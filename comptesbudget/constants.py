@@ -49,7 +49,10 @@ SYNC_VERSION = 2
 #          remboursement ne retombe plus dans la catégorie de dépense ;
 #          règles existantes reclassées (Revenus→crédit, autres→débit),
 #          « Mémoriser » hérite du sens de l'opération.
-APP_VERSION = "1.10.0"
+# 1.10.1 : solde de départ non pré-rempli (invite au 1er lancement) ;
+#          notice intégrée mise à jour (onglet Sous-catégories, recherche
+#          globale, rapport mensuel, harmonisation des libellés).
+APP_VERSION = "1.10.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

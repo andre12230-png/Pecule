@@ -34,10 +34,11 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 
 <h2>1. Premier démarrage</h2>
 <ol>
-  <li><b>Configurer le solde de départ</b> : cliquez sur <code>⚙️ Paramètres</code> dans le ruban
-      en haut. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025) et le solde
-      que vous aviez en banque à cette date. Cette valeur sert de base pour calculer votre solde
-      réel à toute date ultérieure.</li>
+  <li><b>Configurer le solde de départ</b> : au tout premier lancement, l'application vous y invite
+      automatiquement ; vous pouvez aussi y revenir à tout moment via <code>⚙️ Paramètres</code>
+      dans le ruban en haut. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025)
+      et le solde que vous aviez en banque à cette date. Cette valeur sert de base pour calculer
+      votre solde réel à toute date ultérieure.</li>
   <li><b>Importer vos relevés bancaires</b> en CSV : trois moyens possibles
       <ul>
         <li>Bouton <code>📥 Importer CSV</code> dans le ruban</li>
@@ -55,8 +56,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 <p>Vue d'ensemble avec 6 indicateurs clés, l'évolution mensuelle revenus/dépenses,
 la répartition des dépenses par catégorie, et les listes top dépenses / sources de revenus /
 plus grosses dépenses individuelles.</p>
-<p>Le KPI <b>« Solde compte fin de période »</b> donne le solde réel du compte
-(solde initial + toutes les opérations jusqu'à la fin de la période choisie).</p>
+<p>Le KPI <b>« 💼 Solde bancaire réel (pointé) »</b> donne le solde réel du compte :
+solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Le KPI
+<b>« ✔ Solde pointé »</b> en donne le détail sur la période choisie.</p>
 
 <h3>📋 Opérations</h3>
 <p>Liste complète des transactions avec filtres (recherche, catégorie, type, pointage).
@@ -81,6 +83,11 @@ selon votre consommation pour la période sélectionnée.</p>
 (nombre d'opérations et total), à droite les opérations détaillées de la
 catégorie sélectionnée. Le bouton « Recatégoriser » permet de déplacer
 en masse toutes les opérations d'une catégorie vers une autre.</p>
+
+<h3>🏷️ Sous-catégories</h3>
+<p>Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
+<b>fusion</b> de variantes, <b>renommage</b> en masse et nettoyage des
+sous-catégories vides ou rarement utilisées.</p>
 
 <h3>🧠 Règles auto</h3>
 <p>Les règles automatisent la catégorisation des opérations futures.
@@ -128,13 +135,24 @@ solde bancaire.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
-  <tr><td>📥 Importer CSV</td><td>Import d'un relevé bancaire (ou drag&drop)</td></tr>
+  <tr><td>📥 Importer CSV</td><td>Import d'un relevé bancaire (ou glisser-déposer)</td></tr>
   <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>🔧 Harmoniser</td><td>Suggère des catégorisations d'après les libellés</td></tr>
+  <tr><td>🏷️ Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
   <tr><td>🔍 Doublons</td><td>Détecte et supprime les opérations en doublon</td></tr>
+  <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
+  <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>💾 Exporter (JSON)</td><td>Sauvegarde complète (transactions, règles, budgets)</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale</td></tr>
 </table>
+
+<h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
+<p>Recherche dans <b>tout l'historique</b>, toutes périodes confondues : libellé,
+note, catégorie, montant ou date. Double-cliquez sur un résultat pour modifier l'opération.</p>
+
+<h3>🖨 Rapport mensuel</h3>
+<p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
+top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
 
 <h2>6. Sauvegarde des données</h2>
 <p>Toutes vos données sont stockées localement dans le fichier
@@ -227,9 +245,17 @@ ou un mois précis (« Mai 2026 »).</dd>
 <dd>Projection des opérations à venir basée sur les opérations récurrentes
 déclarées. Permet d'anticiper le solde futur.</dd>
 
+<dt>Rapport mensuel</dt>
+<dd>Synthèse imprimable d'un mois (soldes, budgets, dépenses par catégorie,
+top dépenses), exportable en PDF. Accessible par le bouton 🖨 du ruban.</dd>
+
 <dt>Rapprochement bancaire</dt>
 <dd>Procédure consistant à comparer ligne à ligne ses opérations enregistrées
 avec celles du relevé bancaire. Réalisée via le <i>pointage</i>.</dd>
+
+<dt>Recherche globale</dt>
+<dd>Recherche (<code>Ctrl+F</code>) portant sur tout l'historique, toutes
+périodes confondues : libellé, note, catégorie, montant ou date.</dd>
 
 <dt>Règle automatique</dt>
 <dd>Affectation automatique d'une catégorie et sous-catégorie aux opérations
