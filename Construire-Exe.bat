@@ -1,7 +1,7 @@
 @echo off
 rem ==========================================================================
 rem  Construit un executable autonome de l'application
-rem  Resultat : dist\Comptes-Budget.exe (~100 Mo, demarre en double-clic)
+rem  Resultat : dist\Comptes-Budget\ (dossier autonome --onedir, demarrage rapide)
 rem ==========================================================================
 
 setlocal
@@ -23,15 +23,14 @@ echo.
 echo === 2/3 : Construction de l'executable ===
 "%PYTHON%" -m PyInstaller ^
     --noconfirm ^
-    --onefile ^
+    --onedir ^
     --windowed ^
     --name "Comptes-Budget" ^
     --icon "%~dp0Budget.ico" ^
     --add-data "%~dp0Budget.ico;." ^
-    --distpath "%~dp0." ^
+    --distpath "%~dp0dist" ^
     --workpath "%~dp0build" ^
     --specpath "%~dp0build" ^
-    --collect-submodules PySide6 ^
     comptes_budget.py
 if errorlevel 1 (
     echo ERREUR : la construction a echoue.
@@ -41,12 +40,12 @@ if errorlevel 1 (
 
 echo.
 echo === 3/3 : Termine ===
-echo Executable cree : %~dp0Comptes-Budget.exe
-echo (il est dans le meme dossier que comptes.db, tout fonctionne directement)
+echo Application creee : %~dp0dist\Comptes-Budget\Comptes-Budget.exe
+echo (la base comptes.db sera creee a cote du .exe, dans ce dossier)
 echo.
 echo Vous pouvez :
-echo   - Double-cliquer dessus pour lancer l'application
-echo   - Le copier ou vous voulez (il est autonome)
-echo   - Creer un raccourci bureau (clic droit ^> Envoyer vers ^> Bureau)
+echo   - Double-cliquer sur Comptes-Budget.exe pour lancer l'application
+echo   - Copier TOUT le dossier Comptes-Budget\ ou vous voulez (il est autonome)
+echo   - Creer un raccourci vers le .exe (clic droit ^> Envoyer vers ^> Bureau)
 echo.
 pause
