@@ -1,5 +1,9 @@
 # Comptes et Budget
 
+[![Téléchargements](https://img.shields.io/github/downloads/andre12230-png/Comptes-Budget/total?label=t%C3%A9l%C3%A9chargements&color=brightgreen)](https://github.com/andre12230-png/Comptes-Budget/releases)
+[![Dernière version](https://img.shields.io/github/v/release/andre12230-png/Comptes-Budget?label=version)](https://github.com/andre12230-png/Comptes-Budget/releases/latest)
+[![Licence](https://img.shields.io/github/license/andre12230-png/Comptes-Budget)](LICENSE)
+
 Application de bureau pour la **gestion de comptes et de budget personnels** :
 suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel
 des opérations récurrentes, rapports et rapprochement bancaire.
@@ -7,7 +11,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python de l'ancienne application HTML/JS (archivée dans [`archive/`](archive/)).
 
-> Version applicative : **1.10.0**
+> Version applicative : **1.10.1**
 
 ---
 
