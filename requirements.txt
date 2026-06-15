@@ -1,0 +1,3 @@
+# Dépendances Python de Comptes & Budget (interface PySide6)
+# Installation : pip install -r requirements.txt
+PySide6>=6.5

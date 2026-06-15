@@ -1,0 +1,1 @@
+"""Couche interface (PySide6)."""
