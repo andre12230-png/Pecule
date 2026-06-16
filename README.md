@@ -1,8 +1,8 @@
 # Comptes et Budget
 
-[![Téléchargements](https://img.shields.io/github/downloads/andre12230-png/Comptes-Budget/total?label=t%C3%A9l%C3%A9chargements&color=brightgreen)](https://github.com/andre12230-png/Comptes-Budget/releases)
-[![Dernière version](https://img.shields.io/github/v/release/andre12230-png/Comptes-Budget?label=version)](https://github.com/andre12230-png/Comptes-Budget/releases/latest)
-[![Licence](https://img.shields.io/github/license/andre12230-png/Comptes-Budget)](LICENSE)
+[![Téléchargements](https://badgen.net/github/assets-dl/andre12230-png/Comptes-Budget?label=t%C3%A9l%C3%A9chargements&color=green)](https://github.com/andre12230-png/Comptes-Budget/releases)
+[![Dernière version](https://badgen.net/github/tag/andre12230-png/Comptes-Budget?label=version)](https://github.com/andre12230-png/Comptes-Budget/releases/latest)
+[![Licence](https://badgen.net/github/license/andre12230-png/Comptes-Budget)](LICENSE)
 
 Application de bureau pour la **gestion de comptes et de budget personnels** :
 suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel
