@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comptes et Budget — gestion de comptes et budget personnels (Windows, gratuit)</title>
+<meta name="description" content="Application gratuite et en français pour gérer ses comptes et son budget personnels sur PC Windows. Suivi des opérations, import CSV, budgets, prévisionnel, rapports. Données 100% locales. Open source (MIT).">
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:54px 0 46px;text-align:center}
+  header h1{margin:0;font-size:2.5rem;letter-spacing:.5px}
+  header .sub{font-size:1.15rem;opacity:.95;margin:10px auto 0;max-width:620px}
+  .badges{margin:18px 0 26px}
+  .badges img{height:20px;margin:0 3px;vertical-align:middle}
+
+  .btn{display:inline-block;background:#fff;color:var(--bleu);font-weight:700;
+       font-size:1.15rem;padding:14px 28px;border-radius:10px;text-decoration:none;
+       box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .1s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn small{display:block;font-weight:400;font-size:.8rem;color:var(--gris);margin-top:2px}
+  .src{display:inline-block;margin-top:14px;color:#dce6f7;font-size:.95rem}
+
+  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:34px 0}
+  .chip{background:var(--carte);border:1px solid var(--bord);border-radius:30px;
+        padding:8px 16px;font-size:.95rem;font-weight:600}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
+  .card{background:var(--carte);border:1px solid var(--bord);border-radius:12px;padding:16px 18px}
+  .card h3{margin:0 0 6px;color:var(--bleu2);font-size:1.05rem}
+  .card p{margin:0;color:var(--gris);font-size:.95rem}
+
+  ol.steps{padding-left:22px}
+  ol.steps li{margin-bottom:8px}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  .warn{background:#fff8e6;border-left:4px solid #e8c77b;padding:12px 16px;border-radius:6px;margin:14px 0}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>💰 Comptes et Budget</h1>
+    <p class="sub">Gérez vos comptes et votre budget personnels, simplement, sur votre PC.</p>
+    <div class="badges">
+      <img src="https://badgen.net/github/assets-dl/andre12230-png/Comptes-Budget?label=t%C3%A9l%C3%A9chargements&color=green" alt="Téléchargements">
+      <img src="https://badgen.net/github/tag/andre12230-png/Comptes-Budget?label=version" alt="Version">
+      <img src="https://badgen.net/github/license/andre12230-png/Comptes-Budget" alt="Licence MIT">
+    </div>
+    <div>
+      <a class="btn" href="https://github.com/andre12230-png/Comptes-Budget/releases/latest">
+        ⬇ Télécharger pour Windows
+        <small>fichier .zip — PC Windows 64 bits</small>
+      </a>
+    </div>
+    <a class="src" href="https://github.com/andre12230-png/Comptes-Budget">Voir le code source sur GitHub →</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="chips">
+    <span class="chip">💶 100 % gratuit</span>
+    <span class="chip">🇫🇷 En français uniquement</span>
+    <span class="chip">🖥️ PC Windows uniquement</span>
+    <span class="chip">🔒 Données 100 % locales</span>
+    <span class="chip">📖 Open source (MIT)</span>
+  </div>
+
+  <section>
+    <h2>À quoi ça sert ?</h2>
+    <p>Une application de bureau pour suivre vos dépenses et revenus, vous fixer des budgets et
+    garder l'œil sur votre solde réel — sans abonnement, sans compte en ligne, et sans qu'aucune
+    donnée ne quitte votre ordinateur.</p>
+    <div class="grid">
+      <div class="card"><h3>📋 Suivi des opérations</h3><p>Saisie manuelle ou import de vos relevés bancaires CSV (BPCE, Crédit Mutuel, Crédit Agricole…).</p></div>
+      <div class="card"><h3>🧠 Catégorisation automatique</h3><p>Des règles classent vos opérations toutes seules au fil des imports.</p></div>
+      <div class="card"><h3>🎯 Budgets mensuels</h3><p>Un budget par catégorie, avec barres de progression vertes / oranges / rouges.</p></div>
+      <div class="card"><h3>🔮 Prévisionnel</h3><p>Déclarez vos opérations récurrentes (loyer, salaire, abonnements) et anticipez les mois à venir.</p></div>
+      <div class="card"><h3>🖨 Rapports mensuels</h3><p>Une synthèse imprimable ou exportable en PDF, mois par mois.</p></div>
+      <div class="card"><h3>✔ Rapprochement bancaire</h3><p>Pointez vos opérations pour retrouver à l'euro près le solde de votre relevé.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Installation</h2>
+    <ol class="steps">
+      <li><a href="https://github.com/andre12230-png/Comptes-Budget/releases/latest">Téléchargez le fichier <code>.zip</code></a>.</li>
+      <li><b>Décompressez-le</b> où vous voulez (gardez tout le dossier ensemble).</li>
+      <li>Double-cliquez sur <code>Comptes-Budget.exe</code>.</li>
+    </ol>
+    <p>Aucune installation de Python n'est nécessaire. Au premier lancement, l'application vous invite à saisir votre solde de départ.</p>
+    <div class="warn">
+      ⚠️ <b>Avertissement Windows :</b> l'application n'étant pas signée (signature payante), Windows peut
+      afficher un message « <i>Windows a protégé votre ordinateur</i> ». Cliquez sur
+      <b>Informations complémentaires</b> puis <b>Exécuter quand même</b>. C'est sans danger : le code
+      est entièrement <a href="https://github.com/andre12230-png/Comptes-Budget">consultable sur GitHub</a>.
+    </div>
+  </section>
+
+  <section>
+    <h2>Confidentialité</h2>
+    <p>Toutes vos données restent <b>sur votre ordinateur</b>, dans un fichier <code>comptes.db</code> à
+    côté de l'application. <b>Rien n'est envoyé en ligne.</b> Une sauvegarde quotidienne automatique est
+    créée dans un sous-dossier <code>sauvegardes/</code>.</p>
+  </section>
+
+</div>
+
+<footer>
+  Comptes et Budget — logiciel libre sous licence MIT ·
+  <a href="https://github.com/andre12230-png/Comptes-Budget">Code source</a> ·
+  <a href="https://github.com/andre12230-png/Comptes-Budget/releases/latest">Téléchargements</a>
+</footer>
+
+</body>
+</html>
