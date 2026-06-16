@@ -17,6 +17,15 @@ Python de l'ancienne application HTML/JS (archivée dans [`archive/`](archive/))
 
 ---
 
+## Aperçu
+
+| | |
+|:---:|:---:|
+| ![Tableau de bord — soldes, budgets, graphiques](docs/media/promo_1_bilan.png) | ![Budgets mensuels par catégorie](docs/media/promo_3_budget.png) |
+| ![Liste des opérations](docs/media/promo_2_operations.png) | ![Prévisionnel des opérations récurrentes](docs/media/promo_4_previsionnel.png) |
+
+*Captures réalisées avec des données d'exemple.*
+
 ## Fonctionnalités
 
 L'application s'organise en onglets :
