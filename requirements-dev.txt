@@ -1,0 +1,10 @@
+# Dépendances de développement de Comptes & Budget.
+# Installation : pip install -r requirements-dev.txt
+#
+# Inclut les dépendances applicatives (PySide6) plus les outils de test,
+# de qualité et de construction de l'exécutable.
+-r requirements.txt
+
+pytest>=8        # tests unitaires de la couche métier (dossier tests/)
+ruff>=0.5        # analyse statique (jeu de règles pyflakes F)
+pyinstaller>=6   # construction de l'exécutable autonome (Construire-Exe.bat)

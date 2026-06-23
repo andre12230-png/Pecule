@@ -1,6 +1,7 @@
 """Import des relevés bancaires au format CSV (BPCE / CM / CA)."""
 import csv
 import re
+from collections import Counter
 from typing import Optional
 
 from .utils import canonical_cat, deaccent
@@ -28,6 +29,16 @@ def parse_french_date(s: str) -> Optional[str]:
     if m:
         return f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
     return None
+
+
+def _tx_identity(date_iso: str, montant, reference: str, libelle: str) -> str:
+    """Clé d'identité stable d'une opération, **indépendante de sa position**
+    dans le fichier. On privilégie la référence bancaire (souvent unique et non
+    modifiée par l'utilisateur) ; à défaut, le libellé normalisé. Deux relevés
+    qui se chevauchent produisent ainsi la même clé pour une même opération,
+    ce qui permet de la dédoublonner correctement."""
+    ident = (reference or "").strip() or clean_libelle(libelle)
+    return f"{date_iso}|{float(montant or 0):.2f}|{ident}"
 
 
 def import_csv(path: str, db: Database) -> tuple[int, int]:
@@ -73,8 +84,6 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
             iDateVal = i
             break
     iLib = find_col(["libelle"])
-    if iLib == -1:
-        iLib = find_col(["libelle"])
     iMontant = find_col(["montant"])
     iDebit = find_col(["debit"])
     iCredit = find_col(["credit"])
@@ -90,14 +99,21 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
 
     rules = [dict(r) for r in db.list_rules()]
     existing_tx = [dict(r) for r in db.list_tx()]
-    existing_ids = {r["id"] for r in existing_tx}
+    # Multiplicité des opérations déjà en base, indexée sur la clé d'identité
+    # stable (_tx_identity). Recalculée depuis les champs stockés : valable même
+    # pour les opérations importées par une version antérieure (id ancien format).
+    existing_key_counts = Counter(
+        _tx_identity(t.get("date", ""), t.get("montant", 0),
+                     t.get("reference", ""), t.get("libelle", ""))
+        for t in existing_tx)
     # Profils habituels par libellé (indexés sur la forme nettoyée), pour
     # hériter de la catégorie/sous-catégorie d'un libellé déjà connu.
     profiles = build_libelle_profiles(existing_tx, key_fn=clean_libelle)
 
+    seen: Counter = Counter()
     imported = 0
     skipped = 0
-    for r_idx, cols in enumerate(rows[1:]):
+    for cols in rows[1:]:
         if not cols or iDate < 0 or iDate >= len(cols):
             continue
         d_iso = parse_french_date(cols[iDate])
@@ -125,9 +141,14 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
                 d = -d
             montant = d + c
 
-        # ID stable basé sur date + montant + libellé tronqué
-        tx_id = f"{d_iso}|{r_idx}|{montant}|{libelle[:12]}"
-        if tx_id in existing_ids:
+        # ID stable, indépendant de la position dans le fichier : deux relevés
+        # qui se chevauchent dédoublonnent correctement. Le suffixe d'occurrence
+        # distingue d'éventuelles opérations réellement identiques le même jour.
+        ident = _tx_identity(d_iso, montant, ref, libelle)
+        occ = seen[ident]
+        seen[ident] += 1
+        tx_id = f"{ident}#{occ}"
+        if occ < existing_key_counts[ident]:
             skipped += 1
             continue
 

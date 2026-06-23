@@ -196,14 +196,19 @@ base** : même une migration ratée ne peut pas abîmer la copie du jour.
   (*last-write-wins*) n'est plus câblé à l'interface depuis la v1.9.5 (retrait de
   l'app HTML et de sa synchronisation). Il est conservé pour pouvoir
   réimporter / fusionner un fichier d'échange JSON si besoin.
-- **Couche métier testable** : `rules`, `labels`, `recurring`, `csv_import` et
-  `database` s'importent et s'exécutent sans Qt, ce qui facilite d'éventuels tests
-  unitaires.
+- **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import` et
+  `database` s'importent et s'exécutent sans Qt. Une suite de tests unitaires
+  (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
+  récurrentes, le nettoyage des libellés et l'import CSV (dédoublonnage compris).
+
+  ```bash
+  pip install -r requirements-dev.txt
+  pytest
+  ```
 - **Qualité** : le code passe `ruff` (jeu de règles *pyflakes* F : aucun import
   manquant, aucun nom non défini, aucun import inutilisé).
 
   ```bash
-  pip install ruff
   ruff check comptesbudget
   ```
 
