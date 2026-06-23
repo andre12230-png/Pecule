@@ -200,6 +200,9 @@ base** : même une migration ratée ne peut pas abîmer la copie du jour.
   `database` s'importent et s'exécutent sans Qt. Une suite de tests unitaires
   (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
   récurrentes, le nettoyage des libellés et l'import CSV (dédoublonnage compris).
+  La couche UI (PySide6) est couverte par des *smoke tests* : chaque vue et
+  dialogue est construit en mode « offscreen » puis rafraîchi, pour détecter
+  les plantages et erreurs de câblage sans serveur d'affichage.
 
   ```bash
   pip install -r requirements-dev.txt
