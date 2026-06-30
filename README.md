@@ -150,7 +150,7 @@ comptesbudget/
     ├── assistants.py        Harmonisation, pré-remplissage du prévisionnel
     ├── report.py            Rapport mensuel (HTML, aperçu, PDF, impression)
     ├── search.py            Recherche globale (Ctrl+F)
-    ├── main_window.py       MainWindow : assemble onglets et barre d'outils
+    ├── main_window.py       MainWindow : assemble onglets et menu d'actions
     └── views/
         ├── operations.py    Vue Opérations
         ├── bilan.py         Vue Bilan
