@@ -13,7 +13,7 @@ suivi des opérations, catégorisation automatique, budgets mensuels, prévision
 des opérations récurrentes, rapports et rapprochement bancaire.
 
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
-Python de l'ancienne application HTML/JS (archivée dans [`archive/`](archive/)).
+Python d'une ancienne application HTML/JS.
 
 > Version applicative : **1.11.0**
 
@@ -183,7 +183,6 @@ Tout est stocké **à côté du lanceur** (ou de l'`.exe` en mode gelé) :
 | `sauvegardes/` | Copies quotidiennes automatiques de la base (rotation sur 10 jours) | non |
 | `comptes_sync.json` | Fichier d'échange historique (lié au moteur dormant `sync.py`) | non |
 | `Budget.ico` | Icône de l'application | oui |
-| `archive/` | Ancienne application HTML/JS d'origine | oui |
 
 La sauvegarde quotidienne est effectuée **au lancement, avant l'ouverture de la
 base** : même une migration ratée ne peut pas abîmer la copie du jour.
