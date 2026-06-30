@@ -15,7 +15,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python de l'ancienne application HTML/JS (archivée dans [`archive/`](archive/)).
 
-> Version applicative : **1.10.1**
+> Version applicative : **1.11.0**
 
 ---
 

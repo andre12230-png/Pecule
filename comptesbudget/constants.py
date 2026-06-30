@@ -52,7 +52,10 @@ SYNC_VERSION = 2
 # 1.10.1 : solde de départ non pré-rempli (invite au 1er lancement) ;
 #          notice intégrée mise à jour (onglet Sous-catégories, recherche
 #          globale, rapport mensuel, harmonisation des libellés).
-APP_VERSION = "1.10.1"
+# 1.11.0 : interface — les actions passent dans un menu vertical à gauche
+#          (au lieu de la barre d'outils horizontale) ; raccourci Ctrl+F
+#          conservé. Aligne la disposition sur les interfaces native et Qt.
+APP_VERSION = "1.11.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

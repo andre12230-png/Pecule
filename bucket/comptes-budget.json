@@ -1,12 +1,12 @@
 {
-    "version": "1.10.1",
+    "version": "1.11.0",
     "description": "Application gratuite et en français pour gérer ses comptes et son budget personnels (Windows 10/11). Données 100% locales, open source.",
     "homepage": "https://andre12230-png.github.io/Comptes-Budget/",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/andre12230-png/Comptes-Budget/releases/download/v1.10.1/Comptes-Budget-1.10.1-win64.zip",
-            "hash": "9ed09c3f729ba6271f214772cd805794bfa8894cedbed6f838bdb865292fbe8f"
+            "url": "https://github.com/andre12230-png/Comptes-Budget/releases/download/v1.11.0/Comptes-Budget-1.11.0-win64.zip",
+            "hash": "5a73fa18ce152d16b77029ac226607bbf8b145d4a98e4745278ed426604b14b2"
         }
     },
     "extract_dir": "Comptes-Budget",
