@@ -547,6 +547,9 @@ class BilanView(QWidget):
         max_val = max(max(rev_by_month.values(), default=0),
                       max(dep_by_month.values(), default=0))
         ax_y.setRange(0, max_val * 1.1 if max_val > 0 else 1)
-        ax_y.setLabelFormat("%d €")
+        # Pas de « € » dans le format de l'axe : QtCharts le rend en « ? »
+        # (le symbole € est mal géré par setLabelFormat). L'axe reste en
+        # nombres simples — le contexte (revenus/dépenses) suffit.
+        ax_y.setLabelFormat("%d")
         self.bar_chart.addAxis(ax_y, Qt.AlignLeft)
         series.attachAxis(ax_y)
