@@ -2,13 +2,13 @@
 
 import os
 
-from PySide6.QtCore import QSize, QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import (
-    QAction, QIcon, QKeySequence,
+    QIcon, QKeySequence, QShortcut,
 )
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QTabWidget,
-    QToolBar, QStatusBar, QDialog, QMessageBox, QFileDialog,
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
+    QPushButton, QFrame, QStatusBar, QDialog, QMessageBox, QFileDialog,
 )
 
 from ..constants import (
@@ -51,69 +51,60 @@ class MainWindow(QMainWindow):
         # Glisser-déposer de fichiers CSV
         self.setAcceptDrops(True)
 
-        # Barre d'outils (ruban simplifié)
-        tb = QToolBar("Principal")
-        tb.setMovable(False)
-        tb.setIconSize(QSize(20, 20))
-        self.addToolBar(tb)
+        # ── Menu d'actions vertical (à gauche) ──
+        # (Auparavant une barre d'outils horizontale ; déplacé à gauche pour
+        #  s'aligner sur les interfaces native et Qt.)
+        menu = QWidget()
+        menu.setFixedWidth(184)
+        mv = QVBoxLayout(menu)
+        mv.setContentsMargins(8, 8, 8, 8)
+        mv.setSpacing(6)
 
-        act_new = QAction("➕ Nouvelle opération", self)
-        act_new.triggered.connect(self.action_new_tx)
-        tb.addAction(act_new)
+        def add_btn(text, slot, tip=""):
+            b = QPushButton(text)
+            b.setMinimumHeight(30)
+            b.setStyleSheet("text-align:left; padding-left:8px")
+            b.setCursor(Qt.PointingHandCursor)
+            if tip:
+                b.setToolTip(tip)
+            b.clicked.connect(slot)
+            mv.addWidget(b)
+            return b
 
-        act_import = QAction("📥 Importer CSV", self)
-        act_import.triggered.connect(self.action_import)
-        tb.addAction(act_import)
+        def add_sep():
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            mv.addWidget(line)
 
-        tb.addSeparator()
+        add_btn("➕ Nouvelle opération", self.action_new_tx)
+        add_btn("📥 Importer CSV", self.action_import)
+        add_sep()
+        add_btn("🧹 Nettoyer catégories", self.action_clean_cats)
+        add_btn("🔧 Harmoniser", self.action_harmonize,
+                "Suggère une catégorie d'après le libellé (motifs prédéfinis)")
+        add_btn("🔠 Harmoniser libellés", self.action_harmonize_labels,
+                "Normalise la casse et regroupe les variantes des libellés "
+                "(opérations et récurrences)")
+        add_btn("🔍 Doublons", self.action_find_duplicates)
+        add_btn("🔎 Rechercher", self.action_search,
+                "Recherche dans tout l'historique (Ctrl+F) : "
+                "libellé, note, catégorie, montant, date")
+        add_sep()
+        add_btn("💾 Exporter (JSON)", self.action_export)
+        add_btn("🖨 Rapport mensuel", self.action_monthly_report,
+                "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
+        add_sep()
+        add_btn("⚙️ Paramètres", self.action_settings)
+        mv.addStretch()
 
-        act_clean = QAction("🧹 Nettoyer catégories", self)
-        act_clean.triggered.connect(self.action_clean_cats)
-        tb.addAction(act_clean)
+        # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
+        sc_search = QShortcut(QKeySequence("Ctrl+F"), self)
+        sc_search.activated.connect(self.action_search)
 
-        act_harm = QAction("🔧 Harmoniser", self)
-        act_harm.setToolTip("Suggère une catégorie d'après le libellé (motifs prédéfinis)")
-        act_harm.triggered.connect(self.action_harmonize)
-        tb.addAction(act_harm)
-
-        act_harm_lbl = QAction("🔠 Harmoniser libellés", self)
-        act_harm_lbl.setToolTip(
-            "Normalise la casse et regroupe les variantes des libellés "
-            "(opérations et récurrences)")
-        act_harm_lbl.triggered.connect(self.action_harmonize_labels)
-        tb.addAction(act_harm_lbl)
-
-        act_dup = QAction("🔍 Doublons", self)
-        act_dup.triggered.connect(self.action_find_duplicates)
-        tb.addAction(act_dup)
-
-        act_search = QAction("🔎 Rechercher", self)
-        act_search.setShortcut(QKeySequence("Ctrl+F"))
-        act_search.setToolTip("Recherche dans tout l'historique (Ctrl+F) : "
-                              "libellé, note, catégorie, montant, date")
-        act_search.triggered.connect(self.action_search)
-        tb.addAction(act_search)
-
-        tb.addSeparator()
-
-        act_export = QAction("💾 Exporter (JSON)", self)
-        act_export.triggered.connect(self.action_export)
-        tb.addAction(act_export)
-
-        act_report = QAction("🖨 Rapport mensuel", self)
-        act_report.setToolTip("Bilan du mois : synthèse, budgets, dépenses — "
-                              "aperçu, PDF ou impression")
-        act_report.triggered.connect(self.action_monthly_report)
-        tb.addAction(act_report)
-
-        tb.addSeparator()
-
-        act_settings = QAction("⚙️ Paramètres", self)
-        act_settings.triggered.connect(self.action_settings)
-        tb.addAction(act_settings)
-
-        # Barre de période (sous le ruban)
-        central = QWidget(); cv = QVBoxLayout(central)
+        # ── Zone de droite : barre de période + onglets ──
+        right = QWidget()
+        cv = QVBoxLayout(right)
         cv.setContentsMargins(0, 0, 0, 0); cv.setSpacing(0)
         self.period_bar = PeriodBar()
         cv.addWidget(self.period_bar)
@@ -140,6 +131,13 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.notice_view, "📖 Notice")
 
         cv.addWidget(self.tabs)
+
+        # ── Assemblage : menu à gauche, contenu à droite ──
+        central = QWidget()
+        root = QHBoxLayout(central)
+        root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
+        root.addWidget(menu)
+        root.addWidget(right, 1)
         self.setCentralWidget(central)
 
         # Signaux
