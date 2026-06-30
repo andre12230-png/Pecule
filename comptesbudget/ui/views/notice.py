@@ -36,12 +36,12 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 <ol>
   <li><b>Configurer le solde de départ</b> : au tout premier lancement, l'application vous y invite
       automatiquement ; vous pouvez aussi y revenir à tout moment via <code>⚙️ Paramètres</code>
-      dans le ruban en haut. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025)
+      dans le menu de gauche. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025)
       et le solde que vous aviez en banque à cette date. Cette valeur sert de base pour calculer
       votre solde réel à toute date ultérieure.</li>
   <li><b>Importer vos relevés bancaires</b> en CSV : trois moyens possibles
       <ul>
-        <li>Bouton <code>📥 Importer CSV</code> dans le ruban</li>
+        <li>Bouton <code>📥 Importer CSV</code> dans le menu de gauche</li>
         <li><b>Glisser-déposer</b> un ou plusieurs fichiers CSV directement sur la fenêtre</li>
         <li>Saisie manuelle via <code>➕ Nouvelle opération</code></li>
       </ul>
@@ -95,7 +95,7 @@ Trois façons d'en créer :</p>
 <ul>
   <li>Cocher <b>« Mémoriser »</b> dans le formulaire d'une opération</li>
   <li>Bouton <b>➕ Nouvelle règle</b> dans l'onglet</li>
-  <li>Bouton <b>🔧 Harmoniser</b> du ruban (suggestions automatiques)</li>
+  <li>Bouton <b>🔧 Harmoniser</b> du menu de gauche (suggestions automatiques)</li>
 </ul>
 <p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
 la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
@@ -131,7 +131,7 @@ la colonne <b>P</b> de chaque ligne présente sur le relevé. Le KPI
 vérifiées. Si tout est pointé, ce solde doit correspondre exactement à votre
 solde bancaire.</p>
 
-<h2>5. Outils du ruban</h2>
+<h2>5. Outils du menu de gauche</h2>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
@@ -247,7 +247,7 @@ déclarées. Permet d'anticiper le solde futur.</dd>
 
 <dt>Rapport mensuel</dt>
 <dd>Synthèse imprimable d'un mois (soldes, budgets, dépenses par catégorie,
-top dépenses), exportable en PDF. Accessible par le bouton 🖨 du ruban.</dd>
+top dépenses), exportable en PDF. Accessible par le bouton 🖨 du menu de gauche.</dd>
 
 <dt>Rapprochement bancaire</dt>
 <dd>Procédure consistant à comparer ligne à ligne ses opérations enregistrées

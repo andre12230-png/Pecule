@@ -96,6 +96,9 @@ class MainWindow(QMainWindow):
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
         add_sep()
         add_btn("⚙️ Paramètres", self.action_settings)
+        add_sep()
+        add_btn("📖 Notice", self.action_notice,
+                "Mode d'emploi et glossaire")
         mv.addStretch()
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
@@ -119,8 +122,6 @@ class MainWindow(QMainWindow):
         self.rules_view = RulesView(db)
         self.prev_view = PrevisionnelView(db)
 
-        self.notice_view = NoticeView()
-
         self.tabs.addTab(self.bilan_view, "🏠 Bilan")
         self.tabs.addTab(self.ops_view, "📋 Opérations")
         self.tabs.addTab(self.budget_view, "🎯 Budget")
@@ -128,7 +129,6 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.subs_view, "🏷️ Sous-catégories")
         self.tabs.addTab(self.rules_view, "🧠 Règles auto")
         self.tabs.addTab(self.prev_view, "🔮 Prévisionnel")
-        self.tabs.addTab(self.notice_view, "📖 Notice")
 
         cv.addWidget(self.tabs)
 
@@ -468,3 +468,14 @@ class MainWindow(QMainWindow):
         dlg.exec()
         if dlg.changed:
             self.refresh_all()
+
+    def action_notice(self):
+        """Ouvre la notice (mode d'emploi + glossaire) dans une fenêtre.
+        Auparavant un onglet ; déplacée dans le menu de gauche."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Notice — mode d'emploi")
+        dlg.resize(900, 680)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(NoticeView())
+        dlg.exec()
