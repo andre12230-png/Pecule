@@ -332,7 +332,7 @@ class MainWindow(QMainWindow):
             "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
             "le solde de votre compte à la date de début choisie.<br><br>"
             "Vous pourrez le modifier à tout moment via le bouton "
-            "« Paramètres » de la barre d'outils.")
+            "« Paramètres » du menu de gauche.")
         self.action_settings()
 
     def action_harmonize(self):
