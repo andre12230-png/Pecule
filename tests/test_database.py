@@ -52,3 +52,33 @@ def test_budgets(tmp_path):
     db.set_budget("Alimentation", 400.0)
     db.set_budget("Alimentation", 450.0)   # upsert
     assert db.list_budgets() == {"Alimentation": 450.0}
+
+
+def test_batch_groupe_les_ecritures(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    with db.batch():
+        db.insert_tx(_tx(id="a"))
+        db.insert_tx(_tx(id="b"))
+    assert len(list(db.list_tx())) == 2
+
+
+def test_batch_annule_tout_en_cas_d_erreur(tmp_path):
+    # Tout-ou-rien : une erreur au milieu d'un batch ne laisse rien derrière.
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx(_tx(id="avant"))
+    try:
+        with db.batch():
+            db.insert_tx(_tx(id="pendant"))
+            raise RuntimeError("boum")
+    except RuntimeError:
+        pass
+    ids = {dict(r)["id"] for r in db.list_tx()}
+    assert ids == {"avant"}
+
+
+def test_batch_imbrique_tolere(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    with db.batch():
+        with db.batch():   # imbriqué : sans effet, pas d'erreur
+            db.insert_tx(_tx(id="x"))
+    assert len(list(db.list_tx())) == 1

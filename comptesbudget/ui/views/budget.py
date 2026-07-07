@@ -52,12 +52,15 @@ class BudgetView(QWidget):
         v.addLayout(h)
 
     def _month_count(self) -> int:
-        if self.period == "all":
+        """Nombre de mois couverts par la période (pour rapporter le budget
+        mensuel). Pour une année — même l'année en cours — on compte les mois
+        qui ont réellement des opérations : en juillet, le budget annuel vaut
+        7 mois de budget, pas 12."""
+        if self.period == "all" or len(self.period) == 4:
             txs = [dict(r) for r in self.db.list_tx()]
-            months = {t["date"][:7] for t in txs if t.get("date")}
+            months = {t["date"][:7] for t in txs
+                      if t.get("date") and in_period(t["date"], self.period)}
             return max(1, len(months))
-        if len(self.period) == 4:
-            return 12
         return 1
 
     def refresh(self):

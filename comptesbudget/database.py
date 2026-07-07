@@ -1,6 +1,7 @@
 """Accès à la base de données SQLite."""
 import os
 import sqlite3
+from contextlib import contextmanager
 from datetime import datetime, timezone
 
 from .constants import DB_PATH
@@ -12,8 +13,38 @@ class Database:
         self.conn = sqlite3.connect(path)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
+        self._in_batch = False
         self._init_schema()
         self._init_defaults()
+
+    # ── Transaction groupée ─────────────────────────────────────────
+    @contextmanager
+    def batch(self):
+        """Groupe plusieurs écritures en UNE seule transaction.
+
+        Sans cela, chaque insertion/mise à jour écrit physiquement sur le
+        disque (commit) : un import de 300 lignes = 300 écritures, d'où la
+        lenteur des opérations en masse. À l'intérieur d'un `with db.batch():`,
+        les commits intermédiaires sont suspendus ; tout est validé d'un coup
+        à la sortie — et rien n'est enregistré si une erreur survient
+        (tout-ou-rien). Les appels imbriqués sont tolérés (sans effet)."""
+        if self._in_batch:
+            yield
+            return
+        self._in_batch = True
+        try:
+            yield
+            self.conn.commit()
+        except BaseException:
+            self.conn.rollback()
+            raise
+        finally:
+            self._in_batch = False
+
+    def _commit(self):
+        """Commit immédiat, sauf à l'intérieur d'un batch()."""
+        if not self._in_batch:
+            self.conn.commit()
 
     def _init_defaults(self):
         """Valeurs par défaut au premier lancement.
@@ -141,25 +172,25 @@ class Database:
                 :reference, :type, :categorie, :sous_cat, :info, :montant, :pointee, :updated_at)
         """, tx)
         self._clear_deletion("transactions", tx["id"])
-        self.conn.commit()
+        self._commit()
 
     def update_tx(self, tx_id: str, fields: dict):
         fields = {**fields, "updated_at": fields.get("updated_at") or _now_iso()}
         sets = ", ".join(f"{k} = :{k}" for k in fields)
         fields["id"] = tx_id
         self.conn.execute(f"UPDATE transactions SET {sets} WHERE id = :id", fields)
-        self.conn.commit()
+        self._commit()
 
     def delete_tx(self, tx_id: str):
         self._record_deletion("transactions", tx_id)
         self.conn.execute("DELETE FROM transactions WHERE id = ?", (tx_id,))
-        self.conn.commit()
+        self._commit()
 
     def toggle_pointee(self, tx_id: str):
         self.conn.execute(
             "UPDATE transactions SET pointee = 1 - pointee, updated_at = ? "
             "WHERE id = ?", (_now_iso(), tx_id))
-        self.conn.commit()
+        self._commit()
 
     def all_categories_used(self) -> list[str]:
         rows = self.conn.execute(
@@ -180,19 +211,19 @@ class Database:
                 :no_overwrite, :created_at, :updated_at, :sens)
         """, rule)
         self._clear_deletion("rules", rule["id"])
-        self.conn.commit()
+        self._commit()
 
     def update_rule(self, rule_id: str, fields: dict):
         fields = {**fields, "updated_at": fields.get("updated_at") or _now_iso()}
         sets = ", ".join(f"{k} = :{k}" for k in fields)
         fields["id"] = rule_id
         self.conn.execute(f"UPDATE rules SET {sets} WHERE id = :id", fields)
-        self.conn.commit()
+        self._commit()
 
     def delete_rule(self, rule_id: str):
         self._record_deletion("rules", rule_id)
         self.conn.execute("DELETE FROM rules WHERE id = ?", (rule_id,))
-        self.conn.commit()
+        self._commit()
 
     # ── Budgets ─────────────────────────────────────────────────────
     def list_budgets(self) -> dict[str, float]:
@@ -204,7 +235,7 @@ class Database:
             INSERT INTO budgets (categorie, montant) VALUES (?, ?)
             ON CONFLICT(categorie) DO UPDATE SET montant = excluded.montant
         """, (categorie, montant))
-        self.conn.commit()
+        self._commit()
         self.set_setting("_meta_budgets_updated_at", _now_iso())
 
     # ── Récurrent ───────────────────────────────────────────────────
@@ -220,19 +251,19 @@ class Database:
                 :frequency, :day_of_month, :start_date, :end_date, :actif, :updated_at)
         """, rec)
         self._clear_deletion("recurring", rec["id"])
-        self.conn.commit()
+        self._commit()
 
     def update_recurring(self, rec_id: str, fields: dict):
         fields = {**fields, "updated_at": fields.get("updated_at") or _now_iso()}
         sets = ", ".join(f"{k} = :{k}" for k in fields)
         fields["id"] = rec_id
         self.conn.execute(f"UPDATE recurring SET {sets} WHERE id = :id", fields)
-        self.conn.commit()
+        self._commit()
 
     def delete_recurring(self, rec_id: str):
         self._record_deletion("recurring", rec_id)
         self.conn.execute("DELETE FROM recurring WHERE id = ?", (rec_id,))
-        self.conn.commit()
+        self._commit()
 
     # ── Settings ────────────────────────────────────────────────────
     def get_setting(self, key: str, default: str = "") -> str:
@@ -245,14 +276,14 @@ class Database:
             INSERT INTO settings (key, value) VALUES (?, ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value
         """, (key, value))
-        self.conn.commit()
+        self._commit()
         # Les clés méta-sync ne déclenchent pas d'horodatage récursif.
         if not key.startswith("_meta_"):
             self.conn.execute("""
                 INSERT INTO settings (key, value) VALUES ('_meta_settings_updated_at', ?)
                 ON CONFLICT(key) DO UPDATE SET value = excluded.value
             """, (_now_iso(),))
-            self.conn.commit()
+            self._commit()
 
     # ── Synchronisation : tombstones & upserts bruts ────────────────
     def _record_deletion(self, entity: str, id_: str, deleted_at: str = None):
@@ -309,7 +340,7 @@ class Database:
             INSERT INTO settings (key, value) VALUES ('_meta_budgets_updated_at', ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value
         """, (updated_at,))
-        self.conn.commit()
+        self._commit()
 
     # Réglages partagés (solde / date initiale) : application sans ré-horodater.
     SYNCED_SETTINGS = ("initial_balance", "initial_date")
@@ -327,4 +358,4 @@ class Database:
             INSERT INTO settings (key, value) VALUES ('_meta_settings_updated_at', ?)
             ON CONFLICT(key) DO UPDATE SET value = excluded.value
         """, (updated_at,))
-        self.conn.commit()
+        self._commit()

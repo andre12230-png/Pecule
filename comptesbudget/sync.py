@@ -104,18 +104,27 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
         elif cur is None and dts > del_map.get((entity, rid), ""):
             db._record_deletion(entity, rid, dts)
 
-    # 3) Budgets : objet entier, le plus récent l'emporte
+    # 3) Budgets : objet entier, le plus récent l'emporte. Cas particulier :
+    #    si la base locale n'a AUCUN budget (base neuve après restauration),
+    #    on applique sans condition de date — il n'y a rien à perdre, et une
+    #    base créée « maintenant » gagnerait sinon toujours contre un export
+    #    plus ancien.
     r_bud_ts = remote.get("budgets_updated_at") or fallback
     l_bud_ts = db.get_setting("_meta_budgets_updated_at", "")
-    if "budgets" in remote and r_bud_ts and r_bud_ts > l_bud_ts:
-        db.replace_budgets(remote.get("budgets") or {}, r_bud_ts)
+    r_buds = remote.get("budgets") or {}
+    if r_buds and (not db.list_budgets() or (r_bud_ts and r_bud_ts > l_bud_ts)):
+        db.replace_budgets(r_buds, r_bud_ts or l_bud_ts)
 
-    # 4) Réglages partagés (solde / date initiale) : le plus récent l'emporte
+    # 4) Réglages partagés (solde / date initiale) : le plus récent l'emporte.
+    #    Même cas particulier : solde local jamais configuré + solde présent
+    #    dans le fichier → on applique sans condition de date.
     r_set_ts = remote.get("settings_updated_at") or ""
     l_set_ts = db.get_setting("_meta_settings_updated_at", "")
     rset = remote.get("settings") or {}
-    if rset and r_set_ts and r_set_ts > l_set_ts:
-        db.apply_settings_synced(rset, r_set_ts)
+    l_unset = not db.get_setting("initial_balance")
+    r_has = bool(rset.get("initial_balance"))
+    if rset and ((l_unset and r_has) or (r_set_ts and r_set_ts > l_set_ts)):
+        db.apply_settings_synced(rset, r_set_ts or l_set_ts)
         stats["applied"] += 1
 
     db.conn.commit()

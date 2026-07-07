@@ -282,12 +282,13 @@ class OperationsView(QWidget):
         rules = [dict(r) for r in self.db.list_rules()]
         txs = [dict(r) for r in self.db.list_tx()]
         modified = 0
-        for tx in txs:
-            ok, fields = apply_rules_to_tx(tx, rules)
-            if ok and (fields.get("categorie") != tx.get("categorie")
-                       or fields.get("sous_cat") != tx.get("sous_cat")):
-                self.db.update_tx(tx["id"], fields)
-                modified += 1
+        with self.db.batch():
+            for tx in txs:
+                ok, fields = apply_rules_to_tx(tx, rules)
+                if ok and (fields.get("categorie") != tx.get("categorie")
+                           or fields.get("sous_cat") != tx.get("sous_cat")):
+                    self.db.update_tx(tx["id"], fields)
+                    modified += 1
         if modified:
             self.lbl_count.setText(f"{modified} opération(s) recatégorisée(s) par la règle.")
 

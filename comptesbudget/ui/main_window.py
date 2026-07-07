@@ -21,6 +21,7 @@ from ..utils import (
 from ..database import Database
 from ..labels import clean_libelle
 from ..csv_import import import_csv
+from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
 from .widgets import PeriodBar
 from .dialogs import SettingsDialog
@@ -91,7 +92,12 @@ class MainWindow(QMainWindow):
                 "Recherche dans tout l'historique (Ctrl+F) : "
                 "libellé, note, catégorie, montant, date")
         add_sep()
-        add_btn("💾 Exporter (JSON)", self.action_export)
+        add_btn("💾 Exporter (JSON)", self.action_export,
+                "Export complet : opérations, règles, budgets, récurrences "
+                "et réglages (solde/date de départ)")
+        add_btn("♻️ Restaurer (JSON)", self.action_import_json,
+                "Réimporte un export JSON en le fusionnant : pour chaque "
+                "enregistrement, la version la plus récente est conservée")
         add_btn("🖨 Rapport mensuel", self.action_monthly_report,
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
         add_sep()
@@ -225,7 +231,10 @@ class MainWindow(QMainWindow):
         errors = []
         for p in paths:
             try:
-                imp, skip, bad = import_csv(p, self.db)
+                # Un fichier = une transaction groupée : import quasi instantané
+                # (une seule écriture disque) et tout-ou-rien en cas d'erreur.
+                with self.db.batch():
+                    imp, skip, bad = import_csv(p, self.db)
                 total_imp += imp
                 total_skip += skip
                 total_bad += bad
@@ -305,8 +314,9 @@ class MainWindow(QMainWindow):
         msg = f"{len(changes)} catégorie(s) à normaliser :\n\n{summary}\n\nAppliquer ?"
         if QMessageBox.question(self, "Nettoyer les catégories", msg) != QMessageBox.Yes:
             return
-        for tx_id, _, to in changes:
-            self.db.update_tx(tx_id, {"categorie": to})
+        with self.db.batch():
+            for tx_id, _, to in changes:
+                self.db.update_tx(tx_id, {"categorie": to})
         QMessageBox.information(self, "Nettoyage",
             f"{len(changes)} catégorie(s) normalisée(s).")
         self.refresh_all()
@@ -359,8 +369,9 @@ class MainWindow(QMainWindow):
         if dlg.exec() != QDialog.Accepted:
             return
         changes = dlg.selected()
-        for tx_id, new_cat in changes:
-            self.db.update_tx(tx_id, {"categorie": new_cat})
+        with self.db.batch():
+            for tx_id, new_cat in changes:
+                self.db.update_tx(tx_id, {"categorie": new_cat})
         QMessageBox.information(self, "Harmoniser",
             f"{len(changes)} opération(s) recatégorisée(s).")
         self.refresh_all()
@@ -409,13 +420,14 @@ class MainWindow(QMainWindow):
             return
 
         n_tx = n_rec = 0
-        for d in chosen:
-            for tx_id in d["tx_ids"]:
-                self.db.update_tx(tx_id, {"libelle": d["new"]})
-                n_tx += 1
-            for rec_id in d["rec_ids"]:
-                self.db.update_recurring(rec_id, {"libelle": d["new"]})
-                n_rec += 1
+        with self.db.batch():
+            for d in chosen:
+                for tx_id in d["tx_ids"]:
+                    self.db.update_tx(tx_id, {"libelle": d["new"]})
+                    n_tx += 1
+                for rec_id in d["rec_ids"]:
+                    self.db.update_recurring(rec_id, {"libelle": d["new"]})
+                    n_rec += 1
         QMessageBox.information(self, "Harmoniser les libellés",
             f"{len(chosen)} libellé(s) harmonisé(s) — "
             f"{n_tx} opération(s) et {n_rec} récurrence(s) mises à jour.")
@@ -444,29 +456,53 @@ class MainWindow(QMainWindow):
         ids = dlg.selected()
         if not ids:
             return
-        for tx_id in ids:
-            self.db.delete_tx(tx_id)
+        with self.db.batch():
+            for tx_id in ids:
+                self.db.delete_tx(tx_id)
         QMessageBox.information(self, "Doublons",
             f"{len(ids)} opération(s) supprimée(s).")
         self.refresh_all()
 
     def action_export(self):
-        import json
+        """Export JSON COMPLET (via le snapshot de synchronisation) : inclut
+        aussi les réglages (solde/date de départ) et les suppressions, pour
+        pouvoir être réimporté par « Restaurer (JSON) »."""
         path, _ = QFileDialog.getSaveFileName(
             self, "Exporter les données", "comptes_export.json",
             "JSON (*.json)")
         if not path:
             return
-        data = {
-            "transactions": [dict(r) for r in self.db.list_tx()],
-            "rules":        [dict(r) for r in self.db.list_rules()],
-            "budgets":      self.db.list_budgets(),
-            "recurring":    [dict(r) for r in self.db.list_recurring()],
-        }
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2, default=str)
+        write_sync_file(self.db, path)
         QMessageBox.information(self, "Export",
-            f"Données exportées : {path}")
+            f"Données exportées : {path}\n\n"
+            "L'export contient opérations, règles, budgets, récurrences et "
+            "réglages. Il peut être réimporté via « ♻️ Restaurer (JSON) ».")
+
+    def action_import_json(self):
+        """Restaure/fusionne un export JSON : pour chaque enregistrement, la
+        version la plus récente gagne (rien de plus récent que le fichier
+        n'est écrasé) ; les suppressions plus récentes sont propagées."""
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Restaurer / fusionner un export JSON", "", "JSON (*.json)")
+        if not path:
+            return
+        data = read_sync_file(path)
+        if data is None:
+            QMessageBox.warning(self, "Restaurer",
+                "Fichier illisible : ce n'est pas un export JSON de l'application.")
+            return
+        if QMessageBox.question(
+                self, "Restaurer / fusionner",
+                "Fusionner ce fichier avec vos données ?\n\n"
+                "Pour chaque opération, règle ou récurrence, la version la "
+                "plus récente est conservée : rien de plus récent que le "
+                "fichier ne sera écrasé.") != QMessageBox.Yes:
+            return
+        stats = merge_remote_into_db(self.db, data)
+        QMessageBox.information(self, "Restaurer",
+            f"Fusion terminée : {stats['applied']} enregistrement(s) "
+            f"appliqué(s), {stats['deleted']} suppression(s) propagée(s).")
+        self.refresh_all()
 
     def action_monthly_report(self):
         MonthlyReportDialog(self, self.db).exec()

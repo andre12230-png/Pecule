@@ -166,8 +166,9 @@ class CategoriesView(QWidget):
                 self, "Confirmer",
                 f"Déplacer {len(affected)} opération(s) vers « {new_cat} » ?") != QMessageBox.Yes:
             return
-        for t in affected:
-            self.db.update_tx(t["id"], {"categorie": new_cat.strip()})
+        with self.db.batch():
+            for t in affected:
+                self.db.update_tx(t["id"], {"categorie": new_cat.strip()})
         self.current_cat = new_cat.strip()
         self.refresh()
         self.cat_changed.emit()

@@ -236,24 +236,25 @@ class PrevisionnelView(QWidget):
 
         today = date.today()
         n = 0
-        for c in chosen:
-            rec = {
-                "id":           str(uuid.uuid4()),
-                "libelle":      c["libelle"],
-                "montant":      c["montant"],
-                "categorie":    c["categorie"],
-                "sous_cat":     c.get("sous_cat", ""),
-                "type":         c.get("type", ""),
-                "frequency":    c["frequency"],
-                "day_of_month": c["day_of_month"],
-                "start_date":   _recurring_aligned_start(
-                                    c["frequency"], c["day_of_month"], today
-                                ).isoformat(),
-                "end_date":     None,
-                "actif":        1,
-            }
-            self.db.insert_recurring(rec)
-            n += 1
+        with self.db.batch():
+            for c in chosen:
+                rec = {
+                    "id":           str(uuid.uuid4()),
+                    "libelle":      c["libelle"],
+                    "montant":      c["montant"],
+                    "categorie":    c["categorie"],
+                    "sous_cat":     c.get("sous_cat", ""),
+                    "type":         c.get("type", ""),
+                    "frequency":    c["frequency"],
+                    "day_of_month": c["day_of_month"],
+                    "start_date":   _recurring_aligned_start(
+                                        c["frequency"], c["day_of_month"], today
+                                    ).isoformat(),
+                    "end_date":     None,
+                    "actif":        1,
+                }
+                self.db.insert_recurring(rec)
+                n += 1
 
         QMessageBox.information(
             self, "Pré-remplir",

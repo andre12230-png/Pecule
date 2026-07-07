@@ -265,8 +265,9 @@ class SubcategoriesView(QWidget):
         ) != QMessageBox.Yes:
             return
 
-        for tx_id in tx_ids:
-            self.db.update_tx(tx_id, {"sous_cat": new_name})
+        with self.db.batch():
+            for tx_id in tx_ids:
+                self.db.update_tx(tx_id, {"sous_cat": new_name})
         self.refresh()
         self.sub_changed.emit()
 
@@ -295,8 +296,9 @@ class SubcategoriesView(QWidget):
                 "« sous-catégorie » est mis à blanc."
         ) != QMessageBox.Yes:
             return
-        for tx_id in tx_ids:
-            self.db.update_tx(tx_id, {"sous_cat": ""})
+        with self.db.batch():
+            for tx_id in tx_ids:
+                self.db.update_tx(tx_id, {"sous_cat": ""})
         self.refresh()
         self.sub_changed.emit()
 
@@ -344,13 +346,14 @@ class SubcategoriesView(QWidget):
             return
 
         n_updated = 0
-        for cat, target, variants in plans:
-            for v, _n in variants:
-                if v == target:
-                    continue
-                for tx_id in self._index.get((cat, v), []):
-                    self.db.update_tx(tx_id, {"sous_cat": target})
-                    n_updated += 1
+        with self.db.batch():
+            for cat, target, variants in plans:
+                for v, _n in variants:
+                    if v == target:
+                        continue
+                    for tx_id in self._index.get((cat, v), []):
+                        self.db.update_tx(tx_id, {"sous_cat": target})
+                        n_updated += 1
         QMessageBox.information(
             self, "Nettoyage terminé",
             f"{n_updated} opération(s) mise(s) à jour."
