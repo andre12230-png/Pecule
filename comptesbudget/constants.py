@@ -55,7 +55,15 @@ SYNC_VERSION = 2
 # 1.11.0 : interface — les actions passent dans un menu vertical à gauche
 #          (au lieu de la barre d'outils horizontale) ; raccourci Ctrl+F
 #          conservé. Aligne la disposition sur les interfaces native et Qt.
-APP_VERSION = "1.11.0"
+# 1.12.0 : import CSV — encodage UTF-8 reconnu, montants illisibles signalés
+#          (jamais enregistrés à 0 €), écritures groupées (~70× plus rapide) ;
+#          recherche des montants et dates dans l'onglet Opérations, saisie
+#          « comme à l'écran » (-45,30 €) acceptée partout ; Doublons avec
+#          liste de vérification à cocher avant suppression ; export JSON
+#          complet (réglages inclus) + nouveau bouton « Restaurer (JSON) » ;
+#          budget annuel au prorata des mois couverts ; validation aussi à
+#          la modification d'une opération ; notice et glossaire à jour.
+APP_VERSION = "1.12.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
