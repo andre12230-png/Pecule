@@ -18,7 +18,7 @@ from ...constants import (
     FREQUENCIES,
 )
 from ...utils import (
-    fmt_euro, in_period,
+    deaccent, fmt_date_fr, fmt_euro, in_period,
 )
 from ...database import Database
 from ...rules import apply_rules_to_tx
@@ -47,7 +47,7 @@ class OperationsView(QWidget):
         toolbar.addWidget(self.btn_new)
 
         self.search = QLineEdit()
-        self.search.setPlaceholderText("Rechercher dans les libellés…")
+        self.search.setPlaceholderText("Libellé, montant (45,30), date (12/05/2026)…")
         self.search.textChanged.connect(self.refresh)
         self.search.setMaximumWidth(260)
         toolbar.addWidget(self.search)
@@ -148,7 +148,12 @@ class OperationsView(QWidget):
         return t.get("date", "")
 
     def refresh(self):
-        q = self.search.text().strip().lower()
+        # Recherche : mêmes règles que la Recherche globale — sans accents,
+        # chaque mot requis, montants (45,30 / 45.30 / -45,30 €) et dates
+        # (12/05/2026) reconnus. Le € et le signe sont ignorés.
+        brut = self.search.text().replace("€", " ")
+        words = [w.lstrip("+-") for w in deaccent(brut).split()]
+        words = [w for w in words if w]
         cat = self.cat_filter.currentText()
         tp = self.type_filter.currentText()
         opt = self.optype_filter.currentText()
@@ -157,9 +162,15 @@ class OperationsView(QWidget):
         def keep(t: dict) -> bool:
             if not in_period(self._eff_date(t), self.period):
                 return False
-            if q:
-                blob = f"{t.get('libelle','')} {t.get('libelle_op','')} {t.get('reference','')} {t.get('info','')}".lower()
-                if q not in blob:
+            if words:
+                m = abs(t.get("montant", 0) or 0)
+                blob = deaccent(" ".join([
+                    t.get("libelle", ""), t.get("libelle_op", ""),
+                    t.get("reference", ""), t.get("info", ""),
+                    t.get("date", ""), fmt_date_fr(t.get("date", "")),
+                    f"{m:.2f}", f"{m:.2f}".replace(".", ","), f"{m:g}",
+                ]))
+                if not all(w in blob for w in words):
                     return False
             if cat and cat != "Toutes" and t.get("categorie") != cat:
                 return False

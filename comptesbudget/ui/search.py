@@ -87,7 +87,12 @@ class GlobalSearchDialog(QDialog):
         self._blobs = [(t, self._blob(t)) for t in self._rows]
 
     def _search(self, *_):
-        words = deaccent(self.edit.text()).split()
+        # Tolère la saisie « comme à l'écran » : « -1 234,56 € » fonctionne.
+        # Le € et le signe sont ignorés (les montants sont indexés en valeur
+        # absolue) ; « 1 234,56 » se découpe en mots qui doivent tous matcher.
+        brut = self.edit.text().replace("€", " ")
+        words = [w.lstrip("+-") for w in deaccent(brut).split()]
+        words = [w for w in words if w]
         if words:
             res = [t for t, blob in self._blobs
                    if all(w in blob for w in words)]
