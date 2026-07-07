@@ -45,8 +45,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
         <li><b>Glisser-déposer</b> un ou plusieurs fichiers CSV directement sur la fenêtre</li>
         <li>Saisie manuelle via <code>➕ Nouvelle opération</code></li>
       </ul>
-      L'app gère les CSV des principales banques françaises (BPCE, Crédit Mutuel, Crédit Agricole)
-      au format Windows-1252, séparateur point-virgule, dates JJ/MM/AAAA.
+      L'app gère les CSV des principales banques françaises (BPCE, Crédit Mutuel, Crédit Agricole) :
+      séparateur point-virgule, dates JJ/MM/AAAA, encodage Windows-1252 <b>ou UTF-8</b> (détecté
+      automatiquement). Les doublons sont ignorés — même entre deux relevés qui se chevauchent —
+      et les lignes au montant illisible sont écartées et signalées, jamais enregistrées à 0&nbsp;€.
   </li>
 </ol>
 
@@ -61,13 +63,15 @@ solde initial + les seules opérations <i>pointées</i> (vérifiées sur le rele
 <b>« ✔ Solde pointé »</b> en donne le détail sur la période choisie.</p>
 
 <h3>📋 Opérations</h3>
-<p>Liste complète des transactions avec filtres (recherche, catégorie, type, pointage).
-La colonne <b>P</b> permet de pointer chaque opération d'un simple clic
+<p>Liste complète des transactions avec filtres (catégorie, type, sens, pointage) et un champ
+de recherche qui accepte le libellé, la note, mais aussi un <b>montant</b> (45,30) ou une
+<b>date</b> (12/05/2026). La colonne <b>P</b> permet de pointer chaque opération d'un simple clic
 (<code>○</code> non pointée / <code>✔</code> pointée et vérifiée sur le relevé).
 Les colonnes <b>Date opér.</b> et <b>Date valeur</b> sont affichées séparément, avec
 indication ⏱ orange si elles diffèrent (débit différé).</p>
 <ul>
   <li><b>Double-clic</b> sur une ligne → ouvre le formulaire de modification</li>
+  <li><b>Touche <kbd>Entrée</kbd></b> → modifie l'opération sélectionnée</li>
   <li><b>Touche <kbd>Suppr</kbd></b> → supprime l'opération sélectionnée</li>
   <li><b>Touche <kbd>Inser</kbd></b> → nouvelle opération</li>
 </ul>
@@ -76,6 +80,9 @@ indication ⏱ orange si elles diffèrent (débit différé).</p>
 <p>Définissez un budget mensuel par catégorie. Les barres de progression
 deviennent vertes (< 80 %), oranges (< 100 %) ou rouges (dépassement)
 selon votre consommation pour la période sélectionnée.</p>
+<p>Sur une année, le budget comparé est le budget mensuel multiplié par le
+nombre de mois <b>réellement couverts</b> par des opérations : en juillet,
+l'année en cours compte pour 7 mois de budget, pas 12.</p>
 <p>Double-cliquez sur une catégorie pour modifier son budget mensuel.</p>
 
 <h3>🏷️ Catégories</h3>
@@ -138,17 +145,21 @@ solde bancaire.</p>
   <tr><td>📥 Importer CSV</td><td>Import d'un relevé bancaire (ou glisser-déposer)</td></tr>
   <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>🔧 Harmoniser</td><td>Suggère des catégorisations d'après les libellés</td></tr>
-  <tr><td>🏷️ Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
-  <tr><td>🔍 Doublons</td><td>Détecte et supprime les opérations en doublon</td></tr>
+  <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
+  <tr><td>🔍 Doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
+  <tr><td>💾 Exporter (JSON)</td><td>Export complet : opérations, règles, budgets, récurrences et réglages</td></tr>
+  <tr><td>♻️ Restaurer (JSON)</td><td>Réimporte un export JSON en le fusionnant (la version la plus récente gagne)</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
-  <tr><td>💾 Exporter (JSON)</td><td>Sauvegarde complète (transactions, règles, budgets)</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale</td></tr>
+  <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
 </table>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
 <p>Recherche dans <b>tout l'historique</b>, toutes périodes confondues : libellé,
-note, catégorie, montant ou date. Double-cliquez sur un résultat pour modifier l'opération.</p>
+note, catégorie, montant ou date. Les montants peuvent être tapés comme à l'écran :
+<code>-45,30 €</code> fonctionne (le signe et le € sont ignorés). Plusieurs mots =
+tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 
 <h3>🖨 Rapport mensuel</h3>
 <p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
@@ -157,10 +168,16 @@ top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
 <h2>6. Sauvegarde des données</h2>
 <p>Toutes vos données sont stockées localement dans le fichier
 <code>comptes.db</code> à côté de l'application (ou de l'exécutable).
-Pour faire une sauvegarde : copiez ce fichier ailleurs (clé USB, OneDrive…).
-Pour restaurer : remettez-le à sa place.</p>
-<div class="warn">⚠️ Le bouton « 💾 Exporter (JSON) » crée un export lisible mais
-ne remplace pas la sauvegarde du fichier <code>comptes.db</code>.</div>
+Une <b>sauvegarde automatique</b> est créée à chaque lancement dans le
+sous-dossier <code>sauvegardes\\</code> (une par jour, les 10 dernières
+sont conservées).</p>
+<p>Pour une sauvegarde externe : copiez <code>comptes.db</code> ailleurs
+(clé USB, OneDrive…) — pour restaurer, remettez-le à sa place. Vous pouvez
+aussi utiliser <code>💾 Exporter (JSON)</code> (export complet) puis
+<code>♻️ Restaurer (JSON)</code> pour le réimporter plus tard.</p>
+<div class="warn">⚠️ La restauration JSON <b>fusionne</b> : pour chaque opération,
+la version la plus récente gagne. Pour revenir exactement à un état antérieur,
+préférez la copie du fichier <code>comptes.db</code>.</div>
 """
 
 GLOSSAIRE_HTML = """
@@ -198,7 +215,9 @@ mois suivant). Reconnu par l'icône ⏱ orange dans la colonne Date valeur.</dd>
 
 <dt>Doublon</dt>
 <dd>Opération qui apparaît deux fois dans la base (même date, même montant,
-même libellé). L'outil 🔍 Doublons les détecte et propose de les supprimer.</dd>
+même libellé). L'outil 🔍 Doublons les détecte et ouvre une liste de
+vérification à cocher : décochez les « faux doublons » légitimes (deux achats
+identiques le même jour) avant de valider la suppression.</dd>
 
 <dt>Encours</dt>
 <dd>Ensemble des opérations en attente de débit, typiquement les achats à
@@ -210,8 +229,10 @@ prédéfinis (ex : tout ce qui contient « Carrefour » → Alimentation).
 Distinct des règles : c'est une suggestion ponctuelle, pas une règle persistante.</dd>
 
 <dt>Importer</dt>
-<dd>Charger un fichier CSV bancaire dans l'application. Les opérations
-déjà présentes (mêmes ID) sont ignorées pour éviter les doublons.</dd>
+<dd>Charger un fichier CSV bancaire dans l'application. Les opérations déjà
+présentes sont reconnues et ignorées, même entre deux relevés qui se
+chevauchent ; deux opérations réellement identiques le même jour sont en
+revanche toutes deux conservées.</dd>
 
 <dt>Libellé</dt>
 <dd>Texte descriptif de l'opération tel qu'apparu sur le relevé bancaire
@@ -262,10 +283,17 @@ périodes confondues : libellé, note, catégorie, montant ou date.</dd>
 dont le libellé correspond à un motif donné. Appliquée à chaque import CSV
 et accessible depuis l'onglet Règles auto.</dd>
 
-<dt>Solde compte</dt>
-<dd>Montant total disponible sur le compte. Calculé comme :
-<code>solde initial + somme des opérations depuis la date initiale</code>.
-Affiché dans le Bilan en KPI principal.</dd>
+<dt>Restaurer (JSON)</dt>
+<dd>Réimporte un export JSON en le <i>fusionnant</i> avec les données :
+pour chaque opération, règle ou récurrence, la version la plus récente
+est conservée — rien de plus récent que le fichier n'est écrasé. Les
+suppressions plus récentes sont propagées.</dd>
+
+<dt>Solde bancaire réel (pointé)</dt>
+<dd>Montant réellement disponible sur le compte, tel qu'affiché en premier
+KPI du Bilan. Calculé comme : <code>solde initial + opérations pointées</code>
+(depuis la date de départ, jusqu'à aujourd'hui). Les opérations non pointées
+sont indiquées à part — c'est le solde « engagé ».</dd>
 
 <dt>Solde de départ (solde initial)</dt>
 <dd>Valeur de référence du compte à une date donnée, saisie dans Paramètres.
