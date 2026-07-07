@@ -221,18 +221,24 @@ class MainWindow(QMainWindow):
         """Importe une liste de fichiers CSV et résume le résultat."""
         total_imp = 0
         total_skip = 0
+        total_bad = 0
         errors = []
         for p in paths:
             try:
-                imp, skip = import_csv(p, self.db)
+                imp, skip, bad = import_csv(p, self.db)
                 total_imp += imp
                 total_skip += skip
+                total_bad += bad
             except Exception as e:
                 errors.append(f"{os.path.basename(p)} : {e}")
         msg = (f"{total_imp} opération(s) importée(s).\n"
                f"{total_skip} doublon(s) ignoré(s).")
+        if total_bad:
+            msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : montant illisible.\n"
+                    "Vérifiez le fichier, ou saisissez ces opérations à la main.")
         if errors:
             msg += "\n\nErreurs :\n  • " + "\n  • ".join(errors)
+        if errors or total_bad:
             QMessageBox.warning(self, "Import", msg)
         else:
             QMessageBox.information(self, "Import", msg)

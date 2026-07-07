@@ -34,8 +34,8 @@ def _write_csv(tmp_path):
 def test_import_csv_inserts(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     csv_path = _write_csv(tmp_path)
-    imported, skipped = import_csv(csv_path, db)
-    assert (imported, skipped) == (2, 0)
+    imported, skipped, bad = import_csv(csv_path, db)
+    assert (imported, skipped, bad) == (2, 0, 0)
     rows = [dict(r) for r in db.list_tx()]
     assert len(rows) == 2
     montants = sorted(r["montant"] for r in rows)
@@ -47,7 +47,7 @@ def test_import_csv_dedup_reimport(tmp_path):
     csv_path = _write_csv(tmp_path)
     import_csv(csv_path, db)
     # Réimport du même fichier : tout doit être ignoré comme doublon.
-    imported, skipped = import_csv(csv_path, db)
+    imported, skipped, _ = import_csv(csv_path, db)
     assert imported == 0
     assert skipped == 2
     assert len(list(db.list_tx())) == 2
@@ -67,9 +67,9 @@ def test_import_csv_dedup_plages_qui_se_chevauchent(tmp_path):
                "Date;Libelle;Montant\n05/01/2026;Loyer;-800,00\n05/02/2026;Loyer;-800,00\n")
     b = _write(tmp_path, "b.csv",
                "Date;Libelle;Montant\n05/02/2026;Loyer;-800,00\n05/03/2026;Loyer;-800,00\n")
-    assert import_csv(a, db) == (2, 0)
+    assert import_csv(a, db) == (2, 0, 0)
     # Le relevé B chevauche février : seul mars (nouveau) doit entrer.
-    imported, skipped = import_csv(b, db)
+    imported, skipped, _ = import_csv(b, db)
     assert (imported, skipped) == (1, 1)
     assert len(list(db.list_tx())) == 3
 
@@ -80,5 +80,35 @@ def test_import_csv_garde_vrais_doublons_du_meme_jour(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     csv_path = _write(tmp_path, "c.csv",
                       "Date;Libelle;Montant\n05/01/2026;Cafe;-2,50\n05/01/2026;Cafe;-2,50\n")
-    assert import_csv(csv_path, db) == (2, 0)
+    assert import_csv(csv_path, db) == (2, 0, 0)
     assert len(list(db.list_tx())) == 2
+
+
+def test_import_csv_utf8_accents(tmp_path):
+    # Régression : un fichier UTF-8 était lu en Windows-1252 → « CRÃ‰DIT ».
+    p = tmp_path / "utf8.csv"
+    p.write_bytes("Date;Libelle;Montant\n23/06/2026;CRÉDIT CAFÉ;-2,50\n".encode("utf-8"))
+    db = Database(str(tmp_path / "t.db"))
+    assert import_csv(str(p), db) == (1, 0, 0)
+    rows = [dict(r) for r in db.list_tx()]
+    assert rows[0]["libelle"] == "CRÉDIT CAFÉ"
+
+
+def test_import_csv_cp1252_accents(tmp_path):
+    # L'encodage habituel des banques françaises doit continuer de fonctionner.
+    p = tmp_path / "cp1252.csv"
+    p.write_bytes("Date;Libelle;Montant\n23/06/2026;CRÉDIT CAFÉ;-2,50\n".encode("cp1252"))
+    db = Database(str(tmp_path / "t.db"))
+    assert import_csv(str(p), db) == (1, 0, 0)
+    rows = [dict(r) for r in db.list_tx()]
+    assert rows[0]["libelle"] == "CRÉDIT CAFÉ"
+
+
+def test_import_csv_montant_illisible_signale(tmp_path):
+    # Un montant illisible ne doit PAS entrer en base à 0 € : la ligne est
+    # écartée et comptée dans le 3e élément du résultat.
+    db = Database(str(tmp_path / "t.db"))
+    csv_path = _write(tmp_path, "bad.csv",
+                      "Date;Libelle;Montant\n05/01/2026;Loyer;-800,00\n06/01/2026;Bizarre;1.234,56\n")
+    assert import_csv(csv_path, db) == (1, 0, 1)
+    assert len(list(db.list_tx())) == 1

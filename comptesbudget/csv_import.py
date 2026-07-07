@@ -9,16 +9,24 @@ from .labels import build_libelle_profiles, clean_libelle
 from .rules import apply_rules_to_tx
 from .database import Database
 
-def parse_french_amount(s: str) -> float:
-    if not s:
-        return 0.0
-    s = s.strip().replace(" ", "").replace("\xa0", "").replace(",", ".")
-    if s.startswith("+"):
-        s = s[1:]
+def _parse_amount_checked(s: str) -> tuple[float, bool]:
+    """Analyse un montant « à la française ». Renvoie (montant, lisible) :
+    un champ vide est lisible (montant 0) ; un texte non vide impossible à
+    interpréter renvoie (0.0, False), pour que l'appelant puisse le signaler
+    au lieu d'enregistrer silencieusement 0 €."""
+    if not s or not s.strip():
+        return 0.0, True
+    t = s.strip().replace(" ", "").replace("\xa0", "").replace(",", ".")
+    if t.startswith("+"):
+        t = t[1:]
     try:
-        return float(s)
+        return float(t), True
     except ValueError:
-        return 0.0
+        return 0.0, False
+
+
+def parse_french_amount(s: str) -> float:
+    return _parse_amount_checked(s)[0]
 
 
 def parse_french_date(s: str) -> Optional[str]:
@@ -41,20 +49,28 @@ def _tx_identity(date_iso: str, montant, reference: str, libelle: str) -> str:
     return f"{date_iso}|{float(montant or 0):.2f}|{ident}"
 
 
-def import_csv(path: str, db: Database) -> tuple[int, int]:
+def _decode_csv(raw: bytes) -> str:
+    """Décode un relevé bancaire. L'UTF-8 est essayé d'abord : un fichier
+    Windows-1252 contenant des accents n'est pratiquement jamais de l'UTF-8
+    valide, donc si le décodage réussit c'est bien de l'UTF-8 (ou de l'ASCII
+    pur, identique dans les deux cas). Sinon, Windows-1252 — l'encodage
+    habituel des banques françaises — puis latin-1 en dernier recours
+    (celui-ci ne peut pas échouer)."""
+    try:
+        return raw.decode("utf-8-sig")   # « -sig » : ignore un éventuel BOM
+    except UnicodeDecodeError:
+        pass
+    try:
+        return raw.decode("cp1252")
+    except UnicodeDecodeError:
+        return raw.decode("latin-1")
+
+
+def import_csv(path: str, db: Database) -> tuple[int, int, int]:
     """Lit un CSV bancaire français et insère les transactions.
-    Retourne (nb_imported, nb_skipped_duplicates)."""
-    encodings = ("windows-1252", "cp1252", "utf-8")
-    text = None
-    for enc in encodings:
-        try:
-            with open(path, "r", encoding=enc) as f:
-                text = f.read()
-            break
-        except UnicodeDecodeError:
-            continue
-    if text is None:
-        raise ValueError("Encodage non reconnu")
+    Retourne (importées, doublons ignorés, lignes au montant illisible)."""
+    with open(path, "rb") as f:
+        text = _decode_csv(f.read())
 
     lines = [l for l in text.splitlines() if l.strip()]
     # Trouver la ligne d'en-tête
@@ -113,6 +129,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
     seen: Counter = Counter()
     imported = 0
     skipped = 0
+    illisibles = 0   # lignes écartées : montant présent mais impossible à lire
     for cols in rows[1:]:
         if not cols or iDate < 0 or iDate >= len(cols):
             continue
@@ -132,14 +149,20 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
 
         # Montant : soit colonne unique, soit débit/crédit séparés
         if iMontant >= 0 and iMontant < len(cols):
-            montant = parse_french_amount(cols[iMontant])
+            montant, lisible = _parse_amount_checked(cols[iMontant])
         else:
-            d = parse_french_amount(cols[iDebit]) if iDebit >= 0 and iDebit < len(cols) else 0
-            c = parse_french_amount(cols[iCredit]) if iCredit >= 0 and iCredit < len(cols) else 0
+            d, ok_d = _parse_amount_checked(cols[iDebit]) if 0 <= iDebit < len(cols) else (0.0, True)
+            c, ok_c = _parse_amount_checked(cols[iCredit]) if 0 <= iCredit < len(cols) else (0.0, True)
             # Le débit est souvent saisi négatif
             if d > 0:
                 d = -d
             montant = d + c
+            lisible = ok_d and ok_c
+        if not lisible:
+            # On n'importe PAS la ligne avec 0 € (donnée fausse invisible) :
+            # elle est comptée et signalée à l'utilisateur en fin d'import.
+            illisibles += 1
+            continue
 
         # ID stable, indépendant de la position dans le fichier : deux relevés
         # qui se chevauchent dédoublonnent correctement. Le suffixe d'occurrence
@@ -187,4 +210,4 @@ def import_csv(path: str, db: Database) -> tuple[int, int]:
         db.insert_tx(tx)
         imported += 1
 
-    return imported, skipped
+    return imported, skipped, illisibles
