@@ -2,6 +2,7 @@
 
 from calendar import monthrange
 from datetime import date
+from html import escape as _esc   # « B&C » → « B&amp;C » : sinon le & casse le HTML
 
 from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout,
@@ -92,7 +93,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
             reste = b - dep
             col = "#C0392B" if ratio >= 100 else ("#E67E22" if ratio >= 85 else "#229954")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
-            H.append(f'<tr{bg}><td>{cat}</td>'
+            H.append(f'<tr{bg}><td>{_esc(cat)}</td>'
                      f'<td align="right">{euro(b)}</td>'
                      f'<td align="right">{euro(dep)}</td>'
                      f'<td align="right"><font color="{col}"><b>{ratio:.0f}&nbsp;%</b></font></td>'
@@ -107,7 +108,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
              '<td align="right"><b>Montant</b></td>'
              '<td align="right"><b>Part</b></td></tr>')
     for cat, dep in sorted(spent.items(), key=lambda x: -x[1]):
-        H.append(f'<tr><td><font color="{cat_color(cat)}">⬤</font> {cat}</td>'
+        H.append(f'<tr><td><font color="{cat_color(cat)}">⬤</font> {_esc(cat)}</td>'
                  f'<td align="right">{euro(-dep)}</td>'
                  f'<td align="right">{dep / total_dep * 100:.0f}&nbsp;%</td></tr>')
     H.append("</table>")
@@ -121,8 +122,8 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
                  '<td><b>Catégorie</b></td><td align="right"><b>Montant</b></td></tr>')
         for t in top:
             H.append(f'<tr><td>{fmt_date_fr(t["date"])}</td>'
-                     f'<td>{t.get("libelle", "")}</td>'
-                     f'<td>{t.get("categorie", "")}</td>'
+                     f'<td>{_esc(t.get("libelle", ""))}</td>'
+                     f'<td>{_esc(t.get("categorie", ""))}</td>'
                      f'<td align="right"><font color="#C0392B">{euro(t["montant"])}</font></td></tr>')
         H.append("</table>")
 

@@ -2,6 +2,7 @@
 
 from calendar import monthrange
 from datetime import date
+from html import escape as _esc   # noms de catégories insérés dans du HTML
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import (
@@ -51,6 +52,7 @@ class CatRowsWidget(QWidget):
             dot.setFixedWidth(14)
             row.addWidget(dot)
             lbl = QLabel(label)
+            lbl.setTextFormat(Qt.PlainText)   # libellé affiché tel quel (jamais interprété)
             lbl.setStyleSheet("color:#222")
             row.addWidget(lbl, 1)
             if sub:
@@ -338,7 +340,7 @@ class BilanView(QWidget):
 
         def _fmt(items):
             return ", ".join(
-                f"<b>{cat}</b> {ratio:.0f} % ({fmt_euro(dep)} / {fmt_euro(budget)})"
+                f"<b>{_esc(cat)}</b> {ratio:.0f} % ({fmt_euro(dep)} / {fmt_euro(budget)})"
                 for ratio, cat, dep, budget in sorted(items, reverse=True))
 
         parts = []

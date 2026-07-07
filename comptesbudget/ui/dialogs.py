@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QDate
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout,
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QDoubleSpinBox, QCheckBox,
-    QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter,
+    QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter, QMessageBox,
 )
 
 from ..constants import (
@@ -200,7 +200,7 @@ class TxDialog(QDialog):
 
         self.btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.btns.accepted.connect(self.accept)
+        self.btns.accepted.connect(self._validate_and_accept)
         self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
 
@@ -227,6 +227,19 @@ class TxDialog(QDialog):
 
         # Initialisation du motif par défaut = libellé
         self.rule_pattern.setText(self.libelle.text())
+
+    def _validate_and_accept(self):
+        """Vérifie la saisie avant de fermer. La validation vit ICI (et non
+        chez les appelants) pour s'appliquer partout : ajout, modification,
+        depuis la vue Opérations, Catégories ou la Recherche."""
+        if not self.libelle.text().strip():
+            QMessageBox.warning(self, "Saisie", "Le libellé est obligatoire.")
+            return
+        if self.montant.value() < 0.005:
+            QMessageBox.warning(self, "Saisie",
+                                "Le montant doit être supérieur à zéro.")
+            return
+        self.accept()
 
     def _update_subcat_list(self, categorie: str):
         """Repeuple la liste des sous-catégories proposées en fonction
@@ -592,7 +605,8 @@ class RecurringDialog(QDialog):
         layout.addRow("", self.actif)
 
         self.btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        self.btns.accepted.connect(self.accept); self.btns.rejected.connect(self.reject)
+        self.btns.accepted.connect(self._validate_and_accept)
+        self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
 
         if rec:
@@ -616,6 +630,14 @@ class RecurringDialog(QDialog):
             if ed:
                 self.end_date.setDate(QDate.fromString(ed, "yyyy-MM-dd"))
             self.actif.setChecked(bool(rec.get("actif", 1)))
+
+    def _validate_and_accept(self):
+        """Libellé obligatoire — vérifié ici pour valoir à l'ajout ET à la
+        modification."""
+        if not self.libelle.text().strip():
+            QMessageBox.warning(self, "Récurrent", "Le libellé est obligatoire.")
+            return
+        self.accept()
 
     def _apply_libelle_profile(self, libelle: str):
         """Pré-remplit catégorie / sous-catégorie / type (et le montant s'il

@@ -24,7 +24,7 @@ from ..csv_import import import_csv
 
 from .widgets import PeriodBar
 from .dialogs import SettingsDialog
-from .assistants import HarmonizeDialog, HarmonizeLabelsDialog
+from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
 from .report import MonthlyReportDialog
 from .search import GlobalSearchDialog
 from .views.operations import OperationsView
@@ -435,17 +435,19 @@ class MainWindow(QMainWindow):
         if not dups:
             QMessageBox.information(self, "Doublons", "Aucun doublon détecté.")
             return
-        msg = (f"{len(dups)} doublon(s) potentiel(s) détecté(s).\n"
-               f"Supprimer les copies ?\n\n"
-               + "\n".join(f"  • {d['date']} — {d['libelle']} {fmt_euro(d['montant'])}"
-                           for d in dups[:10])
-               + ("\n…" if len(dups) > 10 else ""))
-        if QMessageBox.question(self, "Doublons", msg) != QMessageBox.Yes:
+        # Vérification ligne par ligne AVANT suppression : deux opérations
+        # identiques le même jour peuvent être légitimes (deux achats
+        # identiques), la fenêtre permet de les décocher.
+        dlg = DuplicatesDialog(self, dups)
+        if dlg.exec() != QDialog.Accepted:
             return
-        for d in dups:
-            self.db.delete_tx(d["id"])
+        ids = dlg.selected()
+        if not ids:
+            return
+        for tx_id in ids:
+            self.db.delete_tx(tx_id)
         QMessageBox.information(self, "Doublons",
-            f"{len(dups)} opération(s) supprimée(s).")
+            f"{len(ids)} opération(s) supprimée(s).")
         self.refresh_all()
 
     def action_export(self):

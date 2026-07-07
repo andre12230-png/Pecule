@@ -111,6 +111,123 @@ class HarmonizeDialog(QDialog):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Dialogue de vérification des doublons avant suppression
+# ─────────────────────────────────────────────────────────────────────────────
+
+class DuplicatesDialog(QDialog):
+    """Aperçu à cocher des doublons potentiels AVANT toute suppression.
+
+    Chaque ligne est une COPIE détectée (la première occurrence, conservée,
+    n'apparaît pas). Attention : deux opérations réellement identiques le
+    même jour (ex. deux achats identiques chez le même commerçant) sont
+    aussi détectées — c'est à l'utilisateur de les décocher."""
+
+    def __init__(self, parent, dups: list[dict]):
+        super().__init__(parent)
+        self.setWindowTitle("Doublons potentiels")
+        self.resize(760, 480)
+
+        v = QVBoxLayout(self)
+        info = QLabel(
+            "⚠️ Les lignes cochées seront <b>supprimées</b>. Même date, même "
+            "montant et même libellé ne garantissent pas un doublon : deux "
+            "achats identiques le même jour sont légitimes — décochez-les "
+            "avant de valider."
+        )
+        info.setWordWrap(True)
+        info.setStyleSheet("padding:8px; background:#FDEDEB; border:1px solid #E74C3C")
+        v.addWidget(info)
+
+        self.model = QStandardItemModel(0, 5, self)
+        self.model.setHorizontalHeaderLabels(
+            ["✓", "Date", "Libellé", "Montant", "Catégorie"])
+        self.table = QTableView()
+        self.table.setModel(self.model)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setAlternatingRowColors(True)
+        for i, w in enumerate([34, 90, 300, 110, 160]):
+            self.table.setColumnWidth(i, w)
+        self.table.clicked.connect(self._toggle)
+        v.addWidget(self.table)
+
+        for t in dups:
+            it_check = QStandardItem("✔")
+            it_check.setData(True, Qt.UserRole + 1)
+            it_check.setData(t["id"], Qt.UserRole)
+            it_check.setTextAlignment(Qt.AlignCenter)
+            it_check.setForeground(QBrush(QColor("#C0392B")))
+
+            it_montant = QStandardItem(fmt_euro(t.get("montant", 0)))
+            it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            it_montant.setForeground(
+                QBrush(QColor("#C0392B" if t.get("montant", 0) < 0 else "#229954")))
+
+            it_cat = QStandardItem(t.get("categorie", ""))
+            it_cat.setForeground(QBrush(QColor(cat_color(t.get("categorie", "")))))
+
+            self.model.appendRow([
+                it_check,
+                QStandardItem(fmt_date_fr(t.get("date", ""))),
+                QStandardItem(t.get("libelle", "")),
+                it_montant,
+                it_cat,
+            ])
+
+        btn_row = QHBoxLayout()
+        self.lbl_summary = QLabel()
+        btn_row.addWidget(self.lbl_summary)
+        btn_row.addStretch()
+        self.btn_none = QPushButton("Tout décocher")
+        self.btn_none.clicked.connect(lambda: self._set_all(False))
+        btn_row.addWidget(self.btn_none)
+        self.btn_all = QPushButton("Tout cocher")
+        self.btn_all.clicked.connect(lambda: self._set_all(True))
+        btn_row.addWidget(self.btn_all)
+        self.btn_apply = QPushButton("🗑 Supprimer la sélection")
+        self.btn_apply.clicked.connect(self.accept)
+        btn_row.addWidget(self.btn_apply)
+        self.btn_cancel = QPushButton("Annuler")
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(self.btn_cancel)
+        # Entrée ne doit PAS déclencher la suppression par accident :
+        # aucun bouton par défaut, il faut cliquer.
+        for b in (self.btn_none, self.btn_all, self.btn_apply, self.btn_cancel):
+            b.setAutoDefault(False); b.setDefault(False)
+        v.addLayout(btn_row)
+
+        self._update_summary()
+
+    def _toggle(self, index):
+        if index.column() != 0:
+            return
+        it = self.model.item(index.row(), 0)
+        checked = not bool(it.data(Qt.UserRole + 1))
+        it.setData(checked, Qt.UserRole + 1)
+        it.setText("✔" if checked else "")
+        self._update_summary()
+
+    def _set_all(self, val: bool):
+        for r in range(self.model.rowCount()):
+            it = self.model.item(r, 0)
+            it.setData(val, Qt.UserRole + 1)
+            it.setText("✔" if val else "")
+        self._update_summary()
+
+    def _update_summary(self):
+        n = sum(1 for r in range(self.model.rowCount())
+                if self.model.item(r, 0).data(Qt.UserRole + 1))
+        self.lbl_summary.setText(
+            f"{n} à supprimer sur {self.model.rowCount()} détectée(s)")
+
+    def selected(self) -> list[str]:
+        """Ids des opérations cochées (à supprimer)."""
+        return [self.model.item(r, 0).data(Qt.UserRole)
+                for r in range(self.model.rowCount())
+                if self.model.item(r, 0).data(Qt.UserRole + 1)]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Dialogue de pré-remplissage du prévisionnel depuis l'historique
 # ─────────────────────────────────────────────────────────────────────────────
 

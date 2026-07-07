@@ -68,8 +68,9 @@ class RulesView(QWidget):
         btn_row.addStretch()
         v.addLayout(btn_row)
 
-        # Raccourci clavier Suppr + menu contextuel (clic droit)
-        QShortcut(QKeySequence("Delete"), self.table, activated=self.delete_selected)
+        # Raccourci clavier Suppr (limité à cette vue) + menu contextuel (clic droit)
+        sc_del = QShortcut(QKeySequence("Delete"), self.table, activated=self.delete_selected)
+        sc_del.setContext(Qt.WidgetWithChildrenShortcut)
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._show_context_menu)
 

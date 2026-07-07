@@ -104,10 +104,14 @@ class OperationsView(QWidget):
 
         v.addWidget(self.table)
 
-        # Raccourcis
-        QShortcut(QKeySequence("Delete"), self, activated=self.delete_selected)
-        QShortcut(QKeySequence("Insert"), self, activated=self.add_tx)
-        QShortcut(QKeySequence("Return"), self, activated=self.edit_selected)
+        # Raccourcis — portée limitée à cette vue : sans cela, ils resteraient
+        # actifs depuis les autres onglets (la vue est masquée, pas détruite)
+        # et Suppr pourrait viser une ligne invisible.
+        for key, slot in (("Delete", self.delete_selected),
+                          ("Insert", self.add_tx),
+                          ("Return", self.edit_selected)):
+            sc = QShortcut(QKeySequence(key), self, activated=slot)
+            sc.setContext(Qt.WidgetWithChildrenShortcut)
 
     def reload_from_db(self):
         self.transactions = [dict(r) for r in self.db.list_tx()]
