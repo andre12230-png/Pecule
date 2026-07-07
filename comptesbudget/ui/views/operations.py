@@ -48,6 +48,9 @@ class OperationsView(QWidget):
 
         self.search = QLineEdit()
         self.search.setPlaceholderText("Libellé, montant (45,30), date (12/05/2026)…")
+        # Largeur garantie : sans minimum, les filtres et le compteur de droite
+        # écrasent le champ en fenêtre étroite (il ne restait que « Li… »).
+        self.search.setMinimumWidth(190)
         self.search.textChanged.connect(self.refresh)
         self.search.setMaximumWidth(260)
         toolbar.addWidget(self.search)
