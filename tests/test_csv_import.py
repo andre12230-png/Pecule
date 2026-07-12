@@ -84,6 +84,54 @@ def test_import_csv_garde_vrais_doublons_du_meme_jour(tmp_path):
     assert len(list(db.list_tx())) == 2
 
 
+def test_import_csv_dedup_saisie_manuelle_sans_reference(tmp_path):
+    # Régression (incident du 11/07/2026) : une opération saisie À LA MAIN
+    # (sans référence bancaire, libellé harmonisé « Caisse Comp ») doit être
+    # reconnue comme doublon quand le relevé apporte la même opération avec
+    # une référence et un libellé brut « CAISSE COMP ».
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx({
+        "id": "uuid-manuel", "date": "2026-06-01", "date_valeur": "2026-06-01",
+        "libelle": "Caisse Comp", "libelle_op": "Caisse Comp", "reference": "",
+        "type": "Virement", "categorie": "Revenus", "sous_cat": "", "info": "",
+        "montant": 300.00, "pointee": 1,
+    })
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Reference;Montant\n"
+               "01/06/2026;CAISSE COMP;1234567A00000000;300,00\n")
+    assert import_csv(p, db) == (0, 1, 0)
+    assert len(list(db.list_tx())) == 1
+
+
+def test_import_csv_dedup_reference_changee_entre_exports(tmp_path):
+    # Certaines banques changent la référence d'un export à l'autre : le
+    # libellé nettoyé doit suffire à reconnaître le doublon.
+    db = Database(str(tmp_path / "t.db"))
+    a = _write(tmp_path, "a.csv",
+               "Date;Libelle;Reference;Montant\n"
+               "08/06/2026;ALPHATEL;REF-EXPORT-1;-43,00\n")
+    b = _write(tmp_path, "b.csv",
+               "Date;Libelle;Reference;Montant\n"
+               "08/06/2026;ALPHATEL;REF-EXPORT-2;-43,00\n")
+    assert import_csv(a, db) == (1, 0, 0)
+    assert import_csv(b, db) == (0, 1, 0)
+    assert len(list(db.list_tx())) == 1
+
+
+def test_import_csv_categories_banque_ramenees_au_canon(tmp_path):
+    # Les catégories des exports BPCE ne doivent plus créer de catégories
+    # parasites : « A categoriser… » → Non classé, « Revenus et rentrees
+    # d'argent » → Revenus.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "c.csv",
+               "Date;Libelle;Categorie;Montant\n"
+               "01/06/2026;VIR RECU X;Revenus et rentrees d'argent;100,00\n"
+               "02/06/2026;PRLV Y;A categoriser - sortie d'argent;-10,00\n")
+    assert import_csv(p, db) == (2, 0, 0)
+    cats = {dict(r)["categorie"] for r in db.list_tx()}
+    assert cats == {"Revenus", "Non classé"}
+
+
 def test_import_csv_utf8_accents(tmp_path):
     # Régression : un fichier UTF-8 était lu en Windows-1252 → « CRÃ‰DIT ».
     p = tmp_path / "utf8.csv"

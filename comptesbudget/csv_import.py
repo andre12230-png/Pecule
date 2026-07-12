@@ -41,12 +41,19 @@ def parse_french_date(s: str) -> Optional[str]:
 
 def _tx_identity(date_iso: str, montant, reference: str, libelle: str) -> str:
     """Clé d'identité stable d'une opération, **indépendante de sa position**
-    dans le fichier. On privilégie la référence bancaire (souvent unique et non
-    modifiée par l'utilisateur) ; à défaut, le libellé normalisé. Deux relevés
-    qui se chevauchent produisent ainsi la même clé pour une même opération,
-    ce qui permet de la dédoublonner correctement."""
+    dans le fichier : référence bancaire si présente, sinon libellé normalisé.
+    Sert de base à l'ID. ATTENTION : pour DÉTECTER les doublons, cette clé ne
+    suffit pas (cf. _identity_libelle) — une opération saisie à la main n'a
+    pas de référence alors que le relevé en a une."""
     ident = (reference or "").strip() or clean_libelle(libelle)
     return f"{date_iso}|{float(montant or 0):.2f}|{ident}"
+
+
+def _identity_libelle(date_iso: str, montant, libelle: str) -> str:
+    """Clé d'identité par libellé nettoyé — calculable pour TOUTE opération,
+    qu'elle vienne d'un relevé (libellé brut « CAISSE COMP ») ou d'une saisie
+    manuelle / harmonisation (« Caisse Comp ») : clean_libelle unifie les deux."""
+    return f"{date_iso}|{float(montant or 0):.2f}|{clean_libelle(libelle)}"
 
 
 def _decode_csv(raw: bytes) -> str:
@@ -115,18 +122,27 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
 
     rules = [dict(r) for r in db.list_rules()]
     existing_tx = [dict(r) for r in db.list_tx()]
-    # Multiplicité des opérations déjà en base, indexée sur la clé d'identité
-    # stable (_tx_identity). Recalculée depuis les champs stockés : valable même
-    # pour les opérations importées par une version antérieure (id ancien format).
-    existing_key_counts = Counter(
+    # Multiplicité des opérations déjà en base, sous DEUX clés d'identité :
+    # par référence bancaire (quand la ligne en a une) ET par libellé nettoyé.
+    # Correspondre à l'une OU l'autre suffit pour être un doublon — sinon une
+    # opération saisie à la main (sans référence) est réimportée en double
+    # depuis le relevé (bug du 11/07/2026), et inversement si la banque change
+    # ses références d'un export à l'autre. Recalculé depuis les champs
+    # stockés : valable même pour les imports des versions antérieures.
+    existing_by_ref = Counter(
         _tx_identity(t.get("date", ""), t.get("montant", 0),
                      t.get("reference", ""), t.get("libelle", ""))
+        for t in existing_tx if (t.get("reference") or "").strip())
+    existing_by_lbl = Counter(
+        _identity_libelle(t.get("date", ""), t.get("montant", 0),
+                          t.get("libelle", ""))
         for t in existing_tx)
     # Profils habituels par libellé (indexés sur la forme nettoyée), pour
     # hériter de la catégorie/sous-catégorie d'un libellé déjà connu.
     profiles = build_libelle_profiles(existing_tx, key_fn=clean_libelle)
 
-    seen: Counter = Counter()
+    seen: Counter = Counter()       # occurrences par clé d'ID (réf. ou libellé)
+    seen_lbl: Counter = Counter()   # occurrences par clé libellé (dédoublonnage)
     imported = 0
     skipped = 0
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
@@ -164,14 +180,20 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
             illisibles += 1
             continue
 
-        # ID stable, indépendant de la position dans le fichier : deux relevés
-        # qui se chevauchent dédoublonnent correctement. Le suffixe d'occurrence
-        # distingue d'éventuelles opérations réellement identiques le même jour.
+        # ID stable, indépendant de la position dans le fichier. Le suffixe
+        # d'occurrence distingue d'éventuelles opérations réellement identiques
+        # le même jour. Doublon si correspondance par référence OU par libellé
+        # nettoyé (voir le commentaire des compteurs plus haut).
         ident = _tx_identity(d_iso, montant, ref, libelle)
+        k_lbl = _identity_libelle(d_iso, montant, libelle)
         occ = seen[ident]
+        occ_lbl = seen_lbl[k_lbl]
         seen[ident] += 1
+        seen_lbl[k_lbl] += 1
         tx_id = f"{ident}#{occ}"
-        if occ < existing_key_counts[ident]:
+        est_doublon = (occ_lbl < existing_by_lbl[k_lbl]) or (
+            bool(ref.strip()) and occ < existing_by_ref[ident])
+        if est_doublon:
             skipped += 1
             continue
 

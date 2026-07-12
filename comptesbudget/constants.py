@@ -63,7 +63,13 @@ SYNC_VERSION = 2
 #          complet (réglages inclus) + nouveau bouton « Restaurer (JSON) » ;
 #          budget annuel au prorata des mois couverts ; validation aussi à
 #          la modification d'une opération ; notice et glossaire à jour.
-APP_VERSION = "1.12.0"
+# 1.12.1 : correctif IMPORTANT de l'import CSV — les opérations saisies à la
+#          main (sans référence bancaire) étaient réimportées en double
+#          depuis le relevé (la détection ne comparait que la référence).
+#          Doublon désormais reconnu par référence OU par libellé nettoyé.
+#          Les catégories des exports BPCE (« A categoriser… », « Revenus et
+#          rentrees d'argent »…) sont ramenées aux catégories de l'app.
+APP_VERSION = "1.12.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
@@ -131,6 +137,15 @@ CANONICAL_CATS = {
     "transaction exclue": "Transaction exclue",
     "non classe": "Non classé",
     "non classé": "Non classé",
+    # Catégories des exports BPCE : sans correspondance, elles créaient des
+    # catégories parasites (« A categoriser - sortie d'argent »…) à l'import.
+    # Ramenées à « Non classé », elles laissent les règles et les profils de
+    # libellés faire la catégorisation.
+    "a categoriser - sortie d'argent": "Non classé",
+    "a categoriser - rentree d'argent": "Non classé",
+    "revenus et rentrees d'argent": "Revenus",
+    "loisirs et vacances": "Loisirs",
+    "shopping et services": "Shopping",
 }
 
 TYPES_OPERATION = [
