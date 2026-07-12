@@ -73,9 +73,10 @@ def _decode_csv(raw: bytes) -> str:
         return raw.decode("latin-1")
 
 
-def import_csv(path: str, db: Database) -> tuple[int, int, int]:
+def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
     """Lit un CSV bancaire français et insère les transactions.
-    Retourne (importées, doublons ignorés, lignes au montant illisible)."""
+    Retourne (importées, doublons ignorés, lignes au montant illisible,
+    opérations existantes pointées d'après le relevé)."""
     with open(path, "rb") as f:
         text = _decode_csv(f.read())
 
@@ -120,6 +121,10 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
             iType = i
             break
 
+    # Colonne « Pointage operation » de certaines banques (BPCE…) :
+    # « x » = opération passée en banque, autre chose = en attente.
+    iPtg = find_col(["pointage"])
+
     rules = [dict(r) for r in db.list_rules()]
     existing_tx = [dict(r) for r in db.list_tx()]
     # Multiplicité des opérations déjà en base, sous DEUX clés d'identité :
@@ -137,6 +142,24 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
         _identity_libelle(t.get("date", ""), t.get("montant", 0),
                           t.get("libelle", ""))
         for t in existing_tx)
+    # Lignes existantes indexées par les mêmes clés, pour pouvoir POINTER une
+    # opération déjà en base quand la banque la marque passée (« x »).
+    rows_by_ref: dict[str, list[dict]] = {}
+    rows_by_lbl: dict[str, list[dict]] = {}
+    for t in existing_tx:
+        if (t.get("reference") or "").strip():
+            k = _tx_identity(t.get("date", ""), t.get("montant", 0),
+                             t.get("reference", ""), t.get("libelle", ""))
+            rows_by_ref.setdefault(k, []).append(t)
+        k = _identity_libelle(t.get("date", ""), t.get("montant", 0),
+                              t.get("libelle", ""))
+        rows_by_lbl.setdefault(k, []).append(t)
+
+    def _premiere_non_pointee(rows):
+        for r in rows or []:
+            if not r.get("pointee"):
+                return r
+        return None
     # Profils habituels par libellé (indexés sur la forme nettoyée), pour
     # hériter de la catégorie/sous-catégorie d'un libellé déjà connu.
     profiles = build_libelle_profiles(existing_tx, key_fn=clean_libelle)
@@ -146,6 +169,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
     imported = 0
     skipped = 0
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
+    pointees = 0     # opérations existantes pointées d'après le relevé
     for cols in rows[1:]:
         if not cols or iDate < 0 or iDate >= len(cols):
             continue
@@ -159,6 +183,9 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
         tp = cols[iType].strip() if iType >= 0 and iType < len(cols) else ""
         cat = cols[iCat].strip() if iCat >= 0 and iCat < len(cols) else ""
         sub = cols[iSub].strip() if iSub >= 0 and iSub < len(cols) else ""
+        # « x » dans la colonne Pointage = la banque confirme le passage.
+        est_passee = (0 <= iPtg < len(cols)
+                      and cols[iPtg].strip().lower() == "x")
 
         # Normalisation catégorie
         cat = canonical_cat(cat) or cat or "Non classé"
@@ -195,6 +222,19 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
             bool(ref.strip()) and occ < existing_by_ref[ident])
         if est_doublon:
             skipped += 1
+            # La banque confirme le passage (« x ») : on pointe l'opération
+            # existante correspondante si elle ne l'était pas déjà. Jamais
+            # l'inverse — un pointage manuel n'est pas retiré.
+            if est_passee:
+                row = None
+                if ref.strip():
+                    row = _premiere_non_pointee(rows_by_ref.get(ident))
+                if row is None:
+                    row = _premiere_non_pointee(rows_by_lbl.get(k_lbl))
+                if row is not None:
+                    db.update_tx(row["id"], {"pointee": 1})
+                    row["pointee"] = 1   # ne pas re-pointer la même ligne
+                    pointees += 1
             continue
 
         tx = {
@@ -209,7 +249,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
             "sous_cat": sub,
             "info": info,
             "montant": montant,
-            "pointee": 0,
+            "pointee": 1 if est_passee else 0,
         }
         # Appliquer les règles
         modified, fields = apply_rules_to_tx(tx, rules)
@@ -232,4 +272,4 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int]:
         db.insert_tx(tx)
         imported += 1
 
-    return imported, skipped, illisibles
+    return imported, skipped, illisibles, pointees

@@ -228,20 +228,25 @@ class MainWindow(QMainWindow):
         total_imp = 0
         total_skip = 0
         total_bad = 0
+        total_pt = 0
         errors = []
         for p in paths:
             try:
                 # Un fichier = une transaction groupée : import quasi instantané
                 # (une seule écriture disque) et tout-ou-rien en cas d'erreur.
                 with self.db.batch():
-                    imp, skip, bad = import_csv(p, self.db)
+                    imp, skip, bad, pt = import_csv(p, self.db)
                 total_imp += imp
                 total_skip += skip
                 total_bad += bad
+                total_pt += pt
             except Exception as e:
                 errors.append(f"{os.path.basename(p)} : {e}")
         msg = (f"{total_imp} opération(s) importée(s).\n"
                f"{total_skip} doublon(s) ignoré(s).")
+        if total_pt:
+            msg += (f"\n✔ {total_pt} opération(s) déjà enregistrée(s) pointée(s) "
+                    "automatiquement (confirmées par le relevé).")
         if total_bad:
             msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : montant illisible.\n"
                     "Vérifiez le fichier, ou saisissez ces opérations à la main.")

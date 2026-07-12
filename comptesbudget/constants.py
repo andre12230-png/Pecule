@@ -69,7 +69,12 @@ SYNC_VERSION = 2
 #          Doublon désormais reconnu par référence OU par libellé nettoyé.
 #          Les catégories des exports BPCE (« A categoriser… », « Revenus et
 #          rentrees d'argent »…) sont ramenées aux catégories de l'app.
-APP_VERSION = "1.12.1"
+# 1.13.0 : pointage automatique à l'import — si le relevé contient une
+#          colonne « Pointage » (« x » = passée en banque, format BPCE),
+#          les nouvelles opérations arrivent pointées et les opérations
+#          déjà enregistrées sont confirmées (jamais dépointées). L'import
+#          annonce le nombre d'opérations pointées automatiquement.
+APP_VERSION = "1.13.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

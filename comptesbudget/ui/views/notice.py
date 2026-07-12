@@ -47,8 +47,11 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       </ul>
       L'app gère les CSV des principales banques françaises (BPCE, Crédit Mutuel, Crédit Agricole) :
       séparateur point-virgule, dates JJ/MM/AAAA, encodage Windows-1252 <b>ou UTF-8</b> (détecté
-      automatiquement). Les doublons sont ignorés — même entre deux relevés qui se chevauchent —
-      et les lignes au montant illisible sont écartées et signalées, jamais enregistrées à 0&nbsp;€.
+      automatiquement). Les doublons sont ignorés — même entre deux relevés qui se chevauchent,
+      et même face à une opération saisie à la main — et les lignes au montant illisible sont
+      écartées et signalées, jamais enregistrées à 0&nbsp;€. Si le relevé contient une colonne
+      <b>Pointage</b> (« x » = passée en banque), les opérations concernées sont <b>pointées
+      automatiquement</b>.
   </li>
 </ol>
 
@@ -137,6 +140,10 @@ la colonne <b>P</b> de chaque ligne présente sur le relevé. Le KPI
 <b>« Solde pointé »</b> du Bilan vous indique alors le total des opérations
 vérifiées. Si tout est pointé, ce solde doit correspondre exactement à votre
 solde bancaire.</p>
+<p>Gain de temps : si vos exports CSV contiennent une colonne <b>Pointage</b>
+(« x » = opération passée en banque, comme chez BPCE), l'import pointe
+automatiquement ces opérations — y compris celles déjà enregistrées, qu'il
+confirme sans jamais dépointer ce que vous avez fait à la main.</p>
 
 <h2>5. Outils du menu de gauche</h2>
 <table>
