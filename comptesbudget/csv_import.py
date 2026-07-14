@@ -142,10 +142,21 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         _identity_libelle(t.get("date", ""), t.get("montant", 0),
                           t.get("libelle", ""))
         for t in existing_tx)
+    # Troisième filet, réservé aux SAISIES MANUELLES (id sans « | », donc
+    # UUID) : même date + même montant suffisent, quel que soit le libellé.
+    # L'utilisateur nomme ses saisies à sa façon (« Omnishop ») alors que la
+    # banque écrit autre chose (« CREDIPLUS ») — indétectable par libellé
+    # (incident du 14/07/2026). Volontairement limité aux saisies manuelles :
+    # entre deux opérations importées, deux achats distincts du même jour au
+    # même montant restent bien deux opérations.
+    existing_by_dm = Counter(
+        f"{t.get('date', '')}|{float(t.get('montant', 0) or 0):.2f}"
+        for t in existing_tx if "|" not in (t.get("id") or ""))
     # Lignes existantes indexées par les mêmes clés, pour pouvoir POINTER une
     # opération déjà en base quand la banque la marque passée (« x »).
     rows_by_ref: dict[str, list[dict]] = {}
     rows_by_lbl: dict[str, list[dict]] = {}
+    rows_by_dm: dict[str, list[dict]] = {}
     for t in existing_tx:
         if (t.get("reference") or "").strip():
             k = _tx_identity(t.get("date", ""), t.get("montant", 0),
@@ -154,6 +165,9 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         k = _identity_libelle(t.get("date", ""), t.get("montant", 0),
                               t.get("libelle", ""))
         rows_by_lbl.setdefault(k, []).append(t)
+        if "|" not in (t.get("id") or ""):
+            k = f"{t.get('date', '')}|{float(t.get('montant', 0) or 0):.2f}"
+            rows_by_dm.setdefault(k, []).append(t)
 
     def _premiere_non_pointee(rows):
         for r in rows or []:
@@ -166,6 +180,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
 
     seen: Counter = Counter()       # occurrences par clé d'ID (réf. ou libellé)
     seen_lbl: Counter = Counter()   # occurrences par clé libellé (dédoublonnage)
+    seen_dm: Counter = Counter()    # occurrences par clé date+montant (vs manuelles)
     imported = 0
     skipped = 0
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
@@ -213,13 +228,17 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         # nettoyé (voir le commentaire des compteurs plus haut).
         ident = _tx_identity(d_iso, montant, ref, libelle)
         k_lbl = _identity_libelle(d_iso, montant, libelle)
+        k_dm = f"{d_iso}|{float(montant or 0):.2f}"
         occ = seen[ident]
         occ_lbl = seen_lbl[k_lbl]
+        occ_dm = seen_dm[k_dm]
         seen[ident] += 1
         seen_lbl[k_lbl] += 1
+        seen_dm[k_dm] += 1
         tx_id = f"{ident}#{occ}"
         est_doublon = (occ_lbl < existing_by_lbl[k_lbl]) or (
-            bool(ref.strip()) and occ < existing_by_ref[ident])
+            bool(ref.strip()) and occ < existing_by_ref[ident]) or (
+            occ_dm < existing_by_dm[k_dm])
         if est_doublon:
             skipped += 1
             # La banque confirme le passage (« x ») : on pointe l'opération
@@ -231,6 +250,8 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
                     row = _premiere_non_pointee(rows_by_ref.get(ident))
                 if row is None:
                     row = _premiere_non_pointee(rows_by_lbl.get(k_lbl))
+                if row is None:
+                    row = _premiere_non_pointee(rows_by_dm.get(k_dm))
                 if row is not None:
                     db.update_tx(row["id"], {"pointee": 1})
                     row["pointee"] = 1   # ne pas re-pointer la même ligne

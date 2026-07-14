@@ -103,6 +103,42 @@ def test_import_csv_dedup_saisie_manuelle_sans_reference(tmp_path):
     assert len(list(db.list_tx())) == 1
 
 
+def test_import_csv_dedup_saisie_manuelle_libelle_different(tmp_path):
+    # Incident du 14/07/2026 : saisie manuelle « Omnishop », relevé « CREDIPLUS »
+    # (même opération, libellés incomparables). Face à une saisie manuelle,
+    # même date + même montant suffisent — et le « x » de la banque pointe
+    # la saisie manuelle.
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx({
+        "id": "uuid-manuel", "date": "2026-07-03", "date_valeur": "2026-07-03",
+        "libelle": "Omnishop", "libelle_op": "Omnishop", "reference": "",
+        "type": "Carte bancaire", "categorie": "Shopping", "sous_cat": "",
+        "info": "", "montant": -20.00, "pointee": 0,
+    })
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant;Pointage operation\n"
+               "03/07/2026;CREDIPLUS;-20,00;x\n")
+    assert import_csv(p, db) == (0, 1, 0, 1)
+    rows = [dict(r) for r in db.list_tx()]
+    assert len(rows) == 1
+    assert rows[0]["libelle"] == "Omnishop"    # la saisie de l'utilisateur reste
+    assert rows[0]["pointee"] == 1           # ...et la banque l'a confirmée
+
+
+def test_import_csv_date_montant_ne_vaut_que_pour_les_saisies_manuelles(tmp_path):
+    # Deux opérations IMPORTÉES distinctes, même jour et même montant mais
+    # libellés différents, restent deux opérations : la règle date+montant
+    # ne s'applique que face aux saisies manuelles.
+    db = Database(str(tmp_path / "t.db"))
+    a = _write(tmp_path, "a.csv",
+               "Date;Libelle;Montant\n05/01/2026;CAFE DU PORT;-2,50\n")
+    b = _write(tmp_path, "b.csv",
+               "Date;Libelle;Montant\n05/01/2026;BOULANGERIE SUD;-2,50\n")
+    assert import_csv(a, db) == (1, 0, 0, 0)
+    assert import_csv(b, db) == (1, 0, 0, 0)
+    assert len(list(db.list_tx())) == 2
+
+
 def test_import_csv_dedup_reference_changee_entre_exports(tmp_path):
     # Certaines banques changent la référence d'un export à l'autre : le
     # libellé nettoyé doit suffire à reconnaître le doublon.

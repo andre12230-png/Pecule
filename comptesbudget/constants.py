@@ -74,7 +74,12 @@ SYNC_VERSION = 2
 #          les nouvelles opérations arrivent pointées et les opérations
 #          déjà enregistrées sont confirmées (jamais dépointées). L'import
 #          annonce le nombre d'opérations pointées automatiquement.
-APP_VERSION = "1.13.0"
+# 1.13.1 : l'import reconnaît aussi les doublons des SAISIES MANUELLES dont
+#          le libellé diffère de celui de la banque (« Omnishop » saisi à la
+#          main vs « CREDIPLUS » sur le relevé) : face à une saisie manuelle,
+#          même date + même montant suffisent. Limité aux saisies manuelles
+#          pour ne jamais confondre deux opérations importées distinctes.
+APP_VERSION = "1.13.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
