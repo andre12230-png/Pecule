@@ -216,6 +216,18 @@ class BilanView(QWidget):
         f._sub = l_sub
         return f
 
+    def _colorer_kpi(self, cle: str, couleur: str):
+        """Recolore une tuile : le montant ET le liseré du haut, pour qu'ils
+        s'accordent toujours (vert quand c'est positif, rouge quand ça ne l'est pas)."""
+        carte = self.kpis[cle]
+        carte.setStyleSheet(f"""
+            QFrame {{
+                background: white; border: 1px solid #C8D0DC;
+                border-top: 3px solid {couleur}; border-radius: 4px;
+            }}
+        """)
+        carte._value.setStyleSheet(f"color:{couleur}; font-size:16pt; font-weight:bold")
+
     def _eff_date(self, t: dict) -> str:
         if self.date_mode == "valeur":
             return t.get("date_valeur") or t.get("date", "")
@@ -408,9 +420,7 @@ class BilanView(QWidget):
 
         mode_lbl = "valeur (banque)" if self.date_mode == "valeur" else "opération"
         self.kpis["solde"]._value.setText(fmt_euro(solde_compte))
-        col_solde = "#229954" if solde_compte >= 0 else "#C0392B"
-        self.kpis["solde"]._value.setStyleSheet(
-            f"color:{col_solde}; font-size:16pt; font-weight:bold")
+        self._colorer_kpi("solde", "#229954" if solde_compte >= 0 else "#C0392B")
         sub = (f"Au {fmt_date_fr(today_iso)} — initial {fmt_euro(initial_balance)} + "
                f"{len(pointees_up)} opér. pointée(s) — date {mode_lbl}")
         if non_pointees_up:
@@ -422,8 +432,7 @@ class BilanView(QWidget):
         self.kpis["net"]._value.setText(fmt_euro(net))
         self.kpis["net"]._sub.setText(f"{period_label(self.period)} — date {mode_lbl}")
         # Couleur dynamique pour mouvement net
-        col_net = "#229954" if net >= 0 else "#C0392B"
-        self.kpis["net"]._value.setStyleSheet(f"color:{col_net}; font-size:16pt; font-weight:bold")
+        self._colorer_kpi("net", "#229954" if net >= 0 else "#C0392B")
 
         self.kpis["revenus"]._value.setText(fmt_euro(revenus))
         self.kpis["revenus"]._sub.setText(f"{n_rev} entrée(s)")
@@ -432,18 +441,14 @@ class BilanView(QWidget):
         self.kpis["depenses"]._sub.setText(f"{n_dep} sortie(s)")
 
         self.kpis["epargne"]._value.setText(f"{tx_epargne:.1f} %")
-        col_ep = "#16A085" if tx_epargne >= 0 else "#C0392B"
-        self.kpis["epargne"]._value.setStyleSheet(
-            f"color:{col_ep}; font-size:16pt; font-weight:bold")
+        self._colorer_kpi("epargne", "#16A085" if tx_epargne >= 0 else "#C0392B")
         self.kpis["epargne"]._sub.setText(
             "part des revenus mis de côté" if tx_epargne >= 0
             else "dépenses supérieures aux revenus")
 
         self.kpis["pointe"]._value.setText(fmt_euro(solde_p_periode))
         # Couleur dynamique : vert si le solde pointé est positif, rouge s'il est négatif
-        col_pt = "#1A7A3A" if solde_p_periode >= 0 else "#C0392B"
-        self.kpis["pointe"]._value.setStyleSheet(
-            f"color:{col_pt}; font-size:16pt; font-weight:bold")
+        self._colorer_kpi("pointe", "#1A7A3A" if solde_p_periode >= 0 else "#C0392B")
         self.kpis["pointe"]._sub.setText(f"{n_pt} opération(s) pointée(s)")
 
         # ── Graphique en barres : 12 derniers mois ────────────────────

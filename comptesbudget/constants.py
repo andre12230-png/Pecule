@@ -83,7 +83,12 @@ SYNC_VERSION = 2
 #          verte même quand le solde était négatif. Elle suit désormais le
 #          signe du montant (vert si positif, rouge si négatif), comme les
 #          tuiles « Solde bancaire », « Mouvement net » et « Taux d'épargne ».
-APP_VERSION = "1.13.2"
+# 1.13.3 : le liseré coloré en haut des tuiles du Bilan suit lui aussi le
+#          signe du montant, et plus seulement le chiffre. Concerne les
+#          quatre tuiles de solde (Solde bancaire, Mouvement net, Taux
+#          d'épargne, Solde pointé) ; Revenus et Dépenses gardent leur
+#          couleur fixe puisque leur signe ne change jamais.
+APP_VERSION = "1.13.3"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
