@@ -440,6 +440,10 @@ class BilanView(QWidget):
             else "dépenses supérieures aux revenus")
 
         self.kpis["pointe"]._value.setText(fmt_euro(solde_p_periode))
+        # Couleur dynamique : vert si le solde pointé est positif, rouge s'il est négatif
+        col_pt = "#1A7A3A" if solde_p_periode >= 0 else "#C0392B"
+        self.kpis["pointe"]._value.setStyleSheet(
+            f"color:{col_pt}; font-size:16pt; font-weight:bold")
         self.kpis["pointe"]._sub.setText(f"{n_pt} opération(s) pointée(s)")
 
         # ── Graphique en barres : 12 derniers mois ────────────────────

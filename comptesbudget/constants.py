@@ -79,7 +79,11 @@ SYNC_VERSION = 2
 #          main vs « CREDIPLUS » sur le relevé) : face à une saisie manuelle,
 #          même date + même montant suffisent. Limité aux saisies manuelles
 #          pour ne jamais confondre deux opérations importées distinctes.
-APP_VERSION = "1.13.1"
+# 1.13.2 : correctif d'affichage — la tuile « Solde pointé » du Bilan restait
+#          verte même quand le solde était négatif. Elle suit désormais le
+#          signe du montant (vert si positif, rouge si négatif), comme les
+#          tuiles « Solde bancaire », « Mouvement net » et « Taux d'épargne ».
+APP_VERSION = "1.13.2"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
