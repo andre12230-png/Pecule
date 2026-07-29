@@ -88,7 +88,14 @@ SYNC_VERSION = 2
 #          quatre tuiles de solde (Solde bancaire, Mouvement net, Taux
 #          d'épargne, Solde pointé) ; Revenus et Dépenses gardent leur
 #          couleur fixe puisque leur signe ne change jamais.
-APP_VERSION = "1.13.3"
+# 1.14.0 : carte à débit différé — le KPI « Solde bancaire réel » du Bilan est
+#          désormais TOUJOURS calculé en date de valeur, même quand l'affichage
+#          est en « date d'opération » : l'encours carte du mois n'entre dans le
+#          solde que le 4 du mois suivant, jour du prélèvement de la banque.
+#          À la saisie, le type « Carte bancaire » propose automatiquement la
+#          date de valeur au 4 du mois suivant l'achat (modifiable : dès que la
+#          date est saisie à la main, l'app ne la recalcule plus).
+APP_VERSION = "1.14.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

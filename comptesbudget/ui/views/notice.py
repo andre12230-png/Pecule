@@ -62,7 +62,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 la répartition des dépenses par catégorie, et les listes top dépenses / sources de revenus /
 plus grosses dépenses individuelles.</p>
 <p>Le KPI <b>« 💼 Solde bancaire réel (pointé) »</b> donne le solde réel du compte :
-solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Le KPI
+solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Il est
+<b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de
+l'app : les achats par carte à débit différé n'y entrent donc que le jour où la banque les
+prélève (le 4 du mois suivant), pas avant. Le KPI
 <b>« ✔ Solde pointé »</b> en donne le détail sur la période choisie.</p>
 
 <h3>📋 Opérations</h3>
@@ -130,7 +133,14 @@ Vous pouvez choisir « Toutes périodes », une année entière, ou un mois pré
 </table>
 <p>Important pour les <b>cartes à débit différé</b> : un achat fait fin mai
 peut n'être débité qu'en juin. Le mode « Date valeur » est nécessaire pour
-retrouver à l'euro près le solde de votre relevé bancaire.</p>
+retrouver à l'euro près le solde de votre relevé bancaire. Le KPI
+<b>« 💼 Solde bancaire réel »</b> du Bilan, lui, utilise la date de valeur dans
+tous les cas : passer en « Date d'opération » ne le fait plus gonfler de
+l'encours carte pas encore prélevé.</p>
+<p>Quand vous saisissez une opération de type <b>Carte bancaire</b>, la
+<b>date de valeur</b> est proposée automatiquement au <b>4 du mois suivant</b>
+l'achat (jour du prélèvement groupé). Vous pouvez la corriger : dès que vous
+la modifiez vous-même, l'app ne la recalcule plus.</p>
 
 <h2>4. Pointage et rapprochement</h2>
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations

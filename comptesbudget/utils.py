@@ -2,6 +2,7 @@
 import os
 import shutil
 import unicodedata
+from calendar import monthrange
 from datetime import date, datetime, timezone
 from typing import Optional
 
@@ -122,6 +123,30 @@ def fmt_euro(value: float) -> str:
     """Formatage français : 1 234,56 €."""
     s = f"{value:,.2f}".replace(",", " ").replace(".", ",")
     return f"{s} €"
+
+
+# ── Carte à débit différé ───────────────────────────────────────────────────
+
+JOUR_DEBIT_DIFFERE = 4   # la banque prélève les achats carte le 4 du mois suivant
+
+
+def date_debit_differe(date_op_iso: str, jour: int = JOUR_DEBIT_DIFFERE) -> str:
+    """Date de valeur d'un achat payé par carte à débit différé.
+
+    La banque regroupe les achats d'un mois et les prélève en une fois le 4
+    du mois SUIVANT : un achat du 15/07 est débité le 04/08, un achat du
+    02/08 est débité le 04/09. Tant que cette date n'est pas arrivée,
+    l'achat ne doit pas peser sur le solde du compte.
+
+    Retourne la date reçue telle quelle si elle est illisible."""
+    try:
+        d = date.fromisoformat((date_op_iso or "")[:10])
+    except (TypeError, ValueError):
+        return date_op_iso or ""
+    an, mois = (d.year + 1, 1) if d.month == 12 else (d.year, d.month + 1)
+    # Sécurité : un mois court (février) ne va pas jusqu'au 31
+    jour = min(max(jour, 1), monthrange(an, mois)[1])
+    return date(an, mois, jour).isoformat()
 
 
 def fmt_date_fr(iso: str) -> str:

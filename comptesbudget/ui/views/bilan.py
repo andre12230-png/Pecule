@@ -229,9 +229,18 @@ class BilanView(QWidget):
         carte._value.setStyleSheet(f"color:{couleur}; font-size:16pt; font-weight:bold")
 
     def _eff_date(self, t: dict) -> str:
+        """Date utilisée pour les chiffres de la PÉRIODE affichée (mouvement
+        net, dépenses, graphiques) : elle suit le sélecteur « Date »."""
         if self.date_mode == "valeur":
             return t.get("date_valeur") or t.get("date", "")
         return t.get("date", "")
+
+    def _date_banque(self, t: dict) -> str:
+        """Date à laquelle la banque débite ou crédite réellement le compte :
+        TOUJOURS la date de valeur, quel que soit le mode d'affichage choisi.
+        C'est elle qui repousse les achats par carte à débit différé au 4 du
+        mois suivant — avant cette date, ils ne sont pas sur le compte."""
+        return t.get("date_valeur") or t.get("date", "")
 
     def _refresh_cb_banner(self, txs: list[dict]):
         """Calcule les encours CB par mois (achats CB pas encore débités).
@@ -401,12 +410,14 @@ class BilanView(QWidget):
 
         # ── Solde bancaire réel = SEULES les opérations pointées ─────
         # Solde réel du compte À LA DATE DU JOUR (indépendant de la période
-        # affichée) : initial + opérations pointées dont la date effective est
-        # déjà passée (≤ aujourd'hui). Les non pointées sont ignorées : elles
-        # ne sont pas encore débitées et leur date peut changer.
+        # affichée ET du sélecteur « Date ») : initial + opérations pointées
+        # dont la DATE DE VALEUR est déjà passée (≤ aujourd'hui). Les achats
+        # par carte à débit différé n'y entrent donc que le 4 du mois suivant,
+        # comme sur le relevé de la banque. Les non pointées sont ignorées :
+        # elles ne sont pas encore débitées et leur date peut changer.
         today_iso = date.today().isoformat()
         up_to_end = [t for t in all_active
-                     if initial_date <= self._eff_date(t) <= today_iso]
+                     if initial_date <= self._date_banque(t) <= today_iso]
         pointees_up = [t for t in up_to_end if t.get("pointee")]
         non_pointees_up = [t for t in up_to_end if not t.get("pointee")]
         solde_compte = initial_balance + sum(t["montant"] for t in pointees_up)
@@ -422,7 +433,8 @@ class BilanView(QWidget):
         self.kpis["solde"]._value.setText(fmt_euro(solde_compte))
         self._colorer_kpi("solde", "#229954" if solde_compte >= 0 else "#C0392B")
         sub = (f"Au {fmt_date_fr(today_iso)} — initial {fmt_euro(initial_balance)} + "
-               f"{len(pointees_up)} opér. pointée(s) — date {mode_lbl}")
+               f"{len(pointees_up)} opér. pointée(s) — toujours en date de valeur "
+               "(banque), encours carte non compris")
         if non_pointees_up:
             sub += (f"  •  {len(non_pointees_up)} non pointée(s) ignorée(s) "
                     f"({fmt_euro(montant_en_attente)}) — engagé : {fmt_euro(solde_engage)}")

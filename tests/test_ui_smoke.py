@@ -110,6 +110,57 @@ def test_dialogs_creation_et_values(qapp, db):
     assert "frequency" in RecurringDialog(None, None, categories=cats, all_tx=txs).values()
 
 
+def test_bilan_solde_ignore_encours_carte(qapp, db):
+    """Le solde bancaire réel ne doit PAS compter un achat carte déjà pointé
+    mais pas encore prélevé (débit différé) — y compris quand l'affichage est
+    en « date d'opération »."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    today = date.today()
+    future = (today + timedelta(days=20)).isoformat()
+    db.insert_tx(_tx(id="t-cb-pointe", date=today.isoformat(), date_valeur=future,
+                     libelle="LIVRESTORE", libelle_op="LIVRESTORE", type="Carte bancaire",
+                     categorie="Loisirs", montant=-100.0, pointee=1))
+
+    view = BilanView(db)
+    view.date_mode = "valeur"
+    view.refresh()
+    solde_valeur = view.kpis["solde"]._value.text()
+    view.date_mode = "operation"
+    view.refresh()
+    assert view.kpis["solde"]._value.text() == solde_valeur
+
+
+def test_txdialog_date_valeur_carte_differee(qapp, db):
+    """Formulaire d'opération : le type « Carte bancaire » place la date de
+    valeur au 4 du mois suivant, sauf si l'utilisateur la saisit lui-même."""
+    from PySide6.QtCore import QDate
+
+    from comptesbudget.ui.dialogs import TxDialog
+
+    txs = [dict(r) for r in db.list_tx()]
+    dlg = TxDialog(None, None, categories=CATEGORIES_DEFAUT, all_transactions=txs)
+
+    dlg.date_edit.setDate(QDate(2026, 7, 15))
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    assert dlg.values()["date_valeur"] == "2026-08-04"
+
+    # Type sans débit différé : la date de valeur revient sur la date d'opération
+    dlg.type_combo.setCurrentText("Virement")
+    assert dlg.values()["date_valeur"] == "2026-07-15"
+
+    # Date de valeur saisie à la main → plus aucun recalcul automatique
+    dlg.date_val.setDate(QDate(2026, 7, 20))
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    assert dlg.values()["date_valeur"] == "2026-07-20"
+
+    # Modification d'une opération existante : sa date de valeur est conservée
+    existante = next(t for t in txs if t["type"] == "Carte bancaire"
+                     and t["date_valeur"] != t["date"])
+    edit = TxDialog(None, existante, categories=CATEGORIES_DEFAUT, all_transactions=txs)
+    assert edit.values()["date_valeur"] == existante["date_valeur"]
+
+
 def test_rapport_et_recherche(qapp, db):
     from comptesbudget.ui.report import (
         MonthlyReportDialog, build_monthly_report_html,

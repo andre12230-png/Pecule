@@ -1,7 +1,7 @@
 """Tests des utilitaires (formatage, normalisation, périodes)."""
 from comptesbudget.utils import (
-    canonical_cat, cat_color, deaccent, fmt_date_fr, fmt_euro,
-    in_period, list_periods, period_label, suggest_category,
+    canonical_cat, cat_color, date_debit_differe, deaccent, fmt_date_fr,
+    fmt_euro, in_period, list_periods, period_label, suggest_category,
 )
 
 
@@ -59,6 +59,20 @@ def test_list_periods():
     assert "2026-06" in out and "2025-12" in out
     # Années avant les mois, ordre décroissant
     assert out.index("2026") < out.index("2026-06")
+
+
+def test_date_debit_differe():
+    # Achats du mois M → prélevés le 4 du mois M+1
+    assert date_debit_differe("2026-07-15") == "2026-08-04"
+    assert date_debit_differe("2026-07-01") == "2026-08-04"
+    assert date_debit_differe("2026-08-02") == "2026-09-04"   # début de mois : M+1, pas le 04/08
+    assert date_debit_differe("2026-12-20") == "2027-01-04"   # passage d'année
+    # Jour personnalisé, y compris au-delà du dernier jour du mois
+    assert date_debit_differe("2026-01-10", jour=6) == "2026-02-06"
+    assert date_debit_differe("2026-01-10", jour=31) == "2026-02-28"
+    # Entrée illisible → renvoyée telle quelle, jamais d'exception
+    assert date_debit_differe("") == ""
+    assert date_debit_differe("pas une date") == "pas une date"
 
 
 def test_suggest_category():

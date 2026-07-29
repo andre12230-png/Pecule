@@ -13,7 +13,7 @@ from ..constants import (
     CATEGORIES_DEFAUT, TYPES_OPERATION, FREQUENCIES,
 )
 from ..utils import (
-    fmt_euro,
+    fmt_euro, date_debit_differe, JOUR_DEBIT_DIFFERE,
 )
 from ..labels import build_libelle_profiles
 
@@ -40,6 +40,16 @@ class TxDialog(QDialog):
         self.date_val.setCalendarPopup(True)
         self.date_val.setDisplayFormat("dd/MM/yyyy")
         layout.addRow("Date valeur :", self.date_val)
+
+        # Rappel affiché seulement pour les achats par carte (débit différé)
+        self.dv_hint = QLabel(
+            f"💳 Carte à débit différé : la banque prélève le "
+            f"{JOUR_DEBIT_DIFFERE:02d} du mois suivant l'achat. "
+            "L'opération ne comptera dans le solde qu'à cette date.")
+        self.dv_hint.setWordWrap(True)
+        self.dv_hint.setStyleSheet("color:#7E5A18; font-size:9pt")
+        self.dv_hint.setVisible(False)
+        layout.addRow("", self.dv_hint)
 
         sens_row = QHBoxLayout()
         self.rb_debit = QRadioButton("Débit (sortie)")
@@ -225,8 +235,48 @@ class TxDialog(QDialog):
             self.date_edit.setDate(QDate.currentDate())
             self.date_val.setDate(QDate.currentDate())
 
+        # ── Date de valeur automatique (carte à débit différé) ────────
+        # Branché APRÈS le pré-remplissage pour ne pas écraser les valeurs
+        # d'une opération existante. Sur une opération déjà enregistrée, la
+        # date de valeur est considérée comme fixée : on n'y touche plus.
+        self._dv_user_edited = bool(tx)
+        self._dv_updating = False
+        self.date_val.dateChanged.connect(self._on_date_val_changed)
+        self.type_combo.currentTextChanged.connect(lambda _t: self._sync_date_valeur())
+        self.date_edit.dateChanged.connect(lambda _d: self._sync_date_valeur())
+        self._sync_date_valeur()
+
         # Initialisation du motif par défaut = libellé
         self.rule_pattern.setText(self.libelle.text())
+
+    def _on_date_val_changed(self, _d):
+        """L'utilisateur a saisi lui-même une date de valeur : on arrête de
+        la recalculer automatiquement (sa saisie fait foi)."""
+        if not self._dv_updating:
+            self._dv_user_edited = True
+
+    def _sync_date_valeur(self):
+        """Aligne la date de valeur sur le type d'opération choisi.
+
+        « Carte bancaire » = débit différé : la banque prélève l'achat le 4
+        du mois suivant, c'est donc à cette date que l'opération doit entrer
+        dans le solde. Pour les autres types, la date de valeur suit la date
+        d'opération. Ne fait rien si la date de valeur a été saisie à la main."""
+        est_carte = self.type_combo.currentText() == "Carte bancaire"
+        if est_carte != self.dv_hint.isVisible():
+            self.dv_hint.setVisible(est_carte)
+            self.adjustSize()          # laisse la place au rappel affiché
+        if self._dv_user_edited:
+            return
+        d_op = self.date_edit.date()
+        if est_carte:
+            iso = date_debit_differe(d_op.toString("yyyy-MM-dd"))
+            nouvelle = QDate.fromString(iso, "yyyy-MM-dd")
+        else:
+            nouvelle = d_op
+        self._dv_updating = True
+        self.date_val.setDate(nouvelle)
+        self._dv_updating = False
 
     def _validate_and_accept(self):
         """Vérifie la saisie avant de fermer. La validation vit ICI (et non
