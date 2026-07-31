@@ -1,7 +1,6 @@
 """Vue Bilan (tableau de bord)."""
 
-from calendar import monthrange
-from datetime import date
+from datetime import date, timedelta
 from html import escape as _esc   # noms de catégories insérés dans du HTML
 
 from PySide6.QtCore import Qt, Signal
@@ -22,6 +21,13 @@ from ...utils import (
     in_period, period_label,
 )
 from ...database import Database
+from ...labels import clean_libelle
+from ...recurring import generate_occurrences
+
+# Horizon du bandeau « Ce qui est prévu » : assez court pour rester sûr,
+# assez long pour couvrir le prélèvement carte du 4 et les échéances du
+# début de mois suivant.
+JOURS_PREVISION = 15
 
 class CatRowsWidget(QWidget):
     """Liste de lignes : pastille colorée + libellé + (% optionnel) + montant à droite."""
@@ -126,7 +132,7 @@ class BilanView(QWidget):
                      border: 1px solid #E8C77B; border-radius: 4px; }
         """)
         cb_lay = QHBoxLayout(self.cb_banner)
-        cb_lay.setContentsMargins(14, 8, 14, 8); cb_lay.setSpacing(20)
+        cb_lay.setContentsMargins(12, 4, 12, 4); cb_lay.setSpacing(18)
 
         self.cb_title = QLabel("💳 ENCOURS CARTE BANCAIRE")
         self.cb_title.setStyleSheet("font-weight:bold; color:#7E5A18; font-size:9pt")
@@ -137,19 +143,57 @@ class BilanView(QWidget):
         def _mini(label_txt):
             w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
             lbl = QLabel(label_txt); lbl.setStyleSheet("color:#7E5A18; font-size:8pt")
-            val = QLabel("—"); val.setStyleSheet("color:#5A2D00; font-size:13pt; font-weight:bold")
+            val = QLabel("—"); val.setStyleSheet("color:#5A2D00; font-size:12pt; font-weight:bold")
             l.addWidget(lbl); l.addWidget(val)
             return w, val
 
-        w1, self.cb_courant = _mini("Mois en cours (à débiter)")
-        w2, self.cb_precedent = _mini("Mois précédent (non débité)")
-        w3, self.cb_total = _mini("Total à débiter prochainement")
+        # Les deux premiers chiffres reprennent exactement ceux de l'espace
+        # bancaire : « Débit différé au JJ/MM » (achats que la banque a déjà
+        # intégrés au prochain prélèvement = pointés) et les achats « en
+        # cours » qu'elle n'a pas encore intégrés. Leur somme est l'encours.
+        # « Opérations » et non « Achats » : une opération carte en cours peut
+        # être un REMBOURSEMENT (crédit), pas seulement une dépense.
+        w1, self.cb_courant = _mini("Prochain prélèvement (confirmé)")
+        w2, self.cb_precedent = _mini("Opérations en cours (pas encore intégrées)")
+        w3, self.cb_total = _mini("Total des achats à débiter")
         cb_lay.addWidget(w1); cb_lay.addWidget(w2); cb_lay.addWidget(w3)
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
         self.cb_detail.setStyleSheet("color:#7E5A18; font-size:9pt")
         cb_lay.addWidget(self.cb_detail)
         main.addWidget(self.cb_banner)
+
+        # ── Bandeau « Ce qui est prévu » (projection à 15 jours) ──────
+        self.prev_banner = QFrame()
+        self.prev_banner.setStyleSheet("""
+            QFrame { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                        stop:0 #EEF4FC, stop:1 #DCE7F5);
+                     border: 1px solid #A9C0DE; border-radius: 4px; }
+        """)
+        pv_lay = QHBoxLayout(self.prev_banner)
+        pv_lay.setContentsMargins(12, 4, 12, 4); pv_lay.setSpacing(18)
+
+        self.prev_title = QLabel("📅 CE QUI EST PRÉVU")
+        self.prev_title.setStyleSheet("font-weight:bold; color:#1F3A6B; font-size:9pt")
+        pv_lay.addWidget(self.prev_title)
+        pv_lay.addSpacing(10)
+
+        def _mini_bleu(label_txt):
+            w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
+            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#1F3A6B; font-size:8pt")
+            val = QLabel("—"); val.setStyleSheet("color:#12294D; font-size:12pt; font-weight:bold")
+            l.addWidget(lbl); l.addWidget(val)
+            return w, val
+
+        p1, self.prev_sorties = _mini_bleu("Prélèvements prévus (hors carte)")
+        p2, self.prev_entrees = _mini_bleu("Rentrées prévues")
+        p3, self.prev_solde = _mini_bleu("Solde prévu")
+        pv_lay.addWidget(p1); pv_lay.addWidget(p2); pv_lay.addWidget(p3)
+        pv_lay.addStretch()
+        self.prev_detail = QLabel("")
+        self.prev_detail.setStyleSheet("color:#33517C; font-size:9pt")
+        pv_lay.addWidget(self.prev_detail)
+        main.addWidget(self.prev_banner)
 
         # ── Bandeau Alertes budget (mois en cours) ────────────────────
         # Masqué tant qu'aucune catégorie n'approche ou ne dépasse son budget.
@@ -170,7 +214,7 @@ class BilanView(QWidget):
         self.bar_chart.setAnimationOptions(QChart.SeriesAnimations)
         bar_view = QChartView(self.bar_chart)
         bar_view.setRenderHint(QPainter.Antialiasing)
-        bar_view.setMinimumHeight(280)
+        bar_view.setMinimumHeight(240)
         mid_row.addWidget(_make_panel("Évolution mensuelle", bar_view), 2)
 
         # Camembert
@@ -180,7 +224,7 @@ class BilanView(QWidget):
         self.pie_chart.setAnimationOptions(QChart.SeriesAnimations)
         pie_view = QChartView(self.pie_chart)
         pie_view.setRenderHint(QPainter.Antialiasing)
-        pie_view.setMinimumHeight(280)
+        pie_view.setMinimumHeight(240)
         mid_row.addWidget(_make_panel("Répartition des dépenses", pie_view), 2)
 
         main.addLayout(mid_row, 1)
@@ -242,88 +286,177 @@ class BilanView(QWidget):
         mois suivant — avant cette date, ils ne sont pas sur le compte."""
         return t.get("date_valeur") or t.get("date", "")
 
-    def _refresh_cb_banner(self, txs: list[dict]):
-        """Calcule les encours CB par mois (achats CB pas encore débités).
-        Une opération CB est 'pas encore débitée' quand sa date_valeur > aujourd'hui."""
+    def _refresh_cb_banner(self, txs: list[dict], solde_compte: float = None):
+        """Encours de la carte à débit différé, présenté comme la banque.
+
+        Un achat par carte n'est « pas encore débité » tant que sa date de
+        valeur est à venir. Parmi ces achats, la banque distingue deux
+        chiffres, repris ici tels quels :
+          • ceux qu'elle a déjà intégrés au prochain prélèvement — ils sont
+            pointés (convention : `pointee=1` dès que la banque les affiche
+            dans le débit différé) ;
+          • ceux encore « en cours », qu'elle n'a pas encore rattachés.
+        Leur somme est l'encours total. Seul le PROCHAIN prélèvement est
+        compté : en débit différé les achats partent par lot une fois par
+        mois, les échéances plus lointaines sont annoncées à part."""
         today = date.today()
         today_iso = today.isoformat()
-        cur_month = today.strftime("%Y-%m")
-        # Mois précédent
-        if today.month == 1:
-            prev_month = f"{today.year - 1}-12"
-        else:
-            prev_month = f"{today.year}-{today.month - 1:02d}"
 
-        # CB = opérations dont type contient "carte" (insensible à la casse)
+        # CB = opérations dont le type contient « carte » (insensible à la casse)
         def is_cb(t: dict) -> bool:
             return "carte" in (t.get("type") or "").lower()
 
-        # CB du mois en cours (par date d'opération), montant total
-        cb_courant = [t for t in txs
-                      if is_cb(t)
-                      and t.get("date", "").startswith(cur_month)
-                      and t.get("categorie") != "Transaction exclue"]
-        # Mois en cours « à débiter » = total des opérations CB du mois en cours
-        # qui ont été POINTÉES (vérifiées sur le relevé).
-        en_attente_courant = sum(t["montant"] for t in cb_courant if t.get("pointee"))
+        def dv(t: dict) -> str:
+            return t.get("date_valeur") or t.get("date", "")
 
-        # CB du mois précédent NON encore débitées (date_valeur > today)
-        cb_prec_pending = [t for t in txs
-                           if is_cb(t)
-                           and t.get("date", "").startswith(prev_month)
-                           and t.get("categorie") != "Transaction exclue"
-                           and (t.get("date_valeur") or t["date"]) > today_iso]
-        somme_prec = sum(t["montant"] for t in cb_prec_pending)
+        cartes = [t for t in txs
+                  if is_cb(t) and t.get("categorie") != "Transaction exclue"]
 
-        # Total à débiter prochainement = le PROCHAIN prélèvement uniquement.
-        # En débit différé, les achats sont prélevés par lot une fois par mois.
-        # On prend donc les opérations CB non encore débitées dont la date de
-        # valeur tombe dans le mois de la plus proche échéance à venir (les
-        # échéances plus lointaines, ex. mois suivant, ne sont pas comptées ici).
-        cb_pending = [t for t in txs
-                      if is_cb(t)
-                      and t.get("categorie") != "Transaction exclue"
-                      and (t.get("date_valeur") or t["date"]) > today_iso]
-        if cb_pending:
-            next_vd_month = min((t.get("date_valeur") or t["date"]) for t in cb_pending)[:7]
-            cb_pending_total = [t for t in cb_pending
-                                if (t.get("date_valeur") or t["date"]).startswith(next_vd_month)]
+        # ACHATS pas encore débités : leur date de valeur est à venir (ils
+        # partiront au prochain prélèvement groupé).
+        pending = [t for t in cartes if dv(t) > today_iso]
+
+        if pending:
+            prochaine = min(dv(t) for t in pending)      # date du prochain débit
+            lot = [t for t in pending if dv(t)[:7] == prochaine[:7]]
+            plus_tard = [t for t in pending if dv(t)[:7] != prochaine[:7]]
         else:
-            cb_pending_total = []
-        total_pending = sum(t["montant"] for t in cb_pending_total)
+            prochaine, lot, plus_tard = "", [], []
 
-        # Affichage
-        mois_court = ["", "janvier", "février", "mars", "avril", "mai", "juin",
-                      "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
-        nom_cur = mois_court[today.month]
-        nom_prev = mois_court[12 if today.month == 1 else today.month - 1]
+        confirmes = [t for t in lot if t.get("pointee")]
+        # « En cours » chez la banque = opération carte qu'elle n'a pas encore
+        # traitée. Un ACHAT en attente a une date de valeur future ; un
+        # REMBOURSEMENT n'a pas de débit différé (il est porté directement au
+        # compte, il ne réduit jamais l'encours) et sa date de valeur est donc
+        # immédiate — il reste pourtant « en cours » tant qu'il n'est pas
+        # passé. On le reconnaît à son absence de pointage, sur les deux
+        # derniers mois pour ne pas ressortir de vieux oublis.
+        limite = (today - timedelta(days=62)).isoformat()
+        en_cours = [t for t in cartes
+                    if not t.get("pointee")
+                    and (dv(t) > today_iso or t.get("date", "") >= limite)]
+        somme_confirmes = sum(t["montant"] for t in confirmes)
+        somme_en_cours = sum(t["montant"] for t in en_cours)
+        # Ce qui reste réellement à payer par la carte : les ACHATS non encore
+        # débités, toutes échéances confondues. Les remboursements n'y entrent
+        # pas — ils sont crédités sur le compte courant, ils ne viennent jamais
+        # en déduction du prélèvement.
+        total = sum(t["montant"] for t in pending if t["montant"] < 0)
 
-        self.cb_courant.setText(fmt_euro(en_attente_courant))
-        self.cb_precedent.setText(fmt_euro(somme_prec))
-        self.cb_total.setText(fmt_euro(total_pending))
+        self.cb_courant.setText(fmt_euro(somme_confirmes))
+        self.cb_precedent.setText(fmt_euro(somme_en_cours))
+        self.cb_total.setText(fmt_euro(total))
 
-        self.cb_title.setText(f"💳 ENCOURS CARTE BANCAIRE — au {fmt_date_fr(today_iso)}")
+        titre = "💳 ENCOURS CARTE BANCAIRE"
+        if prochaine:
+            titre += f" — prochain prélèvement le {fmt_date_fr(prochaine)}"
+        self.cb_title.setText(titre)
 
-        n_cur = sum(1 for t in cb_courant if t.get("pointee"))
-        n_prev = len(cb_prec_pending)
-        n_tot = len(cb_pending_total)
-        self.cb_detail.setText(
-            f"{n_cur} op. {nom_cur}  •  {n_prev} op. {nom_prev}  •  {n_tot} au prochain prélèvement"
-        )
+        detail = (f"{len(confirmes)} confirmée(s)  •  {len(en_cours)} en cours"
+                  f"  •  {len(lot)} au total sur ce prélèvement")
+        if plus_tard:
+            detail += (f"  •  {len(plus_tard)} opération(s) au-delà "
+                       f"({fmt_euro(sum(t['montant'] for t in plus_tard))})")
+        if solde_compte is not None:
+            # Chiffre mis en avant par la banque sous « Opérations carte en
+            # cours » : il permet de rapprocher les deux écrans d'un coup d'œil.
+            detail += ("\nSolde incluant les opérations carte en cours : "
+                       + fmt_euro(solde_compte + somme_en_cours))
+        self.cb_detail.setText(detail)
 
         # Masquer le bandeau s'il n'y a rien à montrer
-        self.cb_banner.setVisible(n_tot > 0 or en_attente_courant != 0 or somme_prec != 0)
+        self.cb_banner.setVisible(bool(pending))
 
-    def _period_end(self) -> str:
-        """Dernier jour (YYYY-MM-DD inclus) de la période en cours."""
-        if self.period == "all":
-            return "9999-12-31"
-        if len(self.period) == 4:           # YYYY
-            return f"{self.period}-12-31"
-        if len(self.period) == 7:           # YYYY-MM
-            y, m = int(self.period[:4]), int(self.period[5:7])
-            return f"{self.period}-{monthrange(y, m)[1]:02d}"
-        return "9999-12-31"
+    def _refresh_prevu_banner(self, txs: list[dict], solde_compte: float):
+        """Ce qui va entrer et sortir du compte dans les 15 prochains jours.
+
+        Deux sources, sans double compte : les opérations DÉJÀ enregistrées
+        dont le débit est à venir (l'encours carte, surtout), complétées par
+        les échéances du Prévisionnel qui n'ont pas encore d'opération
+        correspondante.
+
+        À ne pas confondre avec le « X € d'opérations prévues prochainement »
+        de l'espace bancaire : la banque n'annonce que les prélèvements dont
+        elle a reçu l'avis, ce chiffre-ci les couvre tous."""
+        today = date.today()
+        today_iso = today.isoformat()
+        fin = today + timedelta(days=JOURS_PREVISION)
+        fin_iso = fin.isoformat()
+
+        def dv(t: dict) -> str:
+            return t.get("date_valeur") or t.get("date", "")
+
+        def est_carte(t: dict) -> bool:
+            return "carte" in (t.get("type") or "").lower()
+
+        actives = [t for t in txs if t.get("categorie") != "Transaction exclue"]
+
+        # 1) Opérations déjà enregistrées dont le débit tombe dans la fenêtre.
+        #    Les opérations CARTE non pointées sont écartées : la banque ne les
+        #    a pas encore rattachées au prochain prélèvement, elles partiront au
+        #    suivant. Les compter ici fausserait le montant du débit — un
+        #    remboursement carte « en cours » ne réduit pas le prélèvement de ce
+        #    mois-ci. Les opérations non-carte, elles, ne sont jamais pointées
+        #    avant leur passage : on les garde toutes.
+        reelles = [t for t in actives
+                   if today_iso < dv(t) <= fin_iso
+                   and not (est_carte(t) and not t.get("pointee"))]
+        en_cours_carte = [t for t in actives
+                          if est_carte(t) and not t.get("pointee")
+                          and dv(t) > today_iso]
+        # Libellés déjà couverts : leur récurrence ne doit pas être recomptée
+        deja = {clean_libelle(t.get("libelle", "")) for t in reelles if not est_carte(t)}
+
+        lignes = [(dv(t), t.get("libelle", ""), t["montant"], est_carte(t))
+                  for t in reelles]
+
+        # 2) Échéances du Prévisionnel encore attendues
+        for r in (dict(x) for x in self.db.list_recurring()):
+            if not r.get("actif"):
+                continue
+            if clean_libelle(r.get("libelle", "")) in deja:
+                continue
+            for d in generate_occurrences(r, fin):
+                if d > today:
+                    lignes.append((d.isoformat(), r.get("libelle", ""),
+                                   r.get("montant", 0), False))
+
+        carte = sum(m for _d, _l, m, c in lignes if c)
+        sorties = sum(m for _d, _l, m, c in lignes if not c and m < 0)
+        entrees = sum(m for _d, _l, m, c in lignes if not c and m > 0)
+        solde_prevu = solde_compte + carte + sorties + entrees
+
+        self.prev_sorties.setText(fmt_euro(sorties))
+        self.prev_entrees.setText(fmt_euro(entrees))
+        self.prev_solde.setText(fmt_euro(solde_prevu))
+        self.prev_solde.setStyleSheet(
+            "font-size:12pt; font-weight:bold; color:"
+            + ("#1A7A3A" if solde_prevu >= 0 else "#C0392B"))
+
+        self.prev_title.setText(
+            f"📅 CE QUI EST PRÉVU — d'ici au {fmt_date_fr(fin_iso)}")
+
+        n_sorties = sum(1 for _d, _l, m, c in lignes if not c and m < 0)
+        n_entrees = sum(1 for _d, _l, m, c in lignes if not c and m > 0)
+        detail = f"{n_sorties} prélèvement(s)  •  {n_entrees} rentrée(s)"
+        if carte:
+            prochaine_carte = min((d for d, _l, _m, c in lignes if c), default="")
+            detail += (f"  •  débit carte {fmt_euro(carte)}"
+                       f" le {fmt_date_fr(prochaine_carte)}")
+        if en_cours_carte:
+            # Écartées du calcul : elles iront au prélèvement d'après.
+            somme = sum(t["montant"] for t in en_cours_carte)
+            detail += (f"  •  {len(en_cours_carte)} opération(s) carte en cours "
+                       f"({fmt_euro(somme)}) au prélèvement suivant")
+        # Les trois prochaines échéances, pour situer
+        suivantes = sorted((l for l in lignes if not l[3]), key=lambda x: x[0])[:3]
+        if suivantes:
+            detail += "\nProchaines : " + "  •  ".join(
+                f"{fmt_date_fr(d)[:5]} {lbl[:22]} {fmt_euro(m)}"
+                for d, lbl, m, _c in suivantes)
+        self.prev_detail.setText(detail)
+
+        self.prev_banner.setVisible(bool(lignes))
 
     def _refresh_budget_alert(self, txs: list[dict]):
         """Alerte sur le MOIS EN COURS (toujours, quelle que soit la période
@@ -337,9 +470,11 @@ class BilanView(QWidget):
         month = date.today().strftime("%Y-%m")
         spent: dict[str, float] = {}
         for t in txs:
+            # Même date que l'onglet Budget (vers lequel l'alerte renvoie) :
+            # sinon les deux écrans annonceraient des dépenses différentes.
             if (t.get("categorie") == "Transaction exclue"
                     or t.get("montant", 0) >= 0
-                    or not (t.get("date") or "").startswith(month)):
+                    or not self._eff_date(t).startswith(month)):
                 continue
             c = t.get("categorie", "Non classé")
             spent[c] = spent.get(c, 0) + abs(t["montant"])
@@ -394,9 +529,6 @@ class BilanView(QWidget):
         except ValueError:
             initial_balance = 0.0
 
-        # ── Encours Carte Bancaire (indépendant de la période) ──────
-        self._refresh_cb_banner(txs)
-
         # Opérations actives (hors exclues) — toutes périodes confondues
         all_active = [t for t in txs if t.get("categorie") != "Transaction exclue"]
 
@@ -424,6 +556,11 @@ class BilanView(QWidget):
         # Solde engagé (informatif) = réel + opérations non pointées
         montant_en_attente = sum(t["montant"] for t in non_pointees_up)
         solde_engage = solde_compte + montant_en_attente
+
+        # ── Bandeaux (indépendants de la période) ────────────────────
+        # Après le calcul du solde : tous deux s'en servent pour projeter.
+        self._refresh_cb_banner(txs, solde_compte)
+        self._refresh_prevu_banner(txs, solde_compte)
 
         n_rev = sum(1 for t in active if t["montant"] > 0)
         n_dep = sum(1 for t in active if t["montant"] < 0)
@@ -516,11 +653,20 @@ class BilanView(QWidget):
     def _refresh_bar_chart(self, active: list[dict]):
         """Barres mensuelles revenus / dépenses sur les 12 derniers mois présents,
         en utilisant la date effective (opération ou valeur)."""
-        months = sorted({self._eff_date(t)[:7] for t in active if self._eff_date(t)})
-        months = months[-12:]
-        if not months:
+        presents = sorted({self._eff_date(t)[:7] for t in active if self._eff_date(t)})
+        if not presents:
             self.bar_chart.removeAllSeries()
             return
+        # Mois SUCCESSIFS entre le premier et le dernier : un mois sans
+        # opération doit apparaître à zéro, pas disparaître de l'axe — sinon
+        # deux barres voisines peuvent être séparées de plusieurs mois et la
+        # courbe des dépenses paraît continue alors qu'elle ne l'est pas.
+        months = []
+        y, m = int(presents[0][:4]), int(presents[0][5:7])
+        while f"{y:04d}-{m:02d}" <= presents[-1]:
+            months.append(f"{y:04d}-{m:02d}")
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+        months = months[-12:]
 
         rev_by_month = {m: 0.0 for m in months}
         dep_by_month = {m: 0.0 for m in months}

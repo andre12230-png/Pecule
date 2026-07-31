@@ -39,10 +39,15 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         initial_balance = 0.0
     y, m = int(month[:4]), int(month[5:7])
     month_end = f"{month}-{monthrange(y, m)[1]:02d}"
+    # Pour le mois EN COURS, on s'arrête à aujourd'hui : compter jusqu'au 31
+    # ferait entrer des opérations à venir (un achat carte débité le 4 du mois
+    # prochain, par exemple) et le rapport annoncerait un solde différent de
+    # celui du Bilan, sans que rien ne l'explique.
+    arret = min(month_end, date.today().isoformat())
     solde_fin = initial_balance + sum(
         t["montant"] for t in txs
         if t.get("categorie") != "Transaction exclue" and t.get("pointee")
-        and initial_date <= eff(t) <= month_end)
+        and initial_date <= eff(t) <= arret)
 
     # Dépenses par catégorie + comparaison budget
     budgets = db.list_budgets()
@@ -69,7 +74,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         ("Dépenses", euro(depenses), "#C0392B"),
         ("Mouvement net", euro(net), "#229954" if net >= 0 else "#C0392B"),
         ("Taux d'épargne", f"{taux:.1f}&nbsp;%", "#16A085" if taux >= 0 else "#C0392B"),
-        (f"Solde bancaire réel au {fmt_date_fr(month_end)}", euro(solde_fin),
+        (f"Solde bancaire réel au {fmt_date_fr(arret)}", euro(solde_fin),
          "#1F3A6B" if solde_fin >= 0 else "#C0392B"),
     ]
     for lbl, val, col in kpis:

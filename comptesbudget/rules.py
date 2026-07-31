@@ -1,12 +1,17 @@
 """Règles d'auto-catégorisation des transactions."""
+from .utils import deaccent
+
 
 def matches_rule(tx: dict, rule: dict) -> bool:
-    lib = " ".join([
+    # Comparaison sans accents ni majuscules, comme la recherche et les
+    # sous-catégories : une règle « Café » doit reconnaître « CAFE DE LA
+    # GARE » (les relevés bancaires sont souvent sans accents).
+    lib = deaccent(" ".join([
         (tx.get("libelle") or ""),
         (tx.get("libelle_op") or ""),
         (tx.get("reference") or ""),
-    ]).lower()
-    pattern = (rule.get("pattern") or "").lower()
+    ]))
+    pattern = deaccent(rule.get("pattern") or "")
     if not pattern or pattern not in lib:
         return False
     # Sens : '' = les deux ; 'debit' = montants négatifs ; 'credit' = positifs.

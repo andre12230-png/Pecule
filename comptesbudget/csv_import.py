@@ -125,6 +125,35 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
     # « x » = opération passée en banque, autre chose = en attente.
     iPtg = find_col(["pointage"])
 
+    def _date_et_montant(cols) -> tuple:
+        """Date ISO et montant d'une ligne du relevé, sans rien enregistrer.
+        Retourne (date_iso ou None, montant, lisible). Sert deux fois : au
+        pré-comptage ci-dessous, puis à l'import proprement dit."""
+        if not cols or iDate < 0 or iDate >= len(cols):
+            return None, 0.0, True
+        d_iso = parse_french_date(cols[iDate])
+        if not d_iso:
+            return None, 0.0, True
+        if 0 <= iMontant < len(cols):
+            montant, lisible = _parse_amount_checked(cols[iMontant])
+        else:
+            d, ok_d = _parse_amount_checked(cols[iDebit]) if 0 <= iDebit < len(cols) else (0.0, True)
+            c, ok_c = _parse_amount_checked(cols[iCredit]) if 0 <= iCredit < len(cols) else (0.0, True)
+            # Le débit est souvent saisi négatif
+            if d > 0:
+                d = -d
+            montant = d + c
+            lisible = ok_d and ok_c
+        return d_iso, montant, lisible
+
+    # Combien de lignes du RELEVÉ portent chaque couple date+montant ? Sert à
+    # désamorcer le filet « saisie manuelle » plus bas quand il y a ambiguïté.
+    csv_par_dm: Counter = Counter()
+    for cols in rows[1:]:
+        d_iso, montant, lisible = _date_et_montant(cols)
+        if d_iso and lisible:
+            csv_par_dm[f"{d_iso}|{montant:.2f}"] += 1
+
     rules = [dict(r) for r in db.list_rules()]
     existing_tx = [dict(r) for r in db.list_tx()]
     # Multiplicité des opérations déjà en base, sous DEUX clés d'identité :
@@ -186,9 +215,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
     pointees = 0     # opérations existantes pointées d'après le relevé
     for cols in rows[1:]:
-        if not cols or iDate < 0 or iDate >= len(cols):
-            continue
-        d_iso = parse_french_date(cols[iDate])
+        d_iso, montant, lisible = _date_et_montant(cols)
         if not d_iso:
             continue
         dv_iso = parse_french_date(cols[iDateVal]) if iDateVal >= 0 and iDateVal < len(cols) else None
@@ -205,17 +232,8 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         # Normalisation catégorie
         cat = canonical_cat(cat) or cat or "Non classé"
 
-        # Montant : soit colonne unique, soit débit/crédit séparés
-        if iMontant >= 0 and iMontant < len(cols):
-            montant, lisible = _parse_amount_checked(cols[iMontant])
-        else:
-            d, ok_d = _parse_amount_checked(cols[iDebit]) if 0 <= iDebit < len(cols) else (0.0, True)
-            c, ok_c = _parse_amount_checked(cols[iCredit]) if 0 <= iCredit < len(cols) else (0.0, True)
-            # Le débit est souvent saisi négatif
-            if d > 0:
-                d = -d
-            montant = d + c
-            lisible = ok_d and ok_c
+        # Le montant a déjà été lu par _date_et_montant (colonne unique, ou
+        # débit/crédit séparés).
         if not lisible:
             # On n'importe PAS la ligne avec 0 € (donnée fausse invisible) :
             # elle est comptée et signalée à l'utilisateur en fin d'import.
@@ -236,9 +254,19 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         seen_lbl[k_lbl] += 1
         seen_dm[k_dm] += 1
         tx_id = f"{ident}#{occ}"
+        # Le filet « saisie manuelle » (même date + même montant) ne s'applique
+        # que s'il n'y a AUCUNE ambiguïté : autant de lignes du relevé à cette
+        # date et ce montant que de saisies manuelles à rapprocher. Sinon, on
+        # ne peut pas savoir laquelle correspond, et écarter la première venue
+        # ferait disparaître une vraie dépense du relevé (incident du
+        # 31/07/2026 : une saisie « Café » -4,50 € masquait la boulangerie du
+        # même jour au même montant). En cas d'ambiguïté on importe tout : un
+        # doublon visible se corrige avec « 🔍 Doublons », une opération perdue
+        # ne se voit pas.
+        filet_manuel = (occ_dm < existing_by_dm[k_dm]
+                        and csv_par_dm[k_dm] <= existing_by_dm[k_dm])
         est_doublon = (occ_lbl < existing_by_lbl[k_lbl]) or (
-            bool(ref.strip()) and occ < existing_by_ref[ident]) or (
-            occ_dm < existing_by_dm[k_dm])
+            bool(ref.strip()) and occ < existing_by_ref[ident]) or filet_manuel
         if est_doublon:
             skipped += 1
             # La banque confirme le passage (« x ») : on pointe l'opération

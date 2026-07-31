@@ -61,6 +61,17 @@ def test_list_periods():
     assert out.index("2026") < out.index("2026-06")
 
 
+def test_list_periods_suit_le_mode_date():
+    # Achat carte du 28/07 débité le 04/08 : en mode « date de valeur », le
+    # mois d'août doit être proposé — sinon l'opération n'est visible dans
+    # aucun mois. En mode « date d'opération », c'est juillet qui compte.
+    txs = [{"date": "2026-07-28", "date_valeur": "2026-08-04"}]
+    op = list_periods(txs, "operation")
+    val = list_periods(txs, "valeur")
+    assert "2026-07" in op and "2026-08" not in op
+    assert "2026-08" in val and "2026-07" not in val
+
+
 def test_date_debit_differe():
     # Achats du mois M → prélevés le 4 du mois M+1
     assert date_debit_differe("2026-07-15") == "2026-08-04"
@@ -79,3 +90,16 @@ def test_suggest_category():
     assert suggest_category("EDF facture electricite") == "Logement - maison"
     assert suggest_category("CARREFOUR MARKET") == "Alimentation"
     assert suggest_category("libellé sans motif connu") is None
+
+
+def test_suggest_category_motifs_ambigus():
+    # Corrections des motifs qui se chevauchaient (audit du 31/07/2026)
+    assert suggest_category("TOTALENERGIES SA") == "Logement - maison"
+    assert suggest_category("TOTAL ACCESS") == "Transports"
+    assert suggest_category("BOULANGERIE DUPONT") == "Alimentation"
+    assert suggest_category("BOULANGER 4521") == "Shopping"   # l'enseigne
+    # « remboursement » ne bascule plus en Revenus : la convention est de le
+    # classer dans la catégorie de la dépense d'origine.
+    assert suggest_category("REMBOURSEMENT SAMSE") is None
+    # « BP » (2 lettres) n'attrape plus la Banque Populaire
+    assert suggest_category("BANQUE BP") is None

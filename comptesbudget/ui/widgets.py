@@ -51,7 +51,9 @@ class PeriodBar(QWidget):
         cur_data = self.combo.currentData()
         self.combo.blockSignals(True)
         self.combo.clear()
-        for p in list_periods(transactions):
+        # Les périodes proposées suivent le mode d'affichage : c'est la même
+        # date qui sert à remplir cette liste et à filtrer les opérations.
+        for p in list_periods(transactions, self.current_date_mode()):
             self.combo.addItem(period_label(p), p)
         # Premier remplissage : sélectionner le mois en cours s'il est présent.
         if self._first_fill:
@@ -66,6 +68,11 @@ class PeriodBar(QWidget):
             if idx >= 0:
                 self.combo.setCurrentIndex(idx)
         self.combo.blockSignals(False)
+        # Changer de mode peut faire disparaître la période choisie (juillet
+        # devient août pour un achat carte). On note ce qui est réellement
+        # sélectionné, sinon un futur choix de cette même période serait
+        # considéré comme « inchangé » et n'actualiserait rien.
+        self._current = self.combo.currentData() or "all"
 
     def _emit(self):
         p = self.combo.currentData() or "all"

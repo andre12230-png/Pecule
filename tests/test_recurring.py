@@ -72,3 +72,33 @@ def test_detect_ignore_trop_court():
     txs = [{"date": f"2026-0{m}-05", "libelle": "Test", "montant": -10.0}
            for m in range(1, 3)]   # 2 mois < min_months
     assert detect_recurring_candidates(txs, min_months=4) == []
+
+
+def test_next_occurrence_ne_derive_pas_apres_un_mois_court():
+    # Sans jour de référence, une échéance au 31 restait bloquée au 28 après
+    # février : 31/01 → 28/02 → 28/03… Elle doit revenir au 31.
+    rec = {"frequency": "monthly", "day_of_month": None}
+    occ = generate_occurrences(
+        {**rec, "actif": 1, "start_date": "2026-01-31"}, date(2026, 5, 31))
+    assert [d.isoformat() for d in occ] == [
+        "2026-01-31", "2026-02-28", "2026-03-31", "2026-04-30", "2026-05-31"]
+
+
+def test_next_occurrence_annuelle_respecte_le_jour_du_mois():
+    # La fréquence annuelle ignorait day_of_month.
+    rec = {"frequency": "yearly", "day_of_month": 5}
+    assert next_occurrence(rec, date(2026, 3, 20)).isoformat() == "2027-03-05"
+    # 29 février → 28 février les années non bissextiles
+    bis = {"frequency": "yearly", "day_of_month": 29}
+    assert next_occurrence(bis, date(2028, 2, 29)).isoformat() == "2029-02-28"
+
+
+def test_generate_occurrences_date_illisible_ne_plante_pas():
+    # Une date abîmée (base modifiée à la main, JSON restauré) ne doit pas
+    # empêcher l'application de s'ouvrir.
+    assert generate_occurrences(
+        {"actif": 1, "start_date": "bidon", "frequency": "monthly"},
+        date(2026, 12, 31)) == []
+    assert generate_occurrences(
+        {"actif": 1, "start_date": "2026-01-01", "end_date": "n'importe quoi",
+         "frequency": "yearly"}, date(2026, 12, 31)) == [date(2026, 1, 1)]

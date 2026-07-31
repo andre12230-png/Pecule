@@ -292,19 +292,41 @@ class OperationsView(QWidget):
             self.db.insert_rule(rule_data)
             QMessageBox.information(self, "Règle",
                 f"Nouvelle règle créée : « {pattern} » → {v.get('categorie')}.")
-        # Appliquer la règle à toutes les opérations correspondantes
-        rules = [dict(r) for r in self.db.list_rules()]
+        # Appliquer SEULEMENT cette règle aux opérations de l'historique qui
+        # lui correspondent (avant : toutes les règles étaient rejouées sur
+        # toute la base, ce qui pouvait défaire des catégories corrigées à la
+        # main sans rapport avec la règle qu'on vient de créer).
+        cible = [dict(r) for r in self.db.list_rules()
+                 if r["pattern"].lower() == pattern.lower()]
         txs = [dict(r) for r in self.db.list_tx()]
-        modified = 0
+        a_changer = []
+        for tx in txs:
+            ok, fields = apply_rules_to_tx(tx, cible)
+            if ok and (fields.get("categorie") != tx.get("categorie")
+                       or fields.get("sous_cat") != tx.get("sous_cat")):
+                a_changer.append((tx, fields))
+        if not a_changer:
+            return
+
+        # Rien n'est modifié sans accord : ces changements ne sont pas annulables.
+        deja_classees = sorted({t.get("categorie") for t, _f in a_changer
+                                if t.get("categorie") not in ("", "Non classé")})
+        msg = (f"{len(a_changer)} opération(s) de l'historique correspondent à "
+               f"cette règle et passeraient en « {v.get('categorie')} ».")
+        if deja_classees:
+            msg += ("\n\n⚠ Dont des opérations déjà classées : "
+                    + ", ".join(f"« {c} »" for c in deja_classees[:6])
+                    + ("…" if len(deja_classees) > 6 else "")
+                    + "\nLeur catégorie actuelle sera remplacée.")
+        msg += "\n\nAppliquer la règle à l'historique ?"
+        if QMessageBox.question(self, "Appliquer la règle", msg) != QMessageBox.Yes:
+            return
+
         with self.db.batch():
-            for tx in txs:
-                ok, fields = apply_rules_to_tx(tx, rules)
-                if ok and (fields.get("categorie") != tx.get("categorie")
-                           or fields.get("sous_cat") != tx.get("sous_cat")):
-                    self.db.update_tx(tx["id"], fields)
-                    modified += 1
-        if modified:
-            self.lbl_count.setText(f"{modified} opération(s) recatégorisée(s) par la règle.")
+            for tx, fields in a_changer:
+                self.db.update_tx(tx["id"], fields)
+        self.lbl_count.setText(
+            f"{len(a_changer)} opération(s) recatégorisée(s) par la règle.")
 
     def add_tx(self):
         cats = sorted(set(t.get("categorie") for t in self.transactions if t.get("categorie")))

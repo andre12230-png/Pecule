@@ -67,12 +67,21 @@ def in_period(date_iso: str, period: str) -> bool:
     return date_iso.startswith(period)
 
 
-def list_periods(transactions: list[dict]) -> list[str]:
-    """Retourne la liste triée des périodes (mois + années) présentes."""
+def list_periods(transactions: list[dict], date_mode: str = "operation") -> list[str]:
+    """Retourne la liste triée des périodes (mois + années) présentes.
+
+    `date_mode` doit être le mode d'affichage choisi dans la barre du haut
+    (« operation » ou « valeur »), car les vues filtrent sur cette date-là.
+    Sans cela, un achat par carte du 28/07 débité le 04/08 n'apparaîtrait
+    dans AUCUN mois en mode « date de valeur » : août ne serait pas proposé
+    tant qu'aucune opération n'aurait le 4 août comme date d'opération."""
     years = set()
     months = set()
     for t in transactions:
-        d = t.get("date", "")
+        if date_mode == "valeur":
+            d = t.get("date_valeur") or t.get("date", "")
+        else:
+            d = t.get("date", "")
         if len(d) >= 7:
             years.add(d[:4])
             months.add(d[:7])

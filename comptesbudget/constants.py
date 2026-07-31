@@ -95,7 +95,99 @@ SYNC_VERSION = 2
 #          À la saisie, le type « Carte bancaire » propose automatiquement la
 #          date de valeur au 4 du mois suivant l'achat (modifiable : dès que la
 #          date est saisie à la main, l'app ne la recalcule plus).
-APP_VERSION = "1.14.0"
+# 1.14.1 : trois correctifs issus de l'audit du 31/07/2026.
+#          • Import CSV — une opération du relevé pouvait DISPARAÎTRE sans
+#            rien signaler : face à une saisie manuelle, le rapprochement
+#            « même date + même montant » écartait la première ligne venue,
+#            même sans rapport (une saisie « Café » -4,50 € masquait la
+#            boulangerie du même jour au même montant). Ce rapprochement ne
+#            s'applique désormais que s'il n'y a aucune ambiguïté ; sinon
+#            tout est importé (un doublon visible se corrige, une opération
+#            perdue ne se voit pas).
+#          • Sélecteur de période — les mois proposés suivent le sélecteur
+#            « Date ». En « date de valeur » (le mode par défaut), un achat
+#            carte du 28/07 débité le 04/08 n'apparaissait dans AUCUN mois
+#            tant qu'août n'existait pas côté date d'opération.
+#          • Onglets Budget et Catégories — ils ignoraient le sélecteur
+#            « Date » et comptaient toujours en date d'opération : le Bilan
+#            pouvait annoncer 0 € de dépenses en juillet pendant que Budget
+#            en affichait 100 €. Les quatre vues comptent maintenant les
+#            mêmes opérations (l'alerte budget du Bilan comprise).
+# 1.15.0 : suite de l'audit du 31/07/2026 — le reste des anomalies relevées.
+#          • Encours carte : le bandeau du Bilan reprend désormais les DEUX
+#            chiffres de l'espace bancaire (« prochain prélèvement confirmé »
+#            = achats pointés, « achats en cours » = pas encore rattachés par
+#            la banque, et leur somme). Les trois tuiles précédentes mêlaient
+#            mois d'opération et pointage sans correspondre à aucun chiffre
+#            vérifiable ; les opérations au-delà du prochain prélèvement sont
+#            annoncées à part. Le bandeau affiche aussi le « solde incluant
+#            les opérations carte en cours », chiffre mis en avant par la
+#            banque : les deux écrans se rapprochent d'un coup d'œil. Une
+#            opération en cours peut être un REMBOURSEMENT (crédit) — il vient
+#            en déduction de l'encours, d'où « opérations » et non « achats ».
+#          • Règles automatiques : comparaison sans accents, comme partout
+#            ailleurs (une règle « Café » reconnaît « CAFE »).
+#          • « Mémoriser » n'applique plus QUE la règle créée, et demande
+#            confirmation en annonçant combien d'opérations changent et
+#            lesquelles étaient déjà classées (ce n'est pas annulable).
+#            Auparavant toutes les règles étaient rejouées sur toute la base
+#            sans prévenir, ce qui pouvait défaire un classement manuel.
+#          • « Recatégoriser toutes ces opérations » agit sur la période
+#            affichée — ce que l'écran montre — et le rappelle dans la
+#            confirmation ; il déplaçait toute la base.
+#          • Harmonisation : motifs qui se chevauchaient corrigés —
+#            TotalEnergies (facture) ne part plus dans Transports, Boulanger
+#            (électroménager) n'est plus de l'Alimentation, « BP » n'attrape
+#            plus la Banque Populaire, et « remboursement » ne bascule plus
+#            en Revenus (convention : catégorie de la dépense d'origine).
+#          • Récurrences : une échéance au 31 ne dérive plus au 28 après
+#            février, la fréquence annuelle respecte le jour du mois, et une
+#            date de début illisible n'empêche plus l'ouverture.
+#          • Libellés : « VIR 123456 » n'est plus réduit à « Vir » — deux
+#            virements sans rapport ne peuvent plus être pris l'un pour
+#            l'autre, y compris par la détection de doublons.
+#          • Rapport mensuel du mois en cours arrêté à aujourd'hui (et non au
+#            31), pour annoncer le même solde que le Bilan.
+#          • Graphique d'évolution : les mois sans opération apparaissent à
+#            zéro au lieu d'être masqués (l'axe du temps était trompeur).
+# 1.16.0 : nouveau bandeau « 📅 Ce qui est prévu » sur le Bilan — projection
+#          du compte sur 15 jours. Il additionne les opérations déjà
+#          enregistrées dont le débit est à venir (l'encours carte) et les
+#          échéances du Prévisionnel sans opération correspondante (pas de
+#          double compte), et affiche prélèvements attendus, rentrées
+#          attendues et SOLDE PRÉVU. Répond à « où en sera mon compte dans
+#          quinze jours ? », ce que ni le Bilan ni le Prévisionnel ne
+#          disaient : le premier ignorait l'avenir, le second listait les
+#          échéances sans les rapprocher du solde.
+#          À ne pas confondre avec le « X € d'opérations prévues
+#          prochainement » de l'espace bancaire : la banque n'annonce que les
+#          prélèvements dont elle a reçu l'avis, ce bandeau les couvre tous —
+#          son montant est donc normalement plus élevé.
+# 1.16.1 : correctif du bandeau « Ce qui est prévu » — le débit carte annoncé
+#          était FAUX. Il additionnait toutes les opérations carte à venir,
+#          y compris celles encore « en cours » : un achat de 120 € déjà
+#          rattaché au prélèvement et un remboursement de 15 € pas encore
+#          traité donnaient 105 € annoncés, alors que la banque prélève bien
+#          120 € (le remboursement ira au prélèvement suivant). Seules les
+#          opérations POINTÉES (celles que la banque a intégrées au
+#          prélèvement) sont désormais comptées ; les autres sont annoncées
+#          à part en fin de ligne. Le solde prévu s'en trouve corrigé d'autant.
+# 1.16.2 : un REMBOURSEMENT par carte ne suit pas le débit différé — la banque
+#          le porte directement au compte courant, il ne vient jamais réduire
+#          l'encours de la carte.
+#          • À la saisie, le type « Carte bancaire » ne proposait le 4 du mois
+#            suivant qu'en regardant le TYPE, sans le sens : un remboursement
+#            se retrouvait daté au prochain prélèvement, donc absent du solde
+#            pendant des semaines. La date de valeur ne se décale plus que
+#            pour les débits, et le rappel « 💳 débit différé » suit le sens.
+#          • Bandeau encours : la 3ᵉ tuile devient « Total des achats à
+#            débiter » (les crédits n'y entrent plus, ils ne sont pas
+#            prélevables). Les opérations en cours restent affichées, achats
+#            comme remboursements, pour correspondre à la liste de la banque.
+#          • Correctif d'affichage : le rappel du débit différé restait
+#            visible après un passage en crédit (isVisible() vaut toujours
+#            False tant que la fenêtre n'est pas ouverte → isVisibleTo).
+APP_VERSION = "1.16.2"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
@@ -125,7 +217,10 @@ CATEGORY_COLORS = {
     "Non classé":            "#8A877F",
 }
 
-# Normalisation : variantes accentuées / banques → forme canonique
+# Normalisation : variantes / catégories des banques → forme canonique.
+# Les clés sont comparées SANS accents (cf. utils.canonical_cat, qui applique
+# deaccent) : inutile d'ajouter ici des variantes accentuées, elles ne
+# seraient jamais consultées.
 CANONICAL_CATS = {
     "alimentation": "Alimentation",
     "alimentation et restauration": "Alimentation",
@@ -136,7 +231,6 @@ CANONICAL_CATS = {
     "logement - maison": "Logement - maison",
     "maison": "Logement - maison",
     "sante": "Santé",
-    "santé": "Santé",
     "loisirs": "Loisirs",
     "loisirs et culture": "Loisirs",
     "shopping": "Shopping",
@@ -146,23 +240,18 @@ CANONICAL_CATS = {
     "banque et assurances": "Banque et assurances",
     "assurances": "Banque et assurances",
     "impots": "Impôts et taxes",
-    "impôts": "Impôts et taxes",
     "impots et taxes": "Impôts et taxes",
-    "impôts et taxes": "Impôts et taxes",
     "famille": "Famille",
     "cadeaux": "Cadeaux et dons",
     "cadeaux et dons": "Cadeaux et dons",
     "revenus": "Revenus",
     "salaire": "Revenus",
     "epargne": "Épargne",
-    "épargne": "Épargne",
     "retraits": "Retraits / dépôts",
     "retraits / depots": "Retraits / dépôts",
-    "retraits / dépôts": "Retraits / dépôts",
     "virements internes": "Virements internes",
     "transaction exclue": "Transaction exclue",
     "non classe": "Non classé",
-    "non classé": "Non classé",
     # Catégories des exports BPCE : sans correspondance, elles créaient des
     # catégories parasites (« A categoriser - sortie d'argent »…) à l'import.
     # Ramenées à « Non classé », elles laissent les règles et les profils de
@@ -184,25 +273,36 @@ TYPES_OPERATION = [
 # première regex qui matche → catégorie canonique.
 HARMONIZE_RULES = [
     # Logement
-    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl|mobile)\b", "Logement - maison"),
+    # « totalenergies » AVANT la règle Transports : sans cela, la facture
+    # d'électricité TotalEnergies partait dans Transports (motif « total »
+    # des stations-service).
+    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl|mobile|totalenergies|total energies)\b", "Logement - maison"),
     (r"\b(brico|leroy[\s-]?merlin|castorama|ikea|conforama|but|maison|ameublement|mobilier|jardin)\b", "Logement - maison"),
     # Transports
-    (r"\b(carburant|station|essence|total|shell|esso|bp|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
+    # « bp » (2 lettres) retiré : il attrapait aussi la Banque Populaire.
+    (r"\b(carburant|station|essence|total|shell|esso|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
     # Santé
     (r"\b(pharmacie|medecin|docteur|dentist|opticien|hopital|clinique|cpam|mutuelle|harmonie|mgen|laboratoire|kine|kinesi|ostheo|psychologue)\b", "Santé"),
     # Alimentation
-    (r"\b(carrefour|leclerc|auchan|intermarche|lidl|aldi|casino|monoprix|super[\s-]?u|hyper[\s-]?u|coop|biocoop|naturalia|grand frais|picard|marche|boulanger\.com|boulanger|patisser|boucher|primeur)\b", "Alimentation"),
+    # « boulangerie » et non « boulanger » : Boulanger est l'enseigne
+    # d'électroménager (elle reste couverte par la règle Shopping).
+    (r"\b(carrefour|leclerc|auchan|intermarche|lidl|aldi|casino|monoprix|super[\s-]?u|hyper[\s-]?u|coop|biocoop|naturalia|grand frais|picard|marche|boulangerie|patisser|boucher|primeur)\b", "Alimentation"),
     (r"\b(mcdo|mc[\s-]?donald|kfc|burger|quick|subway|pizza|restaur|brasserie|bar|cafe|kebab|sushi|chez|brunch)\b", "Alimentation"),
     # Loisirs
     (r"\b(cinema|cine|netflix|spotify|deezer|prime video|disney|amazon prime|canal|playstation|nintendo|xbox|steam|fnac|cultura|micromania|jeu|cinema|gaumont|ugc|pathe|theatre|concert|musee)\b", "Loisirs"),
-    # Shopping
-    (r"\b(amazon|cdiscount|fnac|darty|boulanger|zalando|asos|kiabi|h&m|zara|uniqlo|decathlon|intersport|go sport)\b", "Shopping"),
+    # Shopping — « fnac » n'y figure plus : il est déjà pris par Loisirs
+    # (culture) juste au-dessus, la première règle qui correspond l'emporte.
+    (r"\b(amazon|cdiscount|darty|boulanger|zalando|asos|kiabi|h&m|zara|uniqlo|decathlon|intersport|go sport)\b", "Shopping"),
     # Impôts
     (r"\b(dgfip|tresor public|impot|tva|taxe|cfe|tfh)\b", "Impôts et taxes"),
     # Banque / assurances
     (r"\b(bpce|cic|credit agricole|banque postale|caisse epargne|societe generale|sg|bnp|hsbc|lcl|cotisation|frais|agios|commission|maaf|matmut|maif|axa|gmf|allianz|maif|assurance habitation|assurance accident)\b", "Banque et assurances"),
-    # Revenus
-    (r"\b(salaire|paie|paye|caf|pole emploi|chomage|retraite|pension|remboursement|virement recu)\b", "Revenus"),
+    # Revenus — « remboursement » volontairement ABSENT : la convention est de
+    # classer un remboursement dans la catégorie de la dépense d'origine
+    # (Samse → Logement, Cofidis → Banque et assurances…), pas en Revenus, où
+    # il gonflerait à tort les revenus et le taux d'épargne. Sans motif, ces
+    # opérations restent « Non classé » et c'est vous qui tranchez.
+    (r"\b(salaire|paie|paye|caf|pole emploi|chomage|retraite|pension|virement recu)\b", "Revenus"),
     # Épargne
     (r"\b(virement epargne|livret a|ldds|pel|cel|assurance vie|pea|opcvm)\b", "Épargne"),
 ]

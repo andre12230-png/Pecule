@@ -55,3 +55,14 @@ def test_apply_priorite_montant():
     tx = {"libelle": "RAILEXPRESS", "montant": -50.0, "categorie": "Non classé"}
     _, fields = apply_rules_to_tx(tx, rules)
     assert fields["categorie"] == "Loisirs"
+
+
+def test_matches_rule_ignore_les_accents():
+    # Les relevés bancaires sont souvent sans accents : une règle « Café »
+    # doit reconnaître « CAFE », et inversement.
+    tx = {"libelle": "CAFE DE LA GARE", "montant": -12.0}
+    assert matches_rule(tx, {"pattern": "café", "sens": "debit"})
+    assert matches_rule(tx, {"pattern": "cafe", "sens": "debit"})
+    accentue = {"libelle": "Café de la Gare", "montant": -12.0}
+    assert matches_rule(accentue, {"pattern": "cafe", "sens": "debit"})
+    assert matches_rule(accentue, {"pattern": "café", "sens": "debit"})

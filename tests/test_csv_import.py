@@ -139,6 +139,27 @@ def test_import_csv_date_montant_ne_vaut_que_pour_les_saisies_manuelles(tmp_path
     assert len(list(db.list_tx())) == 2
 
 
+def test_import_csv_saisie_manuelle_ambigue_n_ecarte_aucune_ligne(tmp_path):
+    # Une saisie manuelle face à PLUSIEURS lignes du relevé au même jour et au
+    # même montant : impossible de savoir laquelle elle représente. On importe
+    # alors tout — perdre une vraie dépense du relevé serait pire qu'afficher
+    # un doublon, que l'outil « Doublons » sait traiter.
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx({
+        "id": "uuid-manuel", "date": "2026-07-10", "date_valeur": "2026-07-10",
+        "libelle": "Café", "libelle_op": "Café", "reference": "",
+        "type": "", "categorie": "Alimentation", "sous_cat": "",
+        "info": "", "montant": -4.50, "pointee": 0,
+    })
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Reference;Montant\n"
+               "10/07/2026;BOULANGERIE DUPONT;REF001;-4,50\n"
+               "10/07/2026;PARKING CENTRE;REF002;-4,50\n")
+    assert import_csv(p, db) == (2, 0, 0, 0)
+    libelles = sorted(dict(r)["libelle"] for r in db.list_tx())
+    assert libelles == ["BOULANGERIE DUPONT", "Café", "PARKING CENTRE"]
+
+
 def test_import_csv_dedup_reference_changee_entre_exports(tmp_path):
     # Certaines banques changent la référence d'un export à l'autre : le
     # libellé nettoyé doit suffire à reconnaître le doublon.

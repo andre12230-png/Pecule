@@ -244,6 +244,9 @@ class TxDialog(QDialog):
         self.date_val.dateChanged.connect(self._on_date_val_changed)
         self.type_combo.currentTextChanged.connect(lambda _t: self._sync_date_valeur())
         self.date_edit.dateChanged.connect(lambda _d: self._sync_date_valeur())
+        # Le sens compte aussi : passer une opération carte en crédit
+        # (remboursement) doit ramener la date de valeur à la date d'achat.
+        self.rb_debit.toggled.connect(lambda _c: self._sync_date_valeur())
         self._sync_date_valeur()
 
         # Initialisation du motif par défaut = libellé
@@ -258,12 +261,22 @@ class TxDialog(QDialog):
     def _sync_date_valeur(self):
         """Aligne la date de valeur sur le type d'opération choisi.
 
-        « Carte bancaire » = débit différé : la banque prélève l'achat le 4
-        du mois suivant, c'est donc à cette date que l'opération doit entrer
-        dans le solde. Pour les autres types, la date de valeur suit la date
-        d'opération. Ne fait rien si la date de valeur a été saisie à la main."""
-        est_carte = self.type_combo.currentText() == "Carte bancaire"
-        if est_carte != self.dv_hint.isVisible():
+        « Carte bancaire » en DÉBIT = débit différé : la banque regroupe les
+        achats et les prélève le 4 du mois suivant, c'est donc à cette date
+        que l'opération entre dans le solde.
+
+        En CRÉDIT, il n'y a pas de débit différé : un remboursement par carte
+        est porté directement au compte courant, il ne vient jamais réduire
+        l'encours de la carte. Sa date de valeur suit donc la date
+        d'opération, comme pour les autres types.
+
+        Ne fait rien si la date de valeur a été saisie à la main."""
+        est_carte = (self.type_combo.currentText() == "Carte bancaire"
+                     and self.rb_debit.isChecked())
+        # isVisibleTo (et non isVisible) : tant que la fenêtre n'est pas encore
+        # ouverte, isVisible() renvoie toujours False et le rappel resterait
+        # affiché à tort après un changement de sens.
+        if est_carte != self.dv_hint.isVisibleTo(self):
             self.dv_hint.setVisible(est_carte)
             self.adjustSize()          # laisse la place au rappel affiché
         if self._dv_user_edited:

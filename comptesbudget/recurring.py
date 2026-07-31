@@ -7,10 +7,15 @@ from statistics import median
 
 from .utils import deaccent
 
-def next_occurrence(rec: dict, current: date) -> date:
-    """Date suivant `current` selon la fréquence."""
+def next_occurrence(rec: dict, current: date, ref_day: int = None) -> date:
+    """Date suivant `current` selon la fréquence.
+
+    `ref_day` est le jour du mois de référence : il vient de l'échéance
+    elle-même (day_of_month) ou, à défaut, du jour de la PREMIÈRE occurrence.
+    Sans cette référence, une échéance au 31 dériverait définitivement après
+    un mois court : 31/01 → 28/02 → 28/03 → 28/04… au lieu de revenir au 31."""
     freq = rec.get("frequency", "monthly")
-    ref_day = rec.get("day_of_month") or current.day
+    ref_day = rec.get("day_of_month") or ref_day or current.day
     if freq == "weekly":
         return current + timedelta(days=7)
     if freq == "biweekly":
@@ -28,28 +33,38 @@ def next_occurrence(rec: dict, current: date) -> date:
         d = min(ref_day, monthrange(y, m)[1])
         return date(y, m, d)
     if freq == "yearly":
-        try:
-            return date(current.year + 1, current.month, current.day)
-        except ValueError:
-            return date(current.year + 1, current.month, 28)
+        y = current.year + 1
+        # Même logique : on repart du jour de référence, ramené à la longueur
+        # du mois (un 29 février retombe au 28 les années non bissextiles).
+        return date(y, current.month, min(ref_day, monthrange(y, current.month)[1]))
     return current
+
+
+def _date_ou_none(s) -> date:
+    """Lit une date ISO ; retourne None si elle est absente ou illisible.
+    Une date abîmée (base modifiée à la main, fichier JSON restauré) ne doit
+    pas empêcher l'application de s'ouvrir."""
+    try:
+        return date.fromisoformat((s or "")[:10])
+    except (TypeError, ValueError):
+        return None
 
 
 def generate_occurrences(rec: dict, until: date) -> list[date]:
     """Toutes les occurrences depuis start_date jusqu'à `until` (incluse)."""
     if not rec.get("actif"):
         return []
-    sd_str = rec.get("start_date")
-    if not sd_str:
+    cur = _date_ou_none(rec.get("start_date"))
+    if cur is None:
         return []
-    cur = date.fromisoformat(sd_str)
-    end = date.fromisoformat(rec["end_date"]) if rec.get("end_date") else None
+    end = _date_ou_none(rec.get("end_date")) if rec.get("end_date") else None
+    ref_day = cur.day          # jour de la première occurrence (cf. next_occurrence)
     out = []
     while cur <= until:
         if end and cur > end:
             break
         out.append(cur)
-        nxt = next_occurrence(rec, cur)
+        nxt = next_occurrence(rec, cur, ref_day)
         if nxt <= cur:  # sécurité anti-boucle infinie
             break
         cur = nxt

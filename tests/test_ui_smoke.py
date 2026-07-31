@@ -12,6 +12,7 @@ import pytest
 
 from comptesbudget.constants import CATEGORIES_DEFAUT
 from comptesbudget.database import Database
+from comptesbudget.utils import fmt_euro
 
 
 def _tx(**kw):
@@ -173,3 +174,235 @@ def test_rapport_et_recherche(qapp, db):
 
     MonthlyReportDialog(None, db)    # construction (aperçu QTextBrowser)
     GlobalSearchDialog(None, db)     # construit + indexe + recherche initiale
+
+
+def test_tous_les_onglets_suivent_le_mode_date(qapp, tmp_path):
+    """Bilan, Budget et Catégories doivent compter les MÊMES opérations pour
+    une période donnée. Un achat carte du 28/07 débité le 04/08 appartient à
+    août en mode « date de valeur » et à juillet en mode « date d'opération » :
+    les trois vues doivent être d'accord, sinon les chiffres se contredisent
+    d'un onglet à l'autre."""
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.ui.views.budget import BudgetView
+    from comptesbudget.ui.views.categories import CategoriesView
+
+    d = Database(str(tmp_path / "mode.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="cb", date="2026-07-28", date_valeur="2026-08-04",
+                    libelle="ACHAT CB", type="Carte bancaire",
+                    categorie="Shopping", montant=-100.0))
+
+    def depenses(vue_cls, periode, mode):
+        v = vue_cls(d)
+        v.period = periode
+        v.date_mode = mode
+        v.refresh()
+        return v
+
+    # Juillet en date de valeur : l'opération n'y est pour aucune des vues.
+    assert depenses(BilanView, "2026-07", "valeur").kpis["depenses"]._value.text() \
+        == fmt_euro(0)
+    assert depenses(BudgetView, "2026-07", "valeur").model.rowCount() == 0
+    assert depenses(CategoriesView, "2026-07", "valeur").cats_model.rowCount() == 0
+
+    # Août en date de valeur : les trois vues la voient.
+    assert depenses(BilanView, "2026-08", "valeur").kpis["depenses"]._value.text() \
+        == fmt_euro(-100.0)
+    assert depenses(BudgetView, "2026-08", "valeur").model.rowCount() == 1
+    assert depenses(CategoriesView, "2026-08", "valeur").cats_model.rowCount() == 1
+
+    # Mode « date d'opération » : tout bascule sur juillet, pour les trois.
+    assert depenses(BilanView, "2026-07", "operation").kpis["depenses"]._value.text() \
+        == fmt_euro(-100.0)
+    assert depenses(BudgetView, "2026-07", "operation").model.rowCount() == 1
+    assert depenses(CategoriesView, "2026-07", "operation").cats_model.rowCount() == 1
+
+
+def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
+    """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
+    au prochain prélèvement = pointés) et un encours incluant les achats
+    encore « en cours » (non pointés). Le bandeau doit donner ces deux
+    chiffres et leur somme."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "cb.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    today = date.today()
+    prochain = (today.replace(day=1) + timedelta(days=32)).replace(day=4).isoformat()
+
+    # Deux achats au prochain prélèvement : un intégré par la banque, un en cours
+    d.insert_tx(_tx(id="cb-ok", date=today.isoformat(), date_valeur=prochain,
+                    libelle="HYPERMARCHE", type="Carte bancaire",
+                    montant=-100.0, pointee=1))
+    d.insert_tx(_tx(id="cb-cours", date=today.isoformat(), date_valeur=prochain,
+                    libelle="OMNISHOP", type="Carte bancaire",
+                    montant=-40.00, pointee=0))
+    # Le prélèvement du relevé lui-même ne doit jamais être compté deux fois
+    d.insert_tx(_tx(id="dd", date=today.isoformat(), date_valeur=prochain,
+                    libelle="DEBIT DIFFERE N 1234", type="Carte bancaire",
+                    categorie="Transaction exclue", montant=-140.00, pointee=1))
+
+    v = BilanView(d)
+    v.refresh()
+    assert v.cb_courant.text() == fmt_euro(-100.0)      # confirmé par la banque
+    assert v.cb_precedent.text() == fmt_euro(-40.00)    # encore en cours
+    assert v.cb_total.text() == fmt_euro(-140.00)       # encours total
+    assert v.cb_banner.isVisibleTo(v)
+
+
+def test_encours_carte_avec_remboursement_en_cours(qapp, tmp_path):
+    """Un REMBOURSEMENT par carte est porté directement au compte courant : il
+    ne vient JAMAIS en déduction de l'encours de la carte. Il reste pourtant
+    « en cours » tant que la banque ne l'a pas passé — sa date de valeur est
+    immédiate, contrairement à un achat qui attend le prélèvement groupé."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "remb.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    today = date.today()
+    prochain = (today.replace(day=1) + timedelta(days=32)).replace(day=4).isoformat()
+
+    # Un achat déjà intégré au prélèvement (date de valeur au 4 du mois suivant)
+    d.insert_tx(_tx(id="cb-dep", date=today.isoformat(), date_valeur=prochain,
+                    libelle="ACHAT", type="Carte bancaire",
+                    montant=-100.0, pointee=1))
+    # Un remboursement : date de valeur immédiate, pas encore passé
+    d.insert_tx(_tx(id="cb-remb", date=today.isoformat(),
+                    date_valeur=today.isoformat(),
+                    libelle="OMNISHOP", type="Carte bancaire",
+                    montant=15.00, pointee=0))
+
+    v = BilanView(d)
+    v.refresh()
+    assert v.cb_courant.text() == fmt_euro(-100.0)     # sera prélevé tel quel
+    assert v.cb_precedent.text() == fmt_euro(15.00)    # crédit encore en cours
+    assert v.cb_total.text() == fmt_euro(-100.0)       # inchangé par le remboursement
+    # Le solde du compte (0 €) plus les opérations en cours
+    assert "Solde incluant les opérations carte en cours : " + fmt_euro(15.00) \
+        in v.cb_detail.text()
+
+
+def test_bandeau_ce_qui_est_prevu(qapp, tmp_path):
+    """Projection à 15 jours : les opérations déjà enregistrées dont le débit
+    est à venir (encours carte) PLUS les échéances du Prévisionnel, sans
+    double compte quand l'opération réelle existe déjà."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "prev.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+    today = date.today()
+    dans_5j = (today + timedelta(days=5)).isoformat()
+
+    # Solde du jour : 1000 € (une opération pointée déjà débitée à 0)
+    # Débit carte à venir dans 5 jours
+    d.insert_tx(_tx(id="cb", date=today.isoformat(), date_valeur=dans_5j,
+                    libelle="ACHATS CARTE", type="Carte bancaire",
+                    montant=-200.0, pointee=1))
+    # Une échéance du Prévisionnel à venir dans 5 jours
+    d.insert_recurring({"id": "r-loyer", "libelle": "Loyer", "montant": -750.0,
+                        "categorie": "Logement - maison", "sous_cat": "",
+                        "type": "Prelevement", "frequency": "monthly",
+                        "day_of_month": (today + timedelta(days=5)).day,
+                        "start_date": "2026-01-01", "end_date": None, "actif": 1})
+    # Une rentrée récurrente
+    d.insert_recurring({"id": "r-pension", "libelle": "Pension", "montant": 1500.0,
+                        "categorie": "Revenus", "sous_cat": "", "type": "Virement",
+                        "frequency": "monthly",
+                        "day_of_month": (today + timedelta(days=6)).day,
+                        "start_date": "2026-01-01", "end_date": None, "actif": 1})
+
+    v = BilanView(d)
+    v.refresh()
+    assert v.kpis["solde"]._value.text() == fmt_euro(1000.0)   # carte non débitée
+    assert v.prev_sorties.text() == fmt_euro(-750.0)           # hors carte
+    assert v.prev_entrees.text() == fmt_euro(1500.0)
+    # 1000 − 200 (carte) − 750 (loyer) + 1500 (pension)
+    assert v.prev_solde.text() == fmt_euro(1550.0)
+    assert "débit carte" in v.prev_detail.text()
+
+
+def test_bandeau_prevu_ne_compte_pas_deux_fois(qapp, tmp_path):
+    """Si l'opération réelle est déjà enregistrée pour une échéance à venir,
+    la récurrence correspondante ne doit pas s'y ajouter."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "prev2.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    today = date.today()
+    dans_3j = (today + timedelta(days=3)).isoformat()
+
+    d.insert_tx(_tx(id="loyer-reel", date=dans_3j, date_valeur=dans_3j,
+                    libelle="Loyer", type="Prelevement",
+                    categorie="Logement - maison", montant=-750.0, pointee=0))
+    d.insert_recurring({"id": "r-loyer", "libelle": "Loyer", "montant": -750.0,
+                        "categorie": "Logement - maison", "sous_cat": "",
+                        "type": "Prelevement", "frequency": "monthly",
+                        "day_of_month": (today + timedelta(days=3)).day,
+                        "start_date": "2026-01-01", "end_date": None, "actif": 1})
+
+    v = BilanView(d)
+    v.refresh()
+    assert v.prev_sorties.text() == fmt_euro(-750.0)   # une seule fois
+
+
+def test_prevu_debit_carte_ignore_les_operations_en_cours(qapp, tmp_path):
+    """Le débit annoncé pour le prochain prélèvement ne compte QUE les
+    opérations que la banque y a rattachées (les pointées). Un remboursement
+    carte encore « en cours » ne réduit pas ce prélèvement-là : il partira au
+    suivant. Sinon le montant annoncé ne correspond pas au relevé."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "cb-prev.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    today = date.today()
+    dans_4j = (today + timedelta(days=4)).isoformat()
+
+    d.insert_tx(_tx(id="cb-conf", date=today.isoformat(), date_valeur=dans_4j,
+                    libelle="ACHATS", type="Carte bancaire",
+                    montant=-120.00, pointee=1))
+    d.insert_tx(_tx(id="cb-remb", date=today.isoformat(), date_valeur=dans_4j,
+                    libelle="OMNISHOP", type="Carte bancaire",
+                    montant=15.00, pointee=0))
+
+    v = BilanView(d)
+    v.refresh()
+    # Le débit annoncé est celui du relevé, sans le remboursement en cours
+    assert "débit carte " + fmt_euro(-120.00) in v.prev_detail.text()
+    assert "au prélèvement suivant" in v.prev_detail.text()
+    assert v.prev_solde.text() == fmt_euro(-120.00)
+    # Le bandeau carte, lui, continue d'afficher les deux chiffres
+    assert v.cb_courant.text() == fmt_euro(-120.00)
+    assert v.cb_precedent.text() == fmt_euro(15.00)
+
+
+def test_txdialog_remboursement_carte_sans_debit_differe(qapp, db):
+    """Un remboursement par carte (crédit) est porté directement au compte :
+    pas de débit différé. Le formulaire ne doit donc PAS proposer le 4 du mois
+    suivant, contrairement à un achat."""
+    from PySide6.QtCore import QDate
+
+    from comptesbudget.ui.dialogs import TxDialog
+
+    txs = [dict(r) for r in db.list_tx()]
+    dlg = TxDialog(None, None, categories=CATEGORIES_DEFAUT, all_transactions=txs)
+    dlg.date_edit.setDate(QDate(2026, 7, 15))
+    dlg.type_combo.setCurrentText("Carte bancaire")
+
+    # Achat : débit différé au 4 du mois suivant
+    assert dlg.values()["date_valeur"] == "2026-08-04"
+    assert dlg.dv_hint.isVisibleTo(dlg)
+
+    # Bascule en crédit : la date de valeur revient à la date d'opération
+    dlg.rb_credit.setChecked(True)
+    assert dlg.values()["date_valeur"] == "2026-07-15"
+    assert not dlg.dv_hint.isVisibleTo(dlg)
+
+    # Retour en débit : le débit différé revient
+    dlg.rb_debit.setChecked(True)
+    assert dlg.values()["date_valeur"] == "2026-08-04"

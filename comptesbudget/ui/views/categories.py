@@ -17,7 +17,7 @@ from ...constants import (
     CATEGORIES_DEFAUT,
 )
 from ...utils import (
-    cat_color, fmt_euro, in_period,
+    cat_color, fmt_euro, in_period, period_label,
 )
 from ...database import Database
 
@@ -31,6 +31,7 @@ class CategoriesView(QWidget):
         super().__init__(parent)
         self.db = db
         self.period = "all"
+        self.date_mode = "valeur"   # suit le sélecteur « Date » de la barre du haut
         self.current_cat: Optional[str] = None
 
         v = QVBoxLayout(self); v.setContentsMargins(8, 8, 8, 8)
@@ -80,9 +81,16 @@ class CategoriesView(QWidget):
         splitter.setSizes([320, 700])
         v.addWidget(splitter)
 
+    def _eff_date(self, t: dict) -> str:
+        """Date utilisée pour la période affichée : elle suit le sélecteur
+        « Date » de la barre du haut, comme le Bilan et les Opérations."""
+        if self.date_mode == "valeur":
+            return t.get("date_valeur") or t.get("date", "")
+        return t.get("date", "")
+
     def refresh(self):
-        txs = [dict(r) for r in self.db.list_tx()
-               if in_period(dict(r).get("date", ""), self.period)]
+        txs = [t for t in (dict(r) for r in self.db.list_tx())
+               if in_period(self._eff_date(t), self.period)]
         by_cat = {}
         for t in txs:
             c = t.get("categorie", "Non classé")
@@ -118,13 +126,13 @@ class CategoriesView(QWidget):
         if not cat:
             return
         self.current_cat = cat
-        txs = [dict(r) for r in self.db.list_tx()
-               if dict(r).get("categorie") == cat
-               and in_period(dict(r).get("date", ""), self.period)]
+        txs = [t for t in (dict(r) for r in self.db.list_tx())
+               if t.get("categorie") == cat
+               and in_period(self._eff_date(t), self.period)]
         self._show_cat(cat, txs)
 
     def _show_cat(self, cat: str, txs: list[dict]):
-        txs = sorted(txs, key=lambda t: t.get("date", ""), reverse=True)
+        txs = sorted(txs, key=self._eff_date, reverse=True)
         self.tx_model.load(txs)
         total = sum(t["montant"] for t in txs)
         self.cat_title.setText(f"« {cat} » — {len(txs)} opération(s)  —  {fmt_euro(total)}")
@@ -160,11 +168,22 @@ class CategoriesView(QWidget):
             cats, 0, True)
         if not ok or not new_cat.strip() or new_cat == self.current_cat:
             return
-        affected = [dict(r) for r in self.db.list_tx()
-                    if r["categorie"] == self.current_cat]
+        # Le bouton agit sur ce que l'écran montre : la catégorie POUR LA
+        # PÉRIODE affichée. Auparavant il déplaçait toute la base, y compris
+        # des opérations invisibles à l'écran.
+        affected = [t for t in (dict(r) for r in self.db.list_tx())
+                    if t["categorie"] == self.current_cat
+                    and in_period(self._eff_date(t), self.period)]
+        if not affected:
+            return
+        portee = ("toutes périodes confondues" if self.period == "all"
+                  else f"sur la période affichée ({period_label(self.period)})")
         if QMessageBox.question(
                 self, "Confirmer",
-                f"Déplacer {len(affected)} opération(s) vers « {new_cat} » ?") != QMessageBox.Yes:
+                f"Déplacer {len(affected)} opération(s) de « {self.current_cat} » "
+                f"vers « {new_cat} » ?\n\n"
+                f"Seules les opérations {portee} sont concernées."
+        ) != QMessageBox.Yes:
             return
         with self.db.batch():
             for t in affected:

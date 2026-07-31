@@ -141,6 +141,55 @@ l'encours carte pas encore prélevé.</p>
 <b>date de valeur</b> est proposée automatiquement au <b>4 du mois suivant</b>
 l'achat (jour du prélèvement groupé). Vous pouvez la corriger : dès que vous
 la modifiez vous-même, l'app ne la recalcule plus.</p>
+<p>Le bandeau <b>« 💳 Encours carte bancaire »</b> du Bilan reprend les deux
+chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
+<ul>
+  <li><b>Prochain prélèvement (confirmé)</b> — les achats que la banque a déjà
+      rattachés au prélèvement à venir. Ce sont vos opérations
+      <b>pointées</b> : c'est le montant « débit différé au 4 » de la banque.</li>
+  <li><b>Opérations en cours</b> — faites, mais pas encore passées chez la
+      banque (non pointées). Ce peut être un achat comme un
+      <b>remboursement</b>.</li>
+  <li><b>Total des achats à débiter</b> — ce qu'il reste à payer par la carte,
+      toutes échéances confondues.</li>
+</ul>
+<p><b>Un remboursement par carte ne réduit jamais l'encours</b> : la banque le
+porte directement au compte courant, il n'attend pas le prélèvement groupé.
+C'est pourquoi il n'entre pas dans le total à débiter, et pourquoi le
+formulaire ne lui propose pas de date de valeur différée — sa date de valeur
+suit la date de l'opération.</p>
+<p>La ligne sous ces chiffres donne le <b>solde incluant les opérations carte
+en cours</b> : c'est le montant que votre banque affiche au-dessus de la liste
+« Opérations carte en cours ». Les deux doivent être identiques — sinon, il
+manque une opération dans l'application (ou un pointage).</p>
+
+<h3>Le bandeau « 📅 Ce qui est prévu »</h3>
+<p>Juste en dessous, ce bandeau projette votre compte sur les
+<b>15 prochains jours</b> : il additionne les opérations déjà enregistrées dont
+le débit est à venir (l'encours carte, notamment) et les échéances de votre
+onglet <b>🔮 Prévisionnel</b> qui n'ont pas encore d'opération correspondante.
+Rien n'est compté deux fois.</p>
+<ul>
+  <li><b>Prélèvements prévus (hors carte)</b> — ce qui va sortir, la carte
+      étant déjà comptée dans son propre bandeau.</li>
+  <li><b>Rentrées prévues</b> — pensions, remboursements attendus…</li>
+  <li><b>Solde prévu</b> — votre solde d'aujourd'hui, moins le débit carte,
+      moins les prélèvements, plus les rentrées. C'est la réponse à
+      « où en sera mon compte dans quinze jours ? »</li>
+</ul>
+<p>Le <b>débit carte</b> annoncé est celui de votre relevé : il ne compte que
+les achats que la banque a déjà rattachés au prélèvement (vos opérations
+<b>pointées</b>). Une opération encore « en cours » — un remboursement, par
+exemple — ne réduit pas ce prélèvement-ci : elle partira au suivant. Elle est
+signalée à part en fin de ligne.</p>
+<p><b>Attention</b> : ce chiffre ne correspond pas à celui que votre banque
+affiche sous « X € d'opérations prévues prochainement ». La banque n'annonce
+que les prélèvements dont elle a <i>déjà reçu l'avis</i> ; l'application, elle,
+connaît toutes vos échéances récurrentes. Le montant de l'application est donc
+normalement plus élevé — ce n'est pas une erreur.</p>
+<p>La qualité de cette projection dépend directement de votre onglet
+Prévisionnel : plus vos opérations récurrentes y sont à jour, plus le solde
+prévu est fiable.</p>
 
 <h2>4. Pointage et rapprochement</h2>
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations

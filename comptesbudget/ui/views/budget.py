@@ -23,6 +23,7 @@ class BudgetView(QWidget):
         super().__init__(parent)
         self.db = db
         self.period = "all"
+        self.date_mode = "valeur"   # suit le sélecteur « Date » de la barre du haut
         v = QVBoxLayout(self); v.setContentsMargins(8, 8, 8, 8)
 
         info = QLabel(
@@ -51,15 +52,21 @@ class BudgetView(QWidget):
         h.addStretch()
         v.addLayout(h)
 
-    def _month_count(self) -> int:
+    def _eff_date(self, t: dict) -> str:
+        """Date utilisée pour la période affichée : elle suit le sélecteur
+        « Date » de la barre du haut, comme le Bilan et les Opérations."""
+        if self.date_mode == "valeur":
+            return t.get("date_valeur") or t.get("date", "")
+        return t.get("date", "")
+
+    def _month_count(self, txs: list[dict]) -> int:
         """Nombre de mois couverts par la période (pour rapporter le budget
         mensuel). Pour une année — même l'année en cours — on compte les mois
         qui ont réellement des opérations : en juillet, le budget annuel vaut
         7 mois de budget, pas 12."""
         if self.period == "all" or len(self.period) == 4:
-            txs = [dict(r) for r in self.db.list_tx()]
-            months = {t["date"][:7] for t in txs
-                      if t.get("date") and in_period(t["date"], self.period)}
+            months = {self._eff_date(t)[:7] for t in txs
+                      if self._eff_date(t) and in_period(self._eff_date(t), self.period)}
             return max(1, len(months))
         return 1
 
@@ -68,7 +75,7 @@ class BudgetView(QWidget):
         txs = [dict(r) for r in self.db.list_tx()]
         active = [t for t in txs
                   if t.get("categorie") != "Transaction exclue"
-                  and in_period(t.get("date", ""), self.period)
+                  and in_period(self._eff_date(t), self.period)
                   and t.get("montant", 0) < 0]
         # Dépensé par catégorie
         spent = {}
@@ -77,7 +84,7 @@ class BudgetView(QWidget):
             spent[c] = spent.get(c, 0) + abs(t["montant"])
 
         cats = sorted(set(list(budgets.keys()) + list(spent.keys())))
-        n_months = self._month_count()
+        n_months = self._month_count(txs)
 
         self.model.setRowCount(0)
         for i, cat in enumerate(cats):

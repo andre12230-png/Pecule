@@ -34,3 +34,13 @@ def test_build_profiles_categorie_et_montant():
     assert p["categorie"] == "Alimentation"   # catégorie majoritaire
     assert p["sous_cat"] == "Courses"
     assert p["montant"] == -40.0              # montant médian
+
+
+def test_clean_libelle_conserve_les_libelles_sans_commercant():
+    # « VIR 123456 » se réduisait à « Vir » : deux virements sans rapport
+    # devenaient le même libellé (et donc des doublons à l'import).
+    assert clean_libelle("VIR 123456") == "Vir 123456"
+    assert clean_libelle("VIR 123456") != clean_libelle("VIR 789012")
+    # Les enseignes continuent de fusionner normalement
+    assert clean_libelle("SUPERETTE 3193") == clean_libelle("superette 3852") == "Superette"
+    assert clean_libelle("PRLV SEPA 20260715 EDF") == "Prlv Sepa EDF"

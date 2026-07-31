@@ -3,6 +3,19 @@ import re
 from collections import Counter
 from statistics import median
 
+from .utils import deaccent
+
+# Mots passe-partout des relevés bancaires : seuls, ils ne désignent aucun
+# commerçant. Un libellé qui se réduit à cela après nettoyage a perdu sa seule
+# information distinctive (cf. clean_libelle).
+MOTS_PASSE_PARTOUT = {
+    "vir", "virement", "prlv", "prelevement", "prelvt", "prel", "cb", "carte",
+    "paiement", "pmt", "achat", "retrait", "depot", "dab", "facture", "fact",
+    "ech", "echeance", "remise", "cheque", "chq", "sepa", "avoir", "frais",
+    "operation", "op", "de", "du", "des", "la", "le", "les", "vers", "pour",
+    "par", "sur", "et", "a", "au", "aux", "en",
+}
+
 # Sigles à conserver en majuscules lors de la normalisation des libellés.
 LIBELLE_ACRONYMS = {
     "BPCE", "SFR", "EDF", "GDF", "FDJ", "DGFIP", "CPAM", "ACM", "IARD",
@@ -46,6 +59,13 @@ def clean_libelle(raw: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     if not s:
         return (raw or "").strip()             # ne jamais vider un libellé
+    # Si le nettoyage ne laisse que des mots passe-partout (« VIR 123456 » →
+    # « Vir »), le numéro retiré était la seule chose qui distinguait cette
+    # opération : deux virements sans rapport porteraient le même libellé et
+    # seraient pris l'un pour l'autre — y compris par la détection de
+    # doublons à l'import. On conserve alors le libellé d'origine.
+    if all(deaccent(t) in MOTS_PASSE_PARTOUT for t in s.split()):
+        return _smart_titlecase((raw or "").strip())
     return _smart_titlecase(s)
 
 
