@@ -120,6 +120,15 @@ précisant la fréquence (hebdo, mensuelle, trimestrielle, annuelle) et la date
 de début. L'app calcule automatiquement les <b>12 prochains mois</b> de
 prévisions avec totaux recettes / dépenses / net.</p>
 
+<h3>📊 Les chiffres sur les graphiques</h3>
+<p>Sur le Bilan, l'<b>évolution mensuelle</b> affiche le montant à l'intérieur
+de chaque barre. Au-delà de six mois à l'écran, les barres deviennent trop
+étroites pour rester lisibles : les chiffres sont alors masqués (choisissez un
+mois ou un trimestre pour les revoir).</p>
+<p>Pour la <b>répartition des dépenses</b>, le montant de chaque catégorie est
+indiqué dans la <b>légende</b>, à droite du camembert — écrit autour des parts,
+il se chevaucherait et masquerait les noms de catégories.</p>
+
 <h3>↕️ Trier les tableaux</h3>
 <p>Dans les onglets <b>Opérations</b>, <b>Catégories</b>, <b>Budget</b>,
 <b>Sous-catégories</b> et <b>Prévisionnel</b> — ainsi que dans la recherche

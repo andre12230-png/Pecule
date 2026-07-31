@@ -1,4 +1,4 @@
-COMPTES ET BUDGET - version 1.17.0
+COMPTES ET BUDGET - version 1.18.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -31,6 +31,7 @@ FONCTIONS
   bancaire (prochain prelevement, operations en cours, achats a debiter).
 - Projection du compte a 15 jours : ce qui va sortir, ce qui va rentrer,
   et le solde prevu, d'apres vos operations recurrentes.
+- Montants affiches sur les graphiques du bilan.
 - Tri des tableaux : cliquez sur le titre d'une colonne (dates, montants,
   libelles). Un second clic inverse l'ordre.
 - Notice complete integree (bouton << Notice >> du menu de gauche).

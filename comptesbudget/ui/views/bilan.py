@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCharts import (
     QChart, QChartView, QPieSeries, QBarSeries, QBarSet,
-    QBarCategoryAxis, QValueAxis,
+    QAbstractBarSeries, QBarCategoryAxis, QValueAxis,
 )
 
 from ...utils import (
@@ -221,6 +221,11 @@ class BilanView(QWidget):
         self.pie_chart = QChart()
         self.pie_chart.setBackgroundVisible(False)
         self.pie_chart.legend().setAlignment(Qt.AlignRight)
+        # La légende porte le nom ET le montant de chaque catégorie : un texte
+        # un peu plus petit évite qu'elle soit tronquée en fenêtre étroite.
+        police_legende = self.pie_chart.legend().font()
+        police_legende.setPointSize(8)
+        self.pie_chart.legend().setFont(police_legende)
         self.pie_chart.setAnimationOptions(QChart.SeriesAnimations)
         pie_view = QChartView(self.pie_chart)
         pie_view.setRenderHint(QPainter.Antialiasing)
@@ -617,6 +622,13 @@ class BilanView(QWidget):
         for c, amt in sorted(by_cat.items(), key=lambda x: x[1], reverse=True):
             s = series.append(f"{c}", amt)
             s.setBrush(QColor(cat_color(c)))
+            # Le libellé d'une part sert de texte dans la LÉGENDE : on y met le
+            # nom ET le montant. Écrire en plus ces montants autour du
+            # camembert ferait doublon, et les textes longs (« Logement -
+            # maison — -1 234,56 € ») débordent de la zone en se faisant
+            # tronquer. Les chiffres sont donc lisibles dans la légende, le
+            # camembert reste net.
+            s.setLabel(f"{c} — {fmt_euro(-amt)}")
             s.setLabelVisible(False)
         self.pie_chart.addSeries(series)
         self.pie_chart.setTitle("")
@@ -691,11 +703,32 @@ class BilanView(QWidget):
         bar_rev.setBorderColor(QColor("#229954"))
         bar_dep.setBorderColor(QColor("#E67E22"))
         for m in months:
-            bar_rev.append(rev_by_month[m])
-            bar_dep.append(dep_by_month[m])
+            # Montants arrondis à l'euro : c'est ce que porteront les
+            # étiquettes, et à cette échelle les centimes n'apportent rien.
+            bar_rev.append(round(rev_by_month[m]))
+            bar_dep.append(round(dep_by_month[m]))
 
         series = QBarSeries()
         series.append(bar_rev); series.append(bar_dep)
+        # Montant écrit sur chaque barre. Sans « € » : QtCharts rend mal ce
+        # symbole dans les étiquettes (il sort en « ? »). Sans décimales non
+        # plus — à cette échelle les centimes n'apportent rien et allongent
+        # l'étiquette. Au-delà de 6 mois affichés, les barres deviennent trop
+        # étroites pour porter un nombre lisible : on n'affiche plus rien.
+        if len(months) <= 6:
+            series.setLabelsVisible(True)
+            series.setLabelsFormat("@value")
+            # La précision compte les chiffres SIGNIFICATIFS (format « g ») :
+            # à 0, QtCharts écrit « 5e+03 » au lieu de « 5076 ». On en laisse
+            # largement assez ; les valeurs étant entières, rien ne s'ajoute
+            # après la virgule.
+            series.setLabelsPrecision(9)
+            # Étiquette DANS la barre, près du sommet : au-dessus (OutsideEnd),
+            # celle de la barre la plus haute sort de la zone de tracé et
+            # disparaît. En blanc, lisible sur le vert comme sur l'orange.
+            series.setLabelsPosition(QAbstractBarSeries.LabelsInsideEnd)
+            bar_rev.setLabelColor(QColor("white"))
+            bar_dep.setLabelColor(QColor("white"))
         self.bar_chart.addSeries(series)
 
         # Axe X : libellés courts "Jan 26"

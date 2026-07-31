@@ -201,7 +201,21 @@ SYNC_VERSION = 2
 #          widgets posés dans les cellules et ne suivraient pas un tri fait
 #          par Qt ; les catégories y sont donc triées avant construction des
 #          lignes, ce qui garde chaque barre en face de la sienne.
-APP_VERSION = "1.17.0"
+# 1.18.0 : les montants sont écrits sur les graphiques du Bilan.
+#          • Évolution mensuelle : le montant figure en blanc dans chaque
+#            barre. Deux pièges de QtCharts contournés — la précision compte
+#            les chiffres SIGNIFICATIFS (à 0, « 5076 » sortait en « 5e+03 »),
+#            et une étiquette posée au-dessus de la barre la plus haute sort
+#            de la zone de tracé et disparaît, d'où le placement à
+#            l'intérieur. Au-delà de 6 mois affichés les barres sont trop
+#            étroites pour rester lisibles : les chiffres sont alors masqués.
+#          • Répartition des dépenses : le montant de chaque catégorie passe
+#            dans la LÉGENDE (« Alimentation — -320,00 € ») plutôt qu'autour des
+#            parts. Le libellé d'une part sert aussi de texte à la légende :
+#            y mettre le seul montant faisait disparaître les noms de
+#            catégories, et les textes longs se faisaient tronquer. Police de
+#            la légende réduite pour que toutes les catégories tiennent.
+APP_VERSION = "1.18.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
