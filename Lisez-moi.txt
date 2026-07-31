@@ -1,0 +1,43 @@
+COMPTES ET BUDGET - version 1.16.2
+Application Windows GRATUITE et open source (licence MIT) de gestion de
+comptes et de budget personnel. Aucune installation de Python requise.
+
+-------------------------------------------------------------------
+UTILISATION
+-------------------------------------------------------------------
+- Decompressez ce dossier ou vous voulez (le programme est portable).
+- Double-cliquez sur << Comptes-Budget.exe >> pour lancer l'application.
+- Au 1er lancement, si Windows affiche un avertissement (appli non signee) :
+  cliquez << Informations complementaires >> puis << Executer quand meme >>.
+- Vos donnees sont enregistrees dans le fichier << comptes.db >>, cree
+  automatiquement A COTE de l'executable. Une sauvegarde quotidienne est
+  faite dans le sous-dossier << sauvegardes >>.
+
+MISE A JOUR depuis une version precedente : remplacez seulement
+Comptes-Budget.exe et le dossier _internal. Ne recopiez JAMAIS le dossier
+entier par-dessus une installation existante : vous ecraseriez votre
+fichier comptes.db et perdriez vos operations.
+
+-------------------------------------------------------------------
+FONCTIONS
+-------------------------------------------------------------------
+- Import des releves bancaires au format CSV (banques francaises :
+  BPCE, Credit Mutuel, Credit Agricole et autres).
+- Categorisation automatique (regles), budgets mensuels avec barres de
+  progression, previsionnel des operations recurrentes, bilan avec
+  graphiques, rapport mensuel (impression / PDF), rapprochement (pointage).
+- Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour
+  du prelevement groupe. Un bandeau reprend les chiffres de votre espace
+  bancaire (prochain prelevement, operations en cours, achats a debiter).
+- Projection du compte a 15 jours : ce qui va sortir, ce qui va rentrer,
+  et le solde prevu, d'apres vos operations recurrentes.
+- Notice complete integree (bouton << Notice >> du menu de gauche).
+
+-------------------------------------------------------------------
+INFOS
+-------------------------------------------------------------------
+- Vos donnees restent sur VOTRE ordinateur, rien n'est envoye en ligne.
+- Pour sauvegarder : copiez le fichier << comptes.db >> ailleurs.
+- Code source : https://andre12230-png.github.io/Comptes-Budget/
+
+Windows 10 / 11 - 64 bits.
