@@ -13,7 +13,7 @@ from ..utils import (
 )
 from ..database import Database
 
-from .models import TxTableModel
+from .models import TxTableModel, charger_en_conservant_le_tri
 from .dialogs import TxDialog
 
 class GlobalSearchDialog(QDialog):
@@ -50,6 +50,10 @@ class GlobalSearchDialog(QDialog):
         self.table.doubleClicked.connect(self._edit_tx)
         for i, w in enumerate([32, 85, 95, 280, 150, 140, 110, 95, 95]):
             self.table.setColumnWidth(i, w)
+        # Tri par clic sur les en-têtes, du plus récent au plus ancien au départ
+        self.table.setSortingEnabled(True)
+        self.table.horizontalHeader().setSortIndicatorShown(True)
+        self.table.sortByColumn(TxTableModel.COL_DATE_OP, Qt.DescendingOrder)
         v.addWidget(self.table, 1)
 
         foot = QHBoxLayout()
@@ -100,7 +104,7 @@ class GlobalSearchDialog(QDialog):
             res = list(self._rows)
         res.sort(key=lambda t: t.get("date", ""), reverse=True)
         shown = res[:500]
-        self.model.load(shown)
+        charger_en_conservant_le_tri(self.table, self.model, shown)
         total = sum(t.get("montant", 0) for t in res)
         if words:
             extra = " — affichage des 500 premières" if len(res) > 500 else ""

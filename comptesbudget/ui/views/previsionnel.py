@@ -26,6 +26,7 @@ from ...recurring import (
     _recurring_norm_label, _recurring_aligned_start,
 )
 
+from ..models import SORT_ROLE
 from ..dialogs import RecurringDialog
 from ..assistants import PrefillRecurringDialog
 
@@ -73,6 +74,9 @@ class PrevisionnelView(QWidget):
         self.table.doubleClicked.connect(self._edit)
         for i, w in enumerate([240, 110, 180, 140, 120, 180, 60]):
             self.table.setColumnWidth(i, w)
+        self.model.setSortRole(SORT_ROLE)
+        self.table.setSortingEnabled(True)
+        self.table.horizontalHeader().setSortIndicatorShown(True)
         tlay.addWidget(self.table)
         splitter.addWidget(top)
 
@@ -89,6 +93,9 @@ class PrevisionnelView(QWidget):
         self.forecast_table.setAlternatingRowColors(True)
         for i, w in enumerate([100, 280, 110, 180]):
             self.forecast_table.setColumnWidth(i, w)
+        self.forecast_model.setSortRole(SORT_ROLE)
+        self.forecast_table.setSortingEnabled(True)
+        self.forecast_table.horizontalHeader().setSortIndicatorShown(True)
         blay.addWidget(self.forecast_table)
 
         self.summary = QLabel("")
@@ -103,6 +110,7 @@ class PrevisionnelView(QWidget):
         recs = [dict(r) for r in self.db.list_recurring()]
         freq_lbl = dict(FREQUENCIES)
 
+        self.table.setSortingEnabled(False)
         self.model.setRowCount(0)
         for r in recs:
             row = [
@@ -118,9 +126,15 @@ class PrevisionnelView(QWidget):
             row[1].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#229954")))
             row[2].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
             row[6].setTextAlignment(Qt.AlignCenter)
-            for it in row:
+            tris = [r["libelle"].lower(), r["montant"], r["categorie"].lower(),
+                    (r["type"] or "").lower(), r["frequency"], r["start_date"],
+                    1 if r["actif"] else 0]
+            for it, tri in zip(row, tris):
                 it.setData(r["id"], Qt.UserRole)
+                it.setData(tri, SORT_ROLE)
             self.model.appendRow(row)
+
+        self.table.setSortingEnabled(True)
 
         # Forecast : 12 mois à venir
         until = date.today().replace(day=1)
@@ -134,6 +148,7 @@ class PrevisionnelView(QWidget):
                     events.append((d, r))
         events.sort(key=lambda x: x[0])
 
+        self.forecast_table.setSortingEnabled(False)
         self.forecast_model.setRowCount(0)
         total_pos = total_neg = 0.0
         for d, r in events:
@@ -148,7 +163,12 @@ class PrevisionnelView(QWidget):
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             row[2].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#229954")))
             row[3].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
+            for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
+                                     r["montant"], r["categorie"].lower()]):
+                it.setData(tri, SORT_ROLE)
             self.forecast_model.appendRow(row)
+
+        self.forecast_table.setSortingEnabled(True)
 
         self.summary.setText(
             f"📊 {len(events)} occurrence(s) prévue(s) jusqu'au {fmt_date_fr(until.isoformat())}  —  "

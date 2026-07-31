@@ -406,3 +406,75 @@ def test_txdialog_remboursement_carte_sans_debit_differe(qapp, db):
     # Retour en débit : le débit différé revient
     dlg.rb_debit.setChecked(True)
     assert dlg.values()["date_valeur"] == "2026-08-04"
+
+
+def test_tri_colonnes_dates_et_montants(qapp, tmp_path):
+    """Le tri par clic doit porter sur les VALEURS, pas sur le texte affiché :
+    « 09/01 » ne vient pas après « 10/01 », et « -1 000,00 € » est bien plus
+    petit que « -90,00 € »."""
+    from PySide6.QtCore import Qt
+
+    from comptesbudget.ui.models import TxTableModel
+    from comptesbudget.ui.views.operations import OperationsView
+
+    d = Database(str(tmp_path / "tri.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    for i, (jour, montant, lib) in enumerate([
+            ("09", -90.0, "Bravo"), ("10", -1000.0, "alpha"), ("02", -5.0, "Charlie")]):
+        d.insert_tx(_tx(id=f"t{i}", date=f"2026-01-{jour}",
+                        date_valeur=f"2026-01-{jour}", libelle=lib, montant=montant))
+
+    v = OperationsView(d)
+    v.period = "2026-01"
+    v.reload_from_db()
+
+    # Dates : ordre chronologique, pas alphabétique
+    v.table.sortByColumn(TxTableModel.COL_DATE_OP, Qt.AscendingOrder)
+    assert [v.model.item(r, 1).text() for r in range(3)] == [
+        "02/01/2026", "09/01/2026", "10/01/2026"]
+
+    # Débits : ordre numérique (le plus gros d'abord en croissant)
+    v.table.sortByColumn(7, Qt.AscendingOrder)
+    assert [v.model.item(r, 7).text() for r in range(3)] == [
+        fmt_euro(-1000.0), fmt_euro(-90.0), fmt_euro(-5.0)]
+
+    # Libellés : insensible à la casse
+    v.table.sortByColumn(3, Qt.AscendingOrder)
+    assert [v.model.item(r, 3).text() for r in range(3)] == ["alpha", "Bravo", "Charlie"]
+
+    # Le tri choisi survit à un rechargement (changement de filtre)
+    v.search.setText("a")
+    assert v.table.horizontalHeader().sortIndicatorSection() == 3
+
+
+def test_tri_budget_conserve_les_barres(qapp, tmp_path):
+    """Les barres de progression du Budget sont des widgets posés dans les
+    cellules : après un tri, chaque ligne doit toujours avoir la sienne."""
+    from PySide6.QtCore import Qt
+
+    from comptesbudget.ui.views.budget import BudgetView
+
+    d = Database(str(tmp_path / "tri-bud.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="a", date="2026-01-05", date_valeur="2026-01-05",
+                    categorie="Alimentation", montant=-300.0))
+    d.insert_tx(_tx(id="b", date="2026-01-06", date_valeur="2026-01-06",
+                    categorie="Loisirs", montant=-50.0))
+    d.set_budget("Alimentation", 400.0)
+    d.set_budget("Loisirs", 100.0)
+
+    v = BudgetView(d)
+    v.period = "2026-01"
+    v.refresh()
+
+    v.table.horizontalHeader().setSortIndicator(2, Qt.DescendingOrder)   # dépensé
+    assert v.model.item(0, 0).text() == "Alimentation"      # le plus dépensé d'abord
+    assert all(v.table.indexWidget(v.model.index(r, 3)) is not None
+               for r in range(v.model.rowCount()))
+
+    v.table.horizontalHeader().setSortIndicator(2, Qt.AscendingOrder)
+    assert v.model.item(0, 0).text() == "Loisirs"
+    assert all(v.table.indexWidget(v.model.index(r, 3)) is not None
+               for r in range(v.model.rowCount()))

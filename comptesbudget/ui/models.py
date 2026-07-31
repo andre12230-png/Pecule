@@ -7,8 +7,26 @@ from PySide6.QtGui import (
 )
 
 from ..utils import (
-    cat_color, fmt_euro, fmt_date_fr,
+    cat_color, deaccent, fmt_euro, fmt_date_fr,
 )
+
+# Rôle sous lequel chaque cellule range sa valeur de TRI, distincte du texte
+# affiché. Sans cela, un clic sur l'en-tête trierait sur le texte : les dates
+# « 12/05/2026 » et les montants « 1 234,56 € » se rangeraient par ordre
+# alphabétique, donc n'importe comment.
+SORT_ROLE = Qt.UserRole + 1
+
+
+def charger_en_conservant_le_tri(table, model, transactions: list[dict]):
+    """Recharge le tableau sans perdre la colonne de tri choisie.
+
+    Remplir un modèle ne rejoue pas le tri : les nouvelles lignes arriveraient
+    dans leur ordre d'insertion. Couper puis rétablir le tri le réapplique
+    (setSortingEnabled relance un tri sur la colonne courante)."""
+    table.setSortingEnabled(False)
+    model.load(transactions)
+    table.setSortingEnabled(True)
+
 
 class TxTableModel(QStandardItemModel):
     """Modèle des opérations. Colonnes : P, Date, Libellé, Catégorie, Sous-cat,
@@ -17,9 +35,15 @@ class TxTableModel(QStandardItemModel):
     HEADERS = ["P", "Date opér.", "Date valeur", "Libellé", "Catégorie",
                "Sous-catégorie", "Type", "Débit", "Crédit"]
 
+    # Colonnes des deux dates, pour que les vues placent le tri initial sur
+    # celle qui correspond au mode d'affichage choisi.
+    COL_DATE_OP = 1
+    COL_DATE_VALEUR = 2
+
     def __init__(self, parent=None):
         super().__init__(0, len(self.HEADERS), parent)
         self.setHorizontalHeaderLabels(self.HEADERS)
+        self.setSortRole(SORT_ROLE)
         self.tx_data = []  # liste des dicts en parallèle
 
     def load(self, transactions: list[dict]):
@@ -44,9 +68,24 @@ class TxTableModel(QStandardItemModel):
             QStandardItem(fmt_euro(tx["montant"]) if tx.get("montant", 0) < 0 else ""),
             QStandardItem(fmt_euro(tx["montant"]) if tx.get("montant", 0) > 0 else ""),
         ]
-        for it in items:
+        # Valeur de tri de chaque colonne : les dates au format ISO (triables
+        # tels quels), les montants en nombre, le texte sans accents ni casse.
+        montant = tx.get("montant", 0) or 0
+        valeurs_tri = [
+            1 if pointee else 0,
+            date_op,
+            date_val,
+            deaccent(tx.get("libelle", "")),
+            deaccent(tx.get("categorie", "")),
+            deaccent(tx.get("sous_cat", "")),
+            deaccent(tx.get("type", "")),
+            montant if montant < 0 else 0.0,   # colonne Débit
+            montant if montant > 0 else 0.0,   # colonne Crédit
+        ]
+        for it, tri in zip(items, valeurs_tri):
             it.setEditable(False)
             it.setData(tx["id"], Qt.UserRole)
+            it.setData(tri, SORT_ROLE)
             if pointee:
                 it.setForeground(QBrush(QColor("#888")))
 

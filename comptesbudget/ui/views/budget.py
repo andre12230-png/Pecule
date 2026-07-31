@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils import (
-    cat_color, fmt_euro, in_period,
+    cat_color, deaccent, fmt_euro, in_period,
 )
 from ...database import Database
 
@@ -43,6 +43,15 @@ class BudgetView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.doubleClicked.connect(self._edit_budget)
+        # Tri par clic. Les barres de progression sont des widgets posés dans
+        # les cellules : un tri fait par Qt déplacerait les lignes en laissant
+        # les barres sur place. On trie donc nous-mêmes les données et on
+        # reconstruit le tableau (refresh) à chaque clic sur un en-tête.
+        entete = self.table.horizontalHeader()
+        entete.setSectionsClickable(True)
+        entete.setSortIndicatorShown(True)
+        entete.setSortIndicator(0, Qt.AscendingOrder)
+        entete.sortIndicatorChanged.connect(lambda *_: self.refresh())
         v.addWidget(self.table)
 
         h = QHBoxLayout()
@@ -85,6 +94,28 @@ class BudgetView(QWidget):
 
         cats = sorted(set(list(budgets.keys()) + list(spent.keys())))
         n_months = self._month_count(txs)
+
+        # Tri demandé par l'utilisateur (clic sur un en-tête) : on classe les
+        # catégories AVANT de construire les lignes, pour que les barres de
+        # progression restent en face de la bonne ligne.
+        entete = self.table.horizontalHeader()
+        colonne, ordre = entete.sortIndicatorSection(), entete.sortIndicatorOrder()
+
+        def cle(cat: str):
+            budget = budgets.get(cat, 0)
+            dep = spent.get(cat, 0)
+            budget_p = budget * n_months
+            if colonne == 1:
+                return budget
+            if colonne == 2:
+                return dep
+            if colonne == 3:                     # progression
+                return (dep / budget_p * 100) if budget_p > 0 else -1
+            if colonne == 4:                     # reste / dépassement
+                return budget_p - dep if budget else float("inf")
+            return deaccent(cat)
+
+        cats.sort(key=cle, reverse=(ordre == Qt.DescendingOrder))
 
         self.model.setRowCount(0)
         for i, cat in enumerate(cats):

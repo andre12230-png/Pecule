@@ -23,7 +23,7 @@ from ...utils import (
 from ...database import Database
 from ...rules import apply_rules_to_tx
 
-from ..models import TxTableModel
+from ..models import TxTableModel, charger_en_conservant_le_tri
 from ..dialogs import TxDialog
 
 class OperationsView(QWidget):
@@ -104,6 +104,13 @@ class OperationsView(QWidget):
         h.setStretchLastSection(False)
         for i, w in enumerate([32, 90, 95, 260, 160, 140, 120, 100, 100]):
             self.table.setColumnWidth(i, w)
+
+        # Tri par clic sur les en-têtes. Départ sur la date qui correspond au
+        # mode d'affichage, de la plus récente à la plus ancienne — l'ordre
+        # habituel du relevé.
+        self.table.setSortingEnabled(True)
+        h.setSortIndicatorShown(True)
+        self.table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
 
         v.addWidget(self.table)
 
@@ -189,10 +196,22 @@ class OperationsView(QWidget):
                 return False
             return True
 
+        # Quand le tri porte sur une date, il suit le sélecteur « Date » :
+        # inutile de trier sur la date d'opération quand l'écran raisonne en
+        # date de valeur. Un tri sur une autre colonne n'est pas touché.
+        entete = self.table.horizontalHeader()
+        col = entete.sortIndicatorSection()
+        if col in (TxTableModel.COL_DATE_OP, TxTableModel.COL_DATE_VALEUR):
+            voulue = (TxTableModel.COL_DATE_VALEUR if self.date_mode == "valeur"
+                      else TxTableModel.COL_DATE_OP)
+            if col != voulue:
+                self.table.sortByColumn(voulue, entete.sortIndicatorOrder())
+
         self.filtered = [t for t in self.transactions if keep(t)]
-        # Tri par la date effective
+        # Ordre de base par date effective ; si l'utilisateur a choisi une
+        # autre colonne en cliquant sur un en-tête, ce tri-là reprend la main.
         self.filtered.sort(key=self._eff_date, reverse=True)
-        self.model.load(self.filtered)
+        charger_en_conservant_le_tri(self.table, self.model, self.filtered)
 
         solde = sum(t.get("montant", 0) for t in self.filtered)
         pointed = [t for t in self.filtered if t.get("pointee")]

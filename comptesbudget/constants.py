@@ -187,7 +187,21 @@ SYNC_VERSION = 2
 #          • Correctif d'affichage : le rappel du débit différé restait
 #            visible après un passage en crédit (isVisible() vaut toujours
 #            False tant que la fenêtre n'est pas ouverte → isVisibleTo).
-APP_VERSION = "1.16.2"
+# 1.17.0 : tri des tableaux par clic sur le titre d'une colonne (Opérations,
+#          Catégories, Budget, Prévisionnel et recherche globale ; les
+#          Sous-catégories l'avaient déjà). Second clic = ordre inverse.
+#          Le tri porte sur les VALEURS et non sur le texte affiché : sans
+#          cela « 09/01 » passerait après « 10/01 » et « -1 000 € » avant
+#          « -90 € ». Chaque cellule range donc sa valeur de tri à part
+#          (dates en ISO, montants en nombre, texte sans accents ni casse).
+#          Le tri survit aux rechargements — changer de filtre, de période ou
+#          pointer une opération ne le remet pas à zéro — et, sur une colonne
+#          de date, il suit le sélecteur « Date » de la barre du haut.
+#          Cas particulier du Budget : ses barres de progression sont des
+#          widgets posés dans les cellules et ne suivraient pas un tri fait
+#          par Qt ; les catégories y sont donc triées avant construction des
+#          lignes, ce qui garde chaque barre en face de la sienne.
+APP_VERSION = "1.17.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

@@ -120,6 +120,16 @@ précisant la fréquence (hebdo, mensuelle, trimestrielle, annuelle) et la date
 de début. L'app calcule automatiquement les <b>12 prochains mois</b> de
 prévisions avec totaux recettes / dépenses / net.</p>
 
+<h3>↕️ Trier les tableaux</h3>
+<p>Dans les onglets <b>Opérations</b>, <b>Catégories</b>, <b>Budget</b>,
+<b>Sous-catégories</b> et <b>Prévisionnel</b> — ainsi que dans la recherche
+globale — <b>cliquez sur le titre d'une colonne</b> pour trier dessus. Un
+second clic inverse l'ordre ; une petite flèche indique la colonne active.</p>
+<p>Le tri porte sur les <b>valeurs</b> et non sur le texte : les dates se
+classent dans l'ordre du calendrier et les montants du plus grand au plus
+petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
+Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
+
 <h2>3. Période et mode date</h2>
 <p>La barre <b>Période</b> en haut de l'app filtre toutes les vues (sauf Règles).
 Vous pouvez choisir « Toutes périodes », une année entière, ou un mois précis.</p>

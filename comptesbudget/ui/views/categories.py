@@ -17,11 +17,11 @@ from ...constants import (
     CATEGORIES_DEFAUT,
 )
 from ...utils import (
-    cat_color, fmt_euro, in_period, period_label,
+    cat_color, deaccent, fmt_euro, in_period, period_label,
 )
 from ...database import Database
 
-from ..models import TxTableModel
+from ..models import SORT_ROLE, TxTableModel, charger_en_conservant_le_tri
 from ..dialogs import TxDialog
 
 class CategoriesView(QWidget):
@@ -49,6 +49,10 @@ class CategoriesView(QWidget):
         self.cats_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.cats_table.verticalHeader().setVisible(False)
         self.cats_table.clicked.connect(self._on_cat_clicked)
+        # Tri par clic : par nom, par nombre d'opérations ou par total
+        self.cats_model.setSortRole(SORT_ROLE)
+        self.cats_table.setSortingEnabled(True)
+        self.cats_table.horizontalHeader().setSortIndicatorShown(True)
         lv.addWidget(self.cats_table)
         splitter.addWidget(left)
 
@@ -75,6 +79,9 @@ class CategoriesView(QWidget):
         self.tx_table.doubleClicked.connect(self._edit_tx)
         for i, w in enumerate([32, 90, 280, 160, 140, 120, 100, 100]):
             self.tx_table.setColumnWidth(i, w)
+        self.tx_table.setSortingEnabled(True)
+        self.tx_table.horizontalHeader().setSortIndicatorShown(True)
+        self.tx_table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
         rv.addWidget(self.tx_table)
 
         splitter.addWidget(right)
@@ -96,6 +103,7 @@ class CategoriesView(QWidget):
             c = t.get("categorie", "Non classé")
             by_cat.setdefault(c, []).append(t)
 
+        self.cats_table.setSortingEnabled(False)   # rétabli après remplissage
         self.cats_model.setRowCount(0)
         for c in sorted(by_cat.keys()):
             n = len(by_cat[c])
@@ -103,10 +111,14 @@ class CategoriesView(QWidget):
             it_c = QStandardItem(c)
             it_c.setForeground(QBrush(QColor(cat_color(c))))
             it_c.setData(c, Qt.UserRole)
+            it_c.setData(deaccent(c), SORT_ROLE)
             it_n = QStandardItem(str(n)); it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            it_n.setData(n, SORT_ROLE)          # trier sur le nombre, pas « 10 » < « 9 »
             it_t = QStandardItem(fmt_euro(tot)); it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_t.setForeground(QBrush(QColor("#C0392B" if tot < 0 else "#229954")))
+            it_t.setData(tot, SORT_ROLE)
             self.cats_model.appendRow([it_c, it_n, it_t])
+        self.cats_table.setSortingEnabled(True)
 
         self.cats_table.setColumnWidth(0, 200)
         self.cats_table.setColumnWidth(1, 50)
@@ -133,7 +145,7 @@ class CategoriesView(QWidget):
 
     def _show_cat(self, cat: str, txs: list[dict]):
         txs = sorted(txs, key=self._eff_date, reverse=True)
-        self.tx_model.load(txs)
+        charger_en_conservant_le_tri(self.tx_table, self.tx_model, txs)
         total = sum(t["montant"] for t in txs)
         self.cat_title.setText(f"« {cat} » — {len(txs)} opération(s)  —  {fmt_euro(total)}")
         self.btn_recat.setEnabled(True)
