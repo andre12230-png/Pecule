@@ -51,7 +51,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       et même face à une opération saisie à la main — et les lignes au montant illisible sont
       écartées et signalées, jamais enregistrées à 0&nbsp;€. Si le relevé contient une colonne
       <b>Pointage</b> (« x » = passée en banque), les opérations concernées sont <b>pointées
-      automatiquement</b>.
+      automatiquement</b>. La ligne récapitulative du <b>débit différé</b> de la carte
+      (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES ») n'est <b>jamais importée</b> : elle
+      totalise des achats qui figurent déjà un par un dans le relevé.
   </li>
 </ol>
 

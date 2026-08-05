@@ -56,6 +56,23 @@ def _identity_libelle(date_iso: str, montant, libelle: str) -> str:
     return f"{date_iso}|{float(montant or 0):.2f}|{clean_libelle(libelle)}"
 
 
+# Libellés des lignes RÉCAPITULATIVES du débit différé de la carte. Le jour du
+# prélèvement, la banque ajoute au relevé du compte une ligne qui totalise tous
+# les achats carte du mois (« DEBIT DIFFERE N° ...1234 » / « CUMUL DES DEBITS
+# DIFFERES ») — alors que ces mêmes achats y figurent déjà un par un. L'importer
+# ferait compter deux fois les mêmes dépenses : ces lignes sont écartées dès la
+# lecture du fichier (demande de l'utilisateur du 05/08/2026).
+MOTIFS_RECAP_DEBIT_DIFFERE = ("debit differe", "debits differes")
+
+
+def est_recap_debit_differe(libelle: str) -> bool:
+    """Vrai si ce libellé de relevé est un récapitulatif de débit différé
+    (cf. le commentaire ci-dessus). Comparaison sans accents ni majuscules,
+    pour reconnaître aussi bien « DEBIT DIFFERE » que « Débit différé »."""
+    lb = deaccent(libelle or "")
+    return any(m in lb for m in MOTIFS_RECAP_DEBIT_DIFFERE)
+
+
 def _decode_csv(raw: bytes) -> str:
     """Décode un relevé bancaire. L'UTF-8 est essayé d'abord : un fichier
     Windows-1252 contenant des accents n'est pratiquement jamais de l'UTF-8
@@ -73,10 +90,11 @@ def _decode_csv(raw: bytes) -> str:
         return raw.decode("latin-1")
 
 
-def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
+def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
     """Lit un CSV bancaire français et insère les transactions.
     Retourne (importées, doublons ignorés, lignes au montant illisible,
-    opérations existantes pointées d'après le relevé)."""
+    opérations existantes pointées d'après le relevé, récapitulatifs de débit
+    différé écartés)."""
     with open(path, "rb") as f:
         text = _decode_csv(f.read())
 
@@ -146,10 +164,17 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
             lisible = ok_d and ok_c
         return d_iso, montant, lisible
 
+    def _libelle(cols) -> str:
+        """Libellé d'une ligne du relevé (colonne « Libelle simplifie »)."""
+        return cols[iLib].strip() if 0 <= iLib < len(cols) else ""
+
     # Combien de lignes du RELEVÉ portent chaque couple date+montant ? Sert à
     # désamorcer le filet « saisie manuelle » plus bas quand il y a ambiguïté.
+    # Les récapitulatifs de débit différé, jamais importés, en sont exclus.
     csv_par_dm: Counter = Counter()
     for cols in rows[1:]:
+        if est_recap_debit_differe(_libelle(cols)):
+            continue
         d_iso, montant, lisible = _date_et_montant(cols)
         if d_iso and lisible:
             csv_par_dm[f"{d_iso}|{montant:.2f}"] += 1
@@ -214,7 +239,13 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
     skipped = 0
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
     pointees = 0     # opérations existantes pointées d'après le relevé
+    recaps = 0       # récapitulatifs de débit différé écartés
     for cols in rows[1:]:
+        # Récapitulatif du débit différé : jamais importé, il ferait doublon
+        # avec les achats carte détaillés (cf. MOTIFS_RECAP_DEBIT_DIFFERE).
+        if est_recap_debit_differe(_libelle(cols)):
+            recaps += 1
+            continue
         d_iso, montant, lisible = _date_et_montant(cols)
         if not d_iso:
             continue
@@ -321,4 +352,4 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int]:
         db.insert_tx(tx)
         imported += 1
 
-    return imported, skipped, illisibles, pointees
+    return imported, skipped, illisibles, pointees, recaps

@@ -215,7 +215,15 @@ SYNC_VERSION = 2
 #            y mettre le seul montant faisait disparaître les noms de
 #            catégories, et les textes longs se faisaient tronquer. Police de
 #            la légende réduite pour que toutes les catégories tiennent.
-APP_VERSION = "1.18.0"
+# 1.19.0 : la ligne récapitulative du débit différé de la carte (« DEBIT
+#          DIFFERE N° ...1234 » / « CUMUL DES DEBITS DIFFERES ») n'est plus
+#          importée. La banque la met dans le relevé du compte alors que les
+#          achats carte y figurent déjà un par un : elle faisait donc doublon.
+#          Elle arrivait jusque-là en catégorie « Transaction exclue », donc
+#          hors du solde et des dépenses, mais restait visible dans la liste
+#          des opérations et gonflait le total affiché en bas de l'onglet.
+#          L'import annonce désormais combien de récapitulatifs il a écartés.
+APP_VERSION = "1.19.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

@@ -1,4 +1,4 @@
-COMPTES ET BUDGET - version 1.18.0
+COMPTES ET BUDGET - version 1.19.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -29,6 +29,8 @@ FONCTIONS
 - Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour
   du prelevement groupe. Un bandeau reprend les chiffres de votre espace
   bancaire (prochain prelevement, operations en cours, achats a debiter).
+  La ligne recapitulative du releve (<< DEBIT DIFFERE... >>) n'est jamais
+  importee : elle ferait doublon avec les achats deja detailles.
 - Projection du compte a 15 jours : ce qui va sortir, ce qui va rentrer,
   et le solde prevu, d'apres vos operations recurrentes.
 - Montants affiches sur les graphiques du bilan.
