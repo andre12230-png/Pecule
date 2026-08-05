@@ -1,16 +1,65 @@
-"""Widgets partagés (sélecteur de période)."""
+"""Widgets partagés (sélecteur de période, champ de montant)."""
 
 from datetime import date
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
-    QWidget, QHBoxLayout,
-    QLabel, QComboBox,
+    QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
+    QLabel, QComboBox, QDoubleSpinBox,
 )
 
 from ..utils import (
     list_periods, period_label,
 )
+
+
+class MontantSpinBox(QDoubleSpinBox):
+    """Champ de montant qui accepte le POINT autant que la virgule.
+
+    En français, Qt n'attend que la virgule comme séparateur décimal : taper
+    « 12.50 » — le point du pavé numérique — était refusé, le champ restait
+    bloqué sur « 12 ». Le point est ici traduit à la volée en séparateur
+    local, si bien que les deux touches donnent le même résultat."""
+
+    def _normalise(self, texte: str) -> str:
+        sep = self.locale().decimalPoint()
+        if sep == ".":
+            return texte or ""
+        return (texte or "").replace(".", sep)
+
+    def validate(self, texte, pos):
+        # Qt réécrit le champ avec le texte renvoyé : le point saisi devient
+        # donc une virgule sous les yeux de l'utilisateur.
+        return super().validate(self._normalise(texte), pos)
+
+    def valueFromText(self, texte):
+        return super().valueFromText(self._normalise(texte))
+
+
+def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
+                     mini: float = 0.0, maxi: float = 1_000_000.0):
+    """Petite boîte « saisissez un montant », équivalent de
+    QInputDialog.getDouble mais bâtie sur MontantSpinBox : le point du pavé
+    numérique y est accepté comme la virgule. Renvoie (montant, validé)."""
+    dlg = QDialog(parent)
+    dlg.setWindowTitle(titre)
+    dlg.setMinimumWidth(360)
+    lay = QVBoxLayout(dlg)
+    lay.addWidget(QLabel(question))
+    champ = MontantSpinBox()
+    champ.setRange(mini, maxi)
+    champ.setDecimals(2)
+    champ.setSuffix(" €")
+    champ.setValue(valeur)
+    champ.selectAll()
+    lay.addWidget(champ)
+    btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+    btns.accepted.connect(dlg.accept)
+    btns.rejected.connect(dlg.reject)
+    lay.addWidget(btns)
+    ok = dlg.exec() == QDialog.Accepted
+    return champ.value(), ok
+
 
 class PeriodBar(QWidget):
     period_changed = Signal(str)

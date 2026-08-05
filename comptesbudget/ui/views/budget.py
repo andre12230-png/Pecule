@@ -8,13 +8,14 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTableView, QAbstractItemView,
-    QProgressBar, QInputDialog,
+    QProgressBar,
 )
 
 from ...utils import (
     cat_color, deaccent, fmt_euro, in_period,
 )
 from ...database import Database
+from ..widgets import demander_montant
 
 class BudgetView(QWidget):
     budget_changed = Signal()
@@ -175,10 +176,9 @@ class BudgetView(QWidget):
         if not cat:
             return
         current = self.db.list_budgets().get(cat, 0)
-        v, ok = QInputDialog.getDouble(
+        v, ok = demander_montant(
             self, "Budget mensuel",
-            f"Budget mensuel pour « {cat} » (en €) :",
-            current, 0.0, 1_000_000.0, 2)
+            f"Budget mensuel pour « {cat} » (en €) :", current)
         if not ok:
             return
         self.db.set_budget(cat, v)

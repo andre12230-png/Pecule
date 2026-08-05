@@ -150,10 +150,15 @@ def test_txdialog_date_valeur_carte_differee(qapp, db):
     dlg.type_combo.setCurrentText("Virement")
     assert dlg.values()["date_valeur"] == "2026-07-15"
 
-    # Date de valeur saisie à la main → plus aucun recalcul automatique
+    # Date de valeur saisie à la main → la date d'opération ne la bouge plus
     dlg.date_val.setDate(QDate(2026, 7, 20))
-    dlg.type_combo.setCurrentText("Carte bancaire")
+    dlg.date_edit.setDate(QDate(2026, 7, 16))
     assert dlg.values()["date_valeur"] == "2026-07-20"
+
+    # ...mais changer le TYPE relance le calcul (correction du 05/08/2026) :
+    # l'ancienne date découlait d'un type qui n'est plus celui de l'opération.
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    assert dlg.values()["date_valeur"] == "2026-08-04"
 
     # Modification d'une opération existante : sa date de valeur est conservée
     existante = next(t for t in txs if t["type"] == "Carte bancaire"
@@ -478,3 +483,61 @@ def test_tri_budget_conserve_les_barres(qapp, tmp_path):
     assert v.model.item(0, 0).text() == "Loisirs"
     assert all(v.table.indexWidget(v.model.index(r, 3)) is not None
                for r in range(v.model.rowCount()))
+
+
+def test_montant_accepte_le_point_decimal(qapp):
+    """Le point du pavé numérique doit valoir la virgule dans un champ de
+    montant : « 12.50 » saisi donne bien 12,50 € (demande du 05/08/2026)."""
+    from PySide6.QtCore import QLocale
+
+    from comptesbudget.ui.widgets import MontantSpinBox
+
+    QLocale.setDefault(QLocale(QLocale.French, QLocale.France))
+    sb = MontantSpinBox()
+    sb.setRange(0.0, 1_000_000.0)
+    sb.setDecimals(2)
+    sb.setSuffix(" €")
+    for saisie in ("12.50", "12,50", "1234.05", "0.99"):
+        sb.clear()
+        sb.lineEdit().setText(saisie)
+        sb.interpretText()
+        attendu = float(saisie.replace(",", "."))
+        assert sb.value() == attendu, f"{saisie} → {sb.value()}"
+
+
+def test_changer_le_type_recale_la_date_de_valeur(qapp):
+    """Corriger le type d'une opération DÉJÀ enregistrée doit recalculer sa
+    date de valeur : sans cela, un prélèvement saisi par erreur en « Carte
+    bancaire » gardait la date du 4 du mois suivant et sortait du solde
+    bancaire réel (cas d'une prime d'assurance auto prélevée en début de
+    mois)."""
+    from comptesbudget.ui.dialogs import TxDialog
+
+    tx = _tx(id="assurance", date="2026-08-05", date_valeur="2026-09-04",
+             libelle="L'amandier Assurrance", type="Carte bancaire",
+             categorie="Banque et assurances", montant=-35.00, pointee=1)
+    dlg = TxDialog(tx=tx, categories=CATEGORIES_DEFAUT, all_transactions=[])
+    # À l'ouverture, la date enregistrée est respectée telle quelle
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
+    # Le vrai type est « Prelevement » : la date de valeur suit
+    dlg.type_combo.setCurrentText("Prelevement")
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-08-05"
+    # ...et le retour en carte bancaire redonne le débit différé
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
+
+
+def test_date_de_valeur_saisie_a_la_main_est_respectee(qapp):
+    """Une date de valeur saisie à la main ne doit pas être écrasée tant que
+    le type et le sens ne changent pas (achat carte de fin de mois débité au
+    cycle suivant)."""
+    from PySide6.QtCore import QDate
+
+    from comptesbudget.ui.dialogs import TxDialog
+
+    dlg = TxDialog(categories=CATEGORIES_DEFAUT, all_transactions=[])
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    dlg.date_edit.setDate(QDate(2026, 7, 31))
+    dlg.date_val.setDate(QDate(2026, 9, 4))      # correction volontaire
+    dlg.libelle.setText("Centre Marche")
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"

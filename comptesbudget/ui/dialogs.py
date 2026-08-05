@@ -5,7 +5,7 @@ from typing import Optional
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout,
-    QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QDoubleSpinBox, QCheckBox,
+    QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
     QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter, QMessageBox,
 )
 
@@ -16,6 +16,7 @@ from ..utils import (
     fmt_euro, date_debit_differe, JOUR_DEBIT_DIFFERE,
 )
 from ..labels import build_libelle_profiles
+from .widgets import MontantSpinBox
 
 class TxDialog(QDialog):
     """Boîte de dialogue d'ajout / modification d'opération."""
@@ -61,7 +62,7 @@ class TxDialog(QDialog):
         sens_wrap = QWidget(); sens_wrap.setLayout(sens_row)
         layout.addRow("Sens :", sens_wrap)
 
-        self.montant = QDoubleSpinBox()
+        self.montant = MontantSpinBox()
         self.montant.setRange(0.0, 1_000_000.0)
         self.montant.setDecimals(2)
         self.montant.setSuffix(" €")
@@ -242,11 +243,11 @@ class TxDialog(QDialog):
         self._dv_user_edited = bool(tx)
         self._dv_updating = False
         self.date_val.dateChanged.connect(self._on_date_val_changed)
-        self.type_combo.currentTextChanged.connect(lambda _t: self._sync_date_valeur())
         self.date_edit.dateChanged.connect(lambda _d: self._sync_date_valeur())
-        # Le sens compte aussi : passer une opération carte en crédit
-        # (remboursement) doit ramener la date de valeur à la date d'achat.
-        self.rb_debit.toggled.connect(lambda _c: self._sync_date_valeur())
+        # Le type et le sens décident de la règle : leur changement RELANCE le
+        # calcul, même sur une opération déjà enregistrée (cf. _on_nature_changed).
+        self.type_combo.currentTextChanged.connect(lambda _t: self._on_nature_changed())
+        self.rb_debit.toggled.connect(lambda _c: self._on_nature_changed())
         self._sync_date_valeur()
 
         # Initialisation du motif par défaut = libellé
@@ -257,6 +258,18 @@ class TxDialog(QDialog):
         la recalculer automatiquement (sa saisie fait foi)."""
         if not self._dv_updating:
             self._dv_user_edited = True
+
+    def _on_nature_changed(self):
+        """Le TYPE ou le SENS de l'opération vient de changer : l'ancienne
+        date de valeur découlait du choix précédent, elle est donc recalculée
+        — y compris sur une opération déjà enregistrée.
+
+        Piège vécu : un prélèvement saisi d'abord en « Carte bancaire » avait
+        reçu la date du 4 du mois suivant ; corriger le type ensuite ne
+        remettait pas la date de valeur au jour du prélèvement, et l'opération
+        restait hors du solde bancaire réel."""
+        self._dv_user_edited = False
+        self._sync_date_valeur()
 
     def _sync_date_valeur(self):
         """Aligne la date de valeur sur le type d'opération choisi.
@@ -482,7 +495,7 @@ class SettingsDialog(QDialog):
             self.initial_date.setDate(QDate(2025, 1, 1))
         layout.addRow("Date de départ :", self.initial_date)
 
-        self.initial_balance = QDoubleSpinBox()
+        self.initial_balance = MontantSpinBox()
         self.initial_balance.setRange(-1_000_000.0, 1_000_000.0)
         self.initial_balance.setDecimals(2)
         self.initial_balance.setSuffix(" €")
@@ -524,7 +537,7 @@ class RuleDialog(QDialog):
         self.use_amount = QCheckBox("🎯 Filtrer par montant exact")
         layout.addRow("", self.use_amount)
 
-        self.amount = QDoubleSpinBox()
+        self.amount = MontantSpinBox()
         self.amount.setRange(0.0, 1_000_000.0)
         self.amount.setDecimals(2)
         self.amount.setSuffix(" €")
@@ -625,7 +638,7 @@ class RecurringDialog(QDialog):
         sens_wrap = QWidget(); sens_wrap.setLayout(sens_row)
         layout.addRow("Sens :", sens_wrap)
 
-        self.montant = QDoubleSpinBox()
+        self.montant = MontantSpinBox()
         self.montant.setRange(0.0, 1_000_000.0); self.montant.setDecimals(2)
         self.montant.setSuffix(" €")
         layout.addRow("Montant :", self.montant)

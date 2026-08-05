@@ -223,7 +223,16 @@ SYNC_VERSION = 2
 #          hors du solde et des dépenses, mais restait visible dans la liste
 #          des opérations et gonflait le total affiché en bas de l'onglet.
 #          L'import annonce désormais combien de récapitulatifs il a écartés.
-APP_VERSION = "1.19.0"
+# 1.20.0 : deux corrections de saisie.
+#          • Les champs de montant acceptent le POINT du pavé numérique
+#            autant que la virgule (« 12.50 » = « 12,50 ») — widget partagé
+#            MontantSpinBox, utilisé aussi par la boîte « Budget mensuel ».
+#          • Changer le TYPE ou le SENS d'une opération déjà enregistrée
+#            recalcule sa date de valeur. Un prélèvement saisi par erreur en
+#            « Carte bancaire » gardait sinon la date du 4 du mois suivant :
+#            l'opération sortait du solde bancaire réel sans rien signaler
+#            (cas d'une prime d'assurance, d'où un écart avec la banque).
+APP_VERSION = "1.20.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

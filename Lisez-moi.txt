@@ -1,4 +1,4 @@
-COMPTES ET BUDGET - version 1.19.0
+COMPTES ET BUDGET - version 1.20.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -36,6 +36,8 @@ FONCTIONS
 - Montants affiches sur les graphiques du bilan.
 - Tri des tableaux : cliquez sur le titre d'une colonne (dates, montants,
   libelles). Un second clic inverse l'ordre.
+- Saisie des montants : la virgule et le point du pave numerique donnent
+  le meme resultat (12,50 = 12.50).
 - Notice complete integree (bouton << Notice >> du menu de gauche).
 
 -------------------------------------------------------------------

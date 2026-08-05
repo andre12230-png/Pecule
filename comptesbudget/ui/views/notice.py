@@ -161,7 +161,13 @@ l'encours carte pas encore prélevé.</p>
 <p>Quand vous saisissez une opération de type <b>Carte bancaire</b>, la
 <b>date de valeur</b> est proposée automatiquement au <b>4 du mois suivant</b>
 l'achat (jour du prélèvement groupé). Vous pouvez la corriger : dès que vous
-la modifiez vous-même, l'app ne la recalcule plus.</p>
+la modifiez vous-même, l'app ne la recalcule plus — sauf si vous changez
+ensuite le <b>type</b> ou le <b>sens</b> de l'opération, car la règle de calcul
+n'est alors plus la même. Corriger un type saisi par erreur remet donc la date
+de valeur d'aplomb, y compris sur une opération déjà enregistrée.</p>
+<p>Dans tous les champs de montant, le <b>point</b> du pavé numérique et la
+<b>virgule</b> donnent le même résultat : « 12.50 » comme « 12,50 » valent
+12,50&nbsp;€.</p>
 <p>Le bandeau <b>« 💳 Encours carte bancaire »</b> du Bilan reprend les deux
 chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
 <ul>
