@@ -71,7 +71,12 @@ class Database:
             sous_cat      TEXT NOT NULL DEFAULT '',
             info          TEXT NOT NULL DEFAULT '',
             montant       REAL NOT NULL,
-            pointee       INTEGER NOT NULL DEFAULT 0
+            pointee       INTEGER NOT NULL DEFAULT 0,
+            -- Échéance saisie d'avance (« Générer les échéances du mois ») :
+            -- attendue mais pas encore passée en banque. Sert à la rattacher
+            -- à la ligne du relevé lors de l'import, même si la banque la
+            -- passe un autre jour. Repasse à 0 dès qu'elle est rapprochée.
+            prevue        INTEGER NOT NULL DEFAULT 0
         );
         CREATE INDEX IF NOT EXISTS idx_tx_date ON transactions(date);
         CREATE INDEX IF NOT EXISTS idx_tx_cat  ON transactions(categorie);
@@ -120,6 +125,19 @@ class Database:
         """)
         self.conn.commit()
         self._migrate_sync()
+        self._migrate_prevue()
+
+    def _migrate_prevue(self):
+        """Ajoute la colonne « prevue » aux bases antérieures à la v1.21.
+
+        ALTER TABLE ... ADD COLUMN ne touche pas aux lignes existantes : elles
+        prennent la valeur 0 (opération ordinaire), donc rien ne change pour
+        les données déjà enregistrées."""
+        cols = [r[1] for r in self.conn.execute("PRAGMA table_info(transactions)")]
+        if "prevue" not in cols:
+            self.conn.execute("ALTER TABLE transactions "
+                              "ADD COLUMN prevue INTEGER NOT NULL DEFAULT 0")
+            self.conn.commit()
 
     def _migrate_sync(self):
         """Ajoute la colonne updated_at aux tables existantes si absente, et
@@ -164,12 +182,17 @@ class Database:
         return list(self.conn.execute("SELECT * FROM transactions ORDER BY date DESC"))
 
     def insert_tx(self, tx: dict):
-        tx = {**tx, "updated_at": tx.get("updated_at") or _now_iso()}
+        # « prevue » est facultative pour l'appelant : une opération ordinaire
+        # n'a pas à s'en préoccuper.
+        tx = {**tx, "updated_at": tx.get("updated_at") or _now_iso(),
+              "prevue": 1 if tx.get("prevue") else 0}
         self.conn.execute("""
             INSERT INTO transactions (id, date, date_valeur, libelle, libelle_op,
-                reference, type, categorie, sous_cat, info, montant, pointee, updated_at)
+                reference, type, categorie, sous_cat, info, montant, pointee,
+                prevue, updated_at)
             VALUES (:id, :date, :date_valeur, :libelle, :libelle_op,
-                :reference, :type, :categorie, :sous_cat, :info, :montant, :pointee, :updated_at)
+                :reference, :type, :categorie, :sous_cat, :info, :montant,
+                :pointee, :prevue, :updated_at)
         """, tx)
         self._clear_deletion("transactions", tx["id"])
         self._commit()
@@ -311,7 +334,7 @@ class Database:
         cols = {
             "transactions": ["id", "date", "date_valeur", "libelle", "libelle_op",
                              "reference", "type", "categorie", "sous_cat", "info",
-                             "montant", "pointee", "updated_at"],
+                             "montant", "pointee", "prevue", "updated_at"],
             "rules": ["id", "pattern", "amount", "categorie", "sous_cat",
                       "no_overwrite", "created_at", "updated_at", "sens"],
             "recurring": ["id", "libelle", "montant", "categorie", "sous_cat",
@@ -319,6 +342,11 @@ class Database:
                           "end_date", "actif", "updated_at"],
         }[entity]
         vals = {c: rec.get(c) for c in cols}
+        if entity == "transactions":
+            # Un fichier d'échange écrit par une version antérieure ne connaît
+            # pas « prevue » : sans cela on insérerait NULL dans une colonne
+            # déclarée NOT NULL.
+            vals["prevue"] = 1 if vals.get("prevue") else 0
         placeholders = ", ".join(f":{c}" for c in cols)
         collist = ", ".join(cols)
         self.conn.execute(

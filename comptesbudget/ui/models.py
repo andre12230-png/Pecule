@@ -54,11 +54,15 @@ class TxTableModel(QStandardItemModel):
 
     def _append_row(self, tx: dict):
         pointee = bool(tx.get("pointee"))
+        # Échéance saisie d'avance, pas encore passée en banque : elle mérite
+        # un symbole à elle, pour ne pas la confondre avec une opération réelle
+        # simplement pas encore pointée.
+        prevue = bool(tx.get("prevue")) and not pointee
         date_op = tx.get("date", "")
         date_val = tx.get("date_valeur") or date_op
         is_deferred = date_val and date_val != date_op
         items = [
-            QStandardItem("✔" if pointee else "○"),
+            QStandardItem("✔" if pointee else ("⏳" if prevue else "○")),
             QStandardItem(fmt_date_fr(date_op)),
             QStandardItem(("⏱ " if is_deferred else "") + fmt_date_fr(date_val)),
             QStandardItem(tx.get("libelle", "")),
@@ -93,6 +97,11 @@ class TxTableModel(QStandardItemModel):
         if pointee:
             items[0].setForeground(QBrush(QColor("#1A7A3A")))
             items[0].setBackground(QBrush(QColor("#D6F0DC")))
+        elif prevue:
+            items[0].setForeground(QBrush(QColor("#C77B00")))
+            items[0].setToolTip(
+                "Échéance prévue : pas encore passée en banque.\n"
+                "Elle sera complétée automatiquement à l'import du relevé.")
         else:
             items[0].setForeground(QBrush(QColor("#CCC")))
         items[0].setTextAlignment(Qt.AlignCenter)

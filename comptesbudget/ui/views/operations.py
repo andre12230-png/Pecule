@@ -74,7 +74,8 @@ class OperationsView(QWidget):
 
         toolbar.addWidget(QLabel("Pointage :"))
         self.pt_filter = QComboBox()
-        self.pt_filter.addItems(["Toutes", "Non pointées", "Pointées"])
+        self.pt_filter.addItems(
+            ["Toutes", "Non pointées", "Pointées", "Échéances prévues"])
         self.pt_filter.currentTextChanged.connect(self.refresh)
         toolbar.addWidget(self.pt_filter)
 
@@ -193,6 +194,11 @@ class OperationsView(QWidget):
             if pt == "Pointées" and not t.get("pointee"):
                 return False
             if pt == "Non pointées" and t.get("pointee"):
+                return False
+            # Échéances saisies d'avance et toujours en attente : celles qui
+            # sont passées en banque ne sont plus des prévisions.
+            if pt == "Échéances prévues" and (not t.get("prevue")
+                                              or t.get("pointee")):
                 return False
             return True
 

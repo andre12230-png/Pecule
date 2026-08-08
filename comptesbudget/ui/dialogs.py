@@ -131,6 +131,21 @@ class TxDialog(QDialog):
         self.pointee = QCheckBox("Pointée — vérifiée sur le relevé bancaire")
         layout.addRow("", self.pointee)
 
+        # Saisie d'avance : l'opération est attendue mais n'a pas encore paru
+        # sur le relevé. À l'import, la ligne réelle viendra la compléter (même
+        # si la banque la passe un autre jour) au lieu de faire doublon.
+        self.prevue = QCheckBox(
+            "⏳ Échéance prévue — pas encore passée en banque")
+        self.prevue.setToolTip(
+            "À cocher pour une opération saisie d'avance (prélèvement attendu, "
+            "virement annoncé…).\nÀ l'import du relevé, elle sera complétée "
+            "avec la date et le montant réels au lieu d'être doublonnée.")
+        layout.addRow("", self.prevue)
+        # Une opération confirmée par la banque n'est plus une prévision.
+        self.pointee.toggled.connect(
+            lambda coche: (self.prevue.setChecked(False) if coche else None,
+                           self.prevue.setEnabled(not coche)))
+
         # ── Section « Mémoriser » (création de règle inline) ──────────
         sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setStyleSheet("color:#CCC")
         layout.addRow(sep)
@@ -232,6 +247,8 @@ class TxDialog(QDialog):
             self.sous_cat.setCurrentText(tx.get("sous_cat", ""))
             self.note.setText(tx.get("info", ""))
             self.pointee.setChecked(bool(tx.get("pointee")))
+            self.prevue.setChecked(bool(tx.get("prevue"))
+                                   and not tx.get("pointee"))
         else:
             self.date_edit.setDate(QDate.currentDate())
             self.date_val.setDate(QDate.currentDate())
@@ -448,6 +465,9 @@ class TxDialog(QDialog):
             "info":        self.note.text().strip(),
             "montant":     montant,
             "pointee":     1 if self.pointee.isChecked() else 0,
+            # Pointée = confirmée par la banque : ce n'est plus une prévision.
+            "prevue":      1 if (self.prevue.isChecked()
+                                 and not self.pointee.isChecked()) else 0,
             "_create_rule": self.create_rule.isChecked(),
             "_rule": {
                 "pattern":      self.rule_pattern.text().strip() or self.libelle.text().strip(),

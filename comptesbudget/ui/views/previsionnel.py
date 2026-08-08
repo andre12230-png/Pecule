@@ -18,17 +18,17 @@ from ...constants import (
     FREQUENCIES,
 )
 from ...utils import (
-    cat_color, fmt_euro, fmt_date_fr,
+    cat_color, fmt_euro, fmt_date_fr, date_debit_differe, period_label,
 )
 from ...database import Database
 from ...recurring import (
-    generate_occurrences, detect_recurring_candidates,
+    generate_occurrences, detect_recurring_candidates, echeances_du_mois,
     _recurring_norm_label, _recurring_aligned_start,
 )
 
 from ..models import SORT_ROLE
 from ..dialogs import RecurringDialog
-from ..assistants import PrefillRecurringDialog
+from ..assistants import GenererEcheancesDialog, PrefillRecurringDialog
 
 class PrevisionnelView(QWidget):
     changed = Signal()
@@ -49,6 +49,13 @@ class PrevisionnelView(QWidget):
         self.btn_del.clicked.connect(self._delete)
         toolbar.addWidget(self.btn_del)
         toolbar.addStretch()
+        self.btn_mois = QPushButton("📅 Générer les échéances du mois")
+        self.btn_mois.setToolTip(
+            "Crée en une fois, dans les opérations, tout ce qui doit être "
+            "débité ou encaissé pendant le mois — en non pointé, à pointer "
+            "au fur et à mesure des passages en banque.")
+        self.btn_mois.clicked.connect(self._generer_mois)
+        toolbar.addWidget(self.btn_mois)
         self.btn_prefill = QPushButton("✨ Pré-remplir depuis l'historique")
         self.btn_prefill.setToolTip(
             "Détecte les opérations récurrentes dans vos opérations passées "
@@ -220,6 +227,88 @@ class PrevisionnelView(QWidget):
         if QMessageBox.question(self, "Supprimer", "Supprimer cette opération récurrente ?") != QMessageBox.Yes:
             return
         self.db.delete_recurring(rid)
+        self.refresh()
+        self.changed.emit()
+
+    # ── Génération des échéances d'un mois ──────────────────────────
+    def _mois_proposes(self) -> list[str]:
+        """Mois en cours et les deux suivants, au format « AAAA-MM »."""
+        d = date.today().replace(day=1)
+        out = []
+        for _ in range(3):
+            out.append(d.isoformat()[:7])
+            d = date(d.year + 1, 1, 1) if d.month == 12 else date(d.year, d.month + 1, 1)
+        return out
+
+    def _echeances(self, mois_iso: str) -> list[dict]:
+        """Échéances attendues pour un mois, relues à chaque fois : le
+        dialogue doit refléter la base même si elle a changé entre-temps."""
+        recs = [dict(r) for r in self.db.list_recurring()]
+        txs = [dict(r) for r in self.db.list_tx()]
+        return echeances_du_mois(recs, txs, int(mois_iso[:4]), int(mois_iso[5:7]))
+
+    def _creer_operations(self, echeances: list[dict]) -> int:
+        """Enregistre les échéances retenues en opérations NON pointées.
+
+        Le drapeau « prevue » les distingue d'une opération réellement passée
+        en banque : il permet de les afficher à part (⏳) et, à l'import du
+        relevé, de les compléter au lieu d'ajouter une seconde ligne."""
+        with self.db.batch():
+            for e in echeances:
+                # Une échéance payée par carte n'atteint le compte qu'au
+                # prélèvement groupé du mois suivant (cf. date_debit_differe).
+                est_carte = "carte" in (e["type"] or "").lower()
+                self.db.insert_tx({
+                    "id":          str(uuid.uuid4()),
+                    "date":        e["date"],
+                    "date_valeur": date_debit_differe(e["date"]) if est_carte
+                                   else e["date"],
+                    "libelle":     e["libelle"],
+                    "libelle_op":  e["libelle"],
+                    "reference":   "",
+                    "type":        e["type"],
+                    "categorie":   e["categorie"],
+                    "sous_cat":    e["sous_cat"],
+                    "info":        "",
+                    "montant":     e["montant"],
+                    "pointee":     0,
+                    "prevue":      1,
+                })
+        return len(echeances)
+
+    def _generer_mois(self):
+        """Crée en opérations non pointées ce qui doit tomber dans le mois."""
+        if not self.db.list_recurring():
+            QMessageBox.information(
+                self, "Échéances du mois",
+                "Le prévisionnel est vide : définissez d'abord vos opérations "
+                "récurrentes (ou utilisez « ✨ Pré-remplir depuis l'historique »).")
+            return
+
+        mois_courant = date.today().isoformat()[:7]
+        dlg = GenererEcheancesDialog(
+            self, self._echeances, mois_courant, self._mois_proposes())
+        if dlg.exec() != QDialog.Accepted:
+            return
+        choisies = dlg.selected()
+        mois_iso = dlg.mois()
+        if not choisies:
+            QMessageBox.information(
+                self, "Échéances du mois",
+                "Aucune échéance cochée : rien n'a été créé.")
+            return
+
+        n = self._creer_operations(choisies)
+
+        QMessageBox.information(
+            self, "Échéances du mois",
+            f"{n} opération(s) créée(s) pour {period_label(mois_iso)}, "
+            "en NON pointé : elles n'entrent pas dans le solde en banque.\n\n"
+            "Retrouvez-les dans l'onglet 📋 Opérations, repérées par ⏳ "
+            "(filtre « Échéances prévues »).\n\n"
+            "Au prochain import de relevé, chacune sera complétée avec les "
+            "informations réelles de la banque et pointée automatiquement — "
+            "même si la date ou le montant ne tombent pas exactement juste.")
         self.refresh()
         self.changed.emit()
 

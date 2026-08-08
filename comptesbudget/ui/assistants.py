@@ -8,14 +8,14 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTableView, QAbstractItemView,
-    QDialog,
+    QComboBox, QDialog,
 )
 
 from ..constants import (
     FREQUENCIES,
 )
 from ..utils import (
-    cat_color, fmt_euro, fmt_date_fr,
+    cat_color, fmt_euro, fmt_date_fr, period_label,
 )
 
 class HarmonizeDialog(QDialog):
@@ -359,6 +359,182 @@ class PrefillRecurringDialog(QDialog):
             if it.data(Qt.UserRole + 1):
                 out.append(it.data(Qt.UserRole))
         return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dialogue de génération des échéances d'un mois
+# ─────────────────────────────────────────────────────────────────────────────
+
+class GenererEcheancesDialog(QDialog):
+    """Aperçu à cocher de ce qui doit être débité (ou encaissé) dans le mois.
+
+    Même principe que la feuille mensuelle du classeur Budget : on aligne
+    d'avance toutes les échéances attendues, et on les pointe au fur et à
+    mesure qu'elles passent en banque. Les lignes auxquelles une opération
+    correspond déjà sont affichées en gris et ne sont pas re-créables."""
+
+    VERROU = Qt.UserRole + 2      # ligne non cochable (déjà enregistrée)
+
+    def __init__(self, parent, calc, mois_iso: str, choix_mois: list[str]):
+        """`calc(mois_iso)` retourne les échéances du mois (cf.
+        recurring.echeances_du_mois) ; `choix_mois` liste les mois proposés
+        au format « AAAA-MM »."""
+        super().__init__(parent)
+        self.setWindowTitle("Générer les échéances du mois")
+        self.resize(880, 580)
+        self._calc = calc
+
+        v = QVBoxLayout(self)
+        info = QLabel(
+            "💡 Échéances attendues d'après le <b>Prévisionnel</b>. Elles seront "
+            "créées en opérations <b>non pointées</b> : visibles dans la liste et "
+            "dans « ce qui est prévu », mais sans effet sur le solde en banque "
+            "tant qu'elles ne sont pas pointées. Les lignes grisées correspondent "
+            "à une opération déjà enregistrée : elles ne seront pas recréées."
+        )
+        info.setWordWrap(True)
+        info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
+        v.addWidget(info)
+
+        bar = QHBoxLayout()
+        bar.addWidget(QLabel("Mois :"))
+        self.mois_combo = QComboBox()
+        for m in choix_mois:
+            self.mois_combo.addItem(period_label(m), m)
+        idx = self.mois_combo.findData(mois_iso)
+        if idx >= 0:
+            self.mois_combo.setCurrentIndex(idx)
+        self.mois_combo.currentIndexChanged.connect(self._remplir)
+        bar.addWidget(self.mois_combo)
+        bar.addStretch()
+        v.addLayout(bar)
+
+        self.model = QStandardItemModel(0, 6, self)
+        self.model.setHorizontalHeaderLabels(
+            ["✓", "Date prévue", "Libellé", "Montant", "Catégorie", "État"])
+        self.table = QTableView()
+        self.table.setModel(self.model)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setAlternatingRowColors(True)
+        self.table.clicked.connect(self._toggle)
+        for i, w in enumerate([34, 100, 260, 110, 170, 180]):
+            self.table.setColumnWidth(i, w)
+        v.addWidget(self.table)
+
+        btn_row = QHBoxLayout()
+        self.lbl_summary = QLabel()
+        btn_row.addWidget(self.lbl_summary)
+        btn_row.addStretch()
+        self.btn_none = QPushButton("Tout décocher")
+        self.btn_none.clicked.connect(lambda: self._set_all(False))
+        btn_row.addWidget(self.btn_none)
+        self.btn_all = QPushButton("Tout cocher")
+        self.btn_all.clicked.connect(lambda: self._set_all(True))
+        btn_row.addWidget(self.btn_all)
+        self.btn_apply = QPushButton("✓ Créer les opérations")
+        self.btn_apply.setDefault(True)
+        self.btn_apply.clicked.connect(self.accept)
+        btn_row.addWidget(self.btn_apply)
+        self.btn_cancel = QPushButton("Annuler")
+        self.btn_cancel.clicked.connect(self.reject)
+        btn_row.addWidget(self.btn_cancel)
+        v.addLayout(btn_row)
+
+        self._remplir()
+
+    # ── Remplissage ────────────────────────────────────────────────
+    def mois(self) -> str:
+        return self.mois_combo.currentData()
+
+    def _remplir(self):
+        self.model.setRowCount(0)
+        for e in self._calc(self.mois()):
+            verrou = bool(e["_deja"])
+            checked = bool(e["_default"])
+
+            it_check = QStandardItem("✔" if checked else "")
+            it_check.setData(checked, Qt.UserRole + 1)
+            it_check.setData(e, Qt.UserRole)
+            it_check.setData(verrou, self.VERROU)
+            it_check.setTextAlignment(Qt.AlignCenter)
+            it_check.setForeground(QBrush(QColor("#1A7A3A")))
+
+            it_montant = QStandardItem(fmt_euro(e["montant"]))
+            it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            it_montant.setForeground(
+                QBrush(QColor("#C0392B" if e["montant"] < 0 else "#229954")))
+
+            it_cat = QStandardItem(e["categorie"])
+            it_cat.setForeground(QBrush(QColor(cat_color(e["categorie"]))))
+
+            if verrou:
+                etat, couleur = "✔ déjà enregistrée", "#888"
+            elif e["_passee"]:
+                etat, couleur = "⚠ date déjà passée", "#C77B00"
+            else:
+                etat, couleur = "à créer", "#1A7A3A"
+            it_etat = QStandardItem(etat)
+            it_etat.setForeground(QBrush(QColor(couleur)))
+
+            row = [
+                it_check,
+                QStandardItem(fmt_date_fr(e["date"])),
+                QStandardItem(e["libelle"]),
+                it_montant,
+                it_cat,
+                it_etat,
+            ]
+            if verrou:
+                # Ligne informative : elle montre que l'échéance est couverte,
+                # mais il n'y a rien à faire dessus.
+                for it in row:
+                    it.setForeground(QBrush(QColor("#999")))
+            self.model.appendRow(row)
+        self._update_summary()
+
+    # ── Cases à cocher ─────────────────────────────────────────────
+    def _toggle(self, index):
+        if index.column() != 0:
+            return
+        it = self.model.item(index.row(), 0)
+        if it.data(self.VERROU):
+            return
+        checked = not bool(it.data(Qt.UserRole + 1))
+        it.setData(checked, Qt.UserRole + 1)
+        it.setText("✔" if checked else "")
+        self._update_summary()
+
+    def _set_all(self, val: bool):
+        for r in range(self.model.rowCount()):
+            it = self.model.item(r, 0)
+            if it.data(self.VERROU):
+                continue
+            it.setData(val, Qt.UserRole + 1)
+            it.setText("✔" if val else "")
+        self._update_summary()
+
+    def _update_summary(self):
+        choisies = self.selected()
+        sorties = sum(e["montant"] for e in choisies if e["montant"] < 0)
+        entrees = sum(e["montant"] for e in choisies if e["montant"] > 0)
+        deja = sum(1 for r in range(self.model.rowCount())
+                   if self.model.item(r, 0).data(self.VERROU))
+        txt = (f"{len(choisies)} opération(s) à créer sur "
+               f"{self.model.rowCount()} échéance(s) du mois")
+        if deja:
+            txt += f" ({deja} déjà enregistrée(s))"
+        if choisies:
+            txt += (f"  —  à débiter : {fmt_euro(sorties)}"
+                    f"  •  à encaisser : {fmt_euro(entrees)}")
+        self.lbl_summary.setText(txt)
+
+    def selected(self) -> list[dict]:
+        """Échéances cochées (dicts issus de echeances_du_mois)."""
+        return [self.model.item(r, 0).data(Qt.UserRole)
+                for r in range(self.model.rowCount())
+                if self.model.item(r, 0).data(Qt.UserRole + 1)
+                and not self.model.item(r, 0).data(self.VERROU)]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

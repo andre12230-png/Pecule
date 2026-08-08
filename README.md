@@ -15,7 +15,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version applicative : **1.11.0**
+> Version applicative : **1.21.0**
 
 ---
 
@@ -40,13 +40,29 @@ L'application s'organise en onglets :
 | 🏷️ **Catégories** | Exploration par catégorie (drill-down), recatégorisation en masse |
 | 🏷️ **Sous-catégories** | Tri, fusion, renommage, nettoyage des sous-catégories |
 | 🧠 **Règles auto** | Règles de catégorisation automatique (motif → catégorie) |
-| 🔮 **Prévisionnel** | Opérations récurrentes et projection des prochains mois |
+| 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
 | 📖 **Notice** | Mode d'emploi et glossaire intégrés |
 
 Autres outils : **import CSV** des relevés bancaires (BPCE / CM / CA, encodage
 windows-1252), **harmonisation** des catégories et libellés, **recherche globale**
 (Ctrl+F), **rapport mensuel** imprimable / PDF, et **sauvegarde quotidienne
 automatique** de la base.
+
+### Saisir d'avance les échéances du mois
+
+Le bouton **📅 Générer les échéances du mois** (onglet Prévisionnel) crée en une
+fois les opérations attendues du mois d'après vos récurrences. Elles sont
+enregistrées **non pointées** et marquées ⏳ : elles apparaissent dans la liste
+et dans « ce qui est prévu », mais ne pèsent pas sur le solde en banque.
+
+À l'import du relevé, chacune est **complétée** par la ligne réelle de la banque
+— date, montant, libellé d'origine, référence, pointage — au lieu de créer un
+doublon, avec une tolérance de 7 jours et deux modes de reconnaissance : même
+montant, ou libellé concordant (pour les factures à montant variable). Votre
+libellé et votre catégorie sont conservés.
+
+Le Bilan résume tout cela dans le bandeau **🗓 Ce mois-ci** : reste à débiter,
+reste à encaisser et **solde prévu au dernier jour du mois**.
 
 ---
 

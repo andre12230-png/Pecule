@@ -1,5 +1,6 @@
 """Vue Bilan (tableau de bord)."""
 
+from calendar import monthrange
 from datetime import date, timedelta
 from html import escape as _esc   # noms de catégories insérés dans du HTML
 
@@ -22,7 +23,7 @@ from ...utils import (
 )
 from ...database import Database
 from ...labels import clean_libelle
-from ...recurring import generate_occurrences
+from ...recurring import echeances_du_mois
 
 # Horizon du bandeau « Ce qui est prévu » : assez court pour rester sûr,
 # assez long pour couvrir le prélèvement carte du 4 et les échéances du
@@ -194,6 +195,40 @@ class BilanView(QWidget):
         self.prev_detail.setStyleSheet("color:#33517C; font-size:9pt")
         pv_lay.addWidget(self.prev_detail)
         main.addWidget(self.prev_banner)
+
+        # ── Bandeau « Ce mois-ci » (reste à passer jusqu'au dernier jour) ──
+        # La lecture du budget mensuel tenu sur papier : en banque aujourd'hui,
+        # ce qui doit encore tomber, et le solde attendu en fin de mois.
+        self.mois_banner = QFrame()
+        self.mois_banner.setStyleSheet("""
+            QFrame { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                        stop:0 #EDF7EE, stop:1 #D8ECDC);
+                     border: 1px solid #A6CDAF; border-radius: 4px; }
+        """)
+        mo_lay = QHBoxLayout(self.mois_banner)
+        mo_lay.setContentsMargins(12, 4, 12, 4); mo_lay.setSpacing(18)
+
+        self.mois_title = QLabel("🗓 CE MOIS-CI")
+        self.mois_title.setStyleSheet("font-weight:bold; color:#1A5E2A; font-size:9pt")
+        mo_lay.addWidget(self.mois_title)
+        mo_lay.addSpacing(10)
+
+        def _mini_vert(label_txt):
+            w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
+            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#1A5E2A; font-size:8pt")
+            val = QLabel("—"); val.setStyleSheet("color:#0F3D1B; font-size:12pt; font-weight:bold")
+            l.addWidget(lbl); l.addWidget(val)
+            return w, val
+
+        m1, self.mois_sorties = _mini_vert("Reste à débiter (hors carte)")
+        m2, self.mois_entrees = _mini_vert("Reste à encaisser")
+        m3, self.mois_solde = _mini_vert("Solde prévu en fin de mois")
+        mo_lay.addWidget(m1); mo_lay.addWidget(m2); mo_lay.addWidget(m3)
+        mo_lay.addStretch()
+        self.mois_detail = QLabel("")
+        self.mois_detail.setStyleSheet("color:#2F6B3C; font-size:9pt")
+        mo_lay.addWidget(self.mois_detail)
+        main.addWidget(self.mois_banner)
 
         # ── Bandeau Alertes budget (mois en cours) ────────────────────
         # Masqué tant qu'aucune catégorie n'approche ou ne dépasse son budget.
@@ -372,21 +407,15 @@ class BilanView(QWidget):
         # Masquer le bandeau s'il n'y a rien à montrer
         self.cb_banner.setVisible(bool(pending))
 
-    def _refresh_prevu_banner(self, txs: list[dict], solde_compte: float):
-        """Ce qui va entrer et sortir du compte dans les 15 prochains jours.
+    def _operations_a_venir(self, txs: list[dict], depuis: date,
+                            jusqua: date) -> tuple[list[tuple], list[dict], set]:
+        """Opérations DÉJÀ enregistrées qui doivent encore passer sur le compte
+        entre `depuis` et `jusqua`.
 
-        Deux sources, sans double compte : les opérations DÉJÀ enregistrées
-        dont le débit est à venir (l'encours carte, surtout), complétées par
-        les échéances du Prévisionnel qui n'ont pas encore d'opération
-        correspondante.
-
-        À ne pas confondre avec le « X € d'opérations prévues prochainement »
-        de l'espace bancaire : la banque n'annonce que les prélèvements dont
-        elle a reçu l'avis, ce chiffre-ci les couvre tous."""
-        today = date.today()
-        today_iso = today.isoformat()
-        fin = today + timedelta(days=JOURS_PREVISION)
-        fin_iso = fin.isoformat()
+        Retourne (lignes, opérations carte en cours, libellés couverts), chaque
+        ligne étant (date, libellé, montant, est_carte)."""
+        today_iso = date.today().isoformat()
+        debut_iso, fin_iso = depuis.isoformat(), jusqua.isoformat()
 
         def dv(t: dict) -> str:
             return t.get("date_valeur") or t.get("date", "")
@@ -403,9 +432,13 @@ class BilanView(QWidget):
         #    remboursement carte « en cours » ne réduit pas le prélèvement de ce
         #    mois-ci. Les opérations non-carte, elles, ne sont jamais pointées
         #    avant leur passage : on les garde toutes.
+        #    Une opération pointée dont la date de valeur est déjà passée est
+        #    exclue : elle compte déjà dans le solde bancaire, l'ajouter la
+        #    ferait compter deux fois.
         reelles = [t for t in actives
-                   if today_iso < dv(t) <= fin_iso
-                   and not (est_carte(t) and not t.get("pointee"))]
+                   if debut_iso <= dv(t) <= fin_iso
+                   and not (est_carte(t) and not t.get("pointee"))
+                   and not (t.get("pointee") and dv(t) <= today_iso)]
         en_cours_carte = [t for t in actives
                           if est_carte(t) and not t.get("pointee")
                           and dv(t) > today_iso]
@@ -414,17 +447,102 @@ class BilanView(QWidget):
 
         lignes = [(dv(t), t.get("libelle", ""), t["montant"], est_carte(t))
                   for t in reelles]
+        return lignes, en_cours_carte, deja
 
-        # 2) Échéances du Prévisionnel encore attendues
-        for r in (dict(x) for x in self.db.list_recurring()):
-            if not r.get("actif"):
+    def _echeances_non_couvertes(self, txs: list[dict], depuis: date,
+                                 jusqua: date) -> list[dict]:
+        """Échéances du Prévisionnel qu'aucune opération ne couvre encore,
+        entre deux dates.
+
+        S'appuie sur le rapprochement de « Générer les échéances du mois » :
+        il reconnaît une pension déjà encaissée sous un libellé un peu
+        différent, là où une comparaison stricte l'annoncerait une seconde
+        fois. Les deux écrans disent ainsi la même chose."""
+        recs = [dict(r) for r in self.db.list_recurring()]
+        debut_iso, fin_iso = depuis.isoformat(), jusqua.isoformat()
+        out, vus = [], set()
+        for m in (depuis, jusqua):        # une fenêtre courte couvre 1 ou 2 mois
+            if (m.year, m.month) in vus:
                 continue
-            if clean_libelle(r.get("libelle", "")) in deja:
-                continue
-            for d in generate_occurrences(r, fin):
-                if d > today:
-                    lignes.append((d.isoformat(), r.get("libelle", ""),
-                                   r.get("montant", 0), False))
+            vus.add((m.year, m.month))
+            out += [e for e in echeances_du_mois(recs, txs, m.year, m.month)
+                    if not e["_deja"] and debut_iso <= e["date"] <= fin_iso]
+        return out
+
+    def _lignes_a_venir(self, txs: list[dict], depuis: date,
+                        jusqua: date) -> tuple[list[tuple], list[dict]]:
+        """Les opérations à venir, complétées par les échéances du
+        Prévisionnel qui n'ont pas encore d'opération correspondante."""
+        lignes, en_cours_carte, _deja = self._operations_a_venir(
+            txs, depuis, jusqua)
+        for e in self._echeances_non_couvertes(txs, depuis, jusqua):
+            lignes.append((e["date"], e["libelle"], e["montant"], False))
+        return lignes, en_cours_carte
+
+    def _refresh_mois_banner(self, txs: list[dict], solde_compte: float):
+        """Ce qu'il reste à passer d'ici la FIN DU MOIS en cours.
+
+        C'est la lecture du budget mensuel tenu sur papier : le solde en banque
+        d'un côté, tout ce qui doit encore tomber de l'autre, et le solde qu'on
+        aura à la fin. Contrairement au bandeau des 15 jours, la fenêtre part du
+        1er du mois : une échéance du 5 encore en attente reste comptée."""
+        today = date.today()
+        debut = today.replace(day=1)
+        fin = date(today.year, today.month, monthrange(today.year, today.month)[1])
+
+        lignes, _en_cours = self._lignes_a_venir(txs, debut, fin)
+
+        carte = sum(m for _d, _l, m, c in lignes if c)
+        sorties = sum(m for _d, _l, m, c in lignes if not c and m < 0)
+        entrees = sum(m for _d, _l, m, c in lignes if not c and m > 0)
+        solde_fin = solde_compte + carte + sorties + entrees
+
+        self.mois_sorties.setText(fmt_euro(sorties))
+        self.mois_entrees.setText(fmt_euro(entrees))
+        self.mois_solde.setText(fmt_euro(solde_fin))
+        self.mois_solde.setStyleSheet(
+            "font-size:12pt; font-weight:bold; color:"
+            + ("#1A7A3A" if solde_fin >= 0 else "#C0392B"))
+
+        self.mois_title.setText(
+            f"🗓 CE MOIS-CI — reste à passer d'ici le {fmt_date_fr(fin.isoformat())}")
+
+        n_sorties = sum(1 for _d, _l, m, c in lignes if not c and m < 0)
+        n_entrees = sum(1 for _d, _l, m, c in lignes if not c and m > 0)
+        detail = f"{n_sorties} prélèvement(s)  •  {n_entrees} rentrée(s)"
+        if carte:
+            detail += f"  •  débit carte {fmt_euro(carte)}"
+        # Part déjà saisie en opérations (⏳) : le reste vient du Prévisionnel
+        # et n'existe pas encore dans la liste des opérations.
+        debut_iso, fin_iso = debut.isoformat(), fin.isoformat()
+        n_prevues = sum(
+            1 for t in txs
+            if t.get("prevue") and not t.get("pointee")
+            and debut_iso <= (t.get("date_valeur") or t.get("date", "")) <= fin_iso)
+        if n_prevues:
+            detail += f"  •  dont {n_prevues} échéance(s) déjà saisie(s) ⏳"
+        detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
+        self.mois_detail.setText(detail)
+
+        self.mois_banner.setVisible(bool(lignes))
+
+    def _refresh_prevu_banner(self, txs: list[dict], solde_compte: float):
+        """Ce qui va entrer et sortir du compte dans les 15 prochains jours.
+
+        Deux sources, sans double compte : les opérations DÉJÀ enregistrées
+        dont le débit est à venir (l'encours carte, surtout), complétées par
+        les échéances du Prévisionnel qui n'ont pas encore d'opération
+        correspondante.
+
+        À ne pas confondre avec le « X € d'opérations prévues prochainement »
+        de l'espace bancaire : la banque n'annonce que les prélèvements dont
+        elle a reçu l'avis, ce chiffre-ci les couvre tous."""
+        today = date.today()
+        fin = today + timedelta(days=JOURS_PREVISION)
+        fin_iso = fin.isoformat()
+
+        lignes, en_cours_carte = self._lignes_a_venir(
+            txs, today + timedelta(days=1), fin)
 
         carte = sum(m for _d, _l, m, c in lignes if c)
         sorties = sum(m for _d, _l, m, c in lignes if not c and m < 0)
@@ -566,6 +684,7 @@ class BilanView(QWidget):
         # Après le calcul du solde : tous deux s'en servent pour projeter.
         self._refresh_cb_banner(txs, solde_compte)
         self._refresh_prevu_banner(txs, solde_compte)
+        self._refresh_mois_banner(txs, solde_compte)
 
         n_rev = sum(1 for t in active if t["montant"] > 0)
         n_dep = sum(1 for t in active if t["montant"] < 0)

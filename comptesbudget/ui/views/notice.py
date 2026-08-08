@@ -122,6 +122,38 @@ précisant la fréquence (hebdo, mensuelle, trimestrielle, annuelle) et la date
 de début. L'app calcule automatiquement les <b>12 prochains mois</b> de
 prévisions avec totaux recettes / dépenses / net.</p>
 
+<h3>📅 Générer les échéances du mois</h3>
+<p>Le bouton <b>📅 Générer les échéances du mois</b> (onglet Prévisionnel)
+transforme ces prévisions en <b>vraies opérations</b> pour le mois de votre
+choix : vous voyez d'un coup d'œil tout ce qui doit encore être débité ou
+encaissé, sans le saisir ligne par ligne.</p>
+<p>Les opérations ainsi créées sont <b>non pointées</b> : elles apparaissent
+dans la liste et dans « ce qui est prévu », mais <b>ne comptent pas dans le
+solde en banque</b> tant que vous ne les avez pas pointées (clic sur la colonne
+« P »). C'est le même principe qu'un budget tenu sur papier : on inscrit
+d'avance ce qui doit sortir, on coche au fur et à mesure.</p>
+<p>L'assistant montre <b>toutes</b> les échéances du mois, mais grise celles
+auxquelles une opération correspond déjà — elles ne sont jamais recréées. Une
+échéance dont la date est déjà passée est affichée sans être pré-cochée :
+vérifiez qu'elle n'est pas simplement en attente d'import avant de la créer.</p>
+<p>Dans la liste des opérations, ces échéances portent le symbole <b>⏳</b> dans
+la colonne « P » ; le filtre <b>Pointage → Échéances prévues</b> les isole.</p>
+
+<h3>⏳ Le rattachement à l'import</h3>
+<p>Au prochain import de relevé, chaque échéance ⏳ est <b>complétée</b> par la
+ligne réelle de la banque au lieu d'être doublonnée : date et montant réels,
+libellé d'origine et référence bancaire, pointage si le relevé confirme le
+passage. Votre libellé et votre catégorie sont conservés (ils sont plus
+lisibles que ceux de la banque).</p>
+<p>Le rattachement tolère <b>7 jours d'écart</b> — un prélèvement annoncé le 10
+peut tomber le 12 — et fonctionne de deux façons : même montant au centime
+près, ou libellé concordant (pour les factures dont le montant varie,
+électricité ou téléphone). Au-delà, rien n'est deviné : la ligne est importée
+normalement et vous obtenez deux lignes, à corriger avec 🔍 Doublons.</p>
+<p>La case <b>⏳ Échéance prévue</b> existe aussi dans le formulaire d'une
+opération : cochez-la pour toute saisie faite d'avance (remboursement annoncé,
+virement attendu) afin qu'elle profite du même rattachement.</p>
+
 <h3>📊 Les chiffres sur les graphiques</h3>
 <p>Sur le Bilan, l'<b>évolution mensuelle</b> affiche le montant à l'intérieur
 de chaque barre. Au-delà de six mois à l'écran, les barres deviennent trop
@@ -217,6 +249,28 @@ normalement plus élevé — ce n'est pas une erreur.</p>
 <p>La qualité de cette projection dépend directement de votre onglet
 Prévisionnel : plus vos opérations récurrentes y sont à jour, plus le solde
 prévu est fiable.</p>
+
+<h3>Le bandeau « 🗓 Ce mois-ci »</h3>
+<p>Le bandeau vert répond à une autre question : <b>que reste-t-il à passer
+avant la fin du mois, et où en sera le compte le dernier jour ?</b> C'est la
+lecture d'un budget mensuel tenu sur papier — le solde en banque d'un côté, ce
+qui doit encore tomber de l'autre.</p>
+<ul>
+  <li><b>Reste à débiter (hors carte)</b> — prélèvements et dépenses attendus
+      jusqu'au dernier jour du mois.</li>
+  <li><b>Reste à encaisser</b> — pensions, virements et remboursements
+      attendus d'ici là.</li>
+  <li><b>Solde prévu en fin de mois</b> — solde en banque aujourd'hui, moins ce
+      qui reste à débiter, plus ce qui reste à encaisser.</li>
+</ul>
+<p>Deux différences avec le bandeau des 15 jours : la fenêtre s'arrête au
+dernier jour du mois, et elle <b>commence au 1er</b>. Une échéance du 5 qui
+n'est toujours pas passée reste donc comptée — c'est bien ce qu'on veut d'un
+budget mensuel. En fin de ligne, l'application rappelle combien de ces lignes
+sont des <b>échéances déjà saisies ⏳</b> : les autres viennent du Prévisionnel
+et n'existent pas encore dans vos opérations.</p>
+<p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
+banque, le compter ici le compterait deux fois.</p>
 
 <h2>4. Pointage et rapprochement</h2>
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations

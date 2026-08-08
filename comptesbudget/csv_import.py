@@ -2,12 +2,24 @@
 import csv
 import re
 from collections import Counter
-from typing import Optional
+from datetime import date
+from typing import NamedTuple, Optional
 
 from .utils import canonical_cat, deaccent
 from .labels import build_libelle_profiles, clean_libelle
+from .recurring import _meme_operation, _recurring_norm_label
 from .rules import apply_rules_to_tx
 from .database import Database
+
+
+class ResultatImport(NamedTuple):
+    """Compte rendu d'un import, pour le message affiché à l'utilisateur."""
+    importees: int      # nouvelles lignes enregistrées
+    doublons: int       # lignes du relevé déjà présentes, ignorées
+    illisibles: int     # lignes écartées : montant impossible à lire
+    pointees: int       # opérations déjà en base pointées d'après le relevé
+    recaps: int         # récapitulatifs de débit différé écartés
+    rapprochees: int    # échéances prévues rattachées à leur ligne réelle
 
 def _parse_amount_checked(s: str) -> tuple[float, bool]:
     """Analyse un montant « à la française ». Renvoie (montant, lisible) :
@@ -56,6 +68,61 @@ def _identity_libelle(date_iso: str, montant, libelle: str) -> str:
     return f"{date_iso}|{float(montant or 0):.2f}|{clean_libelle(libelle)}"
 
 
+# Décalage toléré, en jours, entre une échéance saisie d'avance et son passage
+# réel en banque : un prélèvement annoncé le 10 peut tomber le 12 (week-end,
+# jour férié, délais interbancaires).
+JOURS_TOLERANCE_ECHEANCE = 7
+
+
+def _ecart_jours(a_iso: str, b_iso: str) -> Optional[int]:
+    """Nombre de jours entre deux dates ISO, ou None si l'une est illisible."""
+    try:
+        return abs((date.fromisoformat(a_iso[:10])
+                    - date.fromisoformat(b_iso[:10])).days)
+    except (TypeError, ValueError):
+        return None
+
+
+def trouver_echeance_prevue(prevues: list[dict], d_iso: str, montant: float,
+                            libelle: str,
+                            tolerance: int = JOURS_TOLERANCE_ECHEANCE) -> Optional[dict]:
+    """Échéance saisie d'avance que cette ligne du relevé vient confirmer.
+
+    Deux façons de se reconnaître, la première étant prioritaire :
+
+      1. **même montant** au centime près, à quelques jours près — le libellé
+         de la banque est souvent méconnaissable (« PRETIS » arrive en
+         « PRLV SEPA PRETIS 1234567 ») ;
+      2. **libellé compatible** et même sens, à quelques jours près — pour les
+         échéances dont le montant varie d'un mois à l'autre (électricité,
+         téléphone).
+
+    À égalité, la plus proche en date l'emporte. Retourne None si rien ne
+    correspond : mieux vaut un doublon visible qu'une dépense avalée."""
+    cle_csv = _recurring_norm_label(libelle)
+    candidates = []
+    for p in prevues:
+        if p.get("_consommee"):
+            continue
+        ecart = _ecart_jours(d_iso, p.get("date", ""))
+        if ecart is None or ecart > tolerance:
+            continue
+        m_prev = float(p.get("montant", 0) or 0)
+        if abs(m_prev - float(montant or 0)) < 0.005:
+            rang = 0
+        elif ((m_prev >= 0) == (float(montant or 0) >= 0) and cle_csv
+              and _meme_operation(_recurring_norm_label(p.get("libelle", "")),
+                                  cle_csv)):
+            rang = 1
+        else:
+            continue
+        candidates.append((rang, ecart, p))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda c: (c[0], c[1]))
+    return candidates[0][2]
+
+
 # Libellés des lignes RÉCAPITULATIVES du débit différé de la carte. Le jour du
 # prélèvement, la banque ajoute au relevé du compte une ligne qui totalise tous
 # les achats carte du mois (« DEBIT DIFFERE N° ...1234 » / « CUMUL DES DEBITS
@@ -90,11 +157,9 @@ def _decode_csv(raw: bytes) -> str:
         return raw.decode("latin-1")
 
 
-def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
+def import_csv(path: str, db: Database) -> ResultatImport:
     """Lit un CSV bancaire français et insère les transactions.
-    Retourne (importées, doublons ignorés, lignes au montant illisible,
-    opérations existantes pointées d'après le relevé, récapitulatifs de débit
-    différé écartés)."""
+    Retourne un ResultatImport (cf. la description de ses six compteurs)."""
     with open(path, "rb") as f:
         text = _decode_csv(f.read())
 
@@ -228,6 +293,10 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
             if not r.get("pointee"):
                 return r
         return None
+
+    # Échéances saisies d'avance et encore en attente : elles seront
+    # rattachées à leur ligne du relevé au lieu d'être doublonnées.
+    prevues = [t for t in existing_tx if t.get("prevue") and not t.get("pointee")]
     # Profils habituels par libellé (indexés sur la forme nettoyée), pour
     # hériter de la catégorie/sous-catégorie d'un libellé déjà connu.
     profiles = build_libelle_profiles(existing_tx, key_fn=clean_libelle)
@@ -240,6 +309,7 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
     illisibles = 0   # lignes écartées : montant présent mais impossible à lire
     pointees = 0     # opérations existantes pointées d'après le relevé
     recaps = 0       # récapitulatifs de débit différé écartés
+    rapprochees = 0  # échéances prévues rattachées à leur ligne du relevé
     for cols in rows[1:]:
         # Récapitulatif du débit différé : jamais importé, il ferait doublon
         # avec les achats carte détaillés (cf. MOTIFS_RECAP_DEBIT_DIFFERE).
@@ -300,21 +370,61 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
             bool(ref.strip()) and occ < existing_by_ref[ident]) or filet_manuel
         if est_doublon:
             skipped += 1
-            # La banque confirme le passage (« x ») : on pointe l'opération
-            # existante correspondante si elle ne l'était pas déjà. Jamais
-            # l'inverse — un pointage manuel n'est pas retiré.
-            if est_passee:
-                row = None
-                if ref.strip():
-                    row = _premiere_non_pointee(rows_by_ref.get(ident))
-                if row is None:
-                    row = _premiere_non_pointee(rows_by_lbl.get(k_lbl))
-                if row is None:
-                    row = _premiere_non_pointee(rows_by_dm.get(k_dm))
-                if row is not None:
-                    db.update_tx(row["id"], {"pointee": 1})
-                    row["pointee"] = 1   # ne pas re-pointer la même ligne
-                    pointees += 1
+            # On retrouve la ligne déjà en base pour la mettre à jour : la
+            # banque confirme le passage (« x ») → on la pointe (jamais
+            # l'inverse : un pointage manuel n'est pas retiré) ; et si c'était
+            # une échéance saisie d'avance, elle cesse d'être une prévision
+            # puisque le relevé la porte désormais.
+            row = None
+            if ref.strip():
+                row = _premiere_non_pointee(rows_by_ref.get(ident))
+            if row is None:
+                row = _premiere_non_pointee(rows_by_lbl.get(k_lbl))
+            if row is None:
+                row = _premiere_non_pointee(rows_by_dm.get(k_dm))
+            if row is not None:
+                champs = {}
+                if est_passee:
+                    champs["pointee"] = 1
+                if row.get("prevue"):
+                    champs["prevue"] = 0
+                if champs:
+                    db.update_tx(row["id"], champs)
+                    row.update(champs)   # ne pas retraiter la même ligne
+                    if "pointee" in champs:
+                        pointees += 1
+            continue
+
+        # Pas un doublon exact : cette ligne vient-elle confirmer une échéance
+        # saisie d'avance ? Si oui, on complète celle-ci avec les informations
+        # réelles de la banque au lieu d'ajouter une seconde ligne.
+        attendue = trouver_echeance_prevue(prevues, d_iso, montant, libelle)
+        if attendue is not None:
+            champs = {
+                "date":        d_iso,
+                "date_valeur": dv_iso or d_iso,
+                # Le libellé choisi par l'utilisateur est conservé (il est plus
+                # lisible que celui de la banque) ; celui du relevé est rangé
+                # dans libelle_op, qui existe pour ça.
+                "libelle_op":  libelle or attendue.get("libelle", ""),
+                "reference":   ref,
+                "info":        info,
+                "montant":     montant,
+                "pointee":     1 if est_passee else 0,
+                "prevue":      0,
+            }
+            if tp:
+                champs["type"] = tp
+            # La catégorie du Prévisionnel prime : c'est celle que l'utilisateur
+            # a choisie. On ne prend celle du relevé que si l'échéance n'était
+            # pas classée.
+            if (attendue.get("categorie") or "Non classé") == "Non classé":
+                champs["categorie"] = cat
+                champs["sous_cat"] = sub
+            db.update_tx(attendue["id"], champs)
+            attendue["_consommee"] = True
+            attendue.update(champs)
+            rapprochees += 1
             continue
 
         tx = {
@@ -352,4 +462,5 @@ def import_csv(path: str, db: Database) -> tuple[int, int, int, int, int]:
         db.insert_tx(tx)
         imported += 1
 
-    return imported, skipped, illisibles, pointees, recaps
+    return ResultatImport(imported, skipped, illisibles, pointees, recaps,
+                          rapprochees)

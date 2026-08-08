@@ -71,6 +71,175 @@ def generate_occurrences(rec: dict, until: date) -> list[date]:
     return out
 
 
+def _meme_operation(cle_a: str, cle_b: str) -> bool:
+    """Deux libellés normalisés désignent-ils la même opération ?
+
+    L'égalité stricte ne suffit pas : la banque ajoute souvent une forme
+    juridique ou une agence à la fin (« SECURIDOM » ↔ « SECURIDOM SAS »,
+    « CAISSE RETRAITE » ↔ « CAISSE RETRAITE 447 »). On accepte donc que le plus
+    court soit le DÉBUT du plus long, mot à mot — mais jamais un simple mot
+    commun au milieu, qui confondrait « ASS AUTO » et « ASS HABITATION »."""
+    a, b = cle_a.split(), cle_b.split()
+    if not a or not b:
+        return False
+    court, long_ = (a, b) if len(a) <= len(b) else (b, a)
+    return long_[:len(court)] == court
+
+
+def _dates_compatibles(dates_op: list[str], d_occ: str, tolerance: int) -> bool:
+    """Une opération peut-elle être le passage de cette échéance ?
+
+    Oui si elle tombe dans le MÊME MOIS que l'échéance attendue (une mensuelle
+    ne passe qu'une fois par mois, peu importe le jour), ou à quelques jours
+    d'elle quand elle déborde sur le mois voisin (échéance du 1er payée le 30).
+    Sans cette règle, un prélèvement du 31 juillet solderait l'échéance du
+    31 août et celle-ci disparaîtrait du budget du mois."""
+    for d in dates_op:
+        if d[:7] == d_occ[:7]:
+            return True
+        try:
+            ecart = abs((date.fromisoformat(d[:10])
+                         - date.fromisoformat(d_occ[:10])).days)
+        except (TypeError, ValueError):
+            continue
+        if ecart <= tolerance:
+            return True
+    return False
+
+
+def _sous_cats_contradictoires(a: str, b: str) -> bool:
+    """Deux sous-catégories renseignées et différentes désignent deux contrats
+    distincts, même sous un libellé identique : chez le même assureur,
+    « Assurance Auto » et « Assurance Habitation » sont prélevées séparément.
+
+    Ne sert qu'en dernier recours (cf. echeances_du_mois) : la banque renomme
+    parfois la sous-catégorie d'une opération (« eau » devient « Energie eau,
+    gaz, electricite, fioul »), ce qui n'en fait pas une autre opération."""
+    a, b = (a or "").strip().lower(), (b or "").strip().lower()
+    return bool(a) and bool(b) and a != b
+
+
+def _montants_voisins(a: float, b: float) -> bool:
+    """Deux montants peuvent-ils être ceux de la même échéance ?
+
+    Tolérance volontairement large : une facture d'électricité ou de téléphone
+    varie d'un mois à l'autre. Il s'agit seulement de distinguer deux échéances
+    de tailles très différentes qui portent le même libellé."""
+    ecart = abs(abs(a) - abs(b))
+    return ecart <= max(2.0, 0.15 * max(abs(a), abs(b)))
+
+
+def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
+                      aujourdhui: date = None,
+                      tolerance_jours: int = 5) -> list[dict]:
+    """Ce qui doit tomber sur le compte pendant le mois demandé.
+
+    Principe du budget mensuel sur papier : en début de mois on aligne toutes
+    les échéances attendues, et on les « pointe » au fur et à mesure qu'elles
+    passent en banque. Chaque ligne retournée porte trois indicateurs :
+
+      * `_deja`   : une opération lui correspond déjà (passée en banque ou
+                    saisie à la main) — il ne faut PAS la recréer ;
+      * `_passee` : sa date prévue est déjà derrière nous ;
+      * `_default`: proposition de pré-cochage (ni déjà là, ni date passée).
+
+    Le rapprochement se fait sur le libellé normalisé et sur le SENS de
+    l'opération (un remboursement ne solde pas un prélèvement attendu), dans
+    une fenêtre élargie de `tolerance_jours` avant et après le mois : une
+    échéance du 1er payée le 30 du mois précédent reste reconnue.
+    """
+    aujourdhui = aujourdhui or date.today()
+    premier = date(annee, mois, 1)
+    dernier = date(annee, mois, monthrange(annee, mois)[1])
+    debut = (premier - timedelta(days=tolerance_jours)).isoformat()
+    fin = (dernier + timedelta(days=tolerance_jours)).isoformat()
+
+    # Opérations déjà en base dans la fenêtre. Chacune ne peut solder qu'UNE
+    # échéance : on les consomme au fur et à mesure (« pris »), sinon une
+    # échéance hebdomadaire passée une fois paraîtrait couverte quatre fois.
+    dispo: list[dict] = []
+    for t in txs:
+        d_op = t.get("date", "") or ""
+        d_val = t.get("date_valeur") or d_op
+        if not (debut <= d_op <= fin or debut <= d_val <= fin):
+            continue
+        cle = _recurring_norm_label(t.get("libelle", ""))
+        if not cle:
+            continue
+        dispo.append({"cle": cle,
+                      "dates": [d for d in (d_op, d_val) if d],
+                      "montant": float(t.get("montant", 0) or 0),
+                      "sous_cat": t.get("sous_cat", "") or "",
+                      "credit": float(t.get("montant", 0) or 0) >= 0,
+                      "pris": False})
+
+    # Toutes les occurrences attendues, AVANT rapprochement : il faut les
+    # connaître toutes pour attribuer chaque opération à la bonne (cf. les
+    # trois passes ci-dessous). Les récurrences sont prises de la plus précise
+    # à la plus vague — « ALPHATEL MOBILE » doit se servir avant « ALPHATEL ».
+    occurrences: list[dict] = []
+    for r in sorted(recs, key=lambda r: -len(
+            _recurring_norm_label(r.get("libelle", "")).split())):
+        if not r.get("actif"):
+            continue
+        montant = float(r.get("montant", 0) or 0)
+        cle_rec = _recurring_norm_label(r.get("libelle", ""))
+        for d in generate_occurrences(r, dernier):
+            if d >= premier:
+                occurrences.append({"rec": r, "date": d, "montant": montant,
+                                    "cle": cle_rec, "couverte": False,
+                                    "sous_cat": r.get("sous_cat", "") or ""})
+
+    # Rapprochement en trois passes, de la plus sûre à la plus tolérante. La
+    # première évite qu'une échéance prenne l'opération d'une autre du même
+    # nom : une banque libelle souvent « Echeance De Credit » aussi bien la
+    # mensualité d'un prêt que la petite assurance qui l'accompagne, et un
+    # prélèvement du montant de la mensualité appartient évidemment au prêt.
+    for passe in (1, 2, 3):
+        for occ in occurrences:
+            if occ["couverte"]:
+                continue
+            for c in dispo:
+                if c["pris"] or c["credit"] != (occ["montant"] >= 0):
+                    continue
+                if not _dates_compatibles(c["dates"], occ["date"].isoformat(),
+                                          tolerance_jours):
+                    continue
+                if passe == 1:
+                    ok = (c["cle"] == occ["cle"]
+                          and _montants_voisins(c["montant"], occ["montant"]))
+                else:
+                    # Passes 2 et 3 : le montant ne confirme plus rien, une
+                    # sous-catégorie contradictoire suffit alors à écarter.
+                    ok = (not _sous_cats_contradictoires(c["sous_cat"],
+                                                         occ["sous_cat"])
+                          and (c["cle"] == occ["cle"] if passe == 2
+                               else _meme_operation(occ["cle"], c["cle"])))
+                if ok:
+                    c["pris"] = True
+                    occ["couverte"] = True
+                    break
+
+    out: list[dict] = []
+    for occ in occurrences:
+        r, d, couverte = occ["rec"], occ["date"], occ["couverte"]
+        out.append({
+            "date":      d.isoformat(),
+            "libelle":   r.get("libelle", ""),
+            "montant":   occ["montant"],
+            "categorie": r.get("categorie", "") or "Non classé",
+            "sous_cat":  r.get("sous_cat", "") or "",
+            "type":      r.get("type", "") or "",
+            "rec_id":    r.get("id", ""),
+            "_deja":     couverte,
+            "_passee":   d < aujourdhui,
+            "_default":  not couverte and d >= aujourdhui,
+        })
+
+    out.sort(key=lambda e: (e["date"], e["libelle"].lower()))
+    return out
+
+
 def _recurring_norm_label(libelle: str) -> str:
     """Normalise un libellé pour regrouper les occurrences d'une même
     opération récurrente : sans accents, sans dates ni numéros de référence,

@@ -232,7 +232,50 @@ SYNC_VERSION = 2
 #            « Carte bancaire » gardait sinon la date du 4 du mois suivant :
 #            l'opération sortait du solde bancaire réel sans rien signaler
 #            (cas d'une prime d'assurance, d'où un écart avec la banque).
-APP_VERSION = "1.20.0"
+# 1.21.0 : saisir d'avance ce qui doit être débité (ou encaissé) dans le mois.
+#          • Onglet Prévisionnel, bouton « 📅 Générer les échéances du mois » :
+#            crée en une fois, pour le mois choisi, les opérations attendues
+#            d'après les récurrences. Elles sont enregistrées NON pointées et
+#            marquées « prévue » (⏳ dans la liste, filtre dédié) : visibles
+#            dans « ce qui est prévu », sans effet sur le solde en banque.
+#            L'assistant grise les échéances auxquelles une opération
+#            correspond déjà : on peut le relancer sans créer de doublon. Le
+#            rapprochement tolère les libellés rallongés par la banque
+#            (« SECURIDOM » / « SECURIDOM SAS »), accepte n'importe quel jour du
+#            MÊME mois (échéance du 17 payée le 30) mais pas le mois voisin
+#            au-delà de 5 jours — sinon le prélèvement du 31 juillet soldait
+#            l'échéance du 31 août. Quand deux échéances portent le même nom
+#            (« Echeance De Credit » désigne aussi bien la mensualité d'un
+#            prêt que sa petite assurance), c'est le montant qui les
+#            départage ; à défaut, une SOUS-CATÉGORIE
+#            contradictoire suffit (chez le même assureur, « Assurance Auto »
+#            et « Assurance Habitation » sont deux contrats). Ce dernier
+#            critère n'intervient qu'en dernier recours : la banque réécrit
+#            parfois la sous-catégorie d'une opération (« eau » devient
+#            « Energie eau, gaz, electricite, fioul ») sans que ce soit une
+#            autre opération.
+#          • À l'import, une échéance prévue est COMPLÉTÉE par la ligne réelle
+#            du relevé (date, montant, libellé d'origine, référence, pointage)
+#            au lieu d'être doublonnée — jusqu'à 7 jours d'écart, sur le même
+#            montant ou sur un libellé concordant (factures à montant
+#            variable). Le libellé et la catégorie choisis sont conservés.
+#            Sans cela, une échéance passée un autre jour que prévu faisait
+#            deux lignes (incident du 06/08/2026, remboursement Omnishop).
+#          • Bilan, nouveau bandeau « 🗓 CE MOIS-CI » : reste à débiter, reste
+#            à encaisser et solde prévu au dernier jour du mois. Sa fenêtre
+#            part du 1er (une échéance du 5 toujours pas passée reste due),
+#            là où le bandeau des 15 jours ne regarde que devant. Ce qui est
+#            pointé et passé en est exclu : c'est déjà dans le solde.
+#          • Correction du bandeau « CE QUI EST PRÉVU » : il annonçait une
+#            seconde fois une échéance déjà encaissée quand la banque avait
+#            employé un libellé un peu différent ou payé un autre jour que
+#            prévu : des pensions déjà encaissées étaient re-comptées quelques
+#            jours plus tard. Les deux bandeaux partagent désormais le
+#            rapprochement tolérant de echeances_du_mois.
+#          • Nouvelle colonne « prevue » dans transactions : ajoutée
+#            automatiquement à l'ouverture des bases antérieures, à 0 — les
+#            données existantes ne changent pas.
+APP_VERSION = "1.21.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

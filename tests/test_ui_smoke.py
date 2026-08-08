@@ -541,3 +541,152 @@ def test_date_de_valeur_saisie_a_la_main_est_respectee(qapp):
     dlg.date_val.setDate(QDate(2026, 9, 4))      # correction volontaire
     dlg.libelle.setText("Centre Marche")
     assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
+
+
+def test_generer_echeances_du_mois(qapp, db):
+    """L'assistant « Générer les échéances du mois » liste ce qui doit tomber
+    dans le mois, le crée en NON pointé, et ne le recrée pas au second passage."""
+    from comptesbudget.ui.assistants import GenererEcheancesDialog
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+
+    view = PrevisionnelView(db)
+    mois = date.today().isoformat()[:7]
+
+    dlg = GenererEcheancesDialog(None, view._echeances, mois, view._mois_proposes())
+    assert dlg.model.rowCount() >= 1          # le loyer mensuel de la fixture
+    dlg._set_all(True)
+    assert dlg.selected()
+    dlg.mois_combo.setCurrentIndex(1)         # mois suivant : recalcul sans planter
+    assert dlg.model.rowCount() >= 1
+
+    echeances = view._echeances(mois)
+    assert view._creer_operations(echeances) == len(echeances)
+    crees = [dict(t) for t in db.list_tx() if t["prevue"]]
+    assert len(crees) == len(echeances)
+    assert all(t["pointee"] == 0 for t in crees)
+
+    # Second passage : tout est désormais couvert, plus rien à créer.
+    assert all(e["_deja"] for e in view._echeances(mois))
+
+
+def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
+    """Une échéance matérialisée en opération ne doit pas s'ajouter à la
+    récurrence dont elle vient : « ce qui est prévu » compterait le double."""
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+
+    cible = date.today() + timedelta(days=3)      # dans la fenêtre des 15 jours
+    db.insert_recurring({"id": "rec-test", "libelle": "ASSURANCE TEST",
+                         "montant": -123.45, "categorie": "Assurances",
+                         "sous_cat": "", "type": "Prelevement",
+                         "frequency": "monthly", "day_of_month": cible.day,
+                         "start_date": cible.isoformat(), "end_date": None,
+                         "actif": 1})
+
+    bilan = BilanView(db)
+    bilan.refresh()
+    avant = bilan.prev_sorties.text()
+    assert "123,45" in avant                       # la récurrence est bien prévue
+
+    prev = PrevisionnelView(db)
+    mois = cible.isoformat()[:7]
+    a_creer = [e for e in prev._echeances(mois) if not e["_deja"]]
+    assert prev._creer_operations(a_creer) == len(a_creer)
+
+    bilan.refresh()
+    assert bilan.prev_sorties.text() == avant      # inchangé : pas de doublon
+
+
+def test_bilan_bandeau_fin_de_mois(qapp, tmp_path):
+    """« Ce mois-ci » : solde en banque + tout ce qui reste à passer d'ici la
+    fin du mois, sans recompter ce qui est déjà pointé."""
+    from calendar import monthrange
+
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "mois.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+
+    today = date.today()
+    premier = today.replace(day=1).isoformat()
+    dernier = date(today.year, today.month,
+                   monthrange(today.year, today.month)[1]).isoformat()
+
+    # Déjà passée en banque → dans le solde, pas dans le reste à passer
+    d.insert_tx(_tx(id="payee", date=premier, date_valeur=premier,
+                    libelle="LOYER PAYE", type="Prelevement",
+                    montant=-100.0, pointee=1))
+    # Échéance du début de mois toujours pas passée : elle reste due
+    d.insert_tx(_tx(id="attendue-1", date=premier, date_valeur=premier,
+                    libelle="ELECTRICITE", type="Prelevement", montant=-50.0,
+                    pointee=0, prevue=1))
+    # Échéance de fin de mois
+    d.insert_tx(_tx(id="attendue-2", date=dernier, date_valeur=dernier,
+                    libelle="ASSURANCE", type="Prelevement", montant=-200.0,
+                    pointee=0, prevue=1))
+
+    vue = BilanView(d)
+    vue.refresh()
+
+    assert vue.kpis["solde"]._value.text() == fmt_euro(900.0)   # 1000 - 100
+    assert vue.mois_sorties.text() == fmt_euro(-250.0)          # 50 + 200
+    assert vue.mois_solde.text() == fmt_euro(650.0)             # 900 - 250
+    assert "2 échéance(s) déjà saisie(s)" in vue.mois_detail.text()
+    assert vue.mois_banner.isVisibleTo(vue)
+
+
+def test_bilan_fin_de_mois_ignore_le_mois_suivant(qapp, tmp_path):
+    """Une échéance qui tombe après le dernier jour du mois n'entre pas dans
+    le solde de fin de mois."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "mois2.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+
+    today = date.today()
+    mois_prochain = (today.replace(day=1) + timedelta(days=40)).replace(day=3)
+    d.insert_tx(_tx(id="plus-tard", date=mois_prochain.isoformat(),
+                    date_valeur=mois_prochain.isoformat(), libelle="IMPOTS",
+                    type="Prelevement", montant=-300.0, pointee=0, prevue=1))
+
+    vue = BilanView(d)
+    vue.refresh()
+    assert vue.mois_sorties.text() == fmt_euro(0)
+    assert vue.mois_solde.text() == fmt_euro(1000.0)
+
+
+def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path):
+    """Défaut corrigé en 1.21 : une pension versée le 7 sous le libellé de la
+    banque était re-annoncée comme « à venir » parce que la récurrence la
+    plaçait le 9 sous un libellé légèrement différent."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "double.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+
+    today = date.today()
+    # Versement déjà encaissé il y a peu, libellé « à la banque »
+    deja = today.replace(day=1)
+    d.insert_tx(_tx(id="pension", date=deja.isoformat(),
+                    date_valeur=deja.isoformat(), libelle="CAISSE RETRAITE 12",
+                    type="Virement", categorie="Revenus",
+                    montant=900.00, pointee=1))
+    # La récurrence le place quelques jours plus tard, sous son nom à lui
+    plus_tard = deja + timedelta(days=8)
+    d.insert_recurring({"id": "rec-pension", "libelle": "Caisse Retraite",
+                        "montant": 900.00, "categorie": "Revenus",
+                        "sous_cat": "", "type": "Virement",
+                        "frequency": "monthly", "day_of_month": plus_tard.day,
+                        "start_date": plus_tard.isoformat(), "end_date": None,
+                        "actif": 1})
+
+    vue = BilanView(d)
+    vue.refresh()
+    assert vue.kpis["solde"]._value.text() == fmt_euro(900.00)
+    # Ni le bandeau des 15 jours ni celui du mois ne doivent l'annoncer encore
+    assert vue.prev_entrees.text() == fmt_euro(0)
+    assert vue.mois_entrees.text() == fmt_euro(0)
+    assert vue.mois_solde.text() == fmt_euro(900.00)

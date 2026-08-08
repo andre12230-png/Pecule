@@ -82,3 +82,40 @@ def test_batch_imbrique_tolere(tmp_path):
         with db.batch():   # imbriqué : sans effet, pas d'erreur
             db.insert_tx(_tx(id="x"))
     assert len(list(db.list_tx())) == 1
+
+
+def test_migration_colonne_prevue_sur_base_ancienne(tmp_path):
+    """Une base créée avant la v1.21 (sans colonne « prevue ») doit s'ouvrir
+    sans rien perdre : la colonne est ajoutée et vaut 0 partout."""
+    import sqlite3
+
+    chemin = str(tmp_path / "ancienne.db")
+    conn = sqlite3.connect(chemin)
+    conn.executescript("""
+        CREATE TABLE transactions (
+            id TEXT PRIMARY KEY, date TEXT NOT NULL, date_valeur TEXT,
+            libelle TEXT NOT NULL DEFAULT '', libelle_op TEXT NOT NULL DEFAULT '',
+            reference TEXT NOT NULL DEFAULT '', type TEXT NOT NULL DEFAULT '',
+            categorie TEXT NOT NULL DEFAULT 'Non classé',
+            sous_cat TEXT NOT NULL DEFAULT '', info TEXT NOT NULL DEFAULT '',
+            montant REAL NOT NULL, pointee INTEGER NOT NULL DEFAULT 0);
+        INSERT INTO transactions (id, date, libelle, montant, pointee)
+            VALUES ('vieux-1', '2026-01-15', 'ANCIENNE OPERATION', -42.5, 1);
+    """)
+    conn.commit()
+    conn.close()
+
+    db = Database(chemin)                       # ouverture = migration
+    lignes = [dict(t) for t in db.list_tx()]
+    assert len(lignes) == 1                     # la donnée est intacte
+    assert lignes[0]["libelle"] == "ANCIENNE OPERATION"
+    assert lignes[0]["montant"] == -42.5
+    assert lignes[0]["pointee"] == 1
+    assert lignes[0]["prevue"] == 0             # valeur par défaut
+
+    # Et la nouvelle colonne est utilisable
+    db.insert_tx({"id": "neuf", "date": "2026-08-10", "date_valeur": "2026-08-10",
+                  "libelle": "PRETIS", "libelle_op": "PRETIS", "reference": "",
+                  "type": "", "categorie": "Non classé", "sous_cat": "", "info": "",
+                  "montant": -600.00, "pointee": 0, "prevue": 1})
+    assert [t["prevue"] for t in db.list_tx() if t["id"] == "neuf"] == [1]
