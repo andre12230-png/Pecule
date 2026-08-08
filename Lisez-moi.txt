@@ -1,4 +1,4 @@
-COMPTES ET BUDGET - version 1.20.0
+COMPTES ET BUDGET - version 1.21.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -33,6 +33,15 @@ FONCTIONS
   importee : elle ferait doublon avec les achats deja detailles.
 - Projection du compte a 15 jours : ce qui va sortir, ce qui va rentrer,
   et le solde prevu, d'apres vos operations recurrentes.
+- Echeances du mois : le bouton << Generer les echeances du mois >> de
+  l'onglet Previsionnel cree en une fois tout ce qui doit encore etre
+  debite ou encaisse. Ces operations sont NON pointees (marquees par un
+  sablier) : elles n'entrent pas dans le solde en banque tant qu'elles ne
+  sont pas passees. A l'import du releve, chacune est completee avec la
+  date et le montant reels au lieu de faire doublon, meme si la banque la
+  passe un autre jour.
+- Bandeau << Ce mois-ci >> du bilan : reste a debiter, reste a encaisser
+  et solde prevu au dernier jour du mois.
 - Montants affiches sur les graphiques du bilan.
 - Tri des tableaux : cliquez sur le titre d'une colonne (dates, montants,
   libelles). Un second clic inverse l'ordre.
