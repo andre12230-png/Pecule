@@ -176,7 +176,22 @@ comptesbudget/
         ├── previsionnel.py  Vue Prévisionnel
         ├── rules_view.py    Vue Règles auto
         └── notice.py        Vue Notice
+
+outils/
+└── captures_promo.py       Refabrique les captures de docs/media/ à partir
+                            d'une base de démonstration inventée
 ```
+
+Pour refaire les captures de la page de présentation après un changement
+d'interface :
+
+```bash
+python outils/captures_promo.py
+```
+
+Le script fabrique une base de démonstration dans un dossier temporaire,
+photographie les quatre onglets de la vitrine, puis efface cette base. Aucune
+donnée réelle n'y figure, et votre `comptes.db` n'est jamais ouverte.
 
 ### Couches
 
