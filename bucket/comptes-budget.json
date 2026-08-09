@@ -10,6 +10,16 @@
         }
     },
     "extract_dir": "Comptes-Budget",
+    "pre_install": [
+        "# Quand un element a conserver n'existe pas dans l'archive, Scoop cree",
+        "# un DOSSIER a sa place. Pour comptes.db il faut un FICHIER, sinon",
+        "# l'application echoue au demarrage (unable to open database file).",
+        "# On cree donc le fichier vide ici : SQLite y ecrira son schema.",
+        "if (!(Test-Path \"$persist_dir\\comptes.db\")) {",
+        "    New-Item -ItemType Directory -Path \"$persist_dir\" -Force | Out-Null",
+        "    New-Item -ItemType File -Path \"$persist_dir\\comptes.db\" | Out-Null",
+        "}"
+    ],
     "persist": [
         "comptes.db",
         "sauvegardes"
