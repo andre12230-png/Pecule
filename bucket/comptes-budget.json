@@ -10,6 +10,10 @@
         }
     },
     "extract_dir": "Comptes-Budget",
+    "persist": [
+        "comptes.db",
+        "sauvegardes"
+    ],
     "shortcuts": [
         [
             "Comptes-Budget.exe",
