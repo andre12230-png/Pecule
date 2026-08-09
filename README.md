@@ -178,8 +178,9 @@ comptesbudget/
         └── notice.py        Vue Notice
 
 outils/
-└── captures_promo.py       Refabrique les captures de docs/media/ à partir
-                            d'une base de démonstration inventée
+├── captures_promo.py       Refabrique les captures de docs/media/ à partir
+│                           d'une base de démonstration inventée
+└── faire_archive.py        Fabrique le .zip de la release et son empreinte
 ```
 
 Pour refaire les captures de la page de présentation après un changement
@@ -192,6 +193,21 @@ python outils/captures_promo.py
 Le script fabrique une base de démonstration dans un dossier temporaire,
 photographie les quatre onglets de la vitrine, puis efface cette base. Aucune
 donnée réelle n'y figure, et votre `comptes.db` n'est jamais ouverte.
+
+Pour préparer une release, après `Construire-Exe.bat` :
+
+```bash
+python outils/faire_archive.py
+```
+
+Il ajoute `Lisez-moi.txt` et `Budget.ico` au dossier construit, écrit le `.zip`
+puis affiche l'empreinte SHA-256 à reporter dans `bucket/comptes-budget.json`.
+
+**Ne fabriquez pas ce `.zip` avec le clic droit de Windows.** `Compress-Archive`
+écrit les entrées de dossier sans le marqueur « répertoire » : un outil strict
+y voit un fichier vide en conflit avec le dossier du même nom et refuse
+l'archive, alors que Windows l'extrait sans rien signaler. Le script n'écrit
+que des fichiers, et vérifie l'archive produite avant de rendre la main.
 
 ### Couches
 
