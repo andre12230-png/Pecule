@@ -241,8 +241,8 @@ def test_import_csv_pointage_confirme_les_existantes(tmp_path):
     p = _write(tmp_path, "p.csv",
                "Date;Libelle;Montant;Pointage operation\n"
                "01/06/2026;ALPHATEL;-43,00;x\n"
-               "02/06/2026;SAUR;-22,50;0\n")
-    # 0 importée, 2 doublons, 1 pointée automatiquement (Orange)
+               "02/06/2026;SERVICE DES EAUX;-22,50;0\n")
+    # 0 importée, 2 doublons, 1 pointée automatiquement (Alphatel)
     assert import_csv(p, db) == (0, 2, 0, 1, 0, 0)
     etats = {dict(r)["libelle"]: dict(r)["pointee"] for r in db.list_tx()}
     assert etats["Alphatel"] == 1     # confirmée par le relevé
