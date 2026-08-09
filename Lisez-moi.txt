@@ -12,9 +12,9 @@ UTILISATION
 - Vos donnees sont enregistrees dans le fichier << comptes.db >>, cree
   automatiquement A COTE de l'executable. Une sauvegarde quotidienne est
   faite dans le sous-dossier << sauvegardes >>.
-  ATTENTION si vous avez installe l'application avec Scoop : le dossier du
-  programme change a chaque mise a jour. Copiez votre comptes.db ailleurs
-  AVANT de faire << scoop update >>, sinon vos operations seront perdues.
+  Si vous avez installe l'application avec Scoop, comptes.db et le dossier
+  << sauvegardes >> sont ranges dans << scoop\persist\comptes-budget >> :
+  ils sont conserves d'une mise a jour a l'autre.
 
 MISE A JOUR depuis une version precedente : remplacez seulement
 Comptes-Budget.exe et le dossier _internal. Ne recopiez JAMAIS le dossier
