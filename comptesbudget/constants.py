@@ -328,7 +328,14 @@ SYNC_VERSION = 2
 #            créer de doublon. AUCUNE INTERFACE pour l'instant : la table est
 #            lue au démarrage mais rien ne permet encore de la remplir depuis
 #            l'application.
-APP_VERSION = "1.22.0"
+# 1.22.1 : le logo et l'icône passent du dollar à l'euro.
+#          • Le sac d'argent portait un $, pour une application française qui
+#            compte en euros. Corrigé dans docs/media/logo.png et Budget.ico.
+#          • L'icône ne contenait qu'une image 256×256, que Windows réduisait
+#            lui-même pour la barre des tâches — d'où un rendu mou aux petites
+#            tailles. Elle embarque désormais 16, 24, 32, 48, 64, 128 et 256.
+#          Aucun changement de fonctionnement.
+APP_VERSION = "1.22.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
