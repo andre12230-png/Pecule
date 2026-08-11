@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QApplication
 
 from .utils import _app_dir, backup_db
 from .database import Database
+from .labels import charger_alias
 from .ui.main_window import MainWindow
 
 def main():
@@ -22,7 +23,7 @@ def main():
         try:
             import ctypes
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
-                "ComptesEtBudget.AlauxStyle.1.0")
+                "andre.Pecule.1.0")
         except Exception:
             pass
 
@@ -39,6 +40,9 @@ def main():
     bak = backup_db()
 
     db = Database()
+    # Correspondances de libellés propres à cette base (« raison sociale du
+    # relevé » → « enseigne »), utilisées par tout le nettoyage de libellés.
+    charger_alias(db.get_alias_libelles())
     w = MainWindow(db)
     if bak:
         w.statusBar().showMessage(

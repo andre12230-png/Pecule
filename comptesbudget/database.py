@@ -1,4 +1,5 @@
 """Accès à la base de données SQLite."""
+import json
 import os
 import sqlite3
 from contextlib import contextmanager
@@ -307,6 +308,26 @@ class Database:
                 ON CONFLICT(key) DO UPDATE SET value = excluded.value
             """, (_now_iso(),))
             self._commit()
+
+    # ── Correspondances de libellés ─────────────────────────────────
+    def get_alias_libelles(self) -> dict:
+        """Correspondances « libellé du relevé → nom voulu », rangées en JSON
+        dans les réglages. Elles restent dans la base : ce sont des données
+        personnelles, elles n'ont pas leur place dans le code."""
+        brut = self.get_setting("alias_libelles", "")
+        if not brut:
+            return {}
+        try:
+            data = json.loads(brut)
+        except ValueError:
+            return {}                  # réglage illisible : on l'ignore
+        if not isinstance(data, dict):
+            return {}
+        return {str(k): str(v) for k, v in data.items()}
+
+    def set_alias_libelles(self, alias: dict):
+        self.set_setting("alias_libelles",
+                         json.dumps(alias or {}, ensure_ascii=False))
 
     # ── Synchronisation : tombstones & upserts bruts ────────────────
     def _record_deletion(self, entity: str, id_: str, deleted_at: str = None):

@@ -26,6 +26,27 @@ LIBELLE_ACRONYMS = {
 }
 
 
+# Correspondances « ce qu'écrit la banque » → « le nom que je veux voir ».
+# Un relevé porte souvent la raison sociale du commerce, pas l'enseigne connue.
+# Ce dictionnaire reste VIDE dans le code : ces correspondances nomment les
+# commerces où l'on passe, elles sont personnelles et vivent dans la base
+# (réglage « alias_libelles »). charger_alias() les installe au démarrage.
+_ALIAS: dict[str, str] = {}
+
+
+def charger_alias(alias: dict | None) -> None:
+    """Installe les correspondances de libellés utilisées par clean_libelle.
+
+    Les clés sont comparées sans accent ni casse, pour qu'une même
+    correspondance vaille quelle que soit la façon dont la banque écrit."""
+    _ALIAS.clear()
+    for source, cible in (alias or {}).items():
+        cle = deaccent(str(source)).upper().strip()
+        valeur = str(cible).strip()
+        if cle and valeur:
+            _ALIAS[cle] = valeur
+
+
 def _smart_titlecase(s: str) -> str:
     """Met un libellé en casse « propre » (Titre) tout en conservant les
     sigles connus ou les courtes suites de consonnes (SFR, EDF, BPCE…)."""
@@ -59,6 +80,13 @@ def clean_libelle(raw: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     if not s:
         return (raw or "").strip()             # ne jamais vider un libellé
+    # Correspondance personnelle : le relevé porte la raison sociale du
+    # commerce, on lui substitue le nom de l'enseigne (cf. charger_alias).
+    # Appliquée ici, elle vaut aussi pour les clés d'identité de l'import :
+    # ancien et nouveau nom désignent la même opération, donc pas de doublon.
+    remplacement = _ALIAS.get(deaccent(s).upper())
+    if remplacement is not None:
+        return _smart_titlecase(remplacement)
     # Si le nettoyage ne laisse que des mots passe-partout (« VIR 123456 » →
     # « Vir »), le numéro retiré était la seule chose qui distinguait cette
     # opération : deux virements sans rapport porteraient le même libellé et
