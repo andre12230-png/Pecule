@@ -131,7 +131,7 @@ def main():
     print(f"SHA-256 : {empreinte}")
     print()
     print("À reporter dans bucket/pecule.json (version, url, hash),")
-    print("puis publier la release GitHub et pousser sur itch.io avec butler.")
+    print("puis publier la release GitHub.")
 
 
 if __name__ == "__main__":
