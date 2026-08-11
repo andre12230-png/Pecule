@@ -47,7 +47,7 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
         <li><b>Glisser-déposer</b> un ou plusieurs fichiers CSV directement sur la fenêtre</li>
         <li>Saisie manuelle via <code>➕ Nouvelle opération</code></li>
       </ul>
-      L'app gère les CSV des principales banques françaises (BPCE, Crédit Mutuel, Crédit Agricole) :
+      L'app gère les CSV des banques françaises — les colonnes sont reconnues par leur nom :
       séparateur point-virgule, dates JJ/MM/AAAA, encodage Windows-1252 <b>ou UTF-8</b> (détecté
       automatiquement). Les doublons sont ignorés — même entre deux relevés qui se chevauchent,
       et même face à une opération saisie à la main — et les lignes au montant illisible sont

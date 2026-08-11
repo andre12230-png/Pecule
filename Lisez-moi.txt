@@ -35,8 +35,8 @@ fichier comptes.db et perdriez vos operations.
 -------------------------------------------------------------------
 FONCTIONS
 -------------------------------------------------------------------
-- Import des releves bancaires au format CSV (banques francaises :
-  BPCE, Credit Mutuel, Credit Agricole et autres).
+- Import des releves bancaires au format CSV. Les colonnes sont
+  reconnues par leur nom, quelle que soit la banque francaise.
 - Categorisation automatique (regles), budgets mensuels avec barres de
   progression, previsionnel des operations recurrentes, bilan avec
   graphiques, rapport mensuel (impression / PDF), rapprochement (pointage).

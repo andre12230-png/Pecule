@@ -45,7 +45,7 @@ telemetry — your financial data never leaves your computer.
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
-- **CSV import** — French bank statement formats (BPCE, Crédit Mutuel, Crédit Agricole; windows-1252)
+- **CSV import** — French bank statement exports; columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8)
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
 - **Automatic daily backup** of the database
 
