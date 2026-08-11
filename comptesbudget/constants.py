@@ -304,7 +304,31 @@ SYNC_VERSION = 2
 #          • Nouvelle colonne « prevue » dans transactions : ajoutée
 #            automatiquement à l'ouverture des bases antérieures, à 0 — les
 #            données existantes ne changent pas.
-APP_VERSION = "1.21.0"
+# 1.22.0 : nouveau nom, et les données ne vivent plus forcément avec le
+#          programme.
+#          • L'application s'appelle désormais « Pécule ». L'ancien nom,
+#            « Comptes et Budget », désignait déjà au moins trois autres
+#            logiciels : impossible de se faire trouver sur Internet avec.
+#            L'exécutable devient Pecule.exe, l'archive Pecule-X.Y.Z-win64.zip.
+#          • comptes.db et le dossier des sauvegardes peuvent maintenant vivre
+#            AILLEURS que dans le dossier du programme — voir _data_dir().
+#            Règle : s'il existe déjà un comptes.db à côté de l'application,
+#            c'est lui qui sert et rien ne change ; sinon les données vont
+#            dans %LOCALAPPDATA%\Pecule. Les installations existantes et
+#            Scoop gardent donc exactement le comportement d'avant, sans
+#            migration. Ce qui change, c'est qu'une installation neuve survit
+#            désormais aux mises à jour d'un gestionnaire de paquets : Winget
+#            effaçait la base à chaque montée de version.
+#            La notice affiche le chemin réellement utilisé.
+#          • Fondation des « alias de libellés » : une correspondance
+#            « ce qu'écrit la banque → le nom que je veux voir », rangée dans
+#            les réglages de la base (get/set_alias_libelles) et appliquée par
+#            clean_libelle. Posée au bon endroit pour que l'ancien et le
+#            nouveau libellé désignent la même opération à l'import, donc sans
+#            créer de doublon. AUCUNE INTERFACE pour l'instant : la table est
+#            lue au démarrage mais rien ne permet encore de la remplir depuis
+#            l'application.
+APP_VERSION = "1.22.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

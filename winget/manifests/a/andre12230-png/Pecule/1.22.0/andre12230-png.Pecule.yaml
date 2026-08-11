@@ -3,7 +3,7 @@
 # Fichier « chapeau » : il ne fait que relier les deux autres manifestes
 # et indiquer quelle langue sert de description par defaut.
 PackageIdentifier: andre12230-png.Pecule
-PackageVersion: 1.21.0
+PackageVersion: 1.22.0
 DefaultLocale: en-US
 ManifestType: version
 ManifestVersion: 1.12.0
