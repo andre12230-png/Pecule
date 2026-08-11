@@ -1,0 +1,218 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Importer un relevé bancaire CSV — format attendu et colonnes reconnues | Pécule</title>
+<meta name="description" content="Quel format de fichier CSV Pécule accepte pour importer un relevé bancaire : séparateur point-virgule, dates JJ/MM/AAAA, colonnes reconnues, encodage. Et ce que l'import fait tout seul : doublons, pointage, débit différé.">
+<link rel="canonical" href="https://andre12230-png.github.io/Pecule/import-csv.html">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Importer un relevé bancaire CSV dans Pécule">
+<meta property="og:description" content="Le format attendu, les colonnes reconnues, et ce que l'import fait automatiquement.">
+<meta property="og:url" content="https://andre12230-png.github.io/Pecule/import-csv.html">
+
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:38px 0 32px}
+  header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header .sub{font-size:1.05rem;opacity:.95;margin:10px 0 0;max-width:640px}
+  header .retour{display:inline-block;color:#dce6f7;font-size:.95rem;
+                 text-decoration:none;margin-bottom:14px}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  h3{color:var(--bleu2);margin-top:26px;margin-bottom:4px;font-size:1.08rem}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  pre{background:#eef1f6;padding:12px 14px;border-radius:8px;overflow-x:auto;
+      font-family:Consolas,monospace;font-size:.9rem;line-height:1.5}
+  .warn{background:#fff8e6;border-left:4px solid #e8c77b;padding:12px 16px;border-radius:6px;margin:14px 0}
+  .ok{background:#eef7ef;border-left:4px solid #7bbd8a;padding:12px 16px;border-radius:6px;margin:14px 0}
+
+  .tableau{width:100%;overflow-x:auto}
+  table{border-collapse:collapse;width:100%;background:var(--carte);
+        border:1px solid var(--bord);border-radius:8px;margin:14px 0;font-size:.95rem}
+  th,td{border:1px solid var(--bord);padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:#eef1f6;color:var(--bleu);font-weight:600}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="retour" href="./">← Pécule</a>
+    <h1>Importer un relevé bancaire au format CSV</h1>
+    <p class="sub">Ce que Pécule attend de votre fichier, et ce qu'il fait tout seul
+      une fois le relevé chargé.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p>Pécule importe les relevés bancaires exportés en <strong>CSV</strong>, le format
+  texte que proposent la plupart des banques françaises depuis leur espace client.
+  L'import n'est pas réservé à une banque en particulier : Pécule reconnaît les
+  colonnes par leur nom, quel que soit l'établissement, du moment que le fichier
+  respecte les trois règles ci-dessous.</p>
+
+  <p>Pour importer : bouton <code>📥 Importer CSV</code> dans le menu de gauche, ou
+  simplement <strong>glisser-déposer</strong> un ou plusieurs fichiers sur la fenêtre.</p>
+</section>
+
+<section>
+  <h2>Les trois règles à respecter</h2>
+
+  <h3>1. Le séparateur doit être le point-virgule</h3>
+  <p>Les colonnes sont séparées par des <code>;</code>, pas par des virgules ni des
+  tabulations. C'est la convention française, et c'est ce qu'exportent les banques
+  hexagonales. Si votre fichier utilise des virgules, ouvrez-le dans un tableur et
+  réenregistrez-le en « CSV (séparateur point-virgule) ».</p>
+
+  <h3>2. Les dates doivent s'écrire JJ/MM/AAAA</h3>
+  <p>Le jour et le mois sur deux chiffres, l'année sur quatre :
+  <code>05/01/2026</code>. Les autres écritures sont refusées, y compris
+  <code>5/1/2026</code> et <code>2026-01-05</code>. Une ligne dont la date n'est pas
+  lisible est simplement ignorée.</p>
+
+  <h3>3. Il faut une ligne d'en-tête nommant les colonnes</h3>
+  <p>Pécule cherche la première ligne contenant à la fois le mot
+  <strong>date</strong> et le mot <strong>libellé</strong>, et considère que c'est
+  l'en-tête. Tout ce qui précède — nom de l'agence, numéro de compte, solde,
+  lignes vides — est ignoré sans que vous ayez à le supprimer.</p>
+
+  <pre>Numero de compte;12345678901
+Solde au 31/01/2026;1 234,56
+
+Date;Libelle;Montant;Pointage operation
+05/01/2026;LOYER JANVIER;-800,00;x
+07/01/2026;VIREMENT SALAIRE;2150,00;x</pre>
+
+  <div class="ok">
+    <strong>L'encodage, lui, est détecté tout seul.</strong> UTF-8, Windows-1252 ou
+    Latin-1 : Pécule essaie dans cet ordre et retient celui qui fonctionne. Vous
+    n'avez rien à régler, et les accents ne se transforment pas en caractères
+    bizarres.
+  </div>
+</section>
+
+<section>
+  <h2>Les colonnes reconnues</h2>
+
+  <p>Pécule repère chaque colonne par un <strong>mot-clé contenu dans son titre</strong>,
+  sans tenir compte des accents ni des majuscules. Peu importe donc que votre banque
+  écrive « Libelle », « Libellé simplifié » ou « LIBELLE OPERATION » : le mot
+  <em>libelle</em> suffit.</p>
+
+  <div class="tableau">
+  <table>
+    <tr><th>Mot-clé cherché</th><th>Rôle</th><th>Nécessaire ?</th></tr>
+    <tr><td><code>date</code></td><td>Date de l'opération. La première colonne dont le titre contient « date » est retenue.</td><td><strong>Oui</strong></td></tr>
+    <tr><td><code>libelle</code></td><td>Le libellé de l'opération.</td><td><strong>Oui</strong></td></tr>
+    <tr><td><code>montant</code></td><td>Montant signé : négatif pour une dépense.</td><td>Oui, sauf si vous avez « débit » et « crédit »</td></tr>
+    <tr><td><code>debit</code> et <code>credit</code></td><td>À défaut d'une colonne « montant ». Le débit est ramené au négatif automatiquement, qu'il soit écrit avec ou sans signe.</td><td>—</td></tr>
+    <tr><td><code>valeur</code></td><td>Date de valeur, quand elle diffère de la date d'opération (typique des cartes à débit différé).</td><td>Non</td></tr>
+    <tr><td><code>pointage</code></td><td>Un <code>x</code> signifie « passée en banque ». Voir plus bas.</td><td>Non</td></tr>
+    <tr><td><code>reference</code></td><td>Référence bancaire, utilisée pour reconnaître les doublons.</td><td>Non</td></tr>
+    <tr><td><code>categorie</code></td><td>Catégorie proposée par la banque.</td><td>Non</td></tr>
+    <tr><td><code>sous</code></td><td>Sous-catégorie proposée par la banque.</td><td>Non</td></tr>
+    <tr><td><code>informations</code></td><td>Informations complémentaires, reprises en note.</td><td>Non</td></tr>
+    <tr><td><code>type</code></td><td>Type d'opération (carte, virement, prélèvement…). Ici le titre doit être exactement « Type », « Type operation » ou « Type d'operation ».</td><td>Non</td></tr>
+  </table>
+  </div>
+
+  <h3>Les montants</h3>
+  <p>La virgule et le point décimal sont acceptés indifféremment, les espaces et
+  espaces insécables sont retirés, et un <code>+</code> en tête est toléré. Ainsi
+  <code>-1 234,56</code>, <code>-1234.56</code> et <code>+2 150,00</code> sont tous
+  compris.</p>
+
+  <p>Une case vide vaut zéro. En revanche, un montant <strong>impossible à lire</strong>
+  n'est jamais enregistré à 0 € en silence : la ligne est écartée et comptée à part
+  dans le compte rendu, pour que vous sachiez qu'il manque quelque chose.</p>
+</section>
+
+<section>
+  <h2>Ce que l'import fait tout seul</h2>
+
+  <h3>Il n'enregistre jamais deux fois la même opération</h3>
+  <p>Vous pouvez importer deux relevés qui se chevauchent, ou réimporter le même
+  fichier : les lignes déjà présentes sont reconnues et ignorées. La comparaison se
+  fait sur la référence bancaire quand elle existe, sinon sur la date, le montant et
+  le libellé nettoyé.</p>
+  <p>Une opération que vous aviez <strong>saisie à la main</strong> est reconnue
+  elle aussi, même si la banque l'écrit autrement — un achat noté « Boulangerie »
+  ne sera pas dupliqué parce que le relevé annonce « SARL LE FOURNIL ».</p>
+
+  <h3>Il pointe les opérations passées en banque</h3>
+  <p>Si votre relevé contient une colonne « Pointage », les lignes marquées
+  <code>x</code> arrivent <strong>déjà pointées</strong>, et celles qui existaient
+  déjà en base sont confirmées. Une opération pointée n'est jamais dépointée par un
+  import : la banque ne fait qu'ajouter de la certitude, jamais en retirer.</p>
+
+  <h3>Il écarte les récapitulatifs de débit différé</h3>
+  <p>Les relevés de carte à débit différé contiennent une ligne de total, du type
+  « DEBIT DIFFERE » ou « CUMUL DES DEBITS DIFFERES ». Cette ligne fait doublon avec
+  les achats déjà détaillés juste au-dessus. Pécule ne l'importe jamais, et vous
+  dit combien il en a écarté.</p>
+
+  <h3>Il complète vos échéances prévues au lieu de les doubler</h3>
+  <p>Si vous aviez inscrit d'avance une dépense attendue — un loyer, un abonnement —
+  l'import ne crée pas une seconde ligne : il <strong>complète la vôtre</strong> avec
+  la date, le montant et la référence réels. La tolérance est de sept jours, ce qui
+  couvre les prélèvements qui tombent un peu plus tôt ou un peu plus tard que prévu.</p>
+
+  <h3>Il applique vos règles de catégorisation</h3>
+  <p>Les règles que vous avez définies s'appliquent à mesure que les lignes arrivent.
+  La catégorie fournie par la banque sert de point de départ quand vous n'avez pas de
+  règle — mais elle est souvent approximative, et rien ne vous empêche de la corriger
+  ensuite.</p>
+</section>
+
+<section>
+  <h2>Le compte rendu d'import</h2>
+
+  <p>À la fin, Pécule affiche six chiffres. Ils méritent un coup d'œil : c'est là
+  qu'on repère un fichier mal exporté.</p>
+
+  <div class="tableau">
+  <table>
+    <tr><th>Chiffre</th><th>Ce qu'il signifie</th></tr>
+    <tr><td><strong>Importées</strong></td><td>Nouvelles opérations enregistrées.</td></tr>
+    <tr><td><strong>Doublons</strong></td><td>Lignes du relevé déjà présentes, ignorées. Un gros chiffre est normal quand deux relevés se chevauchent.</td></tr>
+    <tr><td><strong>Illisibles</strong></td><td>Lignes écartées faute de montant lisible. <strong>Si ce nombre n'est pas nul, regardez votre fichier</strong> : il manque de vraies opérations.</td></tr>
+    <tr><td><strong>Pointées</strong></td><td>Opérations déjà en base que le relevé a confirmées comme passées en banque.</td></tr>
+    <tr><td><strong>Récapitulatifs</strong></td><td>Lignes de total de débit différé écartées.</td></tr>
+    <tr><td><strong>Rapprochées</strong></td><td>Échéances que vous aviez prévues et que la ligne réelle est venue compléter.</td></tr>
+  </table>
+  </div>
+
+  <div class="warn">
+    <strong>Rien n'a été importé et tout est en doublon ?</strong> C'est le signe que
+    le fichier a déjà été chargé. Ce n'est pas une erreur : Pécule protège vos données
+    contre le double comptage.
+  </div>
+</section>
+
+<section>
+  <h2>Si l'import échoue</h2>
+  <p>Un message d'erreur, aucune ligne récupérée, des montants à zéro ?
+  <a href="import-csv-problemes.html">Les causes fréquentes et leurs solutions</a>
+  sont réunies sur une page à part.</p>
+</section>
+
+</div>
+
+<footer>
+  <a href="./">Pécule</a> —
+  <a href="https://github.com/andre12230-png/Pecule">Code source</a> ·
+  <a href="https://github.com/andre12230-png/Pecule/releases/latest">Téléchargements</a>
+</footer>

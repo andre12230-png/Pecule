@@ -1,0 +1,191 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon relevé bancaire CSV ne s'importe pas — causes et solutions | Pécule</title>
+<meta name="description" content="En-tête CSV introuvable, dates refusées, montants illisibles, accents cassés, fichier Excel au lieu d'un CSV : les causes fréquentes d'un import de relevé bancaire qui échoue, et comment les corriger.">
+<link rel="canonical" href="https://andre12230-png.github.io/Pecule/import-csv-problemes.html">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mon relevé bancaire CSV ne s'importe pas">
+<meta property="og:description" content="Les causes fréquentes d'un import qui échoue, et comment les corriger.">
+<meta property="og:url" content="https://andre12230-png.github.io/Pecule/import-csv-problemes.html">
+
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:38px 0 32px}
+  header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header .sub{font-size:1.05rem;opacity:.95;margin:10px 0 0;max-width:640px}
+  header .retour{display:inline-block;color:#dce6f7;font-size:.95rem;
+                 text-decoration:none;margin-bottom:14px}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  pre{background:#eef1f6;padding:12px 14px;border-radius:8px;overflow-x:auto;
+      font-family:Consolas,monospace;font-size:.9rem;line-height:1.5}
+
+  .cas{background:var(--carte);border:1px solid var(--bord);border-radius:12px;
+       padding:18px 20px;margin:18px 0}
+  .cas h3{margin:0 0 10px;color:var(--bleu);font-size:1.12rem}
+  .cas .quoi{color:var(--gris);font-style:italic;margin:0 0 12px}
+  .cas p{margin:8px 0}
+  .sol{background:#eef7ef;border-left:4px solid #7bbd8a;padding:10px 14px;
+       border-radius:6px;margin-top:12px}
+  .sol strong{color:var(--vert)}
+  .warn{background:#fff8e6;border-left:4px solid #e8c77b;padding:12px 16px;border-radius:6px;margin:14px 0}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="retour" href="./">← Pécule</a>
+    <h1>Mon relevé bancaire ne s'importe pas</h1>
+    <p class="sub">Les causes fréquentes, comment les reconnaître, et comment
+      les corriger en quelques minutes.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p>Un import qui échoue vient presque toujours de la <strong>forme du fichier</strong>,
+  pas de son contenu. Voici les cas rencontrés, du plus courant au plus rare. Le
+  <a href="import-csv.html">format attendu</a> est détaillé sur une autre page si vous
+  voulez le détail complet.</p>
+</section>
+
+<section>
+  <h2>Les cas les plus fréquents</h2>
+
+  <div class="cas">
+    <h3>« En-tête CSV introuvable »</h3>
+    <p class="quoi">L'import s'arrête net sur ce message.</p>
+    <p>Pécule cherche la ligne qui nomme les colonnes, en repérant les mots
+    <strong>date</strong> et <strong>libellé</strong>. S'il ne trouve aucune ligne
+    contenant les deux, il ne peut pas deviner à quoi correspond chaque colonne.</p>
+    <p>Cela arrive quand l'export ne comporte pas d'en-tête du tout, ou quand les
+    colonnes portent d'autres noms — par exemple « Opération » au lieu de « Libellé ».</p>
+    <div class="sol"><strong>La solution :</strong> ouvrez le fichier dans un tableur
+    ou dans le Bloc-notes et ajoutez, ou renommez, une ligne d'en-tête. Le minimum
+    vital tient en trois mots :
+    <pre>Date;Libelle;Montant</pre>
+    Les accents et les majuscules n'ont aucune importance, et vous pouvez conserver
+    les autres colonnes.</div>
+  </div>
+
+  <div class="cas">
+    <h3>Le fichier est un Excel, pas un CSV</h3>
+    <p class="quoi">Le fichier s'appelle <code>.xls</code> ou <code>.xlsx</code>, et rien ne se passe.</p>
+    <p>Beaucoup de banques proposent « Exporter vers Excel » plutôt que « Exporter en
+    CSV ». Un fichier Excel n'est pas du texte : Pécule ne sait pas le lire.</p>
+    <div class="sol"><strong>La solution :</strong> ouvrez-le dans votre tableur, puis
+    <em>Fichier → Enregistrer sous</em> en choisissant
+    <strong>« CSV (séparateur : point-virgule) »</strong>. Si votre banque propose les
+    deux formats à l'export, prenez le CSV directement.</div>
+  </div>
+
+  <div class="cas">
+    <h3>Toutes les lignes sont ignorées</h3>
+    <p class="quoi">L'import se termine, mais annonce zéro opération importée et zéro doublon.</p>
+    <p>Deux causes possibles, et la même vérification pour les distinguer : ouvrez le
+    fichier dans le Bloc-notes et regardez une ligne.</p>
+    <p><strong>Les colonnes sont séparées par des virgules</strong> — c'est le format
+    anglo-saxon. Pécule attend des points-virgules.</p>
+    <p><strong>Ou les dates ne sont pas au bon format.</strong> Il faut
+    <code>05/01/2026</code> : jour et mois sur deux chiffres, année sur quatre.
+    <code>5/1/2026</code> et <code>2026-01-05</code> sont refusés, et chaque ligne
+    concernée est silencieusement écartée.</p>
+    <div class="sol"><strong>La solution :</strong> dans les deux cas, un passage par
+    le tableau. Réenregistrez en CSV point-virgule, et forcez le format des dates en
+    <em>JJ/MM/AAAA</em> avant d'enregistrer.</div>
+  </div>
+
+  <div class="cas">
+    <h3>Le compte rendu annonce des lignes « illisibles »</h3>
+    <p class="quoi">Des opérations manquent, et le chiffre « illisibles » n'est pas à zéro.</p>
+    <p>Pécule a bien lu ces lignes, mais n'a pas su interpréter leur montant. Plutôt
+    que de les enregistrer à 0 € sans rien dire — ce qui fausserait vos soldes en
+    silence — il les écarte et vous le signale.</p>
+    <p>En cause, presque toujours : un symbole monétaire dans la case
+    (<code>-45,30 €</code>), un texte à la place d'un nombre (« néant », « — »), ou
+    une colonne « Débit » qui contient autre chose que des nombres.</p>
+    <div class="sol"><strong>La solution :</strong> dans le tableur, mettez la colonne
+    des montants au format nombre et retirez ce qui n'en est pas. Les espaces, la
+    virgule décimale et un <code>+</code> en tête, eux, ne posent aucun problème.</div>
+  </div>
+
+  <div class="cas">
+    <h3>Les accents sont remplacés par des caractères bizarres</h3>
+    <p class="quoi">« Prélèvement » devient « PrÃ©lÃ¨vement », ou « Prél?vement ».</p>
+    <p>Pécule détecte l'encodage tout seul et essaie l'UTF-8, puis le Windows-1252,
+    puis le Latin-1. Il est donc rare qu'un relevé de banque française pose problème.
+    Quand cela arrive, c'est en général que le fichier est passé par un tableur qui
+    l'a réenregistré dans un troisième encodage.</p>
+    <div class="sol"><strong>La solution :</strong> repartez du fichier d'origine
+    téléchargé chez votre banque, sans l'ouvrir dans un tableur. Si vous devez
+    absolument le retoucher, enregistrez-le en <strong>UTF-8</strong>.</div>
+  </div>
+
+  <div class="cas">
+    <h3>Tout est marqué en doublon</h3>
+    <p class="quoi">Zéro importée, et un nombre de doublons égal au nombre de lignes.</p>
+    <p>Ce n'est pas une erreur : ce fichier a déjà été importé, ou ses opérations sont
+    déjà en base parce qu'un relevé précédent les contenait. Pécule refuse de compter
+    deux fois la même dépense.</p>
+    <div class="sol"><strong>Rien à faire.</strong> Vous pouvez réimporter un relevé
+    autant de fois que vous voulez sans risque pour vos données.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Une vérification qui règle la plupart des cas</h2>
+
+  <p>Avant de chercher plus loin, ouvrez votre fichier avec le <strong>Bloc-notes</strong>
+  de Windows — pas avec un tableur, qui masque justement ce qu'on veut voir. Vous
+  devez lire quelque chose qui ressemble à ceci :</p>
+
+  <pre>Date;Libelle;Montant
+05/01/2026;LOYER JANVIER;-800,00
+07/01/2026;VIREMENT SALAIRE;2150,00</pre>
+
+  <p>Trois choses à contrôler d'un coup d'œil : des <strong>points-virgules</strong>
+  entre les colonnes, des dates en <strong>JJ/MM/AAAA</strong>, et une
+  <strong>ligne d'en-tête</strong> quelque part au début. Si ces trois conditions sont
+  réunies, l'import passera.</p>
+
+  <div class="warn">
+    <strong>Vos données ne risquent rien pendant ces essais.</strong> Un import raté
+    n'abîme pas votre base, et Pécule en fait une sauvegarde automatique à chaque
+    lancement, avant même d'ouvrir le fichier. Vous pouvez réessayer autant que
+    nécessaire.
+  </div>
+</section>
+
+<section>
+  <h2>Toujours bloqué ?</h2>
+  <p>Si votre relevé respecte ces règles et refuse quand même de s'importer, le cas
+  vaut la peine d'être signalé : c'est peut-être une particularité de votre banque
+  qui mérite d'être prise en charge.
+  <a href="https://github.com/andre12230-png/Pecule/issues">Ouvrez un ticket sur GitHub</a>
+  en décrivant ce que vous voyez — et si vous joignez un extrait de fichier,
+  <strong>remplacez les montants et les libellés réels par des valeurs inventées</strong>.</p>
+</section>
+
+</div>
+
+<footer>
+  <a href="./">Pécule</a> —
+  <a href="import-csv.html">Format d'import CSV</a> ·
+  <a href="https://github.com/andre12230-png/Pecule">Code source</a>
+</footer>
