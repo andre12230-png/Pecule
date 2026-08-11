@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+# Ou trouver le fichier a installer et comment le poser sur la machine.
+# L'archive publiee est un ZIP qui contient un dossier « Comptes-Budget »,
+# lui-meme contenant l'executable : c'est ce que decrivent les deux
+# lignes « NestedInstaller » ci-dessous.
+PackageIdentifier: andre12230-png.ComptesEtBudget
+PackageVersion: 1.21.0
+InstallerType: zip
+NestedInstallerType: portable
+# INDISPENSABLE ici. Par defaut Winget cree un raccourci vers l'executable
+# dans un dossier a part. Or l'application a besoin de son dossier _internal
+# juste a cote d'elle : lancee depuis le raccourci, elle s'arrete aussitot
+# sur « Failed to load Python DLL » (verifie le 11 aout 2026).
+# Avec ce reglage, Winget ajoute le vrai dossier de l'application au PATH
+# au lieu de creer un raccourci, et tout fonctionne normalement.
+ArchiveBinariesDependOnPath: true
+ReleaseDate: 2026-08-09
+Installers:
+- Architecture: x64
+  NestedInstallerFiles:
+  - RelativeFilePath: Comptes-Budget/Comptes-Budget.exe
+  InstallerUrl: https://github.com/andre12230-png/Comptes-Budget/releases/download/v1.21.0/Comptes-Budget-1.21.0-win64.zip
+  InstallerSha256: 9D9044D7C64A3CDC686B30BE2DA14392ABB8982A651D2A8587AA87EF99549835
+ManifestType: installer
+ManifestVersion: 1.12.0
