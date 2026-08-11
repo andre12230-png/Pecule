@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
     QTextBrowser,
 )
 
+from ...constants import _data_dir
+
 
 NOTICE_HTML = """
 <style>
@@ -313,11 +315,18 @@ tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
 
 <h2>6. Sauvegarde des données</h2>
-<p>Toutes vos données sont stockées localement dans le fichier
-<code>comptes.db</code> à côté de l'application (ou de l'exécutable).
-Une <b>sauvegarde automatique</b> est créée à chaque lancement dans le
-sous-dossier <code>sauvegardes\\</code> (une par jour, les 10 dernières
-sont conservées).</p>
+<p>Toutes vos données restent sur votre ordinateur, dans un fichier unique
+nommé <code>comptes.db</code>. Sur cette installation, il se trouve ici :</p>
+<p><code>DOSSIER_DONNEES</code></p>
+<p>Une <b>sauvegarde automatique</b> est créée à chaque lancement dans le
+sous-dossier <code>sauvegardes\\</code> de ce même dossier (une par jour, les
+10 dernières sont conservées).</p>
+<p>Cet emplacement dépend de la façon dont le logiciel a été installé. S'il
+s'agit du dossier de l'application elle-même, c'est une installation dite
+« portable » : tout tient dans un seul dossier, que vous pouvez déplacer ou
+copier tel quel. Sinon, vos données sont rangées dans votre dossier personnel,
+séparément du programme — c'est plus sûr, car une mise à jour du logiciel ne
+peut alors pas les toucher.</p>
 <p>Pour une sauvegarde externe : copiez <code>comptes.db</code> ailleurs
 (clé USB, OneDrive…) — pour restaurer, remettez-le à sa place. Vous pouvez
 aussi utiliser <code>💾 Exporter (JSON)</code> (export complet) puis
@@ -481,7 +490,10 @@ class NoticeView(QWidget):
         notice = QTextBrowser()
         notice.setOpenExternalLinks(True)
         notice.setStyleSheet("QTextBrowser { background:#FFFFFF; padding:14px }")
-        notice.setHtml(NOTICE_HTML)
+        # Le dossier des données varie selon le type d'installation : on affiche
+        # le vrai chemin plutôt qu'une explication vague, pour que l'utilisateur
+        # sache exactement quoi copier lors d'une sauvegarde manuelle.
+        notice.setHtml(NOTICE_HTML.replace("DOSSIER_DONNEES", _data_dir()))
         sub_tabs.addTab(notice, "📖 Notice d'utilisation")
 
         # Glossaire

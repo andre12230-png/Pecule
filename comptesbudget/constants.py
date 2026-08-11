@@ -4,21 +4,50 @@ import re
 import sys
 
 def _app_dir() -> str:
-    """Dossier de l'application : à côté du .exe en mode gelé, sinon le dossier
-    racine du projet — celui du lanceur comptes_budget.py, où se trouvent
-    comptes.db, Budget.ico et le dossier des sauvegardes."""
+    """Dossier du PROGRAMME : à côté du .exe en mode gelé, sinon le dossier
+    racine du projet — celui du lanceur comptes_budget.py, où se trouve
+    Budget.ico. Ce dossier est remplacé lors d'une mise à jour : n'y ranger
+    que ce qui est livré avec l'application, jamais les données."""
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     # Ce module est dans comptesbudget/ ; on remonte d'un cran vers la racine.
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DB_PATH = os.path.join(_app_dir(), "comptes.db")
+
+def _data_dir() -> str:
+    """Dossier des DONNÉES : comptes.db et le dossier des sauvegardes.
+
+    Deux cas, pour ne rien changer chez ceux qui utilisent déjà le logiciel :
+
+    - S'il existe déjà un comptes.db à côté de l'application, c'est celui-là
+      qui sert et rien ne bouge : l'installation reste « portable », comme
+      dans les versions précédentes. C'est aussi le cas avec Scoop, dont le
+      mécanisme « persist » place justement le fichier à cet endroit.
+    - Sinon — installation neuve, Winget, futur installateur — les données
+      vont dans le dossier personnel de l'utilisateur. C'est indispensable :
+      un gestionnaire de paquets remplace le dossier du programme à chaque
+      mise à jour, et emporterait la base avec lui.
+    """
+    if os.path.exists(os.path.join(_app_dir(), "comptes.db")):
+        return _app_dir()
+    base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    dossier = os.path.join(base, "Comptes-Budget")
+    try:
+        os.makedirs(dossier, exist_ok=True)
+    except OSError:
+        # Cas très improbable (droits, disque plein) : plutôt que d'échouer au
+        # démarrage, on retombe sur l'ancien comportement.
+        return _app_dir()
+    return dossier
+
+
+DB_PATH = os.path.join(_data_dir(), "comptes.db")
 
 # Fichier d'échange JSON (historique). La synchronisation automatique avec
 # l'application HTML a été retirée en 1.9.5 (l'app HTML est archivée dans
 # archive/) ; le moteur de fusion plus bas est conservé : il permettrait de
 # réimporter/fusionner un tel fichier si besoin.
-SYNC_PATH = os.path.join(_app_dir(), "comptes_sync.json")
+SYNC_PATH = os.path.join(_data_dir(), "comptes_sync.json")
 SYNC_VERSION = 2
 
 

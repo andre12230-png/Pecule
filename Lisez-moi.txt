@@ -9,9 +9,20 @@ UTILISATION
 - Double-cliquez sur << Comptes-Budget.exe >> pour lancer l'application.
 - Au 1er lancement, si Windows affiche un avertissement (appli non signee) :
   cliquez << Informations complementaires >> puis << Executer quand meme >>.
-- Vos donnees sont enregistrees dans le fichier << comptes.db >>, cree
-  automatiquement A COTE de l'executable. Une sauvegarde quotidienne est
-  faite dans le sous-dossier << sauvegardes >>.
+- Vos donnees sont enregistrees dans un fichier unique, << comptes.db >>,
+  cree automatiquement au 1er lancement. Une sauvegarde quotidienne est
+  faite dans un sous-dossier << sauvegardes >>, a cote de lui.
+  OU se trouve ce fichier ? Deux cas possibles :
+  * S'il existe deja un << comptes.db >> A COTE de l'executable, c'est
+    celui-la qui sert. L'installation reste portable : tout tient dans un
+    seul dossier, que vous pouvez deplacer ou copier tel quel. C'est le cas
+    quand vous mettez a jour une installation existante.
+  * Sinon (installation neuve), il est range dans votre dossier personnel :
+    C:\Users\<votre nom>\AppData\Local\Comptes-Budget
+    Vos donnees y sont mieux protegees : une mise a jour du programme ne
+    peut pas les effacer.
+  Dans les deux cas, l'onglet << Notice >> de l'application affiche le
+  chemin exact du dossier utilise.
   Si vous avez installe l'application avec Scoop, comptes.db et le dossier
   << sauvegardes >> sont ranges dans << scoop\persist\comptes-budget >> :
   ils sont conserves d'une mise a jour a l'autre.

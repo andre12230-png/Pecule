@@ -7,7 +7,8 @@ from datetime import date, datetime, timezone
 from typing import Optional
 
 from .constants import (
-    _app_dir,
+    _app_dir,     # réexporté : app.py l'importe depuis ce module (icône)
+    _data_dir,
     DB_PATH,
     CANONICAL_CATS,
     CATEGORY_COLORS,
@@ -28,7 +29,9 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
     récentes. Retourne le chemin de la sauvegarde du jour, ou None."""
     if not os.path.exists(path):
         return None
-    bdir = os.path.join(_app_dir(), "sauvegardes")
+    # Les sauvegardes suivent la base : même dossier qu'elle, jamais celui du
+    # programme, qui est remplacé à chaque mise à jour.
+    bdir = os.path.join(_data_dir(), "sauvegardes")
     try:
         os.makedirs(bdir, exist_ok=True)
         dest = os.path.join(bdir, f"comptes-{date.today().isoformat()}.db")
