@@ -3,22 +3,22 @@
 # Texte affiche par defaut (anglais). C'est celui que reprennent
 # winstall.app et winget.run. Il precise clairement que l'application
 # elle-meme est en francais, pour ne pas decevoir un anglophone.
-PackageIdentifier: andre12230-png.ComptesEtBudget
+PackageIdentifier: andre12230-png.Pecule
 PackageVersion: 1.21.0
 PackageLocale: en-US
 Publisher: andre12230-png
 PublisherUrl: https://github.com/andre12230-png
-PublisherSupportUrl: https://github.com/andre12230-png/Comptes-Budget/issues
+PublisherSupportUrl: https://github.com/andre12230-png/Pecule/issues
 Author: andre12230-png
-PackageName: Comptes et Budget
-PackageUrl: https://andre12230-png.github.io/Comptes-Budget/
+PackageName: Pécule
+PackageUrl: https://andre12230-png.github.io/Pecule/
 License: MIT
-LicenseUrl: https://github.com/andre12230-png/Comptes-Budget/blob/main/LICENSE
+LicenseUrl: https://github.com/andre12230-png/Pecule/blob/main/LICENSE
 Copyright: Copyright (c) 2026 andre12230-png
 ShortDescription: |-
   Free desktop app to track personal bank accounts and budgets on Windows. All data stays on your PC. French-language interface.
 Description: |-
-  Comptes et Budget (French for "Accounts and Budget") is a free, open source
+  Pécule (French for "nest egg") is a free, open source
   desktop application for tracking personal bank accounts and household budgets
   on Windows 10 and 11. It stores everything in a local SQLite file: no account
   to create, no cloud, no connection to your bank.
@@ -28,7 +28,7 @@ Description: |-
   and local backups.
 
   Please note: the user interface and the CSV import format are French only.
-Moniker: comptes-budget
+Moniker: pecule
 Tags:
 - accounting
 - budget
@@ -46,9 +46,9 @@ Tags:
 - personal-finance
 - privacy
 - sqlite
-ReleaseNotesUrl: https://github.com/andre12230-png/Comptes-Budget/releases/tag/v1.21.0
+ReleaseNotesUrl: https://github.com/andre12230-png/Pecule/releases/tag/v1.21.0
 Documentations:
 - DocumentLabel: Presentation
-  DocumentUrl: https://andre12230-png.github.io/Comptes-Budget/
+  DocumentUrl: https://andre12230-png.github.io/Pecule/
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0

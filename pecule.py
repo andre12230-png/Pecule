@@ -1,11 +1,11 @@
-"""Lanceur de l'application « Comptes et Budget ».
+"""Lanceur de l'application « Pécule ».
 
 Tout le code est désormais organisé dans le package ``comptesbudget/``.
 Ce fichier reste le point d'entrée historique : il est utilisé tel quel par
-les scripts ``.bat`` (Lancer-Comptes-Budget.bat) et par PyInstaller
+les scripts ``.bat`` (Lancer-Pecule.bat) et par PyInstaller
 (Construire-Exe.bat), qui n'ont donc pas besoin d'être modifiés.
 
-Lancement :  python comptes_budget.py
+Lancement :  python pecule.py
 """
 from comptesbudget.app import main
 

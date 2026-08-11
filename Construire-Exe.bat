@@ -3,13 +3,13 @@ rem ==========================================================================
 rem  Construit un executable autonome de l'application, puis (au choix) met
 rem  a jour votre installation sans jamais toucher a vos donnees.
 rem
-rem  Resultat : dist\Comptes-Budget\ (dossier autonome --onedir)
+rem  Resultat : dist\Pecule\ (dossier autonome --onedir)
 rem
 rem  IMPORTANT : ne recopiez JAMAIS le dossier dist\ entier par-dessus une
 rem  installation existante. Si vous avez lance l'application depuis dist\,
 rem  une comptes.db VIDE y a ete creee, et elle ecraserait vos operations.
 rem  L'etape 4 de ce script fait la mise a jour correctement : elle ne copie
-rem  que le programme (Comptes-Budget.exe et _internal\).
+rem  que le programme (Pecule.exe et _internal\).
 rem ==========================================================================
 
 setlocal
@@ -19,7 +19,7 @@ rem --------------------------------------------------------------------------
 rem  Dossier ou l'application est installee : celui qui contient VOTRE
 rem  comptes.db. Modifiez cette ligne si vous deplacez l'application.
 rem --------------------------------------------------------------------------
-set "INSTALL_DIR=F:\budget-app\Comptes-Budget"
+set "INSTALL_DIR=F:\budget-app\Pecule"
 
 rem --------------------------------------------------------------------------
 rem  Python utilise pour construire. On prend celui du systeme ; pour en
@@ -77,19 +77,19 @@ echo === 2/4 : Construction de l'executable ===
     --noconfirm ^
     --onedir ^
     --windowed ^
-    --name "Comptes-Budget" ^
+    --name "Pecule" ^
     --icon "%~dp0Budget.ico" ^
     --add-data "%~dp0Budget.ico;." ^
     --distpath "%~dp0dist" ^
     --workpath "%~dp0build" ^
     --specpath "%~dp0build" ^
-    comptes_budget.py
+    pecule.py
 if errorlevel 1 (
     echo ERREUR : la construction a echoue.
     pause
     exit /b 1
 )
-if not exist "%~dp0dist\Comptes-Budget\Comptes-Budget.exe" (
+if not exist "%~dp0dist\Pecule\Pecule.exe" (
     echo ERREUR : l'executable n'a pas ete produit.
     pause
     exit /b 1
@@ -101,8 +101,8 @@ echo === 3/4 : Nettoyage du dossier de construction ===
 rem  Si l'executable a deja ete lance depuis dist\, il y a cree une base
 rem  VIDE. On la supprime : ainsi le dossier dist\ ne contient que le
 rem  programme, et une copie malencontreuse ne peut plus ecraser de donnees.
-if exist "%~dp0dist\Comptes-Budget\comptes.db" (
-    del /q "%~dp0dist\Comptes-Budget\comptes.db"
+if exist "%~dp0dist\Pecule\comptes.db" (
+    del /q "%~dp0dist\Pecule\comptes.db"
     echo Base de test supprimee de dist\ ^(elle etait vide^).
 ) else (
     echo Rien a nettoyer.
@@ -111,11 +111,11 @@ if exist "%~dp0dist\Comptes-Budget\comptes.db" (
 rem --------------------------------------------------------------------------
 echo.
 echo === 4/4 : Mise a jour de votre installation ===
-if not exist "%INSTALL_DIR%\Comptes-Budget.exe" (
+if not exist "%INSTALL_DIR%\Pecule.exe" (
     echo Aucune installation trouvee dans :
     echo    %INSTALL_DIR%
     echo Etape ignoree. Pour une PREMIERE installation, copiez le dossier
-    echo    %~dp0dist\Comptes-Budget\
+    echo    %~dp0dist\Pecule\
     echo la ou vous voulez : il est autonome.
     goto :fin
 )
@@ -124,11 +124,11 @@ echo Installation detectee : %INSTALL_DIR%
 if exist "%INSTALL_DIR%\comptes.db" (
     for %%f in ("%INSTALL_DIR%\comptes.db") do echo Vos donnees : comptes.db ^(%%~zf octets^) - NE SERA PAS TOUCHEE.
 )
-echo Seront remplaces : Comptes-Budget.exe et le dossier _internal\
+echo Seront remplaces : Pecule.exe et le dossier _internal\
 echo.
 
 rem  L'application doit etre fermee, sinon la copie echoue a moitie.
-tasklist /fi "imagename eq Comptes-Budget.exe" 2>nul | find /i "Comptes-Budget.exe" >nul
+tasklist /fi "imagename eq Pecule.exe" 2>nul | find /i "Pecule.exe" >nul
 if not errorlevel 1 (
     echo ERREUR : l'application est en cours d'execution.
     echo Fermez-la, puis relancez ce script.
@@ -144,7 +144,7 @@ if errorlevel 2 (
 
 echo.
 echo Copie du programme...
-copy /y "%~dp0dist\Comptes-Budget\Comptes-Budget.exe" "%INSTALL_DIR%\Comptes-Budget.exe" >nul
+copy /y "%~dp0dist\Pecule\Pecule.exe" "%INSTALL_DIR%\Pecule.exe" >nul
 if errorlevel 1 (
     echo ERREUR : copie de l'executable impossible.
     pause
@@ -152,7 +152,7 @@ if errorlevel 1 (
 )
 rem  /MIR ne s'applique qu'au sous-dossier _internal (uniquement du
 rem  programme) : ni comptes.db ni sauvegardes\ ne sont concernes.
-robocopy "%~dp0dist\Comptes-Budget\_internal" "%INSTALL_DIR%\_internal" /MIR /NFL /NDL /NJH /NJS /NP >nul
+robocopy "%~dp0dist\Pecule\_internal" "%INSTALL_DIR%\_internal" /MIR /NFL /NDL /NJH /NJS /NP >nul
 if errorlevel 8 (
     echo ERREUR : copie des bibliotheques impossible.
     pause
@@ -167,8 +167,8 @@ if exist "%INSTALL_DIR%\comptes.db" (
 echo.
 echo ==========================================================================
 echo  Termine.
-echo    Executable construit : %~dp0dist\Comptes-Budget\Comptes-Budget.exe
-if exist "%INSTALL_DIR%\Comptes-Budget.exe" echo    Installation         : %INSTALL_DIR%\Comptes-Budget.exe
+echo    Executable construit : %~dp0dist\Pecule\Pecule.exe
+if exist "%INSTALL_DIR%\Pecule.exe" echo    Installation         : %INSTALL_DIR%\Pecule.exe
 echo ==========================================================================
 echo.
 pause

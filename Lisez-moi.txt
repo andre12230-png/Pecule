@@ -6,7 +6,7 @@ comptes et de budget personnel. Aucune installation de Python requise.
 UTILISATION
 -------------------------------------------------------------------
 - Decompressez ce dossier ou vous voulez (le programme est portable).
-- Double-cliquez sur << Comptes-Budget.exe >> pour lancer l'application.
+- Double-cliquez sur << Pecule.exe >> pour lancer l'application.
 - Au 1er lancement, si Windows affiche un avertissement (appli non signee) :
   cliquez << Informations complementaires >> puis << Executer quand meme >>.
 - Vos donnees sont enregistrees dans un fichier unique, << comptes.db >>,
@@ -18,17 +18,17 @@ UTILISATION
     seul dossier, que vous pouvez deplacer ou copier tel quel. C'est le cas
     quand vous mettez a jour une installation existante.
   * Sinon (installation neuve), il est range dans votre dossier personnel :
-    C:\Users\<votre nom>\AppData\Local\Comptes-Budget
+    C:\Users\<votre nom>\AppData\Local\Pecule
     Vos donnees y sont mieux protegees : une mise a jour du programme ne
     peut pas les effacer.
   Dans les deux cas, l'onglet << Notice >> de l'application affiche le
   chemin exact du dossier utilise.
   Si vous avez installe l'application avec Scoop, comptes.db et le dossier
-  << sauvegardes >> sont ranges dans << scoop\persist\comptes-budget >> :
+  << sauvegardes >> sont ranges dans << scoop\persist\pecule >> :
   ils sont conserves d'une mise a jour a l'autre.
 
 MISE A JOUR depuis une version precedente : remplacez seulement
-Comptes-Budget.exe et le dossier _internal. Ne recopiez JAMAIS le dossier
+Pecule.exe et le dossier _internal. Ne recopiez JAMAIS le dossier
 entier par-dessus une installation existante : vous ecraseriez votre
 fichier comptes.db et perdriez vos operations.
 
@@ -68,7 +68,7 @@ INFOS
 -------------------------------------------------------------------
 - Vos donnees restent sur VOTRE ordinateur, rien n'est envoye en ligne.
 - Pour sauvegarder : copiez le fichier << comptes.db >> ailleurs.
-- Presentation : https://andre12230-png.github.io/Comptes-Budget/
-- Code source   : https://github.com/andre12230-png/Comptes-Budget
+- Presentation : https://andre12230-png.github.io/Pecule/
+- Code source   : https://github.com/andre12230-png/Pecule
 
 Windows 10 / 11 - 64 bits.

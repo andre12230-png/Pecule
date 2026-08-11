@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
     def __init__(self, db: Database):
         super().__init__()
         self.db = db
-        self.setWindowTitle(f"Comptes et Budget — v{APP_VERSION}")
+        self.setWindowTitle(f"Pécule — v{APP_VERSION}")
         self.resize(1280, 800)
 
         # Icône de la fenêtre (Budget.ico à côté du .py/.exe)
@@ -361,7 +361,7 @@ class MainWindow(QMainWindow):
         if self.db.get_setting("initial_balance"):
             return
         QMessageBox.information(
-            self, "Bienvenue dans Comptes et Budget",
+            self, "Bienvenue dans Pécule",
             "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
             "le solde de votre compte à la date de début choisie.<br><br>"
             "Vous pourrez le modifier à tout moment via le bouton "

@@ -31,7 +31,7 @@ NOTICE_HTML = """
 
 <h1>📖 Notice d'utilisation</h1>
 
-<p>Bienvenue dans <b>Comptes et Budget</b>, votre outil de gestion bancaire personnelle.
+<p>Bienvenue dans <b>Pécule</b>, votre outil de gestion bancaire personnelle.
 Cette notice vous guide à travers les principales fonctionnalités.</p>
 
 <h2>1. Premier démarrage</h2>

@@ -2,7 +2,7 @@
 
 # Fichier « chapeau » : il ne fait que relier les deux autres manifestes
 # et indiquer quelle langue sert de description par defaut.
-PackageIdentifier: andre12230-png.ComptesEtBudget
+PackageIdentifier: andre12230-png.Pecule
 PackageVersion: 1.21.0
 DefaultLocale: en-US
 ManifestType: version

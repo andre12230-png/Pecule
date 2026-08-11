@@ -5,7 +5,7 @@ import sys
 
 def _app_dir() -> str:
     """Dossier du PROGRAMME : à côté du .exe en mode gelé, sinon le dossier
-    racine du projet — celui du lanceur comptes_budget.py, où se trouve
+    racine du projet — celui du lanceur pecule.py, où se trouve
     Budget.ico. Ce dossier est remplacé lors d'une mise à jour : n'y ranger
     que ce qui est livré avec l'application, jamais les données."""
     if getattr(sys, "frozen", False):
@@ -31,7 +31,7 @@ def _data_dir() -> str:
     if os.path.exists(os.path.join(_app_dir(), "comptes.db")):
         return _app_dir()
     base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
-    dossier = os.path.join(base, "Comptes-Budget")
+    dossier = os.path.join(base, "Pecule")
     try:
         os.makedirs(dossier, exist_ok=True)
     except OSError:

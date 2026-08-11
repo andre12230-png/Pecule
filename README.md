@@ -1,14 +1,14 @@
-# Comptes et Budget
+# Pécule
 
 **Français** · [English](#-english--personal-accounting-and-budgeting-for-windows)
 
-[![Téléchargements](https://badgen.net/github/assets-dl/andre12230-png/Comptes-Budget?label=t%C3%A9l%C3%A9chargements&color=green)](https://github.com/andre12230-png/Comptes-Budget/releases)
-[![Dernière version](https://badgen.net/github/tag/andre12230-png/Comptes-Budget?label=version)](https://github.com/andre12230-png/Comptes-Budget/releases/latest)
-[![Licence](https://badgen.net/github/license/andre12230-png/Comptes-Budget)](LICENSE)
+[![Téléchargements](https://badgen.net/github/assets-dl/andre12230-png/Pecule?label=t%C3%A9l%C3%A9chargements&color=green)](https://github.com/andre12230-png/Pecule/releases)
+[![Dernière version](https://badgen.net/github/tag/andre12230-png/Pecule?label=version)](https://github.com/andre12230-png/Pecule/releases/latest)
+[![Licence](https://badgen.net/github/license/andre12230-png/Pecule)](LICENSE)
 
-> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Comptes-Budget/) · [dernière version (.zip)](https://github.com/andre12230-png/Comptes-Budget/releases/latest) · [itch.io](https://andre12230.itch.io/comptes-et-budget)
+> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [dernière version (.zip)](https://github.com/andre12230-png/Pecule/releases/latest) · [itch.io](https://andre12230.itch.io/comptes-et-budget)
 
-> 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Comptes-Budget/main/bucket/comptes-budget.json`
+> 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
 
 Application de bureau pour la **gestion de comptes et de budget personnels** :
 suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel
@@ -34,8 +34,8 @@ Python d'une ancienne application HTML/JS.
 
 ## 🇬🇧 English — personal accounting and budgeting for Windows
 
-**Comptes et Budget** is a free, open-source desktop application for tracking
-personal bank accounts and budgets. It is built with **PySide6 (Qt)** and stores
+**Pécule** (French for "nest egg") is a free, open-source desktop application
+for tracking personal bank accounts and budgets. It is built with **PySide6 (Qt)** and stores
 everything in a **local SQLite** file: no account to create, no cloud, no
 telemetry — your financial data never leaves your computer.
 
@@ -53,15 +53,15 @@ telemetry — your financial data never leaves your computer.
 
 ```bash
 pip install PySide6
-python comptes_budget.py
+python pecule.py
 ```
 
 Windows users can instead download the standalone `.exe`
-([latest release](https://github.com/andre12230-png/Comptes-Budget/releases/latest))
+([latest release](https://github.com/andre12230-png/Pecule/releases/latest))
 or install via [Scoop](https://scoop.sh):
 
 ```bash
-scoop install https://raw.githubusercontent.com/andre12230-png/Comptes-Budget/main/bucket/comptes-budget.json
+scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
 ```
 
 Requires Python ≥ 3.9 (developed and tested on 3.13 / 3.14). Licensed under
@@ -71,7 +71,7 @@ and runs on Linux and macOS.
 > ℹ️ **Note:** the user interface, the built-in manual and the rest of this
 > README are in **French**. The CSV importer is tuned for French bank exports.
 > Contributions towards internationalisation are welcome — see
-> [Issues](https://github.com/andre12230-png/Comptes-Budget/issues).
+> [Issues](https://github.com/andre12230-png/Pecule/issues).
 
 ---
 
@@ -125,11 +125,11 @@ pip install PySide6
 **Lancer l'application :**
 
 ```bash
-python comptes_budget.py
+python pecule.py
 ```
 
 Sous Windows, on peut aussi double-cliquer sur
-[`Lancer-Comptes-Budget.bat`](Lancer-Comptes-Budget.bat) (utilise `pythonw.exe`
+[`Lancer-Pecule.bat`](Lancer-Pecule.bat) (utilise `pythonw.exe`
 pour éviter la console noire), ou lancer le package directement :
 
 ```bash
@@ -145,25 +145,25 @@ Le script [`Construire-Exe.bat`](Construire-Exe.bat) produit un `.exe` autonome
 
 ```bash
 python -m PyInstaller --noconfirm --onefile --windowed ^
-    --name "Comptes-Budget" --icon Budget.ico --add-data "Budget.ico;." ^
-    --collect-submodules PySide6 comptes_budget.py
+    --name "Pecule" --icon Budget.ico --add-data "Budget.ico;." ^
+    --collect-submodules PySide6 pecule.py
 ```
 
-Le point d'entrée reste `comptes_budget.py` : PyInstaller suit l'import du package
+Le point d'entrée reste `pecule.py` : PyInstaller suit l'import du package
 et embarque automatiquement tout `comptesbudget/`.
 
 ---
 
 ## Architecture du projet
 
-Le code est organisé en un **lanceur léger** (`comptes_budget.py`) et un **package
+Le code est organisé en un **lanceur léger** (`pecule.py`) et un **package
 `comptesbudget/`** découpé en couches. Les dépendances sont **strictement
 descendantes (graphe acyclique)** : l'interface dépend de la logique, qui dépend
 de la fondation — jamais l'inverse.
 
 ```mermaid
 flowchart TD
-    L["comptes_budget.py — lanceur"] --> APP["comptesbudget/app.py — main()"]
+    L["pecule.py — lanceur"] --> APP["comptesbudget/app.py — main()"]
     APP --> MW["ui/main_window.py — MainWindow"]
     MW --> V["ui/views/ — 8 vues"]
     MW --> C["ui/ — dialogs · assistants · models · widgets · report · search"]
@@ -187,7 +187,7 @@ flowchart TD
 ### Arborescence
 
 ```
-comptes_budget.py            Lanceur (point d'entrée des .bat et de PyInstaller)
+pecule.py            Lanceur (point d'entrée des .bat et de PyInstaller)
 comptesbudget/
 ├── __init__.py
 ├── __main__.py              Permet « python -m comptesbudget »
@@ -248,7 +248,7 @@ python outils/faire_archive.py
 ```
 
 Il ajoute `Lisez-moi.txt` et `Budget.ico` au dossier construit, écrit le `.zip`
-puis affiche l'empreinte SHA-256 à reporter dans `bucket/comptes-budget.json`.
+puis affiche l'empreinte SHA-256 à reporter dans `bucket/pecule.json`.
 
 **Ne fabriquez pas ce `.zip` avec le clic droit de Windows.** `Compress-Archive`
 écrit les entrées de dossier sans le marqueur « répertoire » : un outil strict

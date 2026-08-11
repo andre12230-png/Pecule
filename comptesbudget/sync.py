@@ -17,7 +17,7 @@ def db_snapshot(db: "Database") -> dict:
     """État complet de la base pour le fichier de synchronisation."""
     return {
         "version": SYNC_VERSION,
-        "app": "comptes_budget.py",
+        "app": "pecule.py",
         "synced_at": _now_iso(),
         "transactions": [dict(r) for r in db.list_tx()],
         "rules":        [dict(r) for r in db.list_rules()],

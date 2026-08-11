@@ -1,6 +1,6 @@
 """Fabrique l'archive .zip de la release, prête à être publiée.
 
-À lancer APRÈS Construire-Exe.bat, qui produit dist/Comptes-Budget/.
+À lancer APRÈS Construire-Exe.bat, qui produit dist/Pecule/.
 
 Ce script fait trois choses que le .bat ne fait pas :
 
@@ -11,7 +11,7 @@ Ce script fait trois choses que le .bat ne fait pas :
     un outil strict y voit alors un fichier vide en conflit avec le dossier
     du même nom, et refuse l'archive. C'est arrivé avec butler sur la 1.21.0,
     alors que Windows l'extrayait sans rien signaler ;
-  * il affiche l'empreinte SHA-256, à reporter dans bucket/comptes-budget.json.
+  * il affiche l'empreinte SHA-256, à reporter dans bucket/pecule.json.
 
 Lancement (depuis n'importe où) :
 
@@ -30,7 +30,7 @@ sys.path.insert(0, RACINE)
 
 from comptesbudget.constants import APP_VERSION      # noqa: E402
 
-DOSSIER_BUILD = os.path.join(RACINE, "dist", "Comptes-Budget")
+DOSSIER_BUILD = os.path.join(RACINE, "dist", "Pecule")
 A_COPIER = ("Lisez-moi.txt", "Budget.ico")
 
 
@@ -100,7 +100,7 @@ def controler(cible):
             problemes.append("des noms sont en double")
         if z.testzip() is not None:
             problemes.append("des données sont corrompues")
-        if "Comptes-Budget/Comptes-Budget.exe" not in noms:
+        if "Pecule/Pecule.exe" not in noms:
             problemes.append("l'exécutable est absent")
     if problemes:
         raise SystemExit("ARCHIVE INVALIDE : " + " ; ".join(problemes))
@@ -119,7 +119,7 @@ def main():
     preparer(DOSSIER_BUILD)
 
     os.makedirs(sortie, exist_ok=True)
-    cible = os.path.join(sortie, f"Comptes-Budget-{APP_VERSION}-win64.zip")
+    cible = os.path.join(sortie, f"Pecule-{APP_VERSION}-win64.zip")
     n = archiver(DOSSIER_BUILD, cible)
     print(f"  {n} fichiers archivés")
     controler(cible)
@@ -130,7 +130,7 @@ def main():
     print(f"Taille  : {os.path.getsize(cible)} octets")
     print(f"SHA-256 : {empreinte}")
     print()
-    print("À reporter dans bucket/comptes-budget.json (version, url, hash),")
+    print("À reporter dans bucket/pecule.json (version, url, hash),")
     print("puis publier la release GitHub et pousser sur itch.io avec butler.")
 
 
