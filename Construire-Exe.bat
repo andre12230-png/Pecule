@@ -73,12 +73,22 @@ rem  commande sur les guillemets internes ("python" -c "import ...").
 rem --------------------------------------------------------------------------
 echo.
 echo === 2/4 : Construction de l'executable ===
+rem  Informations d'identite du .exe (nom, version, copyright). Sans elles,
+rem  Windows affiche << Editeur inconnu >> et un panneau vide dans
+rem  l'avertissement SmartScreen. Regenerees a chaque fois depuis APP_VERSION.
+"%PYTHON%" "%~dp0outils\version_exe.py" "%~dp0build\version-exe.txt"
+if errorlevel 1 (
+    echo ERREUR : impossible de generer les informations de version.
+    pause
+    exit /b 1
+)
 "%PYTHON%" -m PyInstaller ^
     --noconfirm ^
     --onedir ^
     --windowed ^
     --name "Pecule" ^
     --icon "%~dp0Budget.ico" ^
+    --version-file "%~dp0build\version-exe.txt" ^
     --add-data "%~dp0Budget.ico;." ^
     --distpath "%~dp0dist" ^
     --workpath "%~dp0build" ^
