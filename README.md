@@ -1,5 +1,7 @@
 # Comptes et Budget
 
+**Français** · [English](#-english--personal-accounting-and-budgeting-for-windows)
+
 [![Téléchargements](https://badgen.net/github/assets-dl/andre12230-png/Comptes-Budget?label=t%C3%A9l%C3%A9chargements&color=green)](https://github.com/andre12230-png/Comptes-Budget/releases)
 [![Dernière version](https://badgen.net/github/tag/andre12230-png/Comptes-Budget?label=version)](https://github.com/andre12230-png/Comptes-Budget/releases/latest)
 [![Licence](https://badgen.net/github/license/andre12230-png/Comptes-Budget)](LICENSE)
@@ -27,6 +29,51 @@ Python d'une ancienne application HTML/JS.
 | ![Liste des opérations](docs/media/promo_2_operations.png) | ![Prévisionnel des opérations récurrentes](docs/media/promo_4_previsionnel.png) |
 
 *Captures réalisées avec des données d'exemple.*
+
+---
+
+## 🇬🇧 English — personal accounting and budgeting for Windows
+
+**Comptes et Budget** is a free, open-source desktop application for tracking
+personal bank accounts and budgets. It is built with **PySide6 (Qt)** and stores
+everything in a **local SQLite** file: no account to create, no cloud, no
+telemetry — your financial data never leaves your computer.
+
+**What it does**
+
+- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection
+- **Budgets** — monthly per-category budgets with progress bars and overspend alerts
+- **Auto-categorisation** — user-defined rules (pattern → category) applied on import
+- **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
+- **CSV import** — French bank statement formats (BPCE, Crédit Mutuel, Crédit Agricole; windows-1252)
+- **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
+- **Automatic daily backup** of the database
+
+**Install**
+
+```bash
+pip install PySide6
+python comptes_budget.py
+```
+
+Windows users can instead download the standalone `.exe`
+([latest release](https://github.com/andre12230-png/Comptes-Budget/releases/latest))
+or install via [Scoop](https://scoop.sh):
+
+```bash
+scoop install https://raw.githubusercontent.com/andre12230-png/Comptes-Budget/main/bucket/comptes-budget.json
+```
+
+Requires Python ≥ 3.9 (developed and tested on 3.13 / 3.14). Licensed under
+**MIT**. Windows 10/11 is the primary target, but the code is pure Python + Qt
+and runs on Linux and macOS.
+
+> ℹ️ **Note:** the user interface, the built-in manual and the rest of this
+> README are in **French**. The CSV importer is tuned for French bank exports.
+> Contributions towards internationalisation are welcome — see
+> [Issues](https://github.com/andre12230-png/Comptes-Budget/issues).
+
+---
 
 ## Fonctionnalités
 
