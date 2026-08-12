@@ -43,8 +43,8 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       votre solde réel à toute date ultérieure.</li>
   <li><b>Importer vos relevés bancaires</b> en CSV : trois moyens possibles
       <ul>
-        <li>Bouton <code>📥 Importer CSV</code> dans le menu de gauche</li>
-        <li><b>Glisser-déposer</b> un ou plusieurs fichiers CSV directement sur la fenêtre</li>
+        <li>Bouton <code>📥 Importer un relevé</code> dans le menu de gauche</li>
+        <li><b>Glisser-déposer</b> un ou plusieurs fichiers directement sur la fenêtre</li>
         <li>Saisie manuelle via <code>➕ Nouvelle opération</code></li>
       </ul>
       L'app gère les CSV des banques françaises — les colonnes sont reconnues par leur nom :
@@ -56,6 +56,26 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       automatiquement</b>. La ligne récapitulative du <b>débit différé</b> de la carte
       (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES ») n'est <b>jamais importée</b> : elle
       totalise des achats qui figurent déjà un par un dans le relevé.
+  </li>
+  <li><b>Reprendre l'historique d'un autre logiciel</b>, au format <b>QIF</b> : c'est le
+      format d'échange qu'exportent Microsoft&nbsp;Money, Quicken, GnuCash, HomeBank et la
+      plupart des gestionnaires de comptes. Même bouton, même glisser-déposer : Pécule
+      reconnaît le fichier à son extension <code>.qif</code> et le traite comme un relevé,
+      avec la même détection des doublons et les mêmes règles de catégorisation.
+      <ul>
+        <li>Les dates sont interprétées automatiquement, que le fichier soit européen
+            (jour/mois) ou américain (mois/jour), de même que les montants
+            (« 1&nbsp;234,56 » ou « 1,234.56 »).</li>
+        <li>La catégorie du fichier (« Alimentation:Supermarché ») devient catégorie et
+            sous-catégorie ; un <b>virement vers un autre compte</b> est signalé en note
+            plutôt que rangé dans une catégorie de dépense qui fausserait votre budget.</li>
+        <li>Une opération <b>ventilée</b> sur plusieurs catégories est reprise pour son
+            montant total, avec sa première catégorie : Pécule ne sait pas découper une
+            opération en plusieurs morceaux.</li>
+        <li><b>Un fichier contenant plusieurs comptes est refusé</b>, sans rien enregistrer.
+            Pécule suit un seul compte par fichier de données : exportez un compte à la fois
+            depuis votre ancien logiciel.</li>
+      </ul>
   </li>
 </ol>
 
@@ -291,7 +311,7 @@ confirme sans jamais dépointer ce que vous avez fait à la main.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
-  <tr><td>📥 Importer CSV</td><td>Import d'un relevé bancaire (ou glisser-déposer)</td></tr>
+  <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
   <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>🔧 Harmoniser</td><td>Suggère des catégorisations d'après les libellés</td></tr>
   <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
@@ -385,10 +405,16 @@ prédéfinis (ex : tout ce qui contient « Carrefour » → Alimentation).
 Distinct des règles : c'est une suggestion ponctuelle, pas une règle persistante.</dd>
 
 <dt>Importer</dt>
-<dd>Charger un fichier CSV bancaire dans l'application. Les opérations déjà
-présentes sont reconnues et ignorées, même entre deux relevés qui se
-chevauchent ; deux opérations réellement identiques le même jour sont en
+<dd>Charger un relevé bancaire (CSV) ou un fichier QIF dans l'application. Les
+opérations déjà présentes sont reconnues et ignorées, même entre deux relevés
+qui se chevauchent ; deux opérations réellement identiques le même jour sont en
 revanche toutes deux conservées.</dd>
+
+<dt>QIF</dt>
+<dd><i>Quicken Interchange Format.</i> Format d'échange commun aux logiciels de
+comptes personnels (Microsoft Money, Quicken, GnuCash, HomeBank…). Sert à
+reprendre l'historique d'un ancien logiciel : exportez-en un fichier
+<code>.qif</code>, un compte à la fois, et importez-le dans Pécule.</dd>
 
 <dt>Libellé</dt>
 <dd>Texte descriptif de l'opération tel qu'apparu sur le relevé bancaire

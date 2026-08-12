@@ -21,6 +21,7 @@ from ..utils import (
 from ..database import Database
 from ..labels import clean_libelle
 from ..csv_import import import_csv
+from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
 from .widgets import PeriodBar
@@ -79,7 +80,9 @@ class MainWindow(QMainWindow):
             mv.addWidget(line)
 
         add_btn("➕ Nouvelle opération", self.action_new_tx)
-        add_btn("📥 Importer CSV", self.action_import)
+        add_btn("📥 Importer un relevé", self.action_import,
+                "Relevé bancaire CSV, ou fichier QIF exporté depuis un autre "
+                "logiciel de comptes (Money, Quicken…)")
         add_sep()
         add_btn("🧹 Nettoyer catégories", self.action_clean_cats)
         add_btn("🔧 Harmoniser", self.action_harmonize,
@@ -217,14 +220,15 @@ class MainWindow(QMainWindow):
 
     def action_import(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Importer un CSV bancaire", "",
-            "Fichiers CSV (*.csv *.txt);;Tous (*.*)")
+            self, "Importer un relevé", "",
+            "Relevés (*.csv *.txt *.qif);;Fichiers CSV (*.csv *.txt);;"
+            "Fichiers QIF (*.qif);;Tous (*.*)")
         if not path:
             return
         self._import_files([path])
 
     def _import_files(self, paths: list[str]):
-        """Importe une liste de fichiers CSV et résume le résultat."""
+        """Importe une liste de relevés (CSV ou QIF) et résume le résultat."""
         total_imp = 0
         total_skip = 0
         total_bad = 0
@@ -236,8 +240,11 @@ class MainWindow(QMainWindow):
             try:
                 # Un fichier = une transaction groupée : import quasi instantané
                 # (une seule écriture disque) et tout-ou-rien en cas d'erreur.
+                # Le format se reconnaît à l'extension ; les deux imports
+                # rendent le même compte rendu.
+                lecteur = import_qif if p.lower().endswith(".qif") else import_csv
                 with self.db.batch():
-                    imp, skip, bad, pt, recap, rappr = import_csv(p, self.db)
+                    imp, skip, bad, pt, recap, rappr = lecteur(p, self.db)
                 total_imp += imp
                 total_skip += skip
                 total_bad += bad
@@ -279,7 +286,7 @@ class MainWindow(QMainWindow):
             if not url.isLocalFile():
                 continue
             p = url.toLocalFile()
-            if p.lower().endswith((".csv", ".txt")):
+            if p.lower().endswith((".csv", ".txt", ".qif")):
                 out.append(p)
         return out
 
@@ -287,7 +294,7 @@ class MainWindow(QMainWindow):
         if self._accepted_drop_paths(event):
             event.acceptProposedAction()
             self.statusBar().showMessage(
-                "📥 Relâchez pour importer le(s) CSV…")
+                "📥 Relâchez pour importer le(s) relevé(s)…")
         else:
             event.ignore()
 

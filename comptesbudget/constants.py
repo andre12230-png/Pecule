@@ -335,7 +335,26 @@ SYNC_VERSION = 2
 #            lui-même pour la barre des tâches — d'où un rendu mou aux petites
 #            tailles. Elle embarque désormais 16, 24, 32, 48, 64, 128 et 256.
 #          Aucun changement de fonctionnement.
-APP_VERSION = "1.22.1"
+# 1.23.0 : import des fichiers QIF, pour reprendre l'historique d'un autre
+#          logiciel de comptes (Microsoft Money, Quicken, GnuCash, HomeBank…).
+#          • Le QIF est traduit en lignes de relevé puis confié à l'import CSV
+#            existant (import_csv_text) : détection des doublons, règles de
+#            catégorisation, pointage automatique et rattachement des échéances
+#            prévues s'appliquent sans code en double.
+#          • Dates et montants reconnus qu'ils soient européens ou américains.
+#            L'ordre jour/mois se décide sur l'ensemble du fichier, pas ligne à
+#            ligne ; un séparateur unique suivi de trois chiffres est un
+#            séparateur de milliers (aucun relevé n'a trois décimales).
+#          • Un fichier contenant plusieurs comptes est REFUSÉ sans rien
+#            enregistrer : Pécule suit un seul compte par base, les mélanger
+#            fausserait solde, budget et prévisionnel.
+#          • Un virement vers un autre compte (« [Livret A] ») est noté en
+#            information au lieu d'être rangé dans une catégorie de dépense.
+#            Une opération ventilée est reprise pour son montant total avec sa
+#            première catégorie.
+#          • Le bouton « 📥 Importer CSV » devient « 📥 Importer un relevé » et
+#            accepte les deux formats, au clic comme au glisser-déposer.
+APP_VERSION = "1.23.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

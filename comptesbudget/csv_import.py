@@ -161,8 +161,16 @@ def import_csv(path: str, db: Database) -> ResultatImport:
     """Lit un CSV bancaire français et insère les transactions.
     Retourne un ResultatImport (cf. la description de ses six compteurs)."""
     with open(path, "rb") as f:
-        text = _decode_csv(f.read())
+        return import_csv_text(_decode_csv(f.read()), db)
 
+
+def import_csv_text(text: str, db: Database) -> ResultatImport:
+    """Import proprement dit, à partir du CONTENU du relevé déjà décodé.
+
+    Séparé de import_csv pour que l'import QIF (qif_import.py) réutilise
+    exactement la même mécanique — doublons, règles, pointage automatique,
+    rattachement des échéances prévues — après avoir traduit le fichier
+    QIF en lignes de relevé."""
     lines = [l for l in text.splitlines() if l.strip()]
     # Trouver la ligne d'en-tête
     header_idx = None

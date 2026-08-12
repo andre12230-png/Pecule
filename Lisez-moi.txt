@@ -1,4 +1,4 @@
-PECULE - version 1.22.1
+PECULE - version 1.23.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -37,6 +37,11 @@ FONCTIONS
 -------------------------------------------------------------------
 - Import des releves bancaires au format CSV. Les colonnes sont
   reconnues par leur nom, quelle que soit la banque francaise.
+- Import au format QIF, pour reprendre l'historique d'un autre logiciel
+  (Microsoft Money, Quicken, GnuCash, HomeBank...). Dates et montants
+  europeens ou americains sont reconnus automatiquement. Un fichier
+  contenant plusieurs comptes est refuse : Pecule suit un seul compte
+  par fichier de donnees, exportez un compte a la fois.
 - Categorisation automatique (regles), budgets mensuels avec barres de
   progression, previsionnel des operations recurrentes, bilan avec
   graphiques, rapport mensuel (impression / PDF), rapprochement (pointage).
