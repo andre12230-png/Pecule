@@ -1,21 +1,33 @@
 # Manifestes Winget
 
 Paquet Winget pour Pecule. **Il n'est pas encore soumis à
-[`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs), et ne doit
-pas l'être en l'état.**
+[`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs).**
 
-Les manifestes sont complets et validés (`winget validate`), mais un test
-d'installation réel a montré qu'une **mise à jour Winget efface `comptes.db`** :
-l'application range sa base à côté de son exécutable, or Winget supprime puis
-recrée son dossier d'installation à chaque montée de version. Pour un logiciel
-de comptes, c'est disqualifiant. Winget n'offre pas d'équivalent au `persist`
-du manifeste Scoop (`bucket/pecule.json`), qui, lui, préserve les
-données.
+## L'obstacle qui a longtemps bloqué la soumission
 
-La soumission attend donc que l'emplacement de la base change.
+Un test d'installation réel avait montré qu'une **mise à jour Winget effaçait
+`comptes.db`** : l'application rangeait sa base à côté de son exécutable, or
+Winget supprime puis recrée son dossier d'installation à chaque montée de
+version. Pour un logiciel de comptes, c'était disqualifiant — et Winget n'offre
+aucun équivalent au `persist` du manifeste Scoop (`bucket/pecule.json`).
 
-En attendant, pour installer proprement en ligne de commande, utilisez
-**Scoop** — voir le README à la racine du dépôt.
+**La cause a disparu en 1.22.0.** `_data_dir()` (`comptesbudget/constants.py`)
+range désormais la base dans `%LOCALAPPDATA%\Pecule`, un dossier auquel Winget
+ne touche jamais. Le mode « portable » est préservé : si un `comptes.db` existe
+déjà à côté de l'exécutable, c'est lui qui sert.
+
+Vérifié le 12 août 2026 sur la 1.23.0, en reproduisant le mécanisme exact de la
+mise à jour : dossier du paquet entièrement supprimé puis réinstallé, base
+retrouvée **au même octet près** (empreinte SHA-256 identique). Aucun
+`comptes.db` n'est créé à côté de l'exécutable.
+
+Reste à refaire le cycle avec Winget lui-même (`install` puis `upgrade` depuis
+un manifeste local) avant d'ouvrir la demande d'intégration : c'est un test de
+bout en bout qui avait révélé le problème, c'est un test de bout en bout qui
+doit clore le sujet.
+
+Pour installer en ligne de commande dès aujourd'hui, utilisez **Scoop** — voir
+le README à la racine du dépôt.
 
 ## Note pour qui reprendrait ces fichiers
 
