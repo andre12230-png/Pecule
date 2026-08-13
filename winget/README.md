@@ -1,7 +1,13 @@
 # Manifestes Winget
 
-Paquet Winget pour Pecule. **Il n'est pas encore soumis à
-[`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs).**
+Paquet Winget pour Pecule. **La demande d'intégration à
+[`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs) est ouverte :
+[#416272](https://github.com/microsoft/winget-pkgs/pull/416272)**, déposée le
+12 août 2026 pour la version 1.23.0.
+
+Tant qu'elle n'est pas fusionnée, `winget install` ne connaît pas encore le
+paquet. Pour installer en ligne de commande dès aujourd'hui, utilisez **Scoop** —
+voir le README à la racine du dépôt.
 
 ## L'obstacle qui a longtemps bloqué la soumission
 
@@ -16,18 +22,34 @@ range désormais la base dans `%LOCALAPPDATA%\Pecule`, un dossier auquel Winget
 ne touche jamais. Le mode « portable » est préservé : si un `comptes.db` existe
 déjà à côté de l'exécutable, c'est lui qui sert.
 
-Vérifié le 12 août 2026 sur la 1.23.0, en reproduisant le mécanisme exact de la
-mise à jour : dossier du paquet entièrement supprimé puis réinstallé, base
-retrouvée **au même octet près** (empreinte SHA-256 identique). Aucun
-`comptes.db` n'est créé à côté de l'exécutable.
+### Le test de bout en bout, refait le 12 août 2026
 
-Reste à refaire le cycle avec Winget lui-même (`install` puis `upgrade` depuis
-un manifeste local) avant d'ouvrir la demande d'intégration : c'est un test de
-bout en bout qui avait révélé le problème, c'est un test de bout en bout qui
-doit clore le sujet.
+C'est un test réel qui avait révélé le problème ; il fallait un test réel pour
+le clore. Refait sur la 1.23.0, avec Winget lui-même :
 
-Pour installer en ligne de commande dès aujourd'hui, utilisez **Scoop** — voir
-le README à la racine du dépôt.
+1. base de départ contenant un repère identifiable ;
+2. `winget install --manifest` de la 1.22.1 ;
+3. `winget upgrade --manifest` vers la 1.23.0 ;
+4. `winget list` confirme bien la 1.23.0.
+
+Résultat : `comptes.db` **identique au bit près** (empreinte SHA-256 inchangée),
+repère relu intact, et aucun `comptes.db` créé à côté de l'exécutable.
+
+## Où en est la demande d'intégration
+
+État au 13 août 2026 :
+
+| | |
+|---|---|
+| Contrat de contribution (CLA) | signé |
+| Validation automatique | `Azure-Pipeline-Passed` |
+| En attente de | une revue humaine, sur l'étiquette `Policy-Test-1.8` (Financial Transactions) |
+
+Cette étiquette est posée automatiquement. Pécule est un outil de tenue de
+comptes **hors ligne** : aucun achat intégré, aucun abonnement, aucun traitement
+de paiement, aucune connexion à une banque ou à un service en ligne —
+l'application n'effectue aucune requête réseau. Une précision en ce sens a été
+ajoutée à la demande ; il n'y a plus qu'à attendre la réponse.
 
 ## Note pour qui reprendrait ces fichiers
 
@@ -39,4 +61,6 @@ au démarrage sur « Failed to load Python DLL » : elle cherche son dossier
 
 Pour tester un manifeste local, il faut d'abord l'autoriser en administrateur
 (`winget settings --enable LocalManifestFiles`), puis penser à remettre
-`--disable` ensuite.
+`--disable` ensuite. La désinstallation ne répond ni à `--id` ni à `--exact` :
+la commande qui fonctionne est
+`winget uninstall --product-code andre12230-png.Pecule__DefaultSource`.
