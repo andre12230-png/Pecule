@@ -23,6 +23,7 @@ from ...utils import (
 from ...database import Database
 from ...rules import apply_rules_to_tx
 
+from ..flow_layout import FlowLayout
 from ..models import TxTableModel, charger_en_conservant_le_tri
 from ..dialogs import TxDialog
 
@@ -40,51 +41,65 @@ class OperationsView(QWidget):
         v = QVBoxLayout(self)
         v.setContentsMargins(8, 8, 8, 8)
 
-        # Barre d'outils
-        toolbar = QHBoxLayout()
+        # Barre d'outils. Les filtres sont rangés « en flux » : quand la
+        # fenêtre est large ils tiennent sur une ligne comme avant, et quand
+        # elle est étroite (moitié d'écran) ils passent sur deux lignes au lieu
+        # d'imposer 1500 pixels de large à toute la fenêtre. Voir flow_layout.py.
+        barre = QHBoxLayout()
+        toolbar = FlowLayout(espacement=6)
+        barre.addLayout(toolbar, 1)
         self.btn_new = QPushButton("➕ Nouvelle")
         self.btn_new.clicked.connect(self.add_tx)
         toolbar.addWidget(self.btn_new)
 
         self.search = QLineEdit()
         self.search.setPlaceholderText("Libellé, montant (45,30), date (12/05/2026)…")
-        # Largeur garantie : sans minimum, les filtres et le compteur de droite
-        # écrasent le champ en fenêtre étroite (il ne restait que « Li… »).
-        self.search.setMinimumWidth(190)
+        # Largeur constante : dans la disposition en flux, les éléments
+        # gardent leur taille souhaitée, il faut donc la fixer ici (sinon le
+        # champ se réduit et il ne reste que « Li… »).
+        self.search.setFixedWidth(260)
         self.search.textChanged.connect(self.refresh)
-        self.search.setMaximumWidth(260)
         toolbar.addWidget(self.search)
 
-        toolbar.addWidget(QLabel("Catégorie :"))
+        def ajouter_filtre(texte, controle):
+            """Range une étiquette et sa liste déroulante dans un même bloc :
+            la disposition en flux ne peut donc jamais les séparer quand elle
+            passe à la ligne."""
+            bloc = QWidget()
+            ligne = QHBoxLayout(bloc)
+            ligne.setContentsMargins(0, 0, 0, 0)
+            ligne.setSpacing(6)
+            ligne.addWidget(QLabel(texte))
+            ligne.addWidget(controle)
+            toolbar.addWidget(bloc)
+
         self.cat_filter = QComboBox()
         self.cat_filter.currentTextChanged.connect(self.refresh)
-        toolbar.addWidget(self.cat_filter)
+        ajouter_filtre("Catégorie :", self.cat_filter)
 
-        toolbar.addWidget(QLabel("Type :"))
         self.optype_filter = QComboBox()
         self.optype_filter.setMinimumWidth(140)
         self.optype_filter.currentTextChanged.connect(self.refresh)
-        toolbar.addWidget(self.optype_filter)
+        ajouter_filtre("Type :", self.optype_filter)
 
-        toolbar.addWidget(QLabel("Sens :"))
         self.type_filter = QComboBox()
         self.type_filter.addItems(["Tous", "Débit", "Crédit"])
         self.type_filter.currentTextChanged.connect(self.refresh)
-        toolbar.addWidget(self.type_filter)
+        ajouter_filtre("Sens :", self.type_filter)
 
-        toolbar.addWidget(QLabel("Pointage :"))
         self.pt_filter = QComboBox()
         self.pt_filter.addItems(
             ["Toutes", "Non pointées", "Pointées", "Échéances prévues"])
         self.pt_filter.currentTextChanged.connect(self.refresh)
-        toolbar.addWidget(self.pt_filter)
+        ajouter_filtre("Pointage :", self.pt_filter)
 
-        toolbar.addStretch()
+        # Compteur à droite, hors du flux des filtres : il reste collé au
+        # bord droit, les filtres se replient sous lui si la place manque.
         self.lbl_count = QLabel("0 opération")
         self.lbl_count.setStyleSheet("color: #666")
-        toolbar.addWidget(self.lbl_count)
+        barre.addWidget(self.lbl_count, 0, Qt.AlignVCenter)
 
-        v.addLayout(toolbar)
+        v.addLayout(barre)
 
         # Tableau
         self.model = TxTableModel()

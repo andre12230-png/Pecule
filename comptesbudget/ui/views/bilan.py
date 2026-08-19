@@ -137,6 +137,9 @@ class BilanView(QWidget):
 
         self.cb_title = QLabel("💳 ENCOURS CARTE BANCAIRE")
         self.cb_title.setStyleSheet("font-weight:bold; color:#7E5A18; font-size:9pt")
+        # Repli sur deux lignes en fenêtre étroite (sinon le bandeau réclame
+        # 1390 pixels de large et bloque le redimensionnement de la fenêtre).
+        self.cb_title.setWordWrap(True)
         cb_lay.addWidget(self.cb_title)
         cb_lay.addSpacing(10)
 
@@ -161,6 +164,7 @@ class BilanView(QWidget):
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
         self.cb_detail.setStyleSheet("color:#7E5A18; font-size:9pt")
+        self.cb_detail.setWordWrap(True)
         cb_lay.addWidget(self.cb_detail)
         main.addWidget(self.cb_banner)
 
@@ -176,6 +180,7 @@ class BilanView(QWidget):
 
         self.prev_title = QLabel("📅 CE QUI EST PRÉVU")
         self.prev_title.setStyleSheet("font-weight:bold; color:#1F3A6B; font-size:9pt")
+        self.prev_title.setWordWrap(True)
         pv_lay.addWidget(self.prev_title)
         pv_lay.addSpacing(10)
 
@@ -193,6 +198,7 @@ class BilanView(QWidget):
         pv_lay.addStretch()
         self.prev_detail = QLabel("")
         self.prev_detail.setStyleSheet("color:#33517C; font-size:9pt")
+        self.prev_detail.setWordWrap(True)
         pv_lay.addWidget(self.prev_detail)
         main.addWidget(self.prev_banner)
 
@@ -210,6 +216,7 @@ class BilanView(QWidget):
 
         self.mois_title = QLabel("🗓 CE MOIS-CI")
         self.mois_title.setStyleSheet("font-weight:bold; color:#1A5E2A; font-size:9pt")
+        self.mois_title.setWordWrap(True)
         mo_lay.addWidget(self.mois_title)
         mo_lay.addSpacing(10)
 
@@ -227,6 +234,7 @@ class BilanView(QWidget):
         mo_lay.addStretch()
         self.mois_detail = QLabel("")
         self.mois_detail.setStyleSheet("color:#2F6B3C; font-size:9pt")
+        self.mois_detail.setWordWrap(True)
         mo_lay.addWidget(self.mois_detail)
         main.addWidget(self.mois_banner)
 
@@ -290,6 +298,9 @@ class BilanView(QWidget):
         lay = QVBoxLayout(f); lay.setContentsMargins(10, 8, 10, 8); lay.setSpacing(2)
         l_label = QLabel(label)
         l_label.setStyleSheet("color:#666; font-size:9pt; font-weight:600; text-transform:uppercase")
+        # Même raison : « Solde bancaire réel (pointé) » sur une seule ligne
+        # imposait 228 pixels à sa tuile, soit 940 pixels pour la rangée.
+        l_label.setWordWrap(True)
         l_value = QLabel(value)
         l_value.setStyleSheet(f"color:{color}; font-size:16pt; font-weight:bold")
         l_sub = QLabel("")
