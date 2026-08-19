@@ -690,3 +690,37 @@ def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path):
     assert vue.prev_entrees.text() == fmt_euro(0)
     assert vue.mois_entrees.text() == fmt_euro(0)
     assert vue.mois_solde.text() == fmt_euro(900.00)
+
+
+def test_non_pointees_ignore_la_periode(qapp, tmp_path):
+    """« Non pointées » montre tout ce qui reste à pointer, y compris les mois
+    qui ne sont pas affichés : sinon une opération oubliée en juillet reste
+    invisible tant que l’écran est sur août."""
+    from comptesbudget.ui.views.operations import OperationsView
+
+    d = Database(str(tmp_path / "pointage.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="a", date="2026-07-10", date_valeur="2026-07-10",
+                    libelle="Juillet non pointee", montant=-10.0))
+    d.insert_tx(_tx(id="b", date="2026-08-10", date_valeur="2026-08-10",
+                    libelle="Aout non pointee", montant=-20.0))
+    d.insert_tx(_tx(id="c", date="2026-08-11", date_valeur="2026-08-11",
+                    libelle="Aout pointee", montant=-30.0, pointee=1))
+
+    v = OperationsView(d)
+    v.period = "2026-08"
+    v.reload_from_db()
+
+    # Sans filtre de pointage, le mois affiché commande
+    assert sorted(t["id"] for t in v.filtered) == ["b", "c"]
+
+    # « Non pointées » : les deux mois, et le compteur prévient
+    v.pt_filter.setCurrentText("Non pointées")
+    assert sorted(t["id"] for t in v.filtered) == ["a", "b"]
+    assert "toutes périodes" in v.lbl_count.text()
+
+    # Les autres choix restent bornés au mois affiché
+    v.pt_filter.setCurrentText("Pointées")
+    assert [t["id"] for t in v.filtered] == ["c"]
+    assert "toutes périodes" not in v.lbl_count.text()

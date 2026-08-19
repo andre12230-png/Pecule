@@ -307,6 +307,13 @@ solde bancaire.</p>
 automatiquement ces opérations — y compris celles déjà enregistrées, qu'il
 confirme sans jamais dépointer ce que vous avez fait à la main.</p>
 
+<p>Le filtre <b>Pointage → Non pointées</b> répond à la question
+« que me reste-t-il à pointer ? » : il affiche <b>toutes</b> les opérations en
+attente, sans se limiter à la période choisie en haut de la fenêtre — une ligne
+oubliée le mois dernier ne peut donc pas passer inaperçue. Le compteur de droite
+le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
+Échéances prévues) restent, eux, bornés à la période affichée.</p>
+
 <h2>5. Outils du menu de gauche</h2>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>

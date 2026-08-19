@@ -354,7 +354,20 @@ SYNC_VERSION = 2
 #            première catégorie.
 #          • Le bouton « 📥 Importer CSV » devient « 📥 Importer un relevé » et
 #            accepte les deux formats, au clic comme au glisser-déposer.
-APP_VERSION = "1.23.0"
+# 1.23.1 : le filtre « Non pointées » ne s’arrête plus au mois affiché.
+#          • Il répond à la question « que me reste-t-il à pointer ? », et
+#            cette réponse ne dépend pas de la période choisie en haut de la
+#            fenêtre : une opération oubliée en juillet apparaît même si
+#            l’écran est sur août. Le compteur de droite le rappelle en
+#            affichant « toutes périodes ».
+#          • Les autres choix (Pointées, Échéances prévues) restent bornés à
+#            la période affichée.
+#          • Les deux fichiers .bat du projet lancent et construisent avec
+#            « py », le lanceur officiel de Windows, au lieu de « python » ou
+#            d’un chemin écrit en dur : plusieurs Python coexistent souvent sur
+#            une même machine, avec des bibliothèques différentes, et l’exe
+#            doit embarquer celles que les tests ont vérifiées.
+APP_VERSION = "1.23.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

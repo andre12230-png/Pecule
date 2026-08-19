@@ -170,8 +170,14 @@ class OperationsView(QWidget):
         opt = self.optype_filter.currentText()
         pt = self.pt_filter.currentText()
 
+        # « Non pointées » répond à la question « que reste-t-il à pointer ? ».
+        # La réponse ne s’arrête pas au mois affiché : une opération oubliée en
+        # juillet doit apparaître même si l’écran est sur août. Le filtre de
+        # période est donc mis de côté pour ce seul choix.
+        toutes_periodes = (pt == "Non pointées")
+
         def keep(t: dict) -> bool:
-            if not in_period(self._eff_date(t), self.period):
+            if not toutes_periodes and not in_period(self._eff_date(t), self.period):
                 return False
             if words:
                 m = abs(t.get("montant", 0) or 0)
@@ -225,6 +231,9 @@ class OperationsView(QWidget):
         mode_lbl = "valeur (banque)" if self.date_mode == "valeur" else "opération"
         txt = (f"{len(self.filtered)} opération{'s' if len(self.filtered)>1 else ''} "
                f"— solde {mode_lbl} : {fmt_euro(solde)}")
+        if toutes_periodes:
+            # Sinon on croirait que le mois choisi contient toutes ces lignes.
+            txt = "toutes périodes — " + txt
         if pointed:
             txt += f"   ✔ pointées : {fmt_euro(solde_p)}"
         self.lbl_count.setText(txt)

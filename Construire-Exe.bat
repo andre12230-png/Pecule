@@ -22,11 +22,15 @@ rem --------------------------------------------------------------------------
 set "INSTALL_DIR=F:\budget-app\Pecule"
 
 rem --------------------------------------------------------------------------
-rem  Python utilise pour construire. On prend celui du systeme ; pour en
-rem  imposer un autre, definissez la variable PYTHON avant de lancer ce
-rem  script (exemple :  set PYTHON=D:\Python\Python313\python.exe ).
+rem  Python utilise pour construire : "py", le Python Launcher officiel de
+rem  Windows. Ce n est PAS "python" du PATH : sur ce PC ce sont DEUX
+rem  installations differentes, avec des bibliotheques differentes. Construire
+rem  avec la mauvaise livrerait un programme qui n embarque pas les versions
+rem  que les tests ont verifiees.
+rem  Pour en imposer un autre, definissez la variable PYTHON avant de lancer
+rem  ce script (exemple :  set PYTHON=F:\Python\Python314\python.exe ).
 rem --------------------------------------------------------------------------
-if not defined PYTHON set "PYTHON=python"
+if not defined PYTHON set "PYTHON=py"
 "%PYTHON%" --version >nul 2>&1
 if errorlevel 1 (
     echo.
