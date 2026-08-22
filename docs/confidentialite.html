@@ -1,0 +1,281 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Politique de confidentialité — vos données ne quittent jamais votre ordinateur | Pécule</title>
+<meta name="description" content="Politique de confidentialité de Pécule : quelles données financières l'application traite, où elles sont stockées, pourquoi elles ne sont jamais transmises, et comment les supprimer. Version française et anglaise.">
+<link rel="canonical" href="https://andre12230-png.github.io/Pecule/confidentialite.html">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Politique de confidentialité de Pécule">
+<meta property="og:description" content="Aucune donnée transmise, aucun compte, aucune connexion bancaire. Tout reste dans un fichier sur votre ordinateur.">
+<meta property="og:url" content="https://andre12230-png.github.io/Pecule/confidentialite.html">
+
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:38px 0 32px}
+  header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header .sub{font-size:1.05rem;opacity:.95;margin:10px 0 0;max-width:640px}
+  header .retour{display:inline-block;color:#dce6f7;font-size:.95rem;
+                 text-decoration:none;margin-bottom:14px}
+  header .date{font-size:.9rem;opacity:.85;margin:14px 0 0}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  h3{color:var(--bleu2);margin-top:26px;margin-bottom:4px;font-size:1.08rem}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  .ok{background:#eef7ef;border-left:4px solid #7bbd8a;padding:12px 16px;border-radius:6px;margin:14px 0}
+
+  .tableau{width:100%;overflow-x:auto}
+  table{border-collapse:collapse;width:100%;background:var(--carte);
+        border:1px solid var(--bord);border-radius:8px;margin:14px 0;font-size:.95rem}
+  th,td{border:1px solid var(--bord);padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:#eef1f6;color:var(--bleu);font-weight:600}
+
+  .langue{border-top:3px solid var(--bord);margin-top:50px;padding-top:10px}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="retour" href="./">← Pécule</a>
+    <h1>Politique de confidentialité</h1>
+    <p class="sub">Pécule traite des données financières. Voici lesquelles, où elles
+      sont conservées, et pourquoi elles ne quittent jamais votre ordinateur.</p>
+    <p class="date">En vigueur depuis le 22 août 2026 · s'applique à la version 1.23.0 et aux suivantes</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <div class="ok">
+    <strong>En une phrase :</strong> Pécule ne collecte rien, ne transmet rien et ne
+    contacte aucun serveur. Il n'y a aucun compte à créer, et l'auteur du logiciel ne
+    reçoit aucune de vos données — il n'a aucun moyen technique d'y accéder.
+  </div>
+</section>
+
+<section>
+  <h2>1. Quelles données l'application traite</h2>
+
+  <p>Pécule enregistre ce que vous y mettez, et rien d'autre :</p>
+
+  <div class="tableau">
+  <table>
+    <tr><th>Donnée</th><th>Provenance</th></tr>
+    <tr><td>Opérations bancaires : date, libellé, montant, catégorie et sous-catégorie,
+        note, référence de l'opération, état de pointage</td>
+        <td>Saisie à la main, ou importée d'un relevé CSV ou d'un fichier QIF que
+            <em>vous</em> exportez depuis votre banque ou votre ancien logiciel</td></tr>
+    <tr><td>Solde de départ et date de début de suivi</td><td>Saisie</td></tr>
+    <tr><td>Budgets mensuels par catégorie</td><td>Saisie</td></tr>
+    <tr><td>Opérations récurrentes (loyer, abonnements…)</td><td>Saisie</td></tr>
+    <tr><td>Règles de catégorisation automatique</td><td>Saisie</td></tr>
+  </table>
+  </div>
+
+  <p>L'application ne demande <strong>ni votre nom, ni votre adresse, ni votre adresse
+  électronique, ni vos identifiants bancaires</strong>. Elle n'en a pas l'usage et ne
+  comporte aucun champ pour les saisir.</p>
+
+  <p>Elle ne se connecte <strong>jamais</strong> à votre banque. Les relevés que vous
+  importez sont des fichiers que vous avez vous-même téléchargés depuis votre espace
+  bancaire.</p>
+</section>
+
+<section>
+  <h2>2. Où ces données sont conservées</h2>
+
+  <p>Dans <strong>un seul fichier</strong>, nommé <code>comptes.db</code>, au format
+  SQLite, sur le disque de votre ordinateur. Son emplacement dépend de votre
+  installation :</p>
+
+  <ul>
+    <li><strong>Installation normale</strong> : dans votre dossier personnel,
+        <code>%LOCALAPPDATA%\Pecule</code>. L'application affiche le chemin exact
+        en bas de sa fenêtre.</li>
+    <li><strong>Usage portable</strong> (clé USB, dossier autonome) : à côté du
+        programme, si un fichier <code>comptes.db</code> s'y trouve déjà.</li>
+  </ul>
+
+  <p>À chaque premier lancement de la journée, Pécule range une copie de sécurité dans
+  un sous-dossier <code>sauvegardes</code>, au même endroit. Les dix plus récentes sont
+  conservées, les plus anciennes sont effacées automatiquement. Ce sont des fichiers
+  ordinaires, sur votre disque.</p>
+
+  <p>Ces fichiers ne sont ni chiffrés ni protégés par mot de passe : ils sont protégés
+  par votre session Windows, comme vos autres documents. Si votre ordinateur est
+  partagé, sachez-le.</p>
+</section>
+
+<section>
+  <h2>3. Ce qui est transmis : rien</h2>
+
+  <p><strong>Pécule n'effectue aucun accès réseau, d'aucune sorte.</strong> Le code
+  source n'importe aucune bibliothèque de communication réseau — ce point est
+  vérifiable par quiconque, le code est public sous licence MIT.</p>
+
+  <p>Concrètement, l'application ne comporte :</p>
+  <ul>
+    <li>aucune télémétrie, aucune statistique d'usage, aucun mouchard ;</li>
+    <li>aucun rapport d'erreur envoyé ailleurs ;</li>
+    <li>aucune vérification automatique de mise à jour ;</li>
+    <li>aucun service tiers, aucune publicité, aucun outil de mesure d'audience ;</li>
+    <li>aucune connexion à une banque ni à un agrégateur de comptes ;</li>
+    <li>aucun compte à créer, aucune inscription, aucune authentification.</li>
+  </ul>
+
+  <p>Vos données ne partent donc nulle part. Elles ne peuvent pas être vendues,
+  analysées, ni consultées par un tiers, puisqu'elles ne quittent pas votre machine.</p>
+
+  <p>Deux réserves d'honnêteté, qui ne dépendent pas du logiciel : si vous rangez
+  vous-même votre fichier <code>comptes.db</code> dans un dossier synchronisé
+  (OneDrive, Dropbox…), c'est ce service qui en détiendra une copie, selon ses propres
+  règles. Et si vous exportez vos données pour les envoyer à quelqu'un, elles suivent
+  le chemin que vous leur donnez.</p>
+</section>
+
+<section>
+  <h2>4. Ce que vous pouvez faire de vos données</h2>
+
+  <ul>
+    <li><strong>Tout consulter et tout modifier</strong> : chaque opération, budget,
+        récurrence ou règle est visible et modifiable dans l'application.</li>
+    <li><strong>Supprimer</strong> : une opération à la fois, ou plusieurs d'un coup.</li>
+    <li><strong>Tout exporter</strong> : le bouton <code>Exporter (JSON)</code> écrit
+        l'intégralité de vos données dans un fichier lisible, à l'endroit que vous
+        choisissez. Rien n'est envoyé nulle part.</li>
+    <li><strong>Tout effacer définitivement</strong> : fermez l'application, supprimez
+        le fichier <code>comptes.db</code> et le dossier <code>sauvegardes</code>.
+        Il ne reste alors plus aucune donnée, nulle part.</li>
+  </ul>
+
+  <p>Aucune de ces opérations ne nécessite de demande auprès de qui que ce soit : vous
+  êtes seul détenteur de vos fichiers.</p>
+</section>
+
+<section>
+  <h2>5. Ce site web — à ne pas confondre avec l'application</h2>
+
+  <p>La page que vous lisez est hébergée par GitHub Pages et utilise un compteur de
+  visites, <a href="https://www.goatcounter.com/">GoatCounter</a>. Il ne concerne
+  <strong>que ce site</strong> : l'application installée sur votre ordinateur n'y est
+  reliée d'aucune façon, et ne communique avec rien.</p>
+
+  <p>Ce compteur ne dépose aucun cookie de suivi. Il n'enregistre ni votre adresse IP,
+  ni l'en-tête complet de votre navigateur, ni aucun identifiant permettant de vous
+  suivre d'un site à l'autre. Il ne retient que des statistiques agrégées : page
+  consultée, provenance du lien, type de navigateur et de système, langue, résolution
+  d'écran et pays — ce dernier étant déduit de l'adresse IP, aussitôt oubliée. Sa
+  politique est publiée sur
+  <a href="https://www.goatcounter.com/help/privacy">goatcounter.com/help/privacy</a>.</p>
+
+  <p>Vous pouvez consulter ce site avec un bloqueur de scripts sans que rien ne cesse de
+  fonctionner, et télécharger le logiciel sans y passer du tout : les fichiers sont
+  publiés sur GitHub.</p>
+</section>
+
+<section>
+  <h2>6. Modifications et contact</h2>
+
+  <p>Cette page fait partie du dépôt public de Pécule. Toute modification y est
+  horodatée et consultable dans l'historique des versions, ligne par ligne.</p>
+
+  <p>Pour une question ou une remarque :
+  <a href="https://github.com/andre12230-png/Pecule/issues">les tickets du dépôt GitHub</a>.</p>
+</section>
+
+<section class="langue">
+  <h2>English version</h2>
+
+  <p><em>The French text above is the reference version. This translation is provided
+  for readers who do not read French.</em></p>
+
+  <h3>In one sentence</h3>
+  <p>Pécule collects nothing, transmits nothing and contacts no server. There is no
+  account to create, and the author of the software receives none of your data — he has
+  no technical means of accessing it.</p>
+
+  <h3>1. What data the application handles</h3>
+  <p>Pécule stores only what you put into it: bank entries (date, label, amount,
+  category and sub-category, note, transaction reference, reconciliation status),
+  your starting balance and start date, monthly budgets per category, recurring
+  entries, and automatic categorisation rules.</p>
+  <p>Entries are either typed in by hand or imported from a CSV bank statement or a
+  QIF file that <em>you</em> export yourself from your bank or from your previous
+  accounting software. The application never connects to a bank.</p>
+  <p>It asks for no name, no address, no email address and no banking credentials. It
+  has no field in which to enter them.</p>
+
+  <h3>2. Where the data is stored</h3>
+  <p>In a single SQLite file named <code>comptes.db</code>, on your own computer.
+  For a normal installation it lives in your user profile, under
+  <code>%LOCALAPPDATA%\Pecule</code>; in portable use it sits next to the program if a
+  <code>comptes.db</code> file already exists there. The application displays the exact
+  path at the bottom of its window.</p>
+  <p>On the first launch of each day, a backup copy is written to a
+  <code>sauvegardes</code> sub-folder in the same location. The ten most recent are
+  kept and older ones are deleted automatically.</p>
+  <p>These files are not encrypted and not password-protected: they are protected by
+  your Windows session, like your other documents.</p>
+
+  <h3>3. What is transmitted: nothing</h3>
+  <p><strong>Pécule performs no network access of any kind.</strong> The source code
+  imports no networking library at all — anyone can verify this, as the code is public
+  under the MIT licence.</p>
+  <p>There is no telemetry, no usage statistics, no crash reporting, no automatic
+  update check, no third-party service, no advertising, no analytics, no connection to
+  any bank or account aggregator, and no account or sign-in of any kind.</p>
+  <p>Your data therefore goes nowhere. It cannot be sold, analysed or read by a third
+  party, because it never leaves your machine.</p>
+  <p>Two honest caveats, which do not depend on the software: if you choose to keep
+  your <code>comptes.db</code> file in a synchronised folder (OneDrive, Dropbox and the
+  like), that service will hold a copy under its own terms; and if you export your data
+  in order to send it to someone, it follows the path you give it.</p>
+
+  <h3>4. Your controls</h3>
+  <p>You can view and edit every entry, budget, recurring item and rule; delete entries
+  one at a time or several at once; export everything to a readable JSON file at a
+  location of your choosing, with nothing sent anywhere; and erase everything
+  permanently by closing the application and deleting <code>comptes.db</code> together
+  with the <code>sauvegardes</code> folder. None of this requires a request to anyone:
+  you are the sole holder of your files.</p>
+
+  <h3>5. This website — not to be confused with the application</h3>
+  <p>The page you are reading is hosted on GitHub Pages and uses a visit counter,
+  <a href="https://www.goatcounter.com/">GoatCounter</a>. It concerns
+  <strong>this website only</strong>: the application installed on your computer is in
+  no way connected to it, and communicates with nothing.</p>
+  <p>The counter sets no tracking cookie. It stores neither your IP address, nor the
+  full User-Agent header, nor any identifier that would allow you to be followed from
+  one site to another. It keeps only aggregated statistics: page viewed, referrer,
+  browser and system type, language, screen size and country — the latter derived from
+  the IP address, which is then immediately discarded. Its policy is published at
+  <a href="https://www.goatcounter.com/help/privacy">goatcounter.com/help/privacy</a>.</p>
+  <p>You can browse this site with a script blocker without anything breaking, and
+  download the software without visiting it at all: the files are published on GitHub.</p>
+
+  <h3>6. Changes and contact</h3>
+  <p>This page is part of the public Pécule repository. Any change to it is timestamped
+  and visible line by line in the version history. Questions and remarks are welcome in
+  the <a href="https://github.com/andre12230-png/Pecule/issues">repository issues</a>.</p>
+</section>
+
+</div>
+
+<footer>
+  <a href="./">Pécule</a> —
+  <a href="https://github.com/andre12230-png/Pecule">Code source</a> ·
+  <a href="https://github.com/andre12230-png/Pecule/releases/latest">Téléchargements</a>
+</footer>
