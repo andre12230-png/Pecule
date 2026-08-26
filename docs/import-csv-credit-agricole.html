@@ -1,0 +1,209 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Importer un relevé Crédit Agricole (CSV) dans un logiciel de budget gratuit — Pécule</title>
+<meta name="description" content="Comment exporter vos opérations depuis crédit-agricole.fr au format CSV, puis les importer dans Pécule, un logiciel de budget gratuit et hors ligne. Le CSV du Crédit Agricole utilise le point-virgule et l'encodage Windows-1252 : Pécule le lit tel quel, sans passer par Excel.">
+<link rel="canonical" href="https://andre12230-png.github.io/Pecule/import-csv-credit-agricole.html">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Importer un relevé Crédit Agricole (CSV) dans Pécule">
+<meta property="og:description" content="Exporter vos opérations Crédit Agricole en CSV puis les charger dans Pécule, sans manipulation d'Excel.">
+<meta property="og:url" content="https://andre12230-png.github.io/Pecule/import-csv-credit-agricole.html">
+<meta property="og:locale" content="fr_FR">
+
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:38px 0 32px}
+  header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header .sub{font-size:1.05rem;opacity:.95;margin:10px 0 0;max-width:640px}
+  header .retour{display:inline-block;color:#dce6f7;font-size:.95rem;
+                 text-decoration:none;margin-bottom:14px}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  h3{color:var(--bleu2);margin-top:26px;margin-bottom:4px;font-size:1.08rem}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  pre{background:#eef1f6;padding:12px 14px;border-radius:8px;overflow-x:auto;
+      font-family:Consolas,monospace;font-size:.9rem;line-height:1.5}
+  .warn{background:#fff8e6;border-left:4px solid #e8c77b;padding:12px 16px;border-radius:6px;margin:14px 0}
+  .ok{background:#eef7ef;border-left:4px solid #7bbd8a;padding:12px 16px;border-radius:6px;margin:14px 0}
+  ol.steps{padding-left:22px}
+  ol.steps li{margin-bottom:8px}
+
+  .cta-box{background:var(--carte);border:1px solid var(--bord);border-radius:12px;
+           padding:18px 20px;margin:22px 0;display:flex;flex-wrap:wrap;gap:16px;
+           align-items:center;justify-content:space-between}
+  .cta-box .txt{flex:1 1 300px}
+  .cta-box .txt strong{color:var(--bleu)}
+  .cta-btn{display:inline-block;background:var(--bleu);color:#fff;font-weight:700;
+           padding:11px 22px;border-radius:8px;text-decoration:none}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="retour" href="./">← Pécule</a>
+    <h1>Importer un relevé Crédit Agricole au format CSV</h1>
+    <p class="sub">Exporter vos opérations depuis votre Caisse régionale, puis les
+      charger dans Pécule sans passer par Excel.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p>Le Crédit Agricole permet d'exporter vos opérations au format CSV depuis
+  l'espace client de votre Caisse régionale. Ce fichier est <strong>pénible à ouvrir
+  dans Excel</strong> — séparateur point-virgule, encodage français, décimales à
+  la virgule — mais <strong>Pécule le lit tel quel</strong>. Aucun
+  réglage à faire, aucune conversion préalable.</p>
+</section>
+
+<section>
+  <h2>1. Exporter le CSV depuis crédit-agricole.fr</h2>
+
+  <p>La marche à suivre varie légèrement d'une Caisse régionale à l'autre, mais le
+  chemin est toujours le même.</p>
+
+  <ol class="steps">
+    <li>Connectez-vous à l'espace client de votre <strong>Caisse régionale</strong>
+      (Alpes-Provence, Nord de France, Sud Rhône-Alpes…).</li>
+    <li>Ouvrez le compte à exporter depuis la rubrique <strong>Comptes</strong>.</li>
+    <li>Sous la liste des opérations, cherchez le bouton
+      <strong>« Télécharger »</strong> ou <strong>« Exporter mes opérations »</strong>.
+      Selon les Caisses il apparaît en bas de page, dans le menu latéral, ou sous
+      un onglet <strong>« Autres »</strong>.</li>
+    <li>Choisissez la <strong>période</strong> puis le format
+      <strong>Excel (.csv)</strong> ou <strong>CSV</strong>. Trois formats sont
+      généralement proposés : Texte, Excel et CSV.</li>
+    <li>Enregistrez le fichier sur votre PC. Il porte un nom du type
+      <code>operations_XXXXXXXX_JJMMAAAA.csv</code>.</li>
+  </ol>
+
+  <div class="ok">
+    L'export en ligne couvre l'<strong>historique récent</strong> disponible dans
+    votre espace client — pas votre historique complet. Pour de vieilles opérations,
+    filtrez la période avant de télécharger, ou passez par les relevés PDF mensuels.
+  </div>
+</section>
+
+<section>
+  <h2>2. Pourquoi Excel n'arrive pas à ouvrir ce fichier</h2>
+
+  <p>Beaucoup d'utilisateurs sont bloqués dès l'ouverture&nbsp;: toutes les colonnes
+  se retrouvent tassées dans une seule cellule, ou les accents deviennent illisibles
+  (<code>Ã©</code> à la place de <code>é</code>). Deux causes se cumulent&nbsp;:</p>
+
+  <ul>
+    <li>Le fichier utilise le <strong>point-virgule (<code>;</code>) comme
+      séparateur</strong>, alors qu'Excel attend la virgule dans une installation en
+      anglais, ou parfois la tabulation.</li>
+    <li>Il est encodé en <strong>Windows-1252</strong> (l'encodage historique du
+      français sous Windows), qu'Excel n'ouvre pas correctement quand il est réglé
+      sur UTF-8 par défaut.</li>
+  </ul>
+
+  <p>Pour ouvrir le fichier proprement dans Excel, il faut passer par
+  <em>Données → À partir d'un fichier texte/CSV</em> et forcer manuellement le
+  séparateur et l'encodage — un détour à faire à chaque relevé.</p>
+
+  <div class="ok">
+    <strong>Pécule n'a pas ce problème.</strong> Les deux formats — point-virgule
+    et Windows-1252 — sont ceux qu'il attend par défaut. Vous lui donnez le fichier
+    tel qu'il sort de la banque, sans rien ouvrir dans un tableur.
+  </div>
+</section>
+
+<section>
+  <h2>3. Importer le fichier dans Pécule</h2>
+
+  <ol class="steps">
+    <li>Ouvrez <strong>Pécule</strong>.</li>
+    <li>Cliquez sur <strong><code>📥 Importer CSV</code></strong> dans le menu de
+      gauche — ou <strong>glissez-déposez</strong> simplement le fichier téléchargé
+      sur la fenêtre.</li>
+    <li>Pécule lit le fichier, reconnaît les colonnes par leur nom
+      (<code>date</code>, <code>libellé</code>, <code>montant</code>, ou
+      <code>débit</code> / <code>crédit</code> séparés), et affiche un
+      <strong>compte rendu</strong> détaillé&nbsp;: lignes importées et doublons
+      ignorés.</li>
+    <li>Vos règles de catégorisation s'appliquent au fil de l'import, et les
+      échéances que vous aviez inscrites d'avance sont <strong>complétées</strong>
+      par la vraie ligne du relevé, sans doublon. Le CSV du Crédit Agricole ne
+      contient pas de colonne de pointage&nbsp;: les opérations arrivent
+      <strong>non pointées</strong>, à vous de les pointer d'un clic une fois
+      vérifiées.</li>
+  </ol>
+
+  <p>Vous pouvez réimporter un nouveau fichier chaque mois : les lignes déjà
+  enregistrées sont reconnues et ignorées. Voir
+  <a href="import-csv.html">la page d'import CSV</a> pour le détail des règles.</p>
+</section>
+
+<section>
+  <h2>4. Le format CSV du Crédit Agricole en détail</h2>
+
+  <h3>Des colonnes qui varient selon la Caisse régionale</h3>
+  <p>Le Crédit Agricole regroupe 39 Caisses régionales, et le format d'export
+  n'est pas strictement identique de l'une à l'autre. En pratique, l'export CSV
+  reste <strong>simple</strong>&nbsp;: on y trouve toujours une
+  <strong>date</strong>, un <strong>libellé</strong> et un <strong>montant</strong>
+  — ce dernier soit dans une seule colonne (négatif pour les dépenses), soit
+  réparti entre une colonne <strong>Débit</strong> et une colonne
+  <strong>Crédit</strong>.</p>
+
+  <p>Pécule ne se fie pas à un ordre de colonnes figé&nbsp;: il reconnaît chacune
+  par un mot-clé (<code>date</code>, <code>libellé</code>, <code>montant</code>,
+  <code>débit</code>, <code>crédit</code>), sans tenir compte des accents ni des
+  majuscules. Quand le débit et le crédit sont séparés, il les rassemble
+  automatiquement en un montant signé.</p>
+
+  <h3>Encodage et séparateur</h3>
+  <ul>
+    <li><strong>Séparateur&nbsp;:</strong> point-virgule <code>;</code></li>
+    <li><strong>Encodage&nbsp;:</strong> Windows-1252 (Latin-1 étendu) — parfois
+      UTF-8 sur les exports les plus récents. Pécule essaie l'un puis l'autre
+      automatiquement.</li>
+    <li><strong>Décimales&nbsp;:</strong> virgule française
+      (<code>-42,50</code>), avec espaces facultatifs pour les milliers.</li>
+    <li><strong>Dates&nbsp;:</strong> format <code>JJ/MM/AAAA</code>.</li>
+  </ul>
+
+  <div class="warn">
+    Les formats proposés (CSV, et parfois Excel, OFX ou QIF) <strong>dépendent de
+    votre Caisse régionale</strong>. Le CSV est le plus répandu et le plus fiable
+    pour récupérer le détail des opérations. Si votre relevé ne s'importe pas, voir
+    <a href="import-csv-problemes.html">« Un relevé ne s'importe pas ? »</a>.
+  </div>
+</section>
+
+<section>
+  <div class="cta-box">
+    <div class="txt">
+      <strong>Pécule</strong> — logiciel de gestion de comptes et budget pour
+      Windows 10/11.<br>
+      Gratuit, 100&nbsp;% hors ligne, sans compte, open source (MIT).
+    </div>
+    <a class="cta-btn" href="./">Découvrir Pécule</a>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <a href="./">Pécule</a> —
+  <a href="import-csv.html">Format CSV attendu</a> ·
+  <a href="import-csv-problemes.html">Un relevé ne s'importe pas ?</a> ·
+  <a href="https://github.com/andre12230-png/Pecule">Code source</a>
+</footer>

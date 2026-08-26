@@ -1,0 +1,177 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Importer un relevé Crédit Mutuel ou CIC (CSV) dans un logiciel de budget gratuit — Pécule</title>
+<meta name="description" content="Comment exporter vos opérations en CSV depuis creditmutuel.fr ou cic.fr, puis les importer dans Pécule. Les deux banques partagent la même plateforme technique et proposent CSV, QIF et OFX. Pécule lit les trois sans conversion.">
+<link rel="canonical" href="https://andre12230-png.github.io/Pecule/import-csv-credit-mutuel.html">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="Importer un relevé Crédit Mutuel ou CIC (CSV) dans Pécule">
+<meta property="og:description" content="Exporter vos opérations Crédit Mutuel ou CIC en CSV puis les charger dans Pécule, sans manipulation d'Excel.">
+<meta property="og:url" content="https://andre12230-png.github.io/Pecule/import-csv-credit-mutuel.html">
+<meta property="og:locale" content="fr_FR">
+
+<style>
+  :root{
+    --bleu:#1F3A6B; --bleu2:#2E5C9E; --vert:#1A7A3A; --fond:#f4f6fa;
+    --txt:#222; --gris:#5b6573; --carte:#ffffff; --bord:#e3e8f0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+       color:var(--txt);background:var(--fond);line-height:1.6}
+  a{color:var(--bleu2)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+
+  header{background:linear-gradient(135deg,#1F3A6B,#2E5C9E);color:#fff;
+         padding:38px 0 32px}
+  header h1{margin:0;font-size:1.9rem;letter-spacing:.3px}
+  header .sub{font-size:1.05rem;opacity:.95;margin:10px 0 0;max-width:640px}
+  header .retour{display:inline-block;color:#dce6f7;font-size:.95rem;
+                 text-decoration:none;margin-bottom:14px}
+
+  section{padding:8px 0 10px}
+  h2{color:var(--bleu);border-bottom:2px solid var(--bord);padding-bottom:6px;margin-top:36px}
+  h3{color:var(--bleu2);margin-top:26px;margin-bottom:4px;font-size:1.08rem}
+  code{background:#eef1f6;padding:2px 6px;border-radius:4px;font-family:Consolas,monospace}
+  pre{background:#eef1f6;padding:12px 14px;border-radius:8px;overflow-x:auto;
+      font-family:Consolas,monospace;font-size:.9rem;line-height:1.5}
+  .warn{background:#fff8e6;border-left:4px solid #e8c77b;padding:12px 16px;border-radius:6px;margin:14px 0}
+  .ok{background:#eef7ef;border-left:4px solid #7bbd8a;padding:12px 16px;border-radius:6px;margin:14px 0}
+  ol.steps{padding-left:22px}
+  ol.steps li{margin-bottom:8px}
+
+  .cta-box{background:var(--carte);border:1px solid var(--bord);border-radius:12px;
+           padding:18px 20px;margin:22px 0;display:flex;flex-wrap:wrap;gap:16px;
+           align-items:center;justify-content:space-between}
+  .cta-box .txt{flex:1 1 300px}
+  .cta-box .txt strong{color:var(--bleu)}
+  .cta-btn{display:inline-block;background:var(--bleu);color:#fff;font-weight:700;
+           padding:11px 22px;border-radius:8px;text-decoration:none}
+
+  footer{text-align:center;color:var(--gris);font-size:.9rem;padding:30px 0 40px;margin-top:30px;
+         border-top:1px solid var(--bord)}
+</style>
+
+<header>
+  <div class="wrap">
+    <a class="retour" href="./">← Pécule</a>
+    <h1>Importer un relevé Crédit Mutuel ou CIC au format CSV</h1>
+    <p class="sub">Les deux banques partagent la même plateforme de banque en ligne
+      et le même export. La marche à suivre est identique dans les deux espaces
+      clients.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p>Le <strong>Crédit Mutuel</strong> et le <strong>CIC</strong> font partie du
+  même groupe et utilisent la même plateforme technique. Leur export d'opérations
+  est donc identique&nbsp;: mêmes formats proposés, mêmes colonnes, même chemin
+  dans l'espace client. Le Crédit Mutuel propose plusieurs formats d'export&nbsp;;
+  <strong>deux d'entre eux se chargent directement dans Pécule</strong>&nbsp;: le
+  <strong>CSV</strong> et le <strong>QIF</strong>. Le CSV est celui qui donne les
+  meilleurs libellés.</p>
+</section>
+
+<section>
+  <h2>1. Exporter le CSV</h2>
+
+  <ol class="steps">
+    <li>Connectez-vous à votre espace client
+      <strong>creditmutuel.fr</strong> ou <strong>cic.fr</strong>.</li>
+    <li>Ouvrez le compte à exporter (rubrique <strong>Comptes et contrats</strong>).</li>
+    <li>Cliquez sur <strong>« Exporter mes opérations »</strong> — le lien apparaît
+      dans le menu latéral du compte ou sous la liste des opérations.</li>
+    <li>Choisissez la <strong>période</strong> (le CIC permet des plages larges),
+      puis le format <strong>Excel (CSV)</strong>. L'option
+      <em>Quicken (QIF)</em> se charge elle aussi dans Pécule&nbsp;; en revanche
+      l'option <em>Microsoft Money (OFX)</em> n'est pas prise en charge.</li>
+    <li>Enregistrez le fichier sur votre PC. Il porte un nom du type
+      <code>CM_JJMMAAAA_JJMMAAAA.csv</code> (ou <code>CIC_...</code>).</li>
+  </ol>
+
+  <div class="ok">
+    <strong>CSV et QIF&nbsp;:</strong> ces deux formats se chargent dans
+    Pécule. Le CSV est celui qui préserve le mieux les libellés d'origine&nbsp;;
+    le QIF est plus léger si vous voulez juste les mouvements sans le détail. Le
+    format OFX, lui, n'est pas reconnu par Pécule.
+  </div>
+</section>
+
+<section>
+  <h2>2. Importer le fichier dans Pécule</h2>
+
+  <ol class="steps">
+    <li>Ouvrez <strong>Pécule</strong>.</li>
+    <li><strong>Glissez-déposez</strong> le fichier sur la fenêtre, ou cliquez sur
+      <strong><code>📥 Importer CSV</code></strong> dans le menu de gauche.</li>
+    <li>Pécule reconnaît les colonnes par leur nom
+      (<code>Date operation</code>, <code>Libelle</code>, <code>Debit</code>,
+      <code>Credit</code>) et affiche un compte rendu détaillé : lignes importées,
+      doublons ignorés, opérations pointées.</li>
+    <li>Vos règles de catégorisation s'appliquent au fil de l'import. Les échéances
+      que vous aviez inscrites d'avance sont
+      <strong>complétées</strong> par la vraie ligne du relevé au lieu d'être
+      dupliquées.</li>
+  </ol>
+
+  <p>Vous pouvez réimporter un nouveau relevé chaque mois : les lignes déjà
+  enregistrées sont reconnues et ignorées. Voir
+  <a href="import-csv.html">la page d'import CSV</a> pour le détail des règles.</p>
+</section>
+
+<section>
+  <h2>3. Le format CSV Crédit Mutuel / CIC en détail</h2>
+
+  <h3>En-tête typique</h3>
+  <pre>Date operation;Date de valeur;Montant;Libelle;Solde</pre>
+
+  <p>C'est un format <strong>plus dépouillé</strong> que celui du Crédit Agricole
+  ou de BPCE&nbsp;: une seule colonne <strong>Montant</strong> (déjà signée, négative
+  pour les dépenses), un seul <strong>libellé</strong> sans version simplifiée, et
+  la colonne <strong>Solde</strong> qui donne le solde du compte après chaque
+  opération.</p>
+
+  <p>Selon la formule d'export choisie, on trouve parfois quelques colonnes
+  supplémentaires (référence, sous-catégorie interne). Pécule les reconnaît toutes
+  par mot-clé, sans tenir compte des accents ni des majuscules.</p>
+
+  <h3>Encodage et séparateur</h3>
+  <ul>
+    <li><strong>Séparateur&nbsp;:</strong> point-virgule <code>;</code></li>
+    <li><strong>Encodage&nbsp;:</strong> Windows-1252 (Latin-1) — parfois UTF-8
+      sur les exports les plus récents. Pécule essaie l'un puis l'autre
+      automatiquement.</li>
+    <li><strong>Décimales&nbsp;:</strong> virgule française
+      (<code>-42,50</code>).</li>
+    <li><strong>Dates&nbsp;:</strong> format <code>JJ/MM/AAAA</code>.</li>
+  </ul>
+
+  <div class="warn">
+    Le CSV du Crédit Mutuel ne contient pas de colonne de <strong>pointage</strong>.
+    Faute de cette information, Pécule importe les opérations comme
+    <strong>non pointées</strong>&nbsp;: c'est à vous de les pointer d'un clic, une
+    fois vérifiées. (Avec les banques dont le relevé comporte une colonne
+    « Pointage », Pécule les pointe automatiquement.)
+  </div>
+</section>
+
+<section>
+  <div class="cta-box">
+    <div class="txt">
+      <strong>Pécule</strong> — logiciel de gestion de comptes et budget pour
+      Windows 10/11.<br>
+      Gratuit, 100&nbsp;% hors ligne, sans compte, open source (MIT).
+    </div>
+    <a class="cta-btn" href="./">Découvrir Pécule</a>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <a href="./">Pécule</a> —
+  <a href="import-csv.html">Format CSV attendu</a> ·
+  <a href="import-csv-problemes.html">Un relevé ne s'importe pas ?</a> ·
+  <a href="https://github.com/andre12230-png/Pecule">Code source</a>
+</footer>
