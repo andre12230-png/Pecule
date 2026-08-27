@@ -128,9 +128,18 @@ pip install PySide6
 python pecule.py
 ```
 
-Sous Windows, on peut aussi double-cliquer sur
-[`Lancer-Pecule.bat`](Lancer-Pecule.bat) (utilise `pythonw.exe`
-pour éviter la console noire), ou lancer le package directement :
+**Sous Windows, préférez `py`**, le Python Launcher officiel : quand plusieurs
+Python sont installés, `python` désigne celui du PATH, qui n'est pas forcément
+celui où PySide6 a été installé.
+
+```bash
+py pecule.py
+```
+
+On peut aussi double-cliquer sur [`Lancer-Pecule.bat`](Lancer-Pecule.bat) : il
+utilise `pyw`, la variante du lanceur qui n'ouvre pas de console noire derrière
+l'application (et retombe sur `py` si `pyw` est absent). Ou lancer le paquet
+directement :
 
 ```bash
 python -m comptesbudget
@@ -140,14 +149,25 @@ python -m comptesbudget
 
 ## Construction d'un exécutable autonome
 
-Le script [`Construire-Exe.bat`](Construire-Exe.bat) produit un `.exe` autonome
-(~100 Mo) via **PyInstaller** :
+Le script [`Construire-Exe.bat`](Construire-Exe.bat) produit, via **PyInstaller**,
+un **dossier autonome** `dist\Pecule\` : `Pecule.exe` et ses bibliothèques
+dans `_internal\`, soit environ 130 Mo — une cinquantaine une fois compressé.
+C'est ce dossier qui est publié en `.zip`, et une mise à jour ne remplace que ces
+deux éléments : ni `comptes.db` ni `sauvegardes\` ne sont touchés.
 
 ```bash
-python -m PyInstaller --noconfirm --onefile --windowed ^
-    --name "Pecule" --icon Budget.ico --add-data "Budget.ico;." ^
-    --collect-submodules PySide6 pecule.py
+py outils\version_exe.py build\version-exe.txt
+py -m PyInstaller --noconfirm --onedir --windowed ^
+    --name "Pecule" --icon Budget.ico ^
+    --version-file build\version-exe.txt --add-data "Budget.ico;." ^
+    --distpath dist --workpath build --specpath build pecule.py
 ```
+
+Le premier appel écrit les **informations d'identité** du `.exe` (nom, version,
+copyright) à partir de `APP_VERSION` : sans elles, l'avertissement SmartScreen de
+Windows affiche « Éditeur inconnu » et un panneau vide. Le script passe ces
+chemins en **absolu**, car `--add-data`, `--icon` et `--version-file` sont résolus
+depuis le `--specpath` et non depuis le dossier courant.
 
 Le point d'entrée reste `pecule.py` : PyInstaller suit l'import du package
 et embarque automatiquement tout `comptesbudget/`.
