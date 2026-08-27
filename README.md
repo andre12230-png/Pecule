@@ -1,4 +1,3 @@
-place le lisez moi.txt aussi
 # Pécule
 
 **Français** · [English](#-english--personal-accounting-and-budgeting-for-windows)
