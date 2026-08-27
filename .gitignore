@@ -199,8 +199,6 @@ config.local.*
 
 # ----- Artefacts de build (PEUVENT contenir une base avec des donnees reelles) -----
 # Ne JAMAIS publier : ces archives/dossiers embarquent comptes.db
-Comptes-Budget-Qt/
-Comptes-Budget-Qt.zip
 *.zip
 
 # ----- Config IDE locale -----
