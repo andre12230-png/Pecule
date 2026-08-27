@@ -9,6 +9,8 @@
 > 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [dernière version (.zip)](https://github.com/andre12230-png/Pecule/releases/latest)
 
 > 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
+>
+> ⏳ Un paquet **Winget** est [soumis et en attente de revue](https://github.com/microsoft/winget-pkgs/pull/416272) : `winget install` ne le connaît pas encore.
 
 Application de bureau pour la **gestion de comptes et de budget personnels** :
 suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel
@@ -63,6 +65,10 @@ or install via [Scoop](https://scoop.sh):
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
 ```
+
+A **Winget** package has been
+[submitted](https://github.com/microsoft/winget-pkgs/pull/416272) and is
+awaiting review; `winget install` does not know about it yet.
 
 Requires Python ≥ 3.9 (developed and tested on 3.13 / 3.14). Licensed under
 **MIT**. Windows 10/11 is the primary target, but the code is pure Python + Qt
@@ -268,7 +274,8 @@ python outils/faire_archive.py
 ```
 
 Il ajoute `Lisez-moi.txt` et `Budget.ico` au dossier construit, écrit le `.zip`
-puis affiche l'empreinte SHA-256 à reporter dans `bucket/pecule.json`.
+puis affiche l'empreinte SHA-256 à reporter dans `bucket/pecule.json` — et,
+le moment venu, dans les manifestes Winget de [`winget/`](winget/README.md).
 
 **Ne fabriquez pas ce `.zip` avec le clic droit de Windows.** `Compress-Archive`
 écrit les entrées de dossier sans le marqueur « répertoire » : un outil strict
