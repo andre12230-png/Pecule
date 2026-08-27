@@ -47,7 +47,7 @@ telemetry — your financial data never leaves your computer.
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
-- **CSV import** — French bank statement exports; columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8)
+- **CSV and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). QIF files exported from another program are read as well
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
 - **Automatic daily backup** of the database
 
@@ -96,10 +96,10 @@ L'application s'organise en onglets :
 | 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
 | 📖 **Notice** | Mode d'emploi et glossaire intégrés |
 
-Autres outils : **import CSV** des relevés bancaires (BPCE / CM / CA, encodage
-windows-1252), **harmonisation** des catégories et libellés, **recherche globale**
-(Ctrl+F), **rapport mensuel** imprimable / PDF, et **sauvegarde quotidienne
-automatique** de la base.
+Autres outils : **import CSV et QIF** des relevés bancaires (BPCE / CM / CA,
+encodage windows-1252), **harmonisation** des catégories et libellés,
+**recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF, et
+**sauvegarde quotidienne automatique** de la base.
 
 ### Saisir d'avance les échéances du mois
 
@@ -202,7 +202,7 @@ flowchart TD
 
     subgraph LOG_G ["Logique métier — testable sans Qt"]
         LOG
-        R["rules · labels · recurring · csv_import · sync (dormant)"]
+        R["rules · labels · recurring · csv_import · qif_import · sync (dormant)"]
     end
     subgraph F_G ["Fondation"]
         F
@@ -230,11 +230,13 @@ comptesbudget/
 ├── labels.py                Nettoyage et profilage des libellés
 ├── recurring.py             Occurrences récurrentes + détection automatique
 ├── csv_import.py            Import des relevés bancaires CSV
+├── qif_import.py            Import des fichiers QIF (autres logiciels)
 ├── sync.py                  Moteur de fusion (LWW) — DORMANT, conservé
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
     ├── models.py            TxTableModel (modèle de table)
     ├── widgets.py           PeriodBar (sélecteur de période)
+    ├── flow_layout.py       FlowLayout : barre d'outils qui passe à la ligne
     ├── dialogs.py           Édition : transaction, réglages, règle, récurrence
     ├── assistants.py        Harmonisation, pré-remplissage du prévisionnel
     ├── report.py            Rapport mensuel (HTML, aperçu, PDF, impression)
@@ -253,7 +255,8 @@ comptesbudget/
 outils/
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
-└── faire_archive.py        Fabrique le .zip de la release et son empreinte
+├── faire_archive.py        Fabrique le .zip de la release et son empreinte
+└── version_exe.py          Écrit les informations de version de l'exécutable
 ```
 
 Pour refaire les captures de la page de présentation après un changement
@@ -287,7 +290,8 @@ que des fichiers, et vérifie l'archive produite avant de rendre la main.
 
 1. **Fondation** (`constants`, `utils`, `database`) — données de configuration,
    utilitaires et accès SQLite. Aucune dépendance vers le reste.
-2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `sync`) —
+2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `qif_import`,
+   `sync`) —
    pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
 3. **Interface** (`ui/`) — widgets, dialogues et vues PySide6. La fenêtre
    principale assemble les huit vues ; aucune vue n'en instancie une autre.
@@ -296,7 +300,20 @@ que des fichiers, et vérifie l'archive produite avant de rendre la main.
 
 ## Données et fichiers
 
-Tout est stocké **à côté du lanceur** (ou de l'`.exe` en mode gelé) :
+Depuis la **1.22.0**, les données ne vivent plus forcément à côté du programme.
+`_data_dir()` (`comptesbudget/constants.py`) tranche entre deux cas :
+
+- **S'il existe déjà un `comptes.db` à côté de l'application**, c'est celui-là
+  qui sert et rien ne bouge : l'installation reste « portable », comme dans les
+  versions précédentes. C'est aussi ce qui se passe avec Scoop, dont le
+  mécanisme `persist` place justement le fichier à cet endroit.
+- **Sinon** — installation neuve, Winget — les données vont dans
+  `%LOCALAPPDATA%\Pecule`. C'est indispensable : un gestionnaire de paquets
+  remplace le dossier du programme à chaque mise à jour, et emporterait la base
+  avec lui.
+
+Les trois fichiers de données suivent ce dossier ; `Budget.ico`, lui, accompagne
+le programme :
 
 | Fichier / dossier | Contenu | Versionné ? |
 |---|---|---|
@@ -316,10 +333,11 @@ base** : même une migration ratée ne peut pas abîmer la copie du jour.
   (*last-write-wins*) n'est plus câblé à l'interface depuis la v1.9.5 (retrait de
   l'app HTML et de sa synchronisation). Il est conservé pour pouvoir
   réimporter / fusionner un fichier d'échange JSON si besoin.
-- **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import` et
-  `database` s'importent et s'exécutent sans Qt. Une suite de tests unitaires
-  (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
-  récurrentes, le nettoyage des libellés et l'import CSV (dédoublonnage compris).
+- **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import`,
+  `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
+  tests unitaires (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
+  récurrentes, le nettoyage des libellés et les imports CSV et QIF (dédoublonnage
+  compris).
   La couche UI (PySide6) est couverte par des *smoke tests* : chaque vue et
   dialogue est construit en mode « offscreen » puis rafraîchi, pour détecter
   les plantages et erreurs de câblage sans serveur d'affichage.
