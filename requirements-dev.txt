@@ -1,4 +1,4 @@
-# Dépendances de développement de Comptes & Budget.
+# Dépendances de développement de Pécule.
 # Installation : pip install -r requirements-dev.txt
 #
 # Inclut les dépendances applicatives (PySide6) plus les outils de test,
