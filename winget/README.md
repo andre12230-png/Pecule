@@ -37,19 +37,35 @@ repère relu intact, et aucun `comptes.db` créé à côté de l'exécutable.
 
 ## Où en est la demande d'intégration
 
-État au 13 août 2026 :
+État au 27 août 2026 :
 
 | | |
 |---|---|
-| Contrat de contribution (CLA) | signé |
+| Contrat de contribution (CLA) | signé le 12 août |
 | Validation automatique | `Azure-Pipeline-Passed` |
-| En attente de | une revue humaine, sur l'étiquette `Policy-Test-1.8` (Financial Transactions) |
+| Politique de confidentialité | publiée le 22 août, à la demande de la revue |
+| En attente de | une revue manuelle par un administrateur du dépôt |
 
-Cette étiquette est posée automatiquement. Pécule est un outil de tenue de
-comptes **hors ligne** : aucun achat intégré, aucun abonnement, aucun traitement
-de paiement, aucune connexion à une banque ou à un service en ligne —
-l'application n'effectue aucune requête réseau. Une précision en ce sens a été
-ajoutée à la demande ; il n'y a plus qu'à attendre la réponse.
+L'étiquette `Policy-Test-1.8` (Financial Transactions) est posée
+automatiquement, sur le vocabulaire de la description. Pécule est un outil de
+tenue de comptes **hors ligne** : aucun achat intégré, aucun abonnement, aucun
+traitement de paiement, aucune connexion à une banque ou à un service en ligne —
+l'application n'effectue aucune requête réseau. La revue a admis ce point le
+22 août : les exigences de la politique 1.8 propres aux transactions ne
+s'opposent pas à l'acceptation du paquet.
+
+Restait une demande. Puisque l'application conserve des données financières
+saisies ou importées par son utilisateur, une **politique de confidentialité**
+dédiée devait être publiée et son adresse inscrite dans le manifeste. C'est fait
+le jour même : la page
+[`confidentialite.html`](https://andre12230-png.github.io/Pecule/confidentialite.html)
+— en français, avec sa traduction anglaise sur la même page — et le champ
+`PrivacyUrl` dans les deux fichiers de langue du manifeste.
+
+La demande est depuis passée en **revue manuelle par un administrateur** du
+dépôt, avec l'étiquette `Validation-Guide`. Il n'y a plus rien à faire de notre
+côté : pas de relance (une a déjà été postée le 22 août), et surtout pas de
+seconde demande, qui ferait fermer les deux.
 
 ## Note pour qui reprendrait ces fichiers
 
@@ -64,3 +80,8 @@ Pour tester un manifeste local, il faut d'abord l'autoriser en administrateur
 `--disable` ensuite. La désinstallation ne répond ni à `--id` ni à `--exact` :
 la commande qui fonctionne est
 `winget uninstall --product-code andre12230-png.Pecule__DefaultSource`.
+
+**Ces manifestes restent en 1.23.0** alors que des versions plus récentes sont
+publiées. C'est volontaire : la demande en cours porte sur la 1.23.0, et on ne
+la perturbe pas pendant sa revue. Ils ne seront remontés qu'une fois le paquet
+accepté.
