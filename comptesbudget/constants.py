@@ -367,7 +367,25 @@ SYNC_VERSION = 2
 #            d’un chemin écrit en dur : plusieurs Python coexistent souvent sur
 #            une même machine, avec des bibliothèques différentes, et l’exe
 #            doit embarquer celles que les tests ont vérifiées.
-APP_VERSION = "1.23.1"
+# 1.23.2 : la fenêtre tient désormais dans la moitié d’un écran.
+#          • Windows ne peut pas réduire une fenêtre en dessous de la
+#            largeur minimale que l’application réclame. Pécule en
+#            exigeait 1721 pixels : lors d’un partage d’écran entre deux
+#            fenêtres, elle débordait de 441 pixels sur sa voisine. Elle
+#            descend maintenant à 1082 pixels, plafond fixé par l’onglet
+#            Prévisionnel.
+#          • Ce n’étaient ni les tableaux ni les graphiques qui imposaient
+#            cette largeur, mais des textes alignés sur une ligne rigide.
+#            Les titres des bandeaux du Bilan, leurs textes de détail et
+#            les libellés des tuiles peuvent maintenant se replier sur
+#            deux lignes.
+#          • Les filtres des Opérations passent par une disposition « en
+#            flux » : une seule ligne quand la fenêtre est large, deux
+#            quand elle est étroite. Chaque étiquette reste collée à sa
+#            liste déroulante, et le compteur reste à droite, hors du flux.
+#          • La hauteur minimale reste de 984 pixels : un quart d’écran
+#            déborderait encore verticalement.
+APP_VERSION = "1.23.2"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
