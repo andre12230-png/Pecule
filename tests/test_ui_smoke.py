@@ -26,6 +26,35 @@ def _tx(**kw):
     return base
 
 
+def _euros(texte: str) -> float:
+    """Relit un montant affiché (« -1 234,56 € ») pour pouvoir le comparer.
+
+    Comparer les textes ne suffit pas : un bandeau additionne tout ce qui
+    tombe dans sa fenêtre, donc son total dépend du reste du jeu d'essai.
+    """
+    return float(texte.replace("€", "").replace(" ", "")
+                      .replace(" ", "").replace(",", ".").strip())
+
+
+def _fige_aujourdhui(monkeypatch, jour: date):
+    """Fige la date du jour vue par le Bilan.
+
+    Ses bandeaux se calent sur « aujourd'hui » : les 15 prochains jours d'un
+    côté, le mois en cours de l'autre. Un test écrit pour « le 5 du mois »
+    échouait donc les derniers jours du mois, quand l'échéance du mois
+    SUIVANT entre à son tour dans la fenêtre des 15 jours — ce que Pécule a
+    raison d'annoncer, mais que le test ne prévoyait pas.
+    """
+    from comptesbudget.ui.views import bilan
+
+    class _Fige(date):
+        @classmethod
+        def today(cls):
+            return jour
+
+    monkeypatch.setattr(bilan, "date", _Fige)
+
+
 @pytest.fixture
 def db(tmp_path):
     """Base peuplée pour exercer les calculs (soldes, encours CB, alerte
@@ -575,6 +604,10 @@ def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
     from comptesbudget.ui.views.bilan import BilanView
     from comptesbudget.ui.views.previsionnel import PrevisionnelView
 
+    bilan = BilanView(db)
+    bilan.refresh()
+    sans_assurance = _euros(bilan.prev_sorties.text())
+
     cible = date.today() + timedelta(days=3)      # dans la fenêtre des 15 jours
     db.insert_recurring({"id": "rec-test", "libelle": "ASSURANCE TEST",
                          "montant": -123.45, "categorie": "Assurances",
@@ -583,10 +616,12 @@ def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
                          "start_date": cible.isoformat(), "end_date": None,
                          "actif": 1})
 
-    bilan = BilanView(db)
     bilan.refresh()
     avant = bilan.prev_sorties.text()
-    assert "123,45" in avant                       # la récurrence est bien prévue
+    # La récurrence est bien prévue : le total a baissé d'exactement 123,45 €.
+    # On mesure l'écart, car le jeu d'essai contient d'autres échéances dont
+    # la présence dans la fenêtre dépend du jour du mois.
+    assert round(_euros(avant) - sans_assurance, 2) == -123.45
 
     prev = PrevisionnelView(db)
     mois = cible.isoformat()[:7]
@@ -657,9 +692,10 @@ def test_bilan_fin_de_mois_ignore_le_mois_suivant(qapp, tmp_path):
     assert vue.mois_solde.text() == fmt_euro(1000.0)
 
 
-def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path):
-    """Défaut corrigé en 1.21 : une pension versée le 7 sous le libellé de la
-    banque était re-annoncée comme « à venir » parce que la récurrence la
+def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path,
+                                                          monkeypatch):
+    """Défaut corrigé en 1.21 : une pension versée le 1er sous le libellé de
+    la banque était re-annoncée comme « à venir » parce que la récurrence la
     plaçait le 9 sous un libellé légèrement différent."""
     from comptesbudget.ui.views.bilan import BilanView
 
@@ -667,15 +703,18 @@ def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path):
     d.set_setting("initial_balance", "0")
     d.set_setting("initial_date", "2026-01-01")
 
-    today = date.today()
+    # On se place au 5 mars : l'échéance du 9 est devant nous (donc dans la
+    # fenêtre des 15 jours), et celle d'avril est bien au-delà.
+    _fige_aujourdhui(monkeypatch, date(2026, 3, 5))
+
     # Versement déjà encaissé il y a peu, libellé « à la banque »
-    deja = today.replace(day=1)
+    deja = date(2026, 3, 1)
     d.insert_tx(_tx(id="pension", date=deja.isoformat(),
                     date_valeur=deja.isoformat(), libelle="CAISSE RETRAITE 12",
                     type="Virement", categorie="Revenus",
                     montant=900.00, pointee=1))
     # La récurrence le place quelques jours plus tard, sous son nom à lui
-    plus_tard = deja + timedelta(days=8)
+    plus_tard = date(2026, 3, 9)
     d.insert_recurring({"id": "rec-pension", "libelle": "Caisse Retraite",
                         "montant": 900.00, "categorie": "Revenus",
                         "sous_cat": "", "type": "Virement",
