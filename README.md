@@ -19,7 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version applicative : **1.23.2**
+> Version applicative : **1.24.0**
 
 ---
 
@@ -48,6 +48,7 @@ telemetry — your financial data never leaves your computer.
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
 - **CSV and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). QIF files exported from another program are read as well
+- **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
 - **Automatic daily backup** of the database
 
@@ -100,6 +101,23 @@ Autres outils : **import CSV et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF, et
 **sauvegarde quotidienne automatique** de la base.
+
+### Plusieurs comptes
+
+Depuis la 1.24.0, Pécule suit **plusieurs comptes bancaires** dans un même
+fichier. Une liste **Compte affiché** apparaît en haut du menu de gauche dès
+qu'il existe au moins deux comptes ; le compte choisi commande tout l'écran
+(bilan, opérations, budget, prévisionnel, rapport, recherche). Le bouton
+**🏦 Mes comptes** permet d'en ajouter, d'en renommer et d'en supprimer.
+
+| | Propre à chaque compte | Commun à tous les comptes |
+|---|---|---|
+| | Opérations, budgets, prévisionnel, solde et date de départ | Règles automatiques, catégories, sous-catégories, libellés harmonisés |
+
+Une base créée avant la 1.24.0 est reprise telle quelle : tout est rattaché à
+un compte « Compte courant » créé au premier lancement, qui hérite du solde et
+de la date de départ enregistrés. Qui n'a qu'un seul compte ne voit aucun
+changement — la liste reste cachée.
 
 ### Saisir d'avance les échéances du mois
 

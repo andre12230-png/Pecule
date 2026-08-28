@@ -48,7 +48,8 @@ DB_PATH = os.path.join(_data_dir(), "comptes.db")
 # archive/) ; le moteur de fusion plus bas est conservé : il permettrait de
 # réimporter/fusionner un tel fichier si besoin.
 SYNC_PATH = os.path.join(_data_dir(), "comptes_sync.json")
-SYNC_VERSION = 2
+# 3 depuis la 1.24.0 : le fichier porte aussi les comptes.
+SYNC_VERSION = 3
 
 
 # Version applicative — incrémentée à chaque amélioration
@@ -385,7 +386,29 @@ SYNC_VERSION = 2
 #            liste déroulante, et le compteur reste à droite, hors du flux.
 #          • La hauteur minimale reste de 984 pixels : un quart d’écran
 #            déborderait encore verticalement.
-APP_VERSION = "1.23.2"
+# 1.24.0 : plusieurs comptes bancaires dans la même application.
+#          • Une liste « Compte affiché » apparaît en haut du menu de
+#            gauche dès qu’il existe au moins deux comptes. Le compte
+#            choisi commande tout l’écran : bilan, opérations, budget,
+#            prévisionnel, rapport et recherche. Qui n’a qu’un compte ne
+#            voit aucun changement — la liste reste cachée.
+#          • Un bouton « Mes comptes » permet d’en ajouter, d’en renommer
+#            et d’en supprimer. Supprimer un compte efface ses opérations,
+#            ses budgets et ses récurrences ; le dernier compte ne peut
+#            pas être supprimé.
+#          • Chaque compte a ses propres opérations, budgets, récurrences
+#            et son propre solde de départ. Les règles automatiques, les
+#            catégories, les sous-catégories et les libellés harmonisés
+#            restent communs : une règle écrite une fois sert partout.
+#          • Les bases existantes sont reprises telles quelles : tout est
+#            rattaché à un compte « Compte courant » créé au premier
+#            lancement, qui hérite du solde et de la date de départ
+#            enregistrés. Rien n’est perdu, rien ne change à l’écran.
+#          • L’export JSON emporte désormais tous les comptes, et la
+#            restauration les recrée. Un export écrit par une version
+#            antérieure reste lisible : ses opérations rejoignent le
+#            compte affiché.
+APP_VERSION = "1.24.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

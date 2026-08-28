@@ -1,12 +1,13 @@
-"""Dialogues d'édition (transaction, réglages, règle, récurrence)."""
+"""Dialogues d'édition (transaction, comptes, réglages, règle, récurrence)."""
 
 from typing import Optional
 
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtWidgets import (
-    QWidget, QHBoxLayout,
+    QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
     QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter, QMessageBox,
+    QListWidget, QListWidgetItem, QPushButton, QInputDialog,
 )
 
 from ..constants import (
@@ -16,7 +17,7 @@ from ..utils import (
     fmt_euro, date_debit_differe, JOUR_DEBIT_DIFFERE,
 )
 from ..labels import build_libelle_profiles
-from .widgets import MontantSpinBox
+from .widgets import MontantSpinBox, demander_montant
 
 class TxDialog(QDialog):
     """Boîte de dialogue d'ajout / modification d'opération."""
@@ -491,9 +492,10 @@ class TxDialog(QDialog):
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, initial_date: str = "2025-01-01",
-                 initial_balance: float = 0.0):
+                 initial_balance: float = 0.0, nom_compte: str = ""):
         super().__init__(parent)
-        self.setWindowTitle("Paramètres")
+        self.setWindowTitle(f"Paramètres — {nom_compte}" if nom_compte
+                            else "Paramètres")
         self.setMinimumWidth(440)
 
         layout = QFormLayout(self)
@@ -501,6 +503,8 @@ class SettingsDialog(QDialog):
         info = QLabel(
             "Le solde de départ est utilisé pour calculer le solde réel du compte.\n"
             "Indiquez le solde de votre relevé bancaire à la date choisie."
+            + (f"\n\nCe réglage ne concerne que le compte « {nom_compte} »."
+               if nom_compte else "")
         )
         info.setWordWrap(True)
         info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; border:1px solid #E8D77B")
@@ -531,6 +535,124 @@ class SettingsDialog(QDialog):
     def values(self) -> tuple[str, float]:
         return (self.initial_date.date().toString("yyyy-MM-dd"),
                 self.initial_balance.value())
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dialogue de gestion des comptes
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ComptesDialog(QDialog):
+    """Ajouter, renommer ou supprimer un compte bancaire.
+
+    Chaque compte a ses propres opérations, budgets, récurrences et solde de
+    départ. Les règles automatiques, les catégories et les libellés restent
+    communs à tous les comptes : une règle écrite une fois sert partout."""
+
+    def __init__(self, db, parent=None):
+        super().__init__(parent)
+        self.db = db
+        self.setWindowTitle("Mes comptes")
+        self.setMinimumWidth(460)
+
+        lay = QVBoxLayout(self)
+
+        info = QLabel(
+            "Chaque compte a ses propres opérations, budgets et prévisionnel.\n"
+            "Les règles automatiques et les catégories sont communes à tous "
+            "les comptes.")
+        info.setWordWrap(True)
+        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
+                           "border:1px solid #E8D77B")
+        lay.addWidget(info)
+
+        self.liste = QListWidget()
+        self.liste.setMinimumHeight(140)
+        lay.addWidget(self.liste)
+
+        barre = QHBoxLayout()
+        for texte, slot in (("➕ Ajouter", self.ajouter),
+                            ("✏️ Renommer", self.renommer),
+                            ("🗑 Supprimer", self.supprimer)):
+            b = QPushButton(texte)
+            b.clicked.connect(slot)
+            barre.addWidget(b)
+        barre.addStretch()
+        lay.addLayout(barre)
+
+        btns = QDialogButtonBox(QDialogButtonBox.Close)
+        btns.rejected.connect(self.accept)
+        lay.addWidget(btns)
+
+        self.remplir()
+
+    def remplir(self):
+        self.liste.clear()
+        for r in self.db.list_comptes():
+            n = self.db.nb_operations(r["id"])
+            actuel = " (affiché)" if r["id"] == self.db.compte_id else ""
+            item = QListWidgetItem(f"{r['nom']} — {n} opération(s){actuel}")
+            item.setData(Qt.UserRole, r["id"])
+            self.liste.addItem(item)
+            if r["id"] == self.db.compte_id:
+                self.liste.setCurrentItem(item)
+
+    def _compte_choisi(self) -> str:
+        item = self.liste.currentItem()
+        return item.data(Qt.UserRole) if item else ""
+
+    def ajouter(self):
+        nom, ok = QInputDialog.getText(
+            self, "Nouveau compte",
+            "Nom du compte (par exemple : Compte joint, Livret A) :")
+        nom = (nom or "").strip()
+        if not ok or not nom:
+            return
+        if any(r["nom"].lower() == nom.lower() for r in self.db.list_comptes()):
+            QMessageBox.warning(self, "Nom déjà pris",
+                                f"Un compte s'appelle déjà « {nom} ».")
+            return
+        solde, ok = demander_montant(
+            self, "Solde de départ",
+            f"Solde du compte « {nom} » au 1er janvier de l'année de départ :",
+            0.0, mini=-1_000_000.0)
+        if not ok:
+            return
+        self.db.add_compte(nom, solde)
+        self.remplir()
+
+    def renommer(self):
+        cid = self._compte_choisi()
+        if not cid:
+            return
+        ancien = self.db.nom_compte(cid)
+        nom, ok = QInputDialog.getText(self, "Renommer le compte",
+                                       "Nouveau nom :", text=ancien)
+        nom = (nom or "").strip()
+        if not ok or not nom or nom == ancien:
+            return
+        self.db.update_compte(cid, {"nom": nom})
+        self.remplir()
+
+    def supprimer(self):
+        cid = self._compte_choisi()
+        if not cid:
+            return
+        nom = self.db.nom_compte(cid)
+        n = self.db.nb_operations(cid)
+        rep = QMessageBox.question(
+            self, "Supprimer le compte",
+            f"Supprimer le compte « {nom} » ?\n\n"
+            f"Ses {n} opération(s), ses budgets et ses récurrences seront "
+            f"définitivement effacés. Cette action est irréversible.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if rep != QMessageBox.Yes:
+            return
+        try:
+            self.db.delete_compte(cid)
+        except ValueError as e:
+            QMessageBox.warning(self, "Suppression impossible", str(e))
+            return
+        self.remplir()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
