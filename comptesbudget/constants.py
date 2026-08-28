@@ -424,7 +424,23 @@ SYNC_VERSION = 3
 #            archivées rejoint le solde de départ, qui se décale au
 #            lendemain de la coupure — comme une banque qui ouvre un
 #            relevé sur un solde reporté.
-APP_VERSION = "1.25.0"
+# 1.25.1 : le menu de gauche se lit enfin d'un coup d'œil.
+#          • Quinze boutons se suivaient sans rien pour les distinguer,
+#            séparés par de simples traits qui ne disaient pas ce qu'ils
+#            séparaient. Ils sont maintenant rangés par intention, chaque
+#            groupe annoncé par son intitulé et souligné d'un filet :
+#            Compte, Saisie, Consulter, Mettre au propre, Mes données,
+#            Réglages, Aide.
+#          • « Rechercher » et « Rapport mensuel » ont rejoint le groupe
+#            « Consulter », où on les cherche naturellement ; ils étaient
+#            perdus au milieu des outils de nettoyage et des exports.
+#          • Les boutons ont un contour et s'éclairent au survol : on voit
+#            où l'on pointe.
+#          • Le groupe « Compte » disparaît entièrement quand il n'y a
+#            qu'un seul compte, comme le faisait déjà son sélecteur.
+#          • Ni la largeur (1082 px hors comptes) ni la hauteur minimale
+#            de la fenêtre ne changent.
+APP_VERSION = "1.25.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

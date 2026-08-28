@@ -342,6 +342,9 @@ le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
 Échéances prévues) restent, eux, bornés à la période affichée.</p>
 
 <h2>6. Outils du menu de gauche</h2>
+<p>Les actions sont rangées par intention, chaque groupe annoncé par son
+intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
+<b>Mettre au propre</b>, <b>Mes données</b>, <b>Réglages</b> et <b>Aide</b>.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
