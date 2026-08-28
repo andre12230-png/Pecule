@@ -135,6 +135,11 @@ class PeriodBar(QWidget):
             self._current_mode = m
             self.date_mode_changed.emit(m)
 
+    def reset_selection(self):
+        """Repart du mois en cours au prochain remplissage. Sert quand on
+        change de compte : les périodes disponibles ne sont plus les mêmes."""
+        self._first_fill = True
+
     def current_period(self) -> str:
         return self.combo.currentData() or "all"
 

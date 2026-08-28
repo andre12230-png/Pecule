@@ -19,10 +19,15 @@ def db_snapshot(db: "Database") -> dict:
         "version": SYNC_VERSION,
         "app": "pecule.py",
         "synced_at": _now_iso(),
-        "transactions": [dict(r) for r in db.list_tx()],
+        # Tous les comptes : une sauvegarde doit pouvoir tout rendre.
+        "comptes":      [dict(r) for r in db.list_comptes()],
+        "transactions": [dict(r) for r in db.list_tx_all()],
         "rules":        [dict(r) for r in db.list_rules()],
-        "recurring":    [dict(r) for r in db.list_recurring()],
+        "recurring":    [dict(r) for r in db.list_recurring_all()],
+        # « budgets » reste celui du compte affiché (lisible par les versions
+        # d'avant le multicomptes) ; « budgets_par_compte » porte le reste.
         "budgets":      db.list_budgets(),
+        "budgets_par_compte": db.list_budgets_all(),
         "budgets_updated_at": db.get_setting("_meta_budgets_updated_at", ""),
         "settings": {
             "initial_balance": db.get_setting("initial_balance", ""),
@@ -68,10 +73,19 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
         return stats
     fallback = remote.get("synced_at") or ""
 
+    # 0) Les comptes d'abord : une opération ne peut être rattachée qu'à un
+    #    compte qui existe. Un fichier écrit avant le multicomptes n'en
+    #    contient aucun — ses opérations rejoindront le compte de travail.
+    for c in remote.get("comptes", []) or []:
+        if c.get("id"):
+            db.upsert_compte(c)
+
+    # La comparaison porte sur TOUS les comptes : une opération de l'autre
+    # compte ne doit pas passer pour absente et être réécrite à tort.
     local = {
-        "transactions": {r["id"]: dict(r) for r in db.list_tx()},
+        "transactions": {r["id"]: dict(r) for r in db.list_tx_all()},
         "rules":        {r["id"]: dict(r) for r in db.list_rules()},
-        "recurring":    {r["id"]: dict(r) for r in db.list_recurring()},
+        "recurring":    {r["id"]: dict(r) for r in db.list_recurring_all()},
     }
     del_map = db.deletion_map()
 
@@ -111,8 +125,18 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     #    plus ancien.
     r_bud_ts = remote.get("budgets_updated_at") or fallback
     l_bud_ts = db.get_setting("_meta_budgets_updated_at", "")
+    par_compte = remote.get("budgets_par_compte") or {}
     r_buds = remote.get("budgets") or {}
-    if r_buds and (not db.list_budgets() or (r_bud_ts and r_bud_ts > l_bud_ts)):
+    plus_recent = bool(r_bud_ts) and r_bud_ts > l_bud_ts
+    if par_compte:
+        # Fichier écrit par la 1.24.0 ou plus : chaque compte a ses budgets.
+        if plus_recent or not db.list_budgets():
+            for cid, buds in par_compte.items():
+                db.set_budgets_compte(cid, buds)
+            db.set_setting("_meta_budgets_updated_at", r_bud_ts or l_bud_ts)
+    elif r_buds and (not db.list_budgets() or plus_recent):
+        # Fichier d'avant le multicomptes : ces budgets sont ceux du compte
+        # de travail.
         db.replace_budgets(r_buds, r_bud_ts or l_bud_ts)
 
     # 4) Réglages partagés (solde / date initiale) : le plus récent l'emporte.

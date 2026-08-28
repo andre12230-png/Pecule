@@ -79,7 +79,34 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
   </li>
 </ol>
 
-<h2>2. Les onglets</h2>
+<h2>2. Plusieurs comptes</h2>
+<p>Pécule peut suivre <b>plusieurs comptes bancaires</b> : un compte courant et
+un livret, deux comptes d'un même foyer, un compte dédié à une maison…
+Tant que vous n'en avez qu'un, rien ne change à l'écran.</p>
+<ul>
+  <li><b>Créer un compte</b> : bouton <code>🏦 Mes comptes</code> du menu de
+      gauche, puis <code>➕ Ajouter</code>. Donnez-lui un nom et le solde qu'il
+      avait à votre date de départ.</li>
+  <li><b>Changer de compte</b> : la liste <b>Compte affiché</b>, en haut du menu
+      de gauche, apparaît dès qu'il y a deux comptes. Le compte choisi commande
+      <b>tout l'écran</b> : bilan, opérations, budget, prévisionnel, rapport
+      mensuel et recherche. Le nom du compte est rappelé dans le titre de la
+      fenêtre, pour ne jamais s'y tromper.</li>
+  <li><b>Ce qui est propre à chaque compte</b> : les opérations, les budgets,
+      le prévisionnel et le solde de départ.</li>
+  <li><b>Ce qui est commun à tous les comptes</b> : les règles automatiques,
+      les catégories, les sous-catégories et les libellés harmonisés. Une règle
+      écrite une fois sert donc partout.</li>
+  <li><b>Importer un relevé</b> alimente le compte affiché : vérifiez-le avant
+      d'importer.</li>
+  <li><b>Supprimer un compte</b> efface aussi ses opérations, ses budgets et ses
+      récurrences. L'application demande confirmation, et refuse de supprimer le
+      dernier compte.</li>
+</ul>
+<p>Si vous utilisiez Pécule avant cette possibilité, vos données ont été
+rattachées à un compte nommé <b>Compte courant</b> : rien n'a bougé.</p>
+
+<h2>3. Les onglets</h2>
 
 <h3>🏠 Bilan (tableau de bord)</h3>
 <p>Vue d'ensemble avec 6 indicateurs clés, l'évolution mensuelle revenus/dépenses,
@@ -195,7 +222,7 @@ classent dans l'ordre du calendrier et les montants du plus grand au plus
 petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
 Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 
-<h2>3. Période et mode date</h2>
+<h2>4. Période et mode date</h2>
 <p>La barre <b>Période</b> en haut de l'app filtre toutes les vues (sauf Règles).
 Vous pouvez choisir « Toutes périodes », une année entière, ou un mois précis.</p>
 <p>Le sélecteur <b>Date</b> à côté contrôle la chronologie :</p>
@@ -294,7 +321,7 @@ et n'existent pas encore dans vos opérations.</p>
 <p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
 banque, le compter ici le compterait deux fois.</p>
 
-<h2>4. Pointage et rapprochement</h2>
+<h2>5. Pointage et rapprochement</h2>
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations
 correspondent bien à votre relevé bancaire (rapprochement bancaire).</div>
 <p>Quand vous recevez votre relevé, ouvrez l'onglet Opérations et cliquez sur
@@ -314,7 +341,7 @@ oubliée le mois dernier ne peut donc pas passer inaperçue. Le compteur de droi
 le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
 Échéances prévues) restent, eux, bornés à la période affichée.</p>
 
-<h2>5. Outils du menu de gauche</h2>
+<h2>6. Outils du menu de gauche</h2>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
@@ -327,7 +354,8 @@ le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
   <tr><td>💾 Exporter (JSON)</td><td>Export complet : opérations, règles, budgets, récurrences et réglages</td></tr>
   <tr><td>♻️ Restaurer (JSON)</td><td>Réimporte un export JSON en le fusionnant (la version la plus récente gagne)</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
-  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale</td></tr>
+  <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer ou supprimer un compte bancaire</td></tr>
+  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b></td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
 </table>
 
@@ -341,7 +369,7 @@ tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 <p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
 top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
 
-<h2>6. Sauvegarde des données</h2>
+<h2>7. Sauvegarde des données</h2>
 <p>Toutes vos données restent sur votre ordinateur, dans un fichier unique
 nommé <code>comptes.db</code>. Sur cette installation, il se trouve ici :</p>
 <p><code>DOSSIER_DONNEES</code></p>

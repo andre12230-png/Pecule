@@ -62,7 +62,12 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         return fmt_euro(v).replace(" ", "&nbsp;")
 
     H = []
-    H.append(f"<h1>📒 Comptes &amp; Budget — Rapport {MOIS_FR[m]} {y}</h1>")
+    # Le nom du compte n'apparait que s'il y en a plusieurs : sur un rapport
+    # imprime, savoir de quel compte il s'agit evite toute confusion.
+    suffixe = ""
+    if len(db.list_comptes()) > 1:
+        suffixe = f" — {db.nom_compte()}"
+    H.append(f"<h1>📒 Pécule — Rapport {MOIS_FR[m]} {y}{suffixe}</h1>")
     H.append(f"<p><i>Généré le {fmt_date_fr(date.today().isoformat())} — "
              f"{len(act)} opération(s) sur le mois.</i></p><hr>")
 

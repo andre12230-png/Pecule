@@ -9,6 +9,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QFrame, QStatusBar, QDialog, QMessageBox, QFileDialog,
+    QLabel, QComboBox,
 )
 
 from ..constants import (
@@ -25,7 +26,7 @@ from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
 from .widgets import PeriodBar
-from .dialogs import SettingsDialog
+from .dialogs import SettingsDialog, ComptesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
 from .report import MonthlyReportDialog
 from .search import GlobalSearchDialog
@@ -79,6 +80,24 @@ class MainWindow(QMainWindow):
             line.setFrameShadow(QFrame.Sunken)
             mv.addWidget(line)
 
+        # ── Compte affiché ──
+        # Le compte choisi ici commande TOUT l'écran : bilan, opérations,
+        # budget, prévisionnel. Il n'apparaît que si plusieurs comptes
+        # existent : celui qui n'en a qu'un ne voit aucun changement.
+        self.compte_label = QLabel("Compte affiché")
+        self.compte_label.setStyleSheet("color:#555; padding-left:2px")
+        mv.addWidget(self.compte_label)
+        self.compte_combo = QComboBox()
+        self.compte_combo.setToolTip(
+            "Compte bancaire affiché. Chaque compte a ses propres "
+            "opérations, budgets et prévisionnel.")
+        self.compte_combo.currentIndexChanged.connect(self.on_compte_changed)
+        mv.addWidget(self.compte_combo)
+        self.compte_sep = QFrame()
+        self.compte_sep.setFrameShape(QFrame.HLine)
+        self.compte_sep.setFrameShadow(QFrame.Sunken)
+        mv.addWidget(self.compte_sep)
+
         add_btn("➕ Nouvelle opération", self.action_new_tx)
         add_btn("📥 Importer un relevé", self.action_import,
                 "Relevé bancaire CSV, ou fichier QIF exporté depuis un autre "
@@ -104,6 +123,8 @@ class MainWindow(QMainWindow):
         add_btn("🖨 Rapport mensuel", self.action_monthly_report,
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
         add_sep()
+        add_btn("🏦 Mes comptes", self.action_comptes,
+                "Ajouter, renommer ou supprimer un compte bancaire")
         add_btn("⚙️ Paramètres", self.action_settings)
         add_sep()
         add_btn("📖 Notice", self.action_notice,
@@ -187,6 +208,8 @@ class MainWindow(QMainWindow):
         self.refresh_all()
 
     def refresh_all(self):
+        # Liste des comptes (et visibilité du sélecteur)
+        self._fill_comptes()
         # Périodes disponibles
         txs = [dict(r) for r in self.db.list_tx()]
         self.period_bar.update_periods(txs)
@@ -205,6 +228,50 @@ class MainWindow(QMainWindow):
         self.subs_view.refresh()
         self.rules_view.refresh()
         self.prev_view.refresh()
+
+    # ── Comptes ─────────────────────────────────────────────────────
+    def _fill_comptes(self):
+        """Remplit la liste déroulante des comptes sans rien recharger.
+        Le sélecteur reste caché tant qu'il n'y a qu'un seul compte."""
+        comptes = self.db.list_comptes()
+        visible = len(comptes) > 1
+        self.compte_label.setVisible(visible)
+        self.compte_combo.setVisible(visible)
+        self.compte_sep.setVisible(visible)
+
+        self.compte_combo.blockSignals(True)
+        self.compte_combo.clear()
+        for r in comptes:
+            self.compte_combo.addItem(r["nom"], r["id"])
+        idx = self.compte_combo.findData(self.db.compte_id)
+        if idx >= 0:
+            self.compte_combo.setCurrentIndex(idx)
+        self.compte_combo.blockSignals(False)
+
+        titre = f"Pécule — v{APP_VERSION}"
+        if visible:
+            titre += f" — {self.db.nom_compte()}"
+        self.setWindowTitle(titre)
+
+    def on_compte_changed(self):
+        """Changement de compte : tout l'écran suit."""
+        cid = self.compte_combo.currentData()
+        if not cid or cid == self.db.compte_id:
+            return
+        self.db.set_compte_courant(cid)
+        # Les périodes disponibles changent avec le compte : on repart du
+        # mois en cours plutôt que de garder une période qui n'existe pas.
+        self.period_bar.reset_selection()
+        self.refresh_all()
+        self.statusBar().showMessage(
+            f"Compte affiché : {self.db.nom_compte()}", 5000)
+
+    def action_comptes(self):
+        avant = self.db.compte_id
+        ComptesDialog(self.db, self).exec()
+        if self.db.compte_id != avant:
+            self.period_bar.reset_selection()
+        self.refresh_all()
 
     def refresh_current(self, idx: int):
         w = self.tabs.widget(idx)
@@ -351,14 +418,16 @@ class MainWindow(QMainWindow):
             b = float(self.db.get_setting("initial_balance", "0"))
         except ValueError:
             b = 0.0
-        dlg = SettingsDialog(self, d, b)
+        dlg = SettingsDialog(self, d, b, self.db.nom_compte())
         if dlg.exec() != QDialog.Accepted:
             return
         nd, nb = dlg.values()
+        # set_setting range ces deux valeurs dans le compte affiché.
         self.db.set_setting("initial_date", nd)
         self.db.set_setting("initial_balance", str(nb))
         QMessageBox.information(self, "Paramètres",
-            f"Solde de départ : {fmt_euro(nb)} au {fmt_date_fr(nd)}.")
+            f"« {self.db.nom_compte()} » — solde de départ : "
+            f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
 
     def _maybe_prompt_initial_setup(self):
