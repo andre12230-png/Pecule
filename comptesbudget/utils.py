@@ -71,7 +71,11 @@ def in_period(date_iso: str, period: str) -> bool:
 
 
 def list_periods(transactions: list[dict], date_mode: str = "operation") -> list[str]:
-    """Retourne la liste triée des périodes (mois + années) présentes.
+    """Retourne la liste triée des périodes présentes : « toutes périodes »,
+    puis chaque année de la plus récente à la plus ancienne, **suivie de ses
+    propres mois**. Ranger toutes les années d'abord et tous les mois ensuite
+    donnait une liste illisible dès qu'on suivait plusieurs années : quatre
+    lignes d'années, puis quarante-cinq mois à la file.
 
     `date_mode` doit être le mode d'affichage choisi dans la barre du haut
     (« operation » ou « valeur »), car les vues filtrent sur cette date-là.
@@ -89,8 +93,9 @@ def list_periods(transactions: list[dict], date_mode: str = "operation") -> list
             years.add(d[:4])
             months.add(d[:7])
     out = ["all"]
-    out += sorted(years, reverse=True)
-    out += sorted(months, reverse=True)
+    for annee in sorted(years, reverse=True):
+        out.append(annee)
+        out += sorted((m for m in months if m[:4] == annee), reverse=True)
     return out
 
 
