@@ -26,7 +26,7 @@ from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
 from .widgets import PeriodBar
-from .dialogs import SettingsDialog, ComptesDialog
+from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
 from .report import MonthlyReportDialog
 from .search import GlobalSearchDialog
@@ -123,6 +123,9 @@ class MainWindow(QMainWindow):
         add_btn("🖨 Rapport mensuel", self.action_monthly_report,
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
         add_sep()
+        add_btn("📦 Archiver", self.action_archives,
+                "Met de côté les opérations anciennes : elles sortent des "
+                "listes sans être supprimées")
         add_btn("🏦 Mes comptes", self.action_comptes,
                 "Ajouter, renommer ou supprimer un compte bancaire")
         add_btn("⚙️ Paramètres", self.action_settings)
@@ -182,6 +185,7 @@ class MainWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.refresh_current)
         self.period_bar.period_changed.connect(self.on_period_changed)
         self.period_bar.date_mode_changed.connect(self.on_date_mode_changed)
+        self.period_bar.archives_toggled.connect(self.on_archives_toggled)
 
         # Statut
         self.setStatusBar(QStatusBar())
@@ -210,6 +214,8 @@ class MainWindow(QMainWindow):
     def refresh_all(self):
         # Liste des comptes (et visibilité du sélecteur)
         self._fill_comptes()
+        # Case « Voir les archives » : visible s'il y a des archives
+        self.period_bar.set_archives_disponibles(self.db.nb_archivees())
         # Périodes disponibles
         txs = [dict(r) for r in self.db.list_tx()]
         self.period_bar.update_periods(txs)
@@ -265,6 +271,20 @@ class MainWindow(QMainWindow):
         self.refresh_all()
         self.statusBar().showMessage(
             f"Compte affiché : {self.db.nom_compte()}", 5000)
+
+    def on_archives_toggled(self, voir: bool):
+        """Affiche ou masque les opérations archivées. Le solde de départ
+        suit tout seul : il repart du début quand on montre les archives."""
+        self.db.set_voir_archives(voir)
+        self.period_bar.reset_selection()
+        self.refresh_all()
+        self.statusBar().showMessage(
+            "Archives affichées" if voir else "Archives masquées", 4000)
+
+    def action_archives(self):
+        ArchivesDialog(self.db, self).exec()
+        self.period_bar.reset_selection()
+        self.refresh_all()
 
     def action_comptes(self):
         avant = self.db.compte_id

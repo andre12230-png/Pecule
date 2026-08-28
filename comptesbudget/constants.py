@@ -408,7 +408,23 @@ SYNC_VERSION = 3
 #            restauration les recrée. Un export écrit par une version
 #            antérieure reste lisible : ses opérations rejoignent le
 #            compte affiché.
-APP_VERSION = "1.24.0"
+# 1.25.0 : archivage des opérations anciennes.
+#          • Un bouton « Archiver » met de côté les opérations antérieures
+#            à une date, sur un compte ou sur tous à la fois. La date
+#            proposée est la fin de la dernière année entièrement plus
+#            vieille que trois ans, pour que les années restent entières
+#            et donc comparables.
+#          • Rien n'est supprimé : les opérations archivées restent dans
+#            vos données. Elles sortent seulement des listes, des
+#            graphiques, des périodes proposées et des outils
+#            (harmonisation, doublons, recherche). Une case « Voir les
+#            archives » apparaît en haut dès qu'il y en a, et le bouton
+#            « Tout rétablir » les remet à la vue.
+#          • Le solde ne change pas d'un centime : le total des opérations
+#            archivées rejoint le solde de départ, qui se décale au
+#            lendemain de la coupure — comme une banque qui ouvre un
+#            relevé sur un solde reporté.
+APP_VERSION = "1.25.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

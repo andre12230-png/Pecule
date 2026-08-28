@@ -19,7 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version applicative : **1.24.0**
+> Version applicative : **1.25.0**
 
 ---
 
@@ -49,6 +49,7 @@ telemetry — your financial data never leaves your computer.
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
 - **CSV and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). QIF files exported from another program are read as well
 - **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
+- **Archiving** — set aside older transactions so lists and period pickers stay short. Nothing is deleted: archived entries stay in the database, and their total rolls into the opening balance, so the displayed balance never changes. A checkbox brings them back, and archiving can be undone
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
 - **Automatic daily backup** of the database
 
@@ -118,6 +119,20 @@ Une base créée avant la 1.24.0 est reprise telle quelle : tout est rattaché �
 un compte « Compte courant » créé au premier lancement, qui hérite du solde et
 de la date de départ enregistrés. Qui n'a qu'un seul compte ne voit aucun
 changement — la liste reste cachée.
+
+### Archiver les opérations anciennes
+
+Le bouton **📦 Archiver** met de côté les opérations antérieures à une date, sur
+un compte ou sur tous à la fois. **Rien n'est supprimé** : les opérations
+archivées restent dans la base, mais sortent des listes, des graphiques, des
+périodes proposées et des outils. Une case **Voir les archives** les réaffiche,
+et **↩ Tout rétablir** annule l'archivage.
+
+Le solde ne change pas : le total des opérations archivées rejoint le solde de
+départ, qui se décale au lendemain de la coupure — comme une banque qui ouvre
+un relevé sur un solde reporté. La date proposée par défaut est la fin de la
+dernière année entièrement plus vieille que trois ans, pour que les années
+restent entières et comparables.
 
 ### Saisir d'avance les échéances du mois
 

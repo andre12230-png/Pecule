@@ -354,6 +354,7 @@ le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
   <tr><td>💾 Exporter (JSON)</td><td>Export complet : opérations, règles, budgets, récurrences et réglages</td></tr>
   <tr><td>♻️ Restaurer (JSON)</td><td>Réimporte un export JSON en le fusionnant (la version la plus récente gagne)</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
+  <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer ou supprimer un compte bancaire</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b></td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
@@ -369,7 +370,31 @@ tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 <p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
 top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
 
-<h2>7. Sauvegarde des données</h2>
+<h2>7. Archiver les opérations anciennes</h2>
+<p>Au bout de quelques années, les listes s'allongent et le choix des périodes
+devient interminable. Le bouton <code>📦 Archiver</code> du menu de gauche met
+de côté les opérations les plus anciennes.</p>
+<ul>
+  <li><b>Rien n'est supprimé.</b> Les opérations archivées restent dans vos
+      données : elles sortent seulement des listes, des graphiques, des
+      périodes proposées et des outils (harmonisation, doublons, recherche).</li>
+  <li><b>Le solde ne bouge pas d'un centime.</b> Le total des opérations
+      archivées rejoint le solde de départ, qui se décale au lendemain de la
+      date de coupure — exactement comme une banque qui ouvre un nouveau
+      relevé sur un solde reporté.</li>
+  <li><b>La date proposée</b> est la fin de la dernière année entièrement plus
+      vieille que trois ans : les années restent entières, donc comparables.
+      Vous pouvez la changer.</li>
+  <li><b>Plusieurs comptes à la fois</b> : cochez ceux que vous voulez
+      archiver, la fenêtre annonce combien d'opérations sont concernées.</li>
+  <li><b>Pour les revoir</b> : la case <b>Voir les archives</b>, en haut de la
+      fenêtre, apparaît dès qu'il y en a. Elle les réaffiche toutes, avec le
+      solde de départ d'origine.</li>
+  <li><b>Pour tout rétablir</b> : le bouton <b>↩ Tout rétablir</b> de la même
+      fenêtre remet les opérations à leur place, comme si de rien n'était.</li>
+</ul>
+
+<h2>8. Sauvegarde des données</h2>
 <p>Toutes vos données restent sur votre ordinateur, dans un fichier unique
 nommé <code>comptes.db</code>. Sur cette installation, il se trouve ici :</p>
 <p><code>DOSSIER_DONNEES</code></p>
