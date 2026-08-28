@@ -61,6 +61,17 @@ def test_list_periods():
     assert out.index("2026") < out.index("2026-06")
 
 
+def test_list_periods_groupe_les_mois_sous_leur_annee():
+    """Chaque annee est suivie de ses propres mois, du plus recent au plus
+    ancien. Toutes les annees d'abord, puis tous les mois, donnait une liste
+    illisible des qu'on suivait plusieurs annees."""
+    txs = [{"date": "2026-06-01"}, {"date": "2026-01-15"},
+           {"date": "2025-12-31"}, {"date": "2025-03-02"}]
+    assert list_periods(txs) == ["all",
+                                 "2026", "2026-06", "2026-01",
+                                 "2025", "2025-12", "2025-03"]
+
+
 def test_list_periods_suit_le_mode_date():
     # Achat carte du 28/07 débité le 04/08 : en mode « date de valeur », le
     # mois d'août doit être proposé — sinon l'opération n'est visible dans

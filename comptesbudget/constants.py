@@ -440,7 +440,14 @@ SYNC_VERSION = 3
 #            qu'un seul compte, comme le faisait déjà son sélecteur.
 #          • Ni la largeur (1082 px hors comptes) ni la hauteur minimale
 #            de la fenêtre ne changent.
-APP_VERSION = "1.25.1"
+# 1.25.2 : la liste des périodes se lit enfin.
+#          • Elle alignait toutes les années, puis tous les mois à la
+#            file : avec quatre années d'historique, cela faisait quatre
+#            lignes puis quarante-cinq mois d'affilée, sans rien pour
+#            savoir où une année finissait.
+#          • Chaque année est maintenant suivie de ses propres mois. Elle
+#            ouvre son groupe en gras, ses mois sont décalés dessous.
+APP_VERSION = "1.25.2"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

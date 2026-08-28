@@ -2,7 +2,8 @@
 
 from datetime import date
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
     QLabel, QComboBox, QDoubleSpinBox, QCheckBox,
@@ -113,8 +114,19 @@ class PeriodBar(QWidget):
         self.combo.clear()
         # Les périodes proposées suivent le mode d'affichage : c'est la même
         # date qui sert à remplir cette liste et à filtrer les opérations.
+        # Une année ouvre son groupe (en gras) ; ses mois sont décalés
+        # dessous. Une liste déroulante Qt ne connaît pas les sous-titres :
+        # le retrait et la graisse en tiennent lieu.
+        grasse = QFont()
+        grasse.setBold(True)
         for p in list_periods(transactions, self.current_date_mode()):
-            self.combo.addItem(period_label(p), p)
+            libelle = period_label(p)
+            if len(p) == 7:
+                libelle = "      " + libelle
+            self.combo.addItem(libelle, p)
+            if len(p) == 4:
+                self.combo.setItemData(self.combo.count() - 1, grasse,
+                                       Qt.FontRole)
         # Premier remplissage : sélectionner le mois en cours s'il est présent.
         if self._first_fill:
             current_month = date.today().strftime("%Y-%m")
