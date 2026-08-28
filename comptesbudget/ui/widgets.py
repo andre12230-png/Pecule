@@ -74,6 +74,9 @@ class PeriodBar(QWidget):
         h.addWidget(QLabel("Période :"))
         self.combo = QComboBox()
         self.combo.setMinimumWidth(220)
+        self.combo.setToolTip(
+            "Période affichée. Seule l'année en cours montre ses mois ; "
+            "choisissez une autre année pour ouvrir les siens.")
         self.combo.currentIndexChanged.connect(self._emit)
         h.addWidget(self.combo)
 
@@ -117,9 +120,20 @@ class PeriodBar(QWidget):
         # Une année ouvre son groupe (en gras) ; ses mois sont décalés
         # dessous. Une liste déroulante Qt ne connaît pas les sous-titres :
         # le retrait et la graisse en tiennent lieu.
+        #
+        # Les années passées restent repliées : seule la ligne « Année … »
+        # apparaît. Sont dépliées l'année en cours et celle de la période
+        # choisie — choisir « Année 2024 » ouvre donc ses mois au passage.
+        # Sans cela, quatre ans d'historique donnaient cinquante entrées.
+        depliees = {date.today().strftime("%Y")}
+        if cur_data and cur_data != "all":
+            depliees.add(cur_data[:4])
+
         grasse = QFont()
         grasse.setBold(True)
         for p in list_periods(transactions, self.current_date_mode()):
+            if len(p) == 7 and p[:4] not in depliees:
+                continue
             libelle = period_label(p)
             if len(p) == 7:
                 libelle = "      " + libelle

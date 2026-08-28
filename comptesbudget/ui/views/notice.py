@@ -226,6 +226,10 @@ petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
 Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 
 <h2>4. Période et mode date</h2>
+<p>La liste <b>Période</b> range les mois sous leur année. Pour qu'elle reste
+courte, <b>seules l'année en cours et l'année choisie montrent leurs mois</b> ;
+les autres n'affichent que leur ligne « Année … ». Choisissez une année
+passée et ses mois s'ouvrent aussitôt.</p>
 <p>La barre <b>Période</b> en haut de l'app filtre toutes les vues (sauf Règles).
 Vous pouvez choisir « Toutes périodes », une année entière, ou un mois précis.</p>
 <p>Le sélecteur <b>Date</b> à côté contrôle la chronologie :</p>
