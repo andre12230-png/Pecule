@@ -5,7 +5,7 @@ from datetime import date
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
-    QLabel, QComboBox, QDoubleSpinBox,
+    QLabel, QComboBox, QDoubleSpinBox, QCheckBox,
 )
 
 from ..utils import (
@@ -64,6 +64,7 @@ def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
 class PeriodBar(QWidget):
     period_changed = Signal(str)
     date_mode_changed = Signal(str)
+    archives_toggled = Signal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -88,6 +89,16 @@ class PeriodBar(QWidget):
         self.date_mode_combo.setCurrentIndex(1)
         self.date_mode_combo.currentIndexChanged.connect(self._emit_date_mode)
         h.addWidget(self.date_mode_combo)
+
+        # Case « Voir les archives » : cachée tant que rien n'est archivé,
+        # pour ne rien ajouter à l'écran de ceux qui n'archivent pas.
+        h.addSpacing(16)
+        self.archives_check = QCheckBox("Voir les archives")
+        self.archives_check.setToolTip(
+            "Réaffiche les opérations mises de côté par l'archivage")
+        self.archives_check.setVisible(False)
+        self.archives_check.toggled.connect(self.archives_toggled.emit)
+        h.addWidget(self.archives_check)
 
         h.addStretch()
         self._current = "all"
@@ -134,6 +145,15 @@ class PeriodBar(QWidget):
         if m != self._current_mode:
             self._current_mode = m
             self.date_mode_changed.emit(m)
+
+    def set_archives_disponibles(self, nb: int):
+        """Montre la case « Voir les archives » seulement s'il y a quelque
+        chose à voir, et rappelle combien."""
+        self.archives_check.setVisible(bool(nb))
+        if nb:
+            self.archives_check.setText(f"Voir les archives ({nb})")
+        if not nb and self.archives_check.isChecked():
+            self.archives_check.setChecked(False)
 
     def reset_selection(self):
         """Repart du mois en cours au prochain remplissage. Sert quand on

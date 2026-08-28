@@ -14,7 +14,7 @@ from ..constants import (
     CATEGORIES_DEFAUT, TYPES_OPERATION, FREQUENCIES,
 )
 from ..utils import (
-    fmt_euro, date_debit_differe, JOUR_DEBIT_DIFFERE,
+    fmt_euro, fmt_date_fr, date_debit_differe, JOUR_DEBIT_DIFFERE,
 )
 from ..labels import build_libelle_profiles
 from .widgets import MontantSpinBox, demander_montant
@@ -653,6 +653,171 @@ class ComptesDialog(QDialog):
             QMessageBox.warning(self, "Suppression impossible", str(e))
             return
         self.remplir()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dialogue d'archivage des opérations anciennes
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ArchivesDialog(QDialog):
+    """Met de côté les opérations anciennes, sans rien perdre.
+
+    Les opérations archivées restent dans la base : elles sortent seulement
+    des listes, des graphiques et des périodes proposées. Le solde reste juste
+    parce que leur total rejoint le solde de départ, qui se décale à la date
+    de coupure — comme une banque qui ouvre un relevé sur un solde reporté."""
+
+    def __init__(self, db, parent=None):
+        super().__init__(parent)
+        self.db = db
+        self.setWindowTitle("Archiver les opérations anciennes")
+        self.setMinimumWidth(640)
+
+        lay = QVBoxLayout(self)
+
+        info = QLabel(
+            "Les opérations archivées ne sont pas supprimées : elles restent "
+            "dans vos données, simplement mises de côté. Elles disparaissent "
+            "des listes, des graphiques et des périodes proposées, mais la "
+            "case « Voir les archives » en haut de la fenêtre les remontre "
+            "quand vous le souhaitez, et vous pouvez tout rétablir.")
+        info.setWordWrap(True)
+        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
+                           "border:1px solid #E8D77B")
+        lay.addWidget(info)
+
+        form = QFormLayout()
+        self.date_edit = QDateEdit()
+        self.date_edit.setCalendarPopup(True)
+        self.date_edit.setDisplayFormat("dd/MM/yyyy")
+        # Par défaut : la fin de la dernière année entièrement plus vieille
+        # que trois ans. Les années restent entières, donc comparables.
+        self.date_edit.setDate(QDate(QDate.currentDate().year() - 4, 12, 31))
+        self.date_edit.dateChanged.connect(self.rafraichir)
+        form.addRow("Archiver jusqu'au (inclus) :", self.date_edit)
+        lay.addLayout(form)
+
+        lay.addWidget(QLabel("Comptes concernés :"))
+        self.liste = QListWidget()
+        self.liste.setMinimumHeight(120)
+        lay.addWidget(self.liste)
+
+        self.resume = QLabel()
+        self.resume.setWordWrap(True)
+        self.resume.setStyleSheet("color:#333; padding:4px")
+        lay.addWidget(self.resume)
+
+        barre = QHBoxLayout()
+        self.b_desarchiver = QPushButton("↩ Tout rétablir")
+        self.b_desarchiver.setToolTip(
+            "Remet à la vue toutes les opérations archivées des comptes cochés")
+        self.b_desarchiver.clicked.connect(self.desarchiver)
+        barre.addWidget(self.b_desarchiver)
+        barre.addStretch()
+        lay.addLayout(barre)
+
+        self.btns = QDialogButtonBox()
+        self.b_ok = self.btns.addButton("📦 Archiver",
+                                        QDialogButtonBox.AcceptRole)
+        self.btns.addButton("Fermer", QDialogButtonBox.RejectRole)
+        self.btns.accepted.connect(self.archiver)
+        self.btns.rejected.connect(self.reject)
+        lay.addWidget(self.btns)
+
+        self.remplir_comptes()
+        self.rafraichir()
+
+    # ── Contenu ─────────────────────────────────────────────────────
+    def remplir_comptes(self):
+        self.liste.clear()
+        for r in self.db.list_comptes():
+            item = QListWidgetItem()
+            item.setData(Qt.UserRole, r["id"])
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setCheckState(Qt.Checked)
+            self.liste.addItem(item)
+        self.liste.itemChanged.connect(lambda _: self.rafraichir())
+
+    def comptes_coches(self) -> list:
+        return [self.liste.item(i).data(Qt.UserRole)
+                for i in range(self.liste.count())
+                if self.liste.item(i).checkState() == Qt.Checked]
+
+    def rafraichir(self):
+        """Met à jour ce que chaque compte a déjà archivé, et ce que la date
+        choisie ajouterait."""
+        jusqua = self.date_edit.date().toString("yyyy-MM-dd")
+        total = 0
+        for i in range(self.liste.count()):
+            item = self.liste.item(i)
+            cid = item.data(Qt.UserRole)
+            nom = self.db.nom_compte(cid)
+            n = self.db.a_archiver(jusqua, cid)
+            deja = self.db.nb_archivees(cid)
+            coupure = self.db.archive_jusqua(cid)
+            txt = f"{nom} — {n} à archiver"
+            if deja:
+                txt += f"   ({deja} déjà archivées, jusqu'au {fmt_date_fr(coupure)})"
+            item.setText(txt)
+            if item.checkState() == Qt.Checked:
+                total += n
+        self.total_a_archiver = total
+        deja_total = sum(self.db.nb_archivees(c) for c in self.comptes_coches())
+        self.resume.setText(
+            f"<b>{total}</b> opération(s) seraient mises de côté. "
+            f"Le solde affiché ne changera pas : leur total rejoint le solde "
+            f"de départ.")
+        self.b_ok.setEnabled(total > 0)
+        self.b_desarchiver.setEnabled(deja_total > 0)
+
+    # ── Actions ─────────────────────────────────────────────────────
+    def archiver(self):
+        jusqua = self.date_edit.date().toString("yyyy-MM-dd")
+        comptes = self.comptes_coches()
+        if not comptes or not self.total_a_archiver:
+            return
+        detail = "\n".join(
+            f"  • {self.db.nom_compte(c)} : {self.db.a_archiver(jusqua, c)} "
+            f"opération(s)" for c in comptes)
+        if QMessageBox.question(
+                self, "Archiver",
+                f"Mettre de côté les opérations jusqu'au "
+                f"{fmt_date_fr(jusqua)} inclus ?\n\n{detail}\n\n"
+                f"Rien n'est supprimé : vous pourrez les revoir avec la case "
+                f"« Voir les archives », ou tout rétablir.",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes) != QMessageBox.Yes:
+            return
+        n = 0
+        with self.db.batch():
+            for cid in comptes:
+                n += self.db.archiver(jusqua, cid)
+        QMessageBox.information(
+            self, "Archivage",
+            f"{n} opération(s) mise(s) de côté jusqu'au "
+            f"{fmt_date_fr(jusqua)}.")
+        self.rafraichir()
+
+    def desarchiver(self):
+        comptes = [c for c in self.comptes_coches() if self.db.nb_archivees(c)]
+        if not comptes:
+            return
+        detail = "\n".join(
+            f"  • {self.db.nom_compte(c)} : {self.db.nb_archivees(c)} "
+            f"opération(s)" for c in comptes)
+        if QMessageBox.question(
+                self, "Tout rétablir",
+                f"Remettre à la vue toutes les opérations archivées ?\n\n"
+                f"{detail}", QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.Yes) != QMessageBox.Yes:
+            return
+        n = 0
+        with self.db.batch():
+            for cid in comptes:
+                n += self.db.desarchiver(cid)
+        QMessageBox.information(self, "Archives",
+                                f"{n} opération(s) remise(s) à la vue.")
+        self.rafraichir()
 
 
 # ─────────────────────────────────────────────────────────────────────────────

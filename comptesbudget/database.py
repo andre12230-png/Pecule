@@ -4,10 +4,20 @@ import os
 import sqlite3
 import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from .constants import DB_PATH
 from .utils import _now_iso
+
+def _lendemain(date_iso: str) -> str:
+    """Jour suivant une date « AAAA-MM-JJ » (la coupure est incluse dans
+    l'archive, le compte reprend donc le lendemain)."""
+    try:
+        d = datetime.strptime(date_iso, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return date_iso
+    return (d + timedelta(days=1)).strftime("%Y-%m-%d")
+
 
 class Database:
     def __init__(self, path: str = DB_PATH, compte_id: str = None):
@@ -21,6 +31,9 @@ class Database:
         # écrits ici ne concernent QUE ce compte. Les règles automatiques,
         # les catégories et les libellés restent communs à tous les comptes.
         self.compte_id = None
+        # Les opérations archivées sont écartées des listes tant que ce
+        # drapeau est faux (cf. la section « Archives » plus bas).
+        self.voir_archives = False
         self._init_schema()
         self._select_compte_initial(compte_id)
         self._init_defaults()
@@ -149,6 +162,7 @@ class Database:
         self._migrate_sync()
         self._migrate_prevue()
         self._migrate_comptes()
+        self._migrate_archives()
 
     def _migrate_prevue(self):
         """Ajoute la colonne « prevue » aux bases antérieures à la v1.21.
@@ -356,12 +370,106 @@ class Database:
         self.update_compte(self.compte_id, {"solde_initial": float(solde),
                                             "date_initiale": date_iso})
 
+    # ── Archives ────────────────────────────────────────────────────
+    # Archiver, c'est mettre de côté les opérations anciennes sans rien
+    # perdre : elles restent dans la base, simplement écartées des listes,
+    # des graphiques et des périodes proposées. Une case « Voir les archives »
+    # les remontre, et le désarchivage rétablit tout.
+    #
+    # Le solde reste juste parce que les opérations archivées ne disparaissent
+    # pas du calcul : leur total vient s'ajouter au solde de départ, qui se
+    # décale à la date de coupure. C'est exactement ce que fait une banque en
+    # ouvrant un nouveau relevé sur un solde reporté.
+
+    def _migrate_archives(self):
+        """Ajoute de quoi archiver (1.25.0). Rien n'est archivé au départ."""
+        cols = [r[1] for r in self.conn.execute(
+            "PRAGMA table_info(transactions)")]
+        if "archivee" not in cols:
+            self.conn.execute("ALTER TABLE transactions "
+                              "ADD COLUMN archivee INTEGER NOT NULL DEFAULT 0")
+        ccols = [r[1] for r in self.conn.execute("PRAGMA table_info(comptes)")]
+        if "archive_jusqua" not in ccols:
+            self.conn.execute("ALTER TABLE comptes ADD COLUMN archive_jusqua TEXT")
+        self.conn.commit()
+
+    def archive_jusqua(self, compte_id: str = None) -> str:
+        """Date de coupure du compte ('' si rien n'est archivé)."""
+        r = self.get_compte(compte_id)
+        return (r["archive_jusqua"] or "") if r else ""
+
+    def nb_archivees(self, compte_id: str = None) -> int:
+        return self.conn.execute(
+            "SELECT COUNT(*) FROM transactions "
+            "WHERE compte_id = ? AND archivee = 1",
+            (compte_id or self.compte_id,)).fetchone()[0]
+
+    def total_archivees(self, compte_id: str = None) -> float:
+        """Somme des opérations archivées qui comptent dans le solde.
+        Le filtre est celui du Bilan : pointées, hors « Transaction exclue »."""
+        r = self.conn.execute(
+            "SELECT COALESCE(SUM(montant), 0) FROM transactions "
+            "WHERE compte_id = ? AND archivee = 1 AND pointee = 1 "
+            "AND categorie <> 'Transaction exclue'",
+            (compte_id or self.compte_id,)).fetchone()
+        return round(float(r[0]), 2)
+
+    def a_archiver(self, jusqua: str, compte_id: str = None) -> int:
+        """Combien d'opérations seraient archivées par une coupure à cette
+        date (incluse). On se fie à la date de valeur, celle du relevé."""
+        return self.conn.execute(
+            "SELECT COUNT(*) FROM transactions WHERE compte_id = ? "
+            "AND archivee = 0 AND COALESCE(NULLIF(date_valeur, ''), date) <= ?",
+            (compte_id or self.compte_id, jusqua)).fetchone()[0]
+
+    def archiver(self, jusqua: str, compte_id: str = None) -> int:
+        """Archive les opérations jusqu'à cette date incluse. Renvoie le
+        nombre d'opérations concernées."""
+        cid = compte_id or self.compte_id
+        n = self.a_archiver(jusqua, cid)
+        if not n:
+            return 0
+        self.conn.execute(
+            "UPDATE transactions SET archivee = 1 WHERE compte_id = ? "
+            "AND archivee = 0 AND COALESCE(NULLIF(date_valeur, ''), date) <= ?",
+            (cid, jusqua))
+        self.conn.execute(
+            "UPDATE comptes SET archive_jusqua = ?, updated_at = ? WHERE id = ?",
+            (jusqua, _now_iso(), cid))
+        self._commit()
+        return n
+
+    def desarchiver(self, compte_id: str = None) -> int:
+        """Remet toutes les archives du compte à la vue. Rien n'est recréé :
+        les opérations n'avaient jamais quitté la base."""
+        cid = compte_id or self.compte_id
+        n = self.nb_archivees(cid)
+        self.conn.execute(
+            "UPDATE transactions SET archivee = 0 WHERE compte_id = ?", (cid,))
+        self.conn.execute(
+            "UPDATE comptes SET archive_jusqua = NULL, updated_at = ? "
+            "WHERE id = ?", (_now_iso(), cid))
+        self._commit()
+        return n
+
+    def set_voir_archives(self, voir: bool):
+        """Affiche ou masque les opérations archivées. Le solde de départ
+        suit : il repart du tout début quand on montre les archives."""
+        self.voir_archives = bool(voir)
+
     # ── Transactions ────────────────────────────────────────────────
     def list_tx(self) -> list[sqlite3.Row]:
-        """Opérations du compte de travail, de la plus récente à la plus ancienne."""
+        """Opérations du compte de travail, de la plus récente à la plus
+        ancienne. Les archivées sont écartées, sauf si l'on a demandé à les
+        voir : tout le reste de l'application s'appuie sur cette méthode, elle
+        seule décide donc de ce qui est affiché."""
+        if self.voir_archives:
+            return list(self.conn.execute(
+                "SELECT * FROM transactions WHERE compte_id = ? "
+                "ORDER BY date DESC", (self.compte_id,)))
         return list(self.conn.execute(
-            "SELECT * FROM transactions WHERE compte_id = ? ORDER BY date DESC",
-            (self.compte_id,)))
+            "SELECT * FROM transactions WHERE compte_id = ? AND archivee = 0 "
+            "ORDER BY date DESC", (self.compte_id,)))
 
     def insert_tx(self, tx: dict):
         # « prevue » est facultative pour l'appelant : une opération ordinaire
@@ -399,9 +507,10 @@ class Database:
         self._commit()
 
     def all_categories_used(self) -> list[str]:
+        filtre = "" if self.voir_archives else " AND archivee = 0"
         rows = self.conn.execute(
-            "SELECT DISTINCT categorie FROM transactions WHERE compte_id = ? "
-            "ORDER BY categorie", (self.compte_id,))
+            f"SELECT DISTINCT categorie FROM transactions WHERE compte_id = ?"
+            f"{filtre} ORDER BY categorie", (self.compte_id,))
         return [r[0] for r in rows if r[0]]
 
     # ── Règles ──────────────────────────────────────────────────────
@@ -492,6 +601,20 @@ class Database:
     def get_setting(self, key: str, default: str = "") -> str:
         if key in self.COMPTE_SETTINGS and self.compte_id:
             r = self.get_compte()
+            # Quand des opérations sont archivées et masquées, le compte
+            # « commence » à la coupure : le solde de départ englobe alors
+            # tout ce qui a été archivé, et la date de départ est le
+            # lendemain de la coupure. Sans cela, masquer des opérations
+            # fausserait le solde de la même façon qu'en supprimer.
+            coupure = (r["archive_jusqua"] or "") if r else ""
+            if coupure and not self.voir_archives:
+                if key == "initial_balance":
+                    base = 0.0 if not r or r["solde_initial"] is None \
+                        else float(r["solde_initial"])
+                    total = round(base + self.total_archivees(), 2)
+                    return str(int(total)) if total == int(total) else str(total)
+                if key == "initial_date":
+                    return _lendemain(coupure)
             v = r[self.COMPTE_SETTINGS[key]] if r else None
             if v is None or v == "":
                 return default
@@ -571,14 +694,15 @@ class Database:
         gardant son identifiant : c'est lui qui relie les opérations."""
         self.conn.execute("""
             INSERT INTO comptes (id, nom, solde_initial, date_initiale, ordre,
-                                 updated_at)
+                                 archive_jusqua, updated_at)
             VALUES (:id, :nom, :solde_initial, :date_initiale, :ordre,
-                    :updated_at)
+                    :archive_jusqua, :updated_at)
             ON CONFLICT(id) DO UPDATE SET
                 nom = excluded.nom,
                 solde_initial = excluded.solde_initial,
                 date_initiale = excluded.date_initiale,
                 ordre = excluded.ordre,
+                archive_jusqua = excluded.archive_jusqua,
                 updated_at = excluded.updated_at
         """, {
             "id": rec.get("id"),
@@ -586,6 +710,7 @@ class Database:
             "solde_initial": rec.get("solde_initial"),
             "date_initiale": rec.get("date_initiale") or "2025-01-01",
             "ordre": rec.get("ordre") or 0,
+            "archive_jusqua": rec.get("archive_jusqua") or None,
             "updated_at": rec.get("updated_at") or _now_iso(),
         })
         self._commit()
@@ -626,7 +751,7 @@ class Database:
             "transactions": ["id", "compte_id", "date", "date_valeur",
                              "libelle", "libelle_op", "reference", "type",
                              "categorie", "sous_cat", "info", "montant",
-                             "pointee", "prevue", "updated_at"],
+                             "pointee", "prevue", "archivee", "updated_at"],
             "rules": ["id", "pattern", "amount", "categorie", "sous_cat",
                       "no_overwrite", "created_at", "updated_at", "sens"],
             "recurring": ["id", "compte_id", "libelle", "montant", "categorie",
@@ -640,9 +765,10 @@ class Database:
             vals["compte_id"] = self.compte_id
         if entity == "transactions":
             # Un fichier d'échange écrit par une version antérieure ne connaît
-            # pas « prevue » : sans cela on insérerait NULL dans une colonne
-            # déclarée NOT NULL.
+            # ni « prevue » ni « archivee » : sans cela on insérerait NULL
+            # dans une colonne déclarée NOT NULL.
             vals["prevue"] = 1 if vals.get("prevue") else 0
+            vals["archivee"] = 1 if vals.get("archivee") else 0
         placeholders = ", ".join(f":{c}" for c in cols)
         collist = ", ".join(cols)
         self.conn.execute(
