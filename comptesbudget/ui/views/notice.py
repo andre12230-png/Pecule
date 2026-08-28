@@ -40,7 +40,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       automatiquement ; vous pouvez aussi y revenir à tout moment via <code>⚙️ Paramètres</code>
       dans le menu de gauche. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025)
       et le solde que vous aviez en banque à cette date. Cette valeur sert de base pour calculer
-      votre solde réel à toute date ultérieure.</li>
+      votre solde réel à toute date ultérieure.
+      <br><b>Chaque compte a le sien</b> : si vous en suivez plusieurs, le réglage
+      s'applique au compte affiché, dont le nom est rappelé dans le titre de la
+      fenêtre des paramètres.</li>
   <li><b>Importer vos relevés bancaires</b> en CSV : trois moyens possibles
       <ul>
         <li>Bouton <code>📥 Importer un relevé</code> dans le menu de gauche</li>
@@ -433,10 +436,26 @@ GLOSSAIRE_HTML = """
 
 <dl>
 
+<dt>Archive</dt>
+<dd>Opération ancienne mise de côté par le bouton <code>📦 Archiver</code>.
+Elle <b>reste dans vos données</b> : elle sort seulement des listes, des
+graphiques, des périodes proposées et des outils. Le solde ne change pas pour
+autant, car le total des opérations archivées rejoint le solde de départ, qui
+se décale au lendemain de la date de coupure. La case <b>Voir les archives</b>
+les réaffiche, et <b>↩ Tout rétablir</b> annule l'archivage.</dd>
+
 <dt>Catégorie</dt>
 <dd>Classement principal d'une opération (Alimentation, Transports, Logement…)
 utilisé pour les statistiques et le budget. Chaque opération a exactement
-une catégorie.</dd>
+une catégorie. Les catégories sont <b>communes à tous vos comptes</b>.</dd>
+
+<dt>Compte</dt>
+<dd>Un compte bancaire suivi par l'application : compte courant, livret,
+compte joint… Le compte affiché, choisi en haut du menu de gauche, commande
+tout l'écran. Chaque compte a ses propres <b>opérations, budgets,
+prévisionnel et solde de départ</b> ; les <b>règles automatiques, catégories,
+sous-catégories et libellés harmonisés</b> sont au contraire communs à tous,
+si bien qu'une règle écrite une fois sert partout.</dd>
 
 <dt>Date d'opération</dt>
 <dd>Date à laquelle vous avez fait l'achat ou l'opération. C'est la date
@@ -542,7 +561,9 @@ sont indiquées à part — c'est le solde « engagé ».</dd>
 
 <dt>Solde de départ (solde initial)</dt>
 <dd>Valeur de référence du compte à une date donnée, saisie dans Paramètres.
-Sert de base pour tous les calculs de solde.</dd>
+Sert de base pour tous les calculs de solde. <b>Propre à chaque compte.</b>
+Si vous archivez des opérations, il se décale à la date de coupure et englobe
+tout ce qui a été archivé — le solde affiché reste donc le même.</dd>
 
 <dt>Solde pointé</dt>
 <dd>Somme des opérations marquées comme pointées sur la période. Indicateur
