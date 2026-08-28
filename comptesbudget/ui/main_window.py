@@ -57,16 +57,36 @@ class MainWindow(QMainWindow):
         # ── Menu d'actions vertical (à gauche) ──
         # (Auparavant une barre d'outils horizontale ; déplacé à gauche pour
         #  s'aligner sur les interfaces native et Qt.)
+        # Les actions sont rangées par intention — saisir, consulter, mettre
+        # au propre, gérer ses données, régler — chaque groupe annoncé par un
+        # intitulé. Quinze boutons d'affilée ne se lisaient pas.
         menu = QWidget()
         menu.setFixedWidth(184)
         mv = QVBoxLayout(menu)
         mv.setContentsMargins(8, 8, 8, 8)
-        mv.setSpacing(6)
+        mv.setSpacing(4)
+
+        STYLE_BOUTON = (
+            "QPushButton {"
+            "  text-align:left; padding-left:8px;"
+            "  border:1px solid #DCDCDC; border-radius:4px;"
+            "  background:#FCFCFC; color:#222 }"
+            "QPushButton:hover {"
+            "  background:#EAF2FB; border-color:#9CC0E8 }"
+            "QPushButton:pressed { background:#D8E7F7 }")
+
+        # Le trait de separation est porte par le titre lui-meme : un
+        # QFrame d'un pixel de haut ne se peint pas de facon fiable, alors
+        # qu'une bordure de QLabel s'affiche toujours.
+        STYLE_TITRE = (
+            "color:#6E6E6E; font-size:8pt; font-weight:700;"
+            "letter-spacing:1px; padding:0 0 3px 3px;"
+            "border-bottom:1px solid #A9A9A9")
 
         def add_btn(text, slot, tip=""):
             b = QPushButton(text)
             b.setMinimumHeight(30)
-            b.setStyleSheet("text-align:left; padding-left:8px")
+            b.setStyleSheet(STYLE_BOUTON)
             b.setCursor(Qt.PointingHandCursor)
             if tip:
                 b.setToolTip(tip)
@@ -74,35 +94,45 @@ class MainWindow(QMainWindow):
             mv.addWidget(b)
             return b
 
-        def add_sep():
-            line = QFrame()
-            line.setFrameShape(QFrame.HLine)
-            line.setFrameShadow(QFrame.Sunken)
-            mv.addWidget(line)
+        def add_section(titre):
+            """Intitulé de groupe : un peu d'air, un mot en petites capitales,
+            un filet. Renvoie ses widgets, pour pouvoir masquer le groupe."""
+            espace = QWidget()
+            espace.setFixedHeight(11 if mv.count() else 0)
+            mv.addWidget(espace)
+            lbl = QLabel(titre.upper())
+            lbl.setStyleSheet(STYLE_TITRE)
+            mv.addWidget(lbl)
+            mv.addSpacing(2)
+            return espace, lbl
 
         # ── Compte affiché ──
         # Le compte choisi ici commande TOUT l'écran : bilan, opérations,
-        # budget, prévisionnel. Il n'apparaît que si plusieurs comptes
-        # existent : celui qui n'en a qu'un ne voit aucun changement.
-        self.compte_label = QLabel("Compte affiché")
-        self.compte_label.setStyleSheet("color:#555; padding-left:2px")
-        mv.addWidget(self.compte_label)
+        # budget, prévisionnel. Le groupe entier disparaît quand il n'y a
+        # qu'un seul compte : rien d'inutile à l'écran.
+        self.compte_espace, self.compte_label = add_section("Compte")
         self.compte_combo = QComboBox()
+        self.compte_combo.setMinimumHeight(26)
         self.compte_combo.setToolTip(
             "Compte bancaire affiché. Chaque compte a ses propres "
             "opérations, budgets et prévisionnel.")
         self.compte_combo.currentIndexChanged.connect(self.on_compte_changed)
         mv.addWidget(self.compte_combo)
-        self.compte_sep = QFrame()
-        self.compte_sep.setFrameShape(QFrame.HLine)
-        self.compte_sep.setFrameShadow(QFrame.Sunken)
-        mv.addWidget(self.compte_sep)
 
+        add_section("Saisie")
         add_btn("➕ Nouvelle opération", self.action_new_tx)
         add_btn("📥 Importer un relevé", self.action_import,
                 "Relevé bancaire CSV, ou fichier QIF exporté depuis un autre "
                 "logiciel de comptes (Money, Quicken…)")
-        add_sep()
+
+        add_section("Consulter")
+        add_btn("🔎 Rechercher", self.action_search,
+                "Recherche dans tout l'historique (Ctrl+F) : "
+                "libellé, note, catégorie, montant, date")
+        add_btn("🖨 Rapport mensuel", self.action_monthly_report,
+                "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
+
+        add_section("Mettre au propre")
         add_btn("🧹 Nettoyer catégories", self.action_clean_cats)
         add_btn("🔧 Harmoniser", self.action_harmonize,
                 "Suggère une catégorie d'après le libellé (motifs prédéfinis)")
@@ -110,26 +140,25 @@ class MainWindow(QMainWindow):
                 "Normalise la casse et regroupe les variantes des libellés "
                 "(opérations et récurrences)")
         add_btn("🔍 Doublons", self.action_find_duplicates)
-        add_btn("🔎 Rechercher", self.action_search,
-                "Recherche dans tout l'historique (Ctrl+F) : "
-                "libellé, note, catégorie, montant, date")
-        add_sep()
+
+        add_section("Mes données")
+        add_btn("📦 Archiver", self.action_archives,
+                "Met de côté les opérations anciennes : elles sortent des "
+                "listes sans être supprimées")
         add_btn("💾 Exporter (JSON)", self.action_export,
                 "Export complet : opérations, règles, budgets, récurrences "
                 "et réglages (solde/date de départ)")
         add_btn("♻️ Restaurer (JSON)", self.action_import_json,
                 "Réimporte un export JSON en le fusionnant : pour chaque "
                 "enregistrement, la version la plus récente est conservée")
-        add_btn("🖨 Rapport mensuel", self.action_monthly_report,
-                "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
-        add_sep()
-        add_btn("📦 Archiver", self.action_archives,
-                "Met de côté les opérations anciennes : elles sortent des "
-                "listes sans être supprimées")
+
+        add_section("Réglages")
         add_btn("🏦 Mes comptes", self.action_comptes,
                 "Ajouter, renommer ou supprimer un compte bancaire")
-        add_btn("⚙️ Paramètres", self.action_settings)
-        add_sep()
+        add_btn("⚙️ Paramètres", self.action_settings,
+                "Solde et date de départ du compte affiché")
+
+        add_section("Aide")
         add_btn("📖 Notice", self.action_notice,
                 "Mode d'emploi et glossaire")
         mv.addStretch()
@@ -241,9 +270,8 @@ class MainWindow(QMainWindow):
         Le sélecteur reste caché tant qu'il n'y a qu'un seul compte."""
         comptes = self.db.list_comptes()
         visible = len(comptes) > 1
-        self.compte_label.setVisible(visible)
-        self.compte_combo.setVisible(visible)
-        self.compte_sep.setVisible(visible)
+        for w in (self.compte_espace, self.compte_label, self.compte_combo):
+            w.setVisible(visible)
 
         self.compte_combo.blockSignals(True)
         self.compte_combo.clear()
