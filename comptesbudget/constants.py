@@ -447,7 +447,15 @@ SYNC_VERSION = 3
 #            savoir où une année finissait.
 #          • Chaque année est maintenant suivie de ses propres mois. Elle
 #            ouvre son groupe en gras, ses mois sont décalés dessous.
-APP_VERSION = "1.25.2"
+# 1.25.3 : les années passées restent repliées.
+#          • Grouper les mois sous leur année n'avait pas raccourci la
+#            liste : elle comptait toujours cinquante entrées. Seules
+#            l'année en cours et l'année choisie montrent désormais leurs
+#            mois ; les autres n'affichent que leur ligne « Année … ».
+#            Quatorze entrées au lieu de cinquante.
+#          • Choisir une année passée ouvre ses mois au passage : rien
+#            n'est hors de portée, tout tient à l'écran.
+APP_VERSION = "1.25.3"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

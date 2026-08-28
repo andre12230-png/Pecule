@@ -118,6 +118,50 @@ def test_view_se_rafraichit(qapp, db, module, cls, method):
     getattr(view, method)()          # rafraîchissement initial — ne doit pas lever
 
 
+def _barre_periodes(qapp):
+    """Une PeriodBar remplie avec trois annees : l'annee en cours et les
+    deux precedentes."""
+    from comptesbudget.ui.widgets import PeriodBar
+    an = date.today().year
+    txs = [{"date": f"{an}-03-01", "date_valeur": f"{an}-03-01"},
+           {"date": f"{an}-04-01", "date_valeur": f"{an}-04-01"},
+           {"date": f"{an - 1}-05-01", "date_valeur": f"{an - 1}-05-01"},
+           {"date": f"{an - 2}-07-01", "date_valeur": f"{an - 2}-07-01"}]
+    barre = PeriodBar()
+    barre.update_periods(txs)
+    return barre, an
+
+
+def _donnees(barre):
+    return [barre.combo.itemData(i) for i in range(barre.combo.count())]
+
+
+def test_periodes_seule_annee_en_cours_est_depliee(qapp):
+    """Les annees passees n'affichent que leur ligne « Annee ... » : avec
+    plusieurs annees d'historique, tout derouler donnait une liste
+    interminable."""
+    barre, an = _barre_periodes(qapp)
+    donnees = _donnees(barre)
+    assert f"{an}-03" in donnees and f"{an}-04" in donnees   # annee en cours
+    assert str(an - 1) in donnees and str(an - 2) in donnees  # les lignes
+    assert f"{an - 1}-05" not in donnees                      # mais pas les mois
+    assert f"{an - 2}-07" not in donnees
+
+
+def test_periodes_choisir_une_annee_ouvre_ses_mois(qapp):
+    barre, an = _barre_periodes(qapp)
+    idx = barre.combo.findData(str(an - 1))
+    barre.combo.setCurrentIndex(idx)
+    barre.update_periods([
+        {"date": f"{an}-03-01", "date_valeur": f"{an}-03-01"},
+        {"date": f"{an - 1}-05-01", "date_valeur": f"{an - 1}-05-01"},
+        {"date": f"{an - 2}-07-01", "date_valeur": f"{an - 2}-07-01"}])
+    donnees = _donnees(barre)
+    assert f"{an - 1}-05" in donnees      # l'annee choisie s'est ouverte
+    assert f"{an}-03" in donnees          # l'annee en cours reste ouverte
+    assert f"{an - 2}-07" not in donnees  # les autres restent repliees
+
+
 def test_notice_view(qapp):
     from comptesbudget.ui.views.notice import NoticeView
     NoticeView()                     # vue statique : construction seule
