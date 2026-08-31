@@ -325,6 +325,7 @@ docs/                      Site de présentation, publié par GitHub Pages
 
 bucket/pecule.json         Manifeste Scoop (version publiée + empreinte)
 winget/                    Manifestes Winget — voir winget/README.md
+JOURNAL.md                 Carnet de bord des séances de travail
 ```
 
 Pour refaire les captures de la page de présentation après un changement
