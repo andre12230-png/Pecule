@@ -7,7 +7,7 @@ from datetime import date, datetime, timezone
 from typing import Optional
 
 from .constants import (
-    _app_dir,     # réexporté : app.py l'importe depuis ce module (icône)
+    _app_dir,  # noqa: F401 - réexporté : app.py l'importe d'ici (icône)
     _data_dir,
     DB_PATH,
     CANONICAL_CATS,

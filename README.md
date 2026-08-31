@@ -51,6 +51,7 @@ telemetry — your financial data never leaves your computer.
 - **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
 - **Archiving** — set aside older transactions so lists and period pickers stay short. Nothing is deleted: archived entries stay in the database, and their total rolls into the opening balance, so the displayed balance never changes. A checkbox brings them back, and archiving can be undone
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
+- **Export & restore** — write everything (transactions, rules, budgets, recurring entries, settings) to a JSON file, and merge it back later: on restore the most recent version of each record wins, so nothing newer than the file is overwritten
 - **Automatic daily backup** of the database
 
 **Install**
@@ -96,12 +97,15 @@ L'application s'organise en onglets :
 | 🏷️ **Sous-catégories** | Tri, fusion, renommage, nettoyage des sous-catégories |
 | 🧠 **Règles auto** | Règles de catégorisation automatique (motif → catégorie) |
 | 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
-| 📖 **Notice** | Mode d'emploi et glossaire intégrés |
+
+La **📖 Notice** (mode d'emploi et glossaire) n'est pas un onglet : c'est un
+bouton du menu de gauche, qui l'ouvre dans une fenêtre à part.
 
 Autres outils : **import CSV et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
-**recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF, et
-**sauvegarde quotidienne automatique** de la base.
+**recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
+**export et restauration JSON** de toutes vos données, et **sauvegarde
+quotidienne automatique** de la base.
 
 ### Plusieurs comptes
 
@@ -149,6 +153,22 @@ libellé et votre catégorie sont conservés.
 
 Le Bilan résume tout cela dans le bandeau **🗓 Ce mois-ci** : reste à débiter,
 reste à encaisser et **solde prévu au dernier jour du mois**.
+
+### Exporter et restaurer vos données
+
+Deux boutons du menu de gauche mettent vos données à l'abri dans un fichier
+lisible, indépendamment de la sauvegarde quotidienne automatique :
+
+- **💾 Exporter (JSON)** écrit dans le fichier de votre choix la **totalité**
+  de ce que contient le compte : opérations, règles, budgets, récurrences et
+  réglages (solde et date de départ compris).
+- **♻️ Restaurer (JSON)** relit un tel fichier et le **fusionne** avec vos
+  données au lieu de les écraser : pour chaque opération, règle ou récurrence,
+  c'est la version la plus récente qui l'emporte. Rien de plus récent que le
+  fichier n'est perdu, et les suppressions sont propagées.
+
+C'est ce qui permet de transporter ses données vers un autre ordinateur, ou de
+récupérer un état ancien sans repartir de zéro.
 
 ---
 
@@ -226,16 +246,18 @@ flowchart TD
     APP --> MW["ui/main_window.py — MainWindow"]
     MW --> V["ui/views/ — 8 vues"]
     MW --> C["ui/ — dialogs · assistants · models · widgets · report · search"]
+    MW --> LOG["Logique métier (Python pur)"]
+    MW --> F["Fondation"]
     V --> C
-    V --> LOG["Logique métier (Python pur)"]
+    V --> LOG
     C --> LOG
-    LOG --> F["Fondation"]
+    LOG --> F
     C --> F
     V --> F
 
     subgraph LOG_G ["Logique métier — testable sans Qt"]
         LOG
-        R["rules · labels · recurring · csv_import · qif_import · sync (dormant)"]
+        R["rules · labels · recurring · csv_import · qif_import · sync"]
     end
     subgraph F_G ["Fondation"]
         F
@@ -264,7 +286,8 @@ comptesbudget/
 ├── recurring.py             Occurrences récurrentes + détection automatique
 ├── csv_import.py            Import des relevés bancaires CSV
 ├── qif_import.py            Import des fichiers QIF (autres logiciels)
-├── sync.py                  Moteur de fusion (LWW) — DORMANT, conservé
+├── sync.py                  Moteur de fusion (LWW) : export et restauration
+│                            JSON du menu de gauche
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
     ├── models.py            TxTableModel (modèle de table)
@@ -283,13 +306,25 @@ comptesbudget/
         ├── subcategories.py Vue Sous-catégories
         ├── previsionnel.py  Vue Prévisionnel
         ├── rules_view.py    Vue Règles auto
-        └── notice.py        Vue Notice
+        └── notice.py        Vue Notice (ouverte en fenêtre, pas en onglet)
 
 outils/
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
 ├── faire_archive.py        Fabrique le .zip de la release et son empreinte
 └── version_exe.py          Écrit les informations de version de l'exécutable
+
+tests/                     Suite pytest : couche métier et smoke tests de l'UI
+docs/                      Site de présentation, publié par GitHub Pages
+├── index.html             Accueil : téléchargement, captures, description
+├── import-csv.html        Aide à l'import, plus une page par banque
+├── import-csv-problemes.html
+├── confidentialite.html
+├── sitemap.xml
+└── media/                 Logo et captures d'écran
+
+bucket/pecule.json         Manifeste Scoop (version publiée + empreinte)
+winget/                    Manifestes Winget — voir winget/README.md
 ```
 
 Pour refaire les captures de la page de présentation après un changement
@@ -327,7 +362,8 @@ que des fichiers, et vérifie l'archive produite avant de rendre la main.
    `sync`) —
    pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
 3. **Interface** (`ui/`) — widgets, dialogues et vues PySide6. La fenêtre
-   principale assemble les huit vues ; aucune vue n'en instancie une autre.
+   principale assemble sept onglets ; la huitième vue, la notice, s'ouvre en
+   fenêtre depuis le menu de gauche. Aucune vue n'en instancie une autre.
 
 ---
 
@@ -345,27 +381,31 @@ Depuis la **1.22.0**, les données ne vivent plus forcément à côté du progra
   remplace le dossier du programme à chaque mise à jour, et emporterait la base
   avec lui.
 
-Les trois fichiers de données suivent ce dossier ; `Budget.ico`, lui, accompagne
+Les deux fichiers de données suivent ce dossier ; `Budget.ico`, lui, accompagne
 le programme :
 
 | Fichier / dossier | Contenu | Versionné ? |
 |---|---|---|
 | `comptes.db` | Base SQLite (opérations, budgets, règles, récurrences, réglages) | non (données perso) |
 | `sauvegardes/` | Copies quotidiennes automatiques de la base (rotation sur 10 jours) | non |
-| `comptes_sync.json` | Fichier d'échange historique (lié au moteur dormant `sync.py`) | non |
 | `Budget.ico` | Icône de l'application | oui |
 
 La sauvegarde quotidienne est effectuée **au lancement, avant l'ouverture de la
 base** : même une migration ratée ne peut pas abîmer la copie du jour.
 
+Les fichiers écrits par **💾 Exporter (JSON)** ne vivent pas là : ils vont où
+vous les enregistrez, sous le nom que vous choisissez.
+
 ---
 
 ## Notes de développement
 
-- **Module `sync.py` dormant** : le moteur de fusion par enregistrement
-  (*last-write-wins*) n'est plus câblé à l'interface depuis la v1.9.5 (retrait de
-  l'app HTML et de sa synchronisation). Il est conservé pour pouvoir
-  réimporter / fusionner un fichier d'échange JSON si besoin.
+- **Module `sync.py`** : le moteur de fusion par enregistrement
+  (*last-write-wins*) a été écrit pour la synchronisation avec l'ancienne
+  application HTML, retirée en v1.9.5. La synchronisation automatique, elle,
+  n'existe plus — mais le moteur sert toujours : c'est lui qui porte les
+  boutons **💾 Exporter (JSON)** et **♻️ Restaurer (JSON)** du menu de gauche
+  (`ui/main_window.py`, méthodes `action_export` et `action_import_json`).
 - **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import`,
   `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
   tests unitaires (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
@@ -374,16 +414,22 @@ base** : même une migration ratée ne peut pas abîmer la copie du jour.
   La couche UI (PySide6) est couverte par des *smoke tests* : chaque vue et
   dialogue est construit en mode « offscreen » puis rafraîchi, pour détecter
   les plantages et erreurs de câblage sans serveur d'affichage.
+  Enfin, `test_compat_python.py` relit le code source pour vérifier qu'aucune
+  annotation n'emploie la notation `X | Y`, réservée à Python 3.10 : elle
+  ferait échouer le démarrage sur la version 3.9 annoncée en prérequis.
 
   ```bash
   pip install -r requirements-dev.txt
   pytest
   ```
-- **Qualité** : le code passe `ruff` (jeu de règles *pyflakes* F : aucun import
-  manquant, aucun nom non défini, aucun import inutilisé).
+- **Qualité** : le code passe `ruff` sur le jeu de règles *pyflakes* **F**
+  (aucun import manquant, aucun nom non défini, aucun import inutilisé). Ce
+  jeu doit être demandé explicitement : sans `--select F`, `ruff` ajoute ses
+  règles de style par défaut, que ce code ne suit pas (instructions séparées
+  par des points-virgules, notamment).
 
   ```bash
-  ruff check comptesbudget
+  ruff check --select F comptesbudget
   ```
 
 ---
