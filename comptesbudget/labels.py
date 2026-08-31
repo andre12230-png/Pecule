@@ -2,6 +2,7 @@
 import re
 from collections import Counter
 from statistics import median
+from typing import Optional
 
 from .utils import deaccent
 
@@ -34,7 +35,7 @@ LIBELLE_ACRONYMS = {
 _ALIAS: dict[str, str] = {}
 
 
-def charger_alias(alias: dict | None) -> None:
+def charger_alias(alias: Optional[dict]) -> None:
     """Installe les correspondances de libellés utilisées par clean_libelle.
 
     Les clés sont comparées sans accent ni casse, pour qu'une même
