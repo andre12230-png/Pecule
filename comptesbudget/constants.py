@@ -481,6 +481,11 @@ SYNC_VERSION = 3
 #          • Chaque opération garde l'identifiant unique que lui donne la
 #            banque (FITID) : un relevé réimporté par erreur ne crée aucun
 #            doublon, même si les libellés ont été renommés entre-temps.
+#          • Le compte rendu d'import ne montre plus de rectangle noir à la
+#            ligne du débit différé : le pictogramme de carte bancaire ne
+#            fait pas partie de Segoe UI, la police des boîtes de dialogue.
+#            La ligne est désormais en texte seul. Les symboles des lignes
+#            voisines (✔, ⏳, ⚠) sont bien dans la police et restent.
 APP_VERSION = "1.26.0"
 
 CATEGORIES_DEFAUT = [

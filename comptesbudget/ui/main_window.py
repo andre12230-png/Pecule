@@ -378,7 +378,11 @@ class MainWindow(QMainWindow):
         msg = (f"{total_imp} opération(s) importée(s).\n"
                f"{total_skip} doublon(s) ignoré(s).")
         if total_recap:
-            msg += (f"\n💳 {total_recap} récapitulatif(s) de débit différé "
+            # Pas de pictogramme sur cette ligne : la carte bancaire (U+1F4B3)
+            # ne fait pas partie de Segoe UI, la police des boîtes de dialogue,
+            # et s'affichait comme un rectangle noir illisible. Les symboles
+            # des lignes voisines (✔, ⏳, ⚠), eux, sont bien dans la police.
+            msg += (f"\n{total_recap} récapitulatif(s) de débit différé "
                     "écarté(s) : les achats carte du relevé sont déjà "
                     "détaillés un par un.")
         if total_pt:
