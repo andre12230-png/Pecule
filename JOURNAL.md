@@ -127,8 +127,19 @@ toucher à l'original. Noté en mémoire avec les quatre autres pièges Excel.
   dont un suffixe bancaire et un tarif différent, tous classés — et un
   remboursement (crédit), qui reste bien non classé. Cette règle vit dans la
   base d'André, pas dans le dépôt : elle n'est pas concernée par le commit.
-- Les deux appels dupliqués du critère « carte » (Bilan, Prévisionnel)
-  pourraient adopter `est_paiement_carte()` — cosmétique, non urgent.
+- ~~Les appels dupliqués du critère « carte »~~ — **faits**. Ils étaient
+  trois, non deux : `is_cb` et `est_carte`, deux noms pour la même chose dans
+  le même fichier (`bilan.py`), plus une expression en clair dans
+  `previsionnel.py`. Les trois définitions locales tombent, tout passe par
+  `est_paiement_carte()` : le critère n'est plus écrit qu'à un seul endroit du
+  projet, et sous un seul nom. Deux lignes devenues trop longues ont été
+  repliées — l'une atteignait 110 caractères, la plus longue du fichier.
+
+  Contrôle du remaniement : `BilanView` construit hors écran sur une copie des
+  vraies données, indicateurs et bandeaux relevés, puis le même relevé sur le
+  code d'avant (`git stash`). **Aucune différence** — mêmes six indicateurs,
+  mêmes bandeaux. 192 tests, `ruff --select F` propre. L'exécutable n'a pas
+  été reconstruit : à comportement identique, il n'y avait rien à y porter.
 
 ---
 

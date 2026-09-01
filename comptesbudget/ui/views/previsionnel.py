@@ -18,7 +18,8 @@ from ...constants import (
     FREQUENCIES,
 )
 from ...utils import (
-    cat_color, fmt_euro, fmt_date_fr, date_debit_differe, period_label,
+    cat_color, est_paiement_carte, fmt_euro, fmt_date_fr,
+    date_debit_differe, period_label,
 )
 from ...database import Database
 from ...recurring import (
@@ -257,7 +258,7 @@ class PrevisionnelView(QWidget):
             for e in echeances:
                 # Une échéance payée par carte n'atteint le compte qu'au
                 # prélèvement groupé du mois suivant (cf. date_debit_differe).
-                est_carte = "carte" in (e["type"] or "").lower()
+                est_carte = est_paiement_carte(e["type"])
                 self.db.insert_tx({
                     "id":          str(uuid.uuid4()),
                     "date":        e["date"],
