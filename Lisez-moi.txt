@@ -1,4 +1,4 @@
-PECULE - version 1.25.3
+PECULE - version 1.26.0
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
 
@@ -37,6 +37,10 @@ FONCTIONS
 -------------------------------------------------------------------
 - Import des releves bancaires au format CSV. Les colonnes sont
   reconnues par leur nom, quelle que soit la banque francaise.
+- Import au format OFX, propose par la plupart des banques a cote du
+  CSV et parfois a sa place. Les deux versions du format sont lues.
+  Le releve de la carte a debit differe est reconnu : ses achats ne
+  pesent sur le solde qu'au jour du prelevement groupe.
 - Import au format QIF, pour reprendre l'historique d'un autre logiciel
   (Microsoft Money, Quicken, GnuCash, HomeBank...). Dates et montants
   europeens ou americains sont reconnus automatiquement. Un fichier

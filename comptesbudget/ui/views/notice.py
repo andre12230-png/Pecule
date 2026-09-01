@@ -44,7 +44,7 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       <br><b>Chaque compte a le sien</b> : si vous en suivez plusieurs, le réglage
       s'applique au compte affiché, dont le nom est rappelé dans le titre de la
       fenêtre des paramètres.</li>
-  <li><b>Importer vos relevés bancaires</b> en CSV : trois moyens possibles
+  <li><b>Importer vos relevés bancaires</b> en CSV (voir l'OFX juste après) : trois moyens possibles
       <ul>
         <li>Bouton <code>📥 Importer un relevé</code> dans le menu de gauche</li>
         <li><b>Glisser-déposer</b> un ou plusieurs fichiers directement sur la fenêtre</li>
@@ -59,6 +59,27 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       automatiquement</b>. La ligne récapitulative du <b>débit différé</b> de la carte
       (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES ») n'est <b>jamais importée</b> : elle
       totalise des achats qui figurent déjà un par un dans le relevé.
+  </li>
+  <li><b>Télécharger le relevé au format OFX</b> quand votre banque ne propose plus le
+      CSV — ou que vous le préférez. Même bouton, même glisser-déposer : Pécule reconnaît le
+      fichier à son extension <code>.ofx</code> (ou <code>.qfx</code>) et le traite comme un
+      relevé, avec la même détection des doublons, les mêmes règles de catégorisation et le
+      même pointage automatique.
+      <ul>
+        <li>Les deux versions du format sont acceptées : la <b>1.x</b> (la plus répandue chez
+            les banques françaises) comme la <b>2.x</b>, écrite en XML.</li>
+        <li>Le <b>type d'opération</b> (prélèvement, virement, prêt, frais bancaires…) est
+            déduit du libellé, l'OFX ne le transportant pas aussi précisément que le CSV.
+            Une somme <b>reçue</b> n'est jamais rangée en paiement par carte : un
+            « CB&nbsp;AMAZON » créditeur est un remboursement.</li>
+        <li>Le relevé de la <b>carte à débit différé</b> est reconnu comme tel : ses achats
+            prennent pour date de valeur le <b>4 du mois qui suit la fin du relevé</b>, jour
+            du prélèvement groupé. Ils ne pèsent donc sur le solde qu'à cette date, comme à
+            la banque.</li>
+        <li>Chaque opération porte l'<b>identifiant unique</b> que lui donne la banque : un
+            relevé réimporté par erreur ne crée aucun doublon, même si vous avez renommé les
+            libellés entre-temps.</li>
+      </ul>
   </li>
   <li><b>Reprendre l'historique d'un autre logiciel</b>, au format <b>QIF</b> : c'est le
       format d'échange qu'exportent Microsoft&nbsp;Money, Quicken, GnuCash, HomeBank et la
@@ -355,7 +376,7 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
-  <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
+  <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
   <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>🔧 Harmoniser</td><td>Suggère des catégorisations d'après les libellés</td></tr>
   <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
@@ -491,10 +512,17 @@ prédéfinis (ex : tout ce qui contient « Carrefour » → Alimentation).
 Distinct des règles : c'est une suggestion ponctuelle, pas une règle persistante.</dd>
 
 <dt>Importer</dt>
-<dd>Charger un relevé bancaire (CSV) ou un fichier QIF dans l'application. Les
+<dd>Charger un relevé bancaire (CSV ou OFX) ou un fichier QIF dans l'application. Les
 opérations déjà présentes sont reconnues et ignorées, même entre deux relevés
 qui se chevauchent ; deux opérations réellement identiques le même jour sont en
 revanche toutes deux conservées.</dd>
+
+<dt>OFX</dt>
+<dd><i>Open Financial Exchange.</i> Format de relevé que proposent la plupart des
+banques à côté du CSV, et parfois à sa place. Il porte les mêmes informations, y
+compris un identifiant unique par opération qui rend le réimport parfaitement sûr.
+Téléchargez le fichier <code>.ofx</code> depuis le site de votre banque et importez-le
+comme un CSV.</dd>
 
 <dt>QIF</dt>
 <dd><i>Quicken Interchange Format.</i> Format d'échange commun aux logiciels de

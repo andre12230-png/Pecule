@@ -22,6 +22,7 @@ from ..utils import (
 from ..database import Database
 from ..labels import clean_libelle
 from ..csv_import import import_csv
+from ..ofx_import import import_ofx
 from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
@@ -122,8 +123,9 @@ class MainWindow(QMainWindow):
         add_section("Saisie")
         add_btn("➕ Nouvelle opération", self.action_new_tx)
         add_btn("📥 Importer un relevé", self.action_import,
-                "Relevé bancaire CSV, ou fichier QIF exporté depuis un autre "
-                "logiciel de comptes (Money, Quicken…)")
+                "Relevé bancaire CSV ou OFX téléchargé chez votre banque, ou "
+                "fichier QIF exporté depuis un autre logiciel de comptes "
+                "(Money, Quicken…)")
 
         add_section("Consulter")
         add_btn("🔎 Rechercher", self.action_search,
@@ -336,14 +338,15 @@ class MainWindow(QMainWindow):
     def action_import(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Importer un relevé", "",
-            "Relevés (*.csv *.txt *.qif);;Fichiers CSV (*.csv *.txt);;"
+            "Relevés (*.csv *.txt *.ofx *.qfx *.qif);;"
+            "Fichiers CSV (*.csv *.txt);;Fichiers OFX (*.ofx *.qfx);;"
             "Fichiers QIF (*.qif);;Tous (*.*)")
         if not path:
             return
         self._import_files([path])
 
     def _import_files(self, paths: list[str]):
-        """Importe une liste de relevés (CSV ou QIF) et résume le résultat."""
+        """Importe une liste de relevés (CSV, OFX ou QIF) et résume le résultat."""
         total_imp = 0
         total_skip = 0
         total_bad = 0
@@ -355,9 +358,13 @@ class MainWindow(QMainWindow):
             try:
                 # Un fichier = une transaction groupée : import quasi instantané
                 # (une seule écriture disque) et tout-ou-rien en cas d'erreur.
-                # Le format se reconnaît à l'extension ; les deux imports
+                # Le format se reconnaît à l'extension ; les trois imports
                 # rendent le même compte rendu.
-                lecteur = import_qif if p.lower().endswith(".qif") else import_csv
+                lecteur = import_csv
+                if p.lower().endswith(".qif"):
+                    lecteur = import_qif
+                elif p.lower().endswith((".ofx", ".qfx")):
+                    lecteur = import_ofx
                 with self.db.batch():
                     imp, skip, bad, pt, recap, rappr = lecteur(p, self.db)
                 total_imp += imp
@@ -401,7 +408,7 @@ class MainWindow(QMainWindow):
             if not url.isLocalFile():
                 continue
             p = url.toLocalFile()
-            if p.lower().endswith((".csv", ".txt", ".qif")):
+            if p.lower().endswith((".csv", ".txt", ".ofx", ".qfx", ".qif")):
                 out.append(p)
         return out
 

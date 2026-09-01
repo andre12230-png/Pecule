@@ -455,7 +455,33 @@ SYNC_VERSION = 3
 #            Quatorze entrées au lieu de cinquante.
 #          • Choisir une année passée ouvre ses mois au passage : rien
 #            n'est hors de portée, tout tient à l'écran.
-APP_VERSION = "1.25.3"
+# 1.26.0 : import des relevés au format OFX.
+#          • Les banques proposent le relevé en plusieurs formats — la
+#            BPCE offre CSV, PDF, QIF et OFX. Pécule lisait le CSV et le
+#            QIF ; il lit désormais l'OFX (et sa variante .qfx), soit
+#            trois des quatre. Même bouton, même glisser-déposer.
+#          • Les deux versions du format sont acceptées : la 1.x, écrite
+#            en SGML, où les balises simples ne sont pas refermées, et la
+#            2.x, qui est du vrai XML.
+#          • Comme le QIF, l'OFX est traduit en lignes de relevé puis
+#            confié à l'import CSV : détection des doublons, règles,
+#            pointage automatique et rattachement des échéances prévues
+#            sont partagés, sans seconde mécanique à maintenir.
+#          • Le type d'opération (prélèvement, virement, prêt, frais
+#            bancaires…) est déduit du libellé, l'OFX ne le transportant
+#            pas. Les motifs sont cherchés comme des mots entiers : sans
+#            cela « ASSURANCE RETRAITE » partait en retrait d'espèces.
+#            Une somme reçue n'est jamais rangée en paiement par carte —
+#            un « CB AMAZON » créditeur est un remboursement.
+#          • Le relevé de la carte à débit différé est reconnu comme tel :
+#            ses achats prennent pour date de valeur le 4 du mois qui suit
+#            la FIN du relevé, jour du prélèvement groupé. S'appuyer sur
+#            la date de chaque achat aurait été faux pour ceux de la fin
+#            du mois précédent, comptabilisés après la clôture.
+#          • Chaque opération garde l'identifiant unique que lui donne la
+#            banque (FITID) : un relevé réimporté par erreur ne crée aucun
+#            doublon, même si les libellés ont été renommés entre-temps.
+APP_VERSION = "1.26.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

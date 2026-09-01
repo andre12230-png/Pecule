@@ -19,7 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version applicative : **1.25.3**
+> Version applicative : **1.26.0**
 
 ---
 
@@ -47,7 +47,7 @@ telemetry — your financial data never leaves your computer.
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
-- **CSV and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). QIF files exported from another program are read as well
+- **CSV, OFX and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). OFX statements are read in both flavours of the format (1.x SGML and 2.x XML), deferred-debit card statements included; QIF files exported from another program are read as well
 - **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
 - **Archiving** — set aside older transactions so lists and period pickers stay short. Nothing is deleted: archived entries stay in the database, and their total rolls into the opening balance, so the displayed balance never changes. A checkbox brings them back, and archiving can be undone
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
@@ -101,7 +101,7 @@ L'application s'organise en onglets :
 La **📖 Notice** (mode d'emploi et glossaire) n'est pas un onglet : c'est un
 bouton du menu de gauche, qui l'ouvre dans une fenêtre à part.
 
-Autres outils : **import CSV et QIF** des relevés bancaires (BPCE / CM / CA,
+Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
 **export et restauration JSON** de toutes vos données, et **sauvegarde
@@ -257,7 +257,7 @@ flowchart TD
 
     subgraph LOG_G ["Logique métier — testable sans Qt"]
         LOG
-        R["rules · labels · recurring · csv_import · qif_import · sync"]
+        R["rules · labels · recurring · csv_import · ofx_import · qif_import · sync"]
     end
     subgraph F_G ["Fondation"]
         F
@@ -285,6 +285,7 @@ comptesbudget/
 ├── labels.py                Nettoyage et profilage des libellés
 ├── recurring.py             Occurrences récurrentes + détection automatique
 ├── csv_import.py            Import des relevés bancaires CSV
+├── ofx_import.py            Import des relevés bancaires OFX (compte et carte)
 ├── qif_import.py            Import des fichiers QIF (autres logiciels)
 ├── sync.py                  Moteur de fusion (LWW) : export et restauration
 │                            JSON du menu de gauche
@@ -359,8 +360,8 @@ que des fichiers, et vérifie l'archive produite avant de rendre la main.
 
 1. **Fondation** (`constants`, `utils`, `database`) — données de configuration,
    utilitaires et accès SQLite. Aucune dépendance vers le reste.
-2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `qif_import`,
-   `sync`) —
+2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `ofx_import`,
+   `qif_import`, `sync`) —
    pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
 3. **Interface** (`ui/`) — widgets, dialogues et vues PySide6. La fenêtre
    principale assemble sept onglets ; la huitième vue, la notice, s'ouvre en
@@ -408,9 +409,9 @@ vous les enregistrez, sous le nom que vous choisissez.
   boutons **💾 Exporter (JSON)** et **♻️ Restaurer (JSON)** du menu de gauche
   (`ui/main_window.py`, méthodes `action_export` et `action_import_json`).
 - **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import`,
-  `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
+  `ofx_import`, `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
   tests unitaires (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
-  récurrentes, le nettoyage des libellés et les imports CSV et QIF (dédoublonnage
+  récurrentes, le nettoyage des libellés et les imports CSV, OFX et QIF (dédoublonnage
   compris).
   La couche UI (PySide6) est couverte par des *smoke tests* : chaque vue et
   dialogue est construit en mode « offscreen » puis rafraîchi, pour détecter
