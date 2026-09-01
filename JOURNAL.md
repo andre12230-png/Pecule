@@ -13,6 +13,55 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-01 — Import des relevés au format OFX (1.26.0)
+
+**Fait.** Nouveau module `comptesbudget/ofx_import.py` et son jeu de 33 tests.
+Pécule lit désormais les relevés OFX (et leur variante `.qfx`), en plus du CSV
+et du QIF : même bouton, même glisser-déposer, notice et README à jour.
+Au passage, le remboursement Amazon du 06/08/2026 est repassé de « Carte
+bancaire » à « Virement reçu », rejoignant les quatorze autres remboursements
+d'achat.
+
+**Pourquoi.** La banque d'André propose le relevé en quatre formats — CSV,
+PDF, QIF, OFX — et il a téléchargé celui d'août en OFX. Le CSV reste
+disponible, mais autant lire les trois formats de données sur quatre.
+
+Trois décisions méritent d'être retenues :
+
+- **L'OFX est traduit en lignes de relevé, puis confié à l'import CSV**, comme
+  le fait déjà le QIF. Une seule mécanique d'import à maintenir : dédoublonnage,
+  règles, pointage automatique et rattachement des échéances prévues sont
+  hérités tels quels.
+- **Le type d'opération est déduit du libellé**, l'OFX ne le transportant pas :
+  le relevé de compte de la BPCE n'écrit que DEBIT ou CREDIT, alors que le
+  mémo annonce « PRLV », « VIR SEPA », « ECH PRET ». Les motifs sont cherchés
+  comme des **mots entiers** — sans cela, « ASSURANCE RETRAITE » faisait
+  partir la pension de la Carsat en retrait d'espèces. Et sur un relevé de
+  compte, une somme **reçue** n'est jamais un paiement par carte : c'est ce
+  qui range « CB AMAZON » créditeur en remboursement, comme André le fait.
+- **La date de débit d'un achat carte vient de la FIN DU RELEVÉ**, pas de la
+  date de l'achat. Un achat du 31/07 que la banque ne comptabilise qu'en août
+  est prélevé le 4 septembre avec les autres, et non le 4 août.
+
+**Vérifié.** Sur une **copie** de la base : les deux vrais relevés d'août
+n'ajoutent rien (57 doublons reconnus, 1 récapitulatif de débit différé
+écarté, solde inchangé). Puis, août effacé de la copie et reconstruit à partir
+des seuls relevés : 57 opérations restituées, solde de retour à **398,15 €**
+au centime, les 25 achats carte tous datés du 04/09. Les deux seules
+différences de type avec la saisie d'André étaient des corrections. L'import a
+enfin été rejoué **par la fenêtre principale** elle-même, hors écran, pour
+contrôler le branchement du bouton et du glisser-déposer. 225 tests au vert.
+
+**Reste.** Rien n'est publié : GitHub, Scoop et le site restent en 1.23.2, et
+c'est voulu. L'exécutable de `F:\budget-app\Pecule` a été reconstruit en
+1.26.0 pour qu'André s'en serve tout de suite (l'ancien est conservé sous
+`Pecule.exe.avant-1.26.0`) — il devance donc la version publiée, comme
+déjà en août. Le commentaire de `qif_import.py` qui affirme que Pécule « suit
+un seul compte par base de données » date d'avant le multicomptes : à corriger
+un jour.
+
+---
+
 ## 2026-09-01 — L'abonnement Claude AI en récurrence mensuelle
 
 **Fait.** Ajout de l'opération récurrente « Anthropique (Claude AI) » sur le
