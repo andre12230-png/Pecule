@@ -147,6 +147,17 @@ def fmt_euro(value: float) -> str:
 JOUR_DEBIT_DIFFERE = 4   # la banque prélève les achats carte le 4 du mois suivant
 
 
+def est_paiement_carte(type_op: str) -> bool:
+    """L'opération est-elle payée par la carte à débit différé ?
+
+    Les imports libellent ce type « Carte bancaire », mais ni la casse ni les
+    variantes ne sont garanties selon la banque : on cherche simplement le mot.
+    Le Bilan et le Prévisionnel appliquent déjà ce critère pour calculer
+    l'encours et la date de débit ; il sert ici à ne pas confondre la date du
+    prélèvement groupé avec celle de l'achat."""
+    return "carte" in (type_op or "").lower()
+
+
 def date_debit_differe(date_op_iso: str, jour: int = JOUR_DEBIT_DIFFERE) -> str:
     """Date de valeur d'un achat payé par carte à débit différé.
 

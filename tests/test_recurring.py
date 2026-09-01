@@ -283,3 +283,41 @@ def test_echeances_du_mois_sous_categorie_renommee_par_la_banque():
     op["sous_cat"] = "Energie eau, gaz, electricite, fioul"
     ech = echeances_du_mois([rec], [op], 2026, 8, aujourdhui=date(2026, 8, 1))
     assert ech[0]["_deja"] is True
+
+
+def test_echeances_du_mois_carte_a_debit_differe():
+    """Un achat par carte du 1er septembre n'est débité que le 4 octobre.
+
+    Cette date de valeur est celle du prélèvement groupé, pas un décalage de
+    quelques jours : elle ne dit rien du mois auquel l'achat se rattache. Sans
+    précaution, l'achat de septembre solderait l'échéance d'OCTOBRE, qui ne
+    serait alors jamais proposée (cas « Anthropique / Claude AI »)."""
+    rec = _rec(libelle="ANTHROPIQUE", montant=-21.60, type="Carte bancaire",
+               day_of_month=1, start_date="2026-01-01")
+    achat_septembre = _op(libelle="ANTHROPIQUE", montant=-21.60,
+                          type="Carte bancaire",
+                          date="2026-09-01", date_valeur="2026-10-04")
+
+    # L'achat de septembre solde bien l'échéance de SEPTEMBRE…
+    ech = echeances_du_mois([rec], [achat_septembre], 2026, 9,
+                            aujourdhui=date(2026, 9, 1))
+    assert ech[0]["_deja"] is True
+
+    # … mais laisse celle d'OCTOBRE à venir.
+    ech = echeances_du_mois([rec], [achat_septembre], 2026, 10,
+                            aujourdhui=date(2026, 9, 1))
+    assert ech[0]["date"] == "2026-10-01"
+    assert ech[0]["_deja"] is False
+    assert ech[0]["_default"] is True
+
+
+def test_echeances_du_mois_hors_carte_garde_la_date_de_valeur():
+    """Le garde-fou ne vaut que pour la carte : un prélèvement ordinaire
+    présenté le 31 juillet et daté du 3 août par la banque solde bien
+    l'échéance d'août."""
+    rec = _rec(libelle="DELTA ASSUR", montant=-40.0, type="Prelevement",
+               day_of_month=3, start_date="2026-01-03")
+    op = _op(libelle="DELTA ASSUR", montant=-40.0, type="Prelevement",
+             date="2026-07-31", date_valeur="2026-08-03")
+    ech = echeances_du_mois([rec], [op], 2026, 8, aujourdhui=date(2026, 8, 1))
+    assert ech[0]["_deja"] is True
