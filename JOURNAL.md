@@ -20,7 +20,13 @@ Pécule lit désormais les relevés OFX (et leur variante `.qfx`), en plus du CS
 et du QIF : même bouton, même glisser-déposer, notice et README à jour.
 Au passage, le remboursement Amazon du 06/08/2026 est repassé de « Carte
 bancaire » à « Virement reçu », rejoignant les quatorze autres remboursements
-d'achat.
+d'achat. Et le compte rendu d'import ne montre plus de rectangle noir à la
+ligne du débit différé : le pictogramme de carte bancaire ne fait pas partie
+de Segoe UI, la police des boîtes de dialogue — mesuré avec
+`QFontMetrics.inFont()` sur la police réellement rendue, celle du mode hors
+écran ne valant rien pour ça (elle remplace tout par « Sans Serif » et
+prétend qu'aucun symbole n'existe). Les trois autres symboles du message,
+eux, sont bien dans la police et restent.
 
 **Pourquoi.** La banque d'André propose le relevé en quatre formats — CSV,
 PDF, QIF, OFX — et il a téléchargé celui d'août en OFX. Le CSV reste
