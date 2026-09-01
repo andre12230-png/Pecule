@@ -115,8 +115,9 @@ toucher à l'original. Noté en mémoire avec les quatre autres pièges Excel.
 
 **Reste.**
 
-- Rien n'est **commité** : le dépôt est public, le commit et la publication
-  restent à la main d'André.
+- Le correctif est **commité et poussé** sur `main`. Rien n'est **publié**
+  pour autant : ni release, ni tag, et `APP_VERSION` reste à 1.25.3 — la page
+  de présentation ne bougera qu'à la prochaine version.
 - ~~Aucune règle de catégorisation pour « Anthropique »~~ — **ajoutée** :
   motif `ANTHROPIQUE`, sens `debit`, vers Abonnements / Abonnements, sans
   montant figé (le tarif d'un abonnement bouge). Simulée sur toute la base
