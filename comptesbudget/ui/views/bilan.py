@@ -18,7 +18,7 @@ from PySide6.QtCharts import (
 )
 
 from ...utils import (
-    cat_color, fmt_euro, fmt_date_fr,
+    cat_color, est_paiement_carte, fmt_euro, fmt_date_fr,
     in_period, period_label,
 )
 from ...database import Database
@@ -353,15 +353,12 @@ class BilanView(QWidget):
         today = date.today()
         today_iso = today.isoformat()
 
-        # CB = opérations dont le type contient « carte » (insensible à la casse)
-        def is_cb(t: dict) -> bool:
-            return "carte" in (t.get("type") or "").lower()
-
         def dv(t: dict) -> str:
             return t.get("date_valeur") or t.get("date", "")
 
         cartes = [t for t in txs
-                  if is_cb(t) and t.get("categorie") != "Transaction exclue"]
+                  if est_paiement_carte(t.get("type"))
+                  and t.get("categorie") != "Transaction exclue"]
 
         # ACHATS pas encore débités : leur date de valeur est à venir (ils
         # partiront au prochain prélèvement groupé).
@@ -431,9 +428,6 @@ class BilanView(QWidget):
         def dv(t: dict) -> str:
             return t.get("date_valeur") or t.get("date", "")
 
-        def est_carte(t: dict) -> bool:
-            return "carte" in (t.get("type") or "").lower()
-
         actives = [t for t in txs if t.get("categorie") != "Transaction exclue"]
 
         # 1) Opérations déjà enregistrées dont le débit tombe dans la fenêtre.
@@ -448,15 +442,17 @@ class BilanView(QWidget):
         #    ferait compter deux fois.
         reelles = [t for t in actives
                    if debut_iso <= dv(t) <= fin_iso
-                   and not (est_carte(t) and not t.get("pointee"))
+                   and not (est_paiement_carte(t.get("type")) and not t.get("pointee"))
                    and not (t.get("pointee") and dv(t) <= today_iso)]
         en_cours_carte = [t for t in actives
-                          if est_carte(t) and not t.get("pointee")
+                          if est_paiement_carte(t.get("type")) and not t.get("pointee")
                           and dv(t) > today_iso]
         # Libellés déjà couverts : leur récurrence ne doit pas être recomptée
-        deja = {clean_libelle(t.get("libelle", "")) for t in reelles if not est_carte(t)}
+        deja = {clean_libelle(t.get("libelle", "")) for t in reelles
+                if not est_paiement_carte(t.get("type"))}
 
-        lignes = [(dv(t), t.get("libelle", ""), t["montant"], est_carte(t))
+        lignes = [(dv(t), t.get("libelle", ""), t["montant"],
+                   est_paiement_carte(t.get("type")))
                   for t in reelles]
         return lignes, en_cours_carte, deja
 
