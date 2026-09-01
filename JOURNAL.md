@@ -87,6 +87,32 @@ premier test a donc conclu à tort à son absence. La preuve se fait en lisant
 l'archive — `CArchiveReader` puis `ZlibArchiveReader`, et inspection des
 `co_names` du module embarqué. Les deux modules la portent bien.
 
+**Classeur, puis alignement des deux outils.** Deux écritures dans
+« Budget 2026.xlsx » par Excel COM : Anthropic 21,60 € porté à l'encours CB de
+septembre, et « Les Voûtes » (27 €, non pointé) reporté de l'encours d'août
+vers celui de septembre — la banque ne l'ayant pas rattaché au lot du 4/09, il
+partira au suivant. Le prélèvement du 4 septembre passe de 1006,51 € à
+979,51 €. Contrôle après coup en comparant le XML du fichier à celui de sa
+sauvegarde : graphiques, graphiques miniatures, tableaux et validations
+intacts ; une seule mise en forme conditionnelle a bougé, étendue d'une ligne
+pour suivre le tableau.
+
+Restait un désaccord entre les deux outils : Pécule datait le débit de
+« Les Voûtes » au 04/09, le classeur au 04/10. Sa date de valeur a été
+décalée d'un lot (`date_debit_differe` appliqué à la date de valeur, pas à la
+date d'achat). Les deux disent maintenant la même chose — lot du 4 septembre
+à 979,51 € sur 26 opérations, 48,60 € reportés au 4 octobre. Le prévisionnel
+n'a pas bougé : depuis la correction du matin, les cartes se rapprochent sur
+la date d'achat, que la date de valeur ne concerne plus.
+
+**Le piège de la séance.** PowerShell fige le type du premier paramètre passé
+à `Value2` sur un objet COM : après un nombre, écrire une chaîne lève
+`InvalidCastException` — et dans l'autre ordre, le message s'inverse. Il n'y a
+pas de « bon ordre » ; il faut écrire en liaison explicite via `InvokeMember`.
+Le premier essai a échoué à mi-parcours et le classeur a été restauré depuis
+sa sauvegarde ; la méthode a ensuite été mise au point sur une copie avant de
+toucher à l'original. Noté en mémoire avec les quatre autres pièges Excel.
+
 **Reste.**
 
 - Rien n'est **commité** : le dépôt est public, le commit et la publication
