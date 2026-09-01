@@ -5,7 +5,7 @@ from collections import Counter, defaultdict
 from datetime import date, timedelta
 from statistics import median
 
-from .utils import deaccent
+from .utils import deaccent, est_paiement_carte
 
 def next_occurrence(rec: dict, current: date, ref_day: int = None) -> date:
     """Date suivant `current` selon la fréquence.
@@ -161,13 +161,22 @@ def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
     for t in txs:
         d_op = t.get("date", "") or ""
         d_val = t.get("date_valeur") or d_op
-        if not (debut <= d_op <= fin or debut <= d_val <= fin):
+        # Une carte à DÉBIT DIFFÉRÉ fausse ce raisonnement : sa date de valeur
+        # est celle du prélèvement groupé du mois suivant, pas le décalage de
+        # quelques jours d'un prélèvement présenté en fin de mois. Elle ne dit
+        # rien du mois auquel l'achat se rattache — retenue, elle ferait solder
+        # l'échéance d'octobre par l'achat de septembre, et cette échéance ne
+        # serait jamais proposée. Pour ces opérations, seule la date d'achat
+        # compte.
+        dates = ([d_op] if est_paiement_carte(t.get("type", ""))
+                 else [d for d in (d_op, d_val) if d])
+        if not any(debut <= d <= fin for d in dates):
             continue
         cle = _recurring_norm_label(t.get("libelle", ""))
         if not cle:
             continue
         dispo.append({"cle": cle,
-                      "dates": [d for d in (d_op, d_val) if d],
+                      "dates": dates,
                       "montant": float(t.get("montant", 0) or 0),
                       "sous_cat": t.get("sous_cat", "") or "",
                       "credit": float(t.get("montant", 0) or 0) >= 0,

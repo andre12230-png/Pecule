@@ -13,6 +13,98 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-01 — L'abonnement Claude AI en récurrence mensuelle
+
+**Fait.** Ajout de l'opération récurrente « Anthropique (Claude AI) » sur le
+Compte courant : 21,60 € le 1er de chaque mois, catégorie Abonnements,
+type Carte bancaire, à partir du 1er septembre 2026. Insertion faite avec
+`Database.insert_recurring()` plutôt qu'en SQL direct, base sauvegardée avant.
+
+**Pourquoi.** Le libellé est le point délicat. La banque écrit
+« Anthropique », pas « Claude AI » : or le prévisionnel rapproche une échéance
+de l'opération réelle en comparant les libellés normalisés, mot à mot, le plus
+court devant être le DÉBUT du plus long. Une récurrence nommée « Claude AI »
+donne la clé `claude`, qui ne correspond jamais à `anthropique` — l'échéance
+serait restée éternellement non soldée, en double avec l'opération réelle à
+chaque import. En commençant par le mot de la banque, la clé devient
+`anthropique claude`, dont `anthropique` est bien le préfixe : le
+rapprochement fonctionne. Vérifié en simulant l'arrivée du relevé sur une
+copie de la base.
+
+**Puis.** André a signalé que les 21,60 € de septembre n'étaient pas encore
+en banque et devaient donc apparaître non pointés. Il avait raison, et le
+motif est plus intéressant qu'il n'y paraît : ses 23 opérations prévues de
+septembre étaient déjà générées (`prevue=1`, `pointee=0`) ; seule Claude AI
+manquait, la récurrence ayant été créée après cette génération. La ligne a
+été ajoutée à la main, avec les champs exacts de `_creer_operations` —
+date de valeur au 04/10 via `date_debit_differe`, `pointee=0`, `prevue=1`.
+
+**Le vrai défaut, structurel.** L'assistant ne reproposera jamais cette
+échéance : `echeances_du_mois` retient une opération si sa date **ou** sa
+date de valeur tombe dans la fenêtre du mois. Pour une carte à débit
+différé, l'opération du mois M porte une date de valeur au 4 du mois M+1 —
+elle solde donc systématiquement l'échéance de M+1. Mesuré : septembre et
+octobre sont `_deja=True`, novembre ne le devient qu'une fois l'opération
+d'octobre créée. Le défaut ne s'était jamais manifesté parce que Claude AI
+est la **seule récurrence de type « Carte bancaire »** sur 24 — les autres
+sont des prélèvements et virements, sans différé.
+
+**Corrigé.** André a choisi de réparer le moteur plutôt que de compenser à la
+main. Deux tests écrits d'abord, dont un qui échouait bien sur le symptôme
+exact (`_deja` vrai pour octobre) ; le second garde le cas ordinaire, où la
+date de valeur doit continuer de servir — un prélèvement présenté le 31/07 et
+daté du 03/08 solde l'échéance d'août.
+
+La correction tient en une règle : dans `echeances_du_mois`, une opération
+payée par **carte** n'est plus rapprochée que sur sa **date d'opération**. Sa
+date de valeur est celle du prélèvement groupé du mois suivant, pas le
+décalage de quelques jours d'un prélèvement de fin de mois : elle ne dit rien
+du mois auquel l'achat se rattache. Le critère « type contenant *carte* »
+était déjà écrit deux fois (Bilan, Prévisionnel) ; il devient
+`utils.est_paiement_carte()`, à côté de `date_debit_differe` dont il partage
+le sujet. Les deux appels existants n'ont pas été refaits — ajouter sans
+remanier.
+
+Résultat sur les données réelles : septembre reste soldé, octobre à décembre
+repassent à « à proposer », et les 24 échéances de septembre restent toutes
+reconnues. 192 tests au vert, aucun écart `ruff` nouveau (les deux points-
+virgules signalés préexistaient).
+
+**Exécutable reconstruit.** `APP_VERSION` reste à **1.25.3** : comme le
+10/08/2026, l'exe installé devance la version publiée pour qu'André profite
+tout de suite du correctif. Le numéro sera incrémenté à la prochaine
+publication — vérifier alors ce qui est dans le source sans être sorti.
+Construit en rejouant les étapes 2 et 3 de `Construire-Exe.bat` (jamais le
+`.bat` lui-même, dont la dernière étape écrase l'installation sans contrôle),
+puis `Pecule.exe` et `_internal` seuls recopiés vers `F:\budget-app\Pecule` —
+`comptes.db` vérifiée par empreinte avant/après, inchangée, et les
+10 sauvegardes intactes. L'ancien exe est conservé sous
+`Pecule.exe.avant-correction`.
+
+**Contrôler un exe, pas à l'œil.** Chercher `est_paiement_carte` dans le
+binaire ne donne rien : le code est compressé dans l'archive PYZ, et un
+premier test a donc conclu à tort à son absence. La preuve se fait en lisant
+l'archive — `CArchiveReader` puis `ZlibArchiveReader`, et inspection des
+`co_names` du module embarqué. Les deux modules la portent bien.
+
+**Reste.**
+
+- Rien n'est **commité** : le dépôt est public, le commit et la publication
+  restent à la main d'André.
+- ~~Aucune règle de catégorisation pour « Anthropique »~~ — **ajoutée** :
+  motif `ANTHROPIQUE`, sens `debit`, vers Abonnements / Abonnements, sans
+  montant figé (le tarif d'un abonnement bouge). Simulée sur toute la base
+  avant insertion : elle reconnaît les trois opérations existantes, n'en
+  reclasse aucune et n'entre en conflit avec aucune des 73 autres règles.
+  Vérifiée ensuite par le vrai moteur `apply_rules_to_tx` sur cinq libellés,
+  dont un suffixe bancaire et un tarif différent, tous classés — et un
+  remboursement (crédit), qui reste bien non classé. Cette règle vit dans la
+  base d'André, pas dans le dépôt : elle n'est pas concernée par le commit.
+- Les deux appels dupliqués du critère « carte » (Bilan, Prévisionnel)
+  pourraient adopter `est_paiement_carte()` — cosmétique, non urgent.
+
+---
+
 ## 2026-08-31 — Le README confronté au code : sept écarts
 
 Séance d'audit : plutôt que relire le README, le confronter au code, et
