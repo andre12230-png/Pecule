@@ -13,6 +13,28 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-02 — Audit README + manifeste : gel de publication à 1.23.2
+
+**Fait.** Audit du README et du manifeste Scoop (`bucket/pecule.json`). Manifeste
+vérifié intègre : son empreinte SHA-256 correspond au bit près à l'archive
+`v1.23.2` en ligne, et l'URL d'installation `…/main/…` du README est valide
+(branche par défaut = `main`). La ligne d'en-tête du README, qui affichait
+« Version applicative : 1.26.0 », devient « Version publiée : **1.23.2**. La
+**1.26.0** … est en cours de développement et n'est pas encore téléchargeable ».
+Commité (`2b2b140`) et poussé sur `main` — le push a aussi emporté le commit
+local « Journal » `96038bc` qui n'était pas encore en ligne.
+
+**Pourquoi.** Le code est monté à 1.26.0 (multicomptes 1.24, archivage 1.25, OFX
+1.26) sans être publié : le README promettait donc une version que personne ne
+peut télécharger. Décision : **geler la publication à la 1.23.2 tant que la PR
+winget-pkgs #416272 n'est pas soldée**, pour ne pas déplacer la cible pendant la
+revue Microsoft — même logique que les manifestes Winget laissés en 1.23.0.
+
+**Reste.** Publier la 1.26.0 et réaligner tous les porteurs de version une fois
+la PR acceptée. `Lisez-moi.txt` du dépôt laissé à 1.26.0 (il suit le code), et
+les mentions « Depuis la 1.24.0 / 1.25.0 » du corps du README laissées telles
+quelles — volontairement.
+
 ## 2026-09-01 — Import des relevés au format OFX (1.26.0)
 
 **Fait.** Nouveau module `comptesbudget/ofx_import.py` et son jeu de 33 tests.
