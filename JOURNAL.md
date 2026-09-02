@@ -22,7 +22,10 @@ vérifié intègre : son empreinte SHA-256 correspond au bit près à l'archive
 « Version applicative : 1.26.0 », devient « Version publiée : **1.23.2**. La
 **1.26.0** … est en cours de développement et n'est pas encore téléchargeable ».
 Commité (`2b2b140`) et poussé sur `main` — le push a aussi emporté le commit
-local « Journal » `96038bc` qui n'était pas encore en ligne.
+local « Journal » `96038bc` qui n'était pas encore en ligne. Puis, dans la
+foulée, `Lisez-moi.txt` (en-tête ramené à 1.23.2 + note « 1.26.0 en
+developpement ») et deux encadrés ⏳ (FR / EN) en tête des fonctionnalités du
+README — commit `9162664`.
 
 **Pourquoi.** Le code est monté à 1.26.0 (multicomptes 1.24, archivage 1.25, OFX
 1.26) sans être publié : le README promettait donc une version que personne ne
@@ -30,10 +33,9 @@ peut télécharger. Décision : **geler la publication à la 1.23.2 tant que la 
 winget-pkgs #416272 n'est pas soldée**, pour ne pas déplacer la cible pendant la
 revue Microsoft — même logique que les manifestes Winget laissés en 1.23.0.
 
-**Reste.** Publier la 1.26.0 et réaligner tous les porteurs de version une fois
-la PR acceptée. `Lisez-moi.txt` du dépôt laissé à 1.26.0 (il suit le code), et
-les mentions « Depuis la 1.24.0 / 1.25.0 » du corps du README laissées telles
-quelles — volontairement.
+**Reste.** À la publication de la 1.26.0 (PR acceptée) : retirer les deux
+encadrés ⏳ du README et remonter d'un bloc README + `Lisez-moi.txt` + manifeste
+Scoop + JSON-LD + `APP_VERSION`, puis tagguer la release.
 
 ## 2026-09-01 — Import des relevés au format OFX (1.26.0)
 
