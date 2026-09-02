@@ -42,6 +42,10 @@ for tracking personal bank accounts and budgets. It is built with **PySide6 (Qt)
 everything in a **local SQLite** file: no account to create, no cloud, no
 telemetry — your financial data never leaves your computer.
 
+> ⏳ **In development (1.26.0, not yet released):** multiple accounts, archiving
+> and OFX import (listed below) are part of the upcoming 1.26.0; the downloadable
+> build (**1.23.2**) does not include them yet.
+
 **What it does**
 
 - **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection
@@ -86,6 +90,10 @@ and runs on Linux and macOS.
 ---
 
 ## Fonctionnalités
+
+> ⏳ **En développement (1.26.0, non encore publiée)** — le suivi de **plusieurs
+> comptes**, l'**archivage** et l'**import OFX** décrits ci-dessous font partie de
+> la 1.26.0 ; la version téléchargeable (**1.23.2**) ne les propose pas encore.
 
 L'application s'organise en onglets :
 
