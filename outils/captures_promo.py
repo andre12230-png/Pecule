@@ -154,7 +154,37 @@ def construire_base(chemin):
             db.insert_rule({"id": f"g{i}", "pattern": motif, "amount": None,
                             "categorie": cat, "sous_cat": "", "no_overwrite": 0,
                             "created_at": f"{AUJOURDHUI.year}-01-01"})
+
+    _ajouter_second_compte(db)
     return db
+
+
+def _ajouter_second_compte(db):
+    """Ouvre un livret à côté du compte courant.
+
+    Sans lui, les captures ne montreraient PAS le multicompte : le sélecteur
+    de comptes reste caché tant qu'il n'y en a qu'un seul, et le titre de la
+    fenêtre ne porte alors pas de nom de compte (cf. `_fill_comptes` dans
+    `main_window.py`). La vitrine annonçait donc une fonction qu'aucune image
+    ne montrait.
+
+    Un livret d'épargne alimenté chaque mois : c'est le cas de figure le plus
+    courant à côté d'un compte courant, et il illustre au passage que chaque
+    compte garde son propre solde de départ.
+    """
+    courant = db.compte_id
+    livret = db.add_compte("Livret A", 3200.00, f"{AUJOURDHUI.year}-01-01")
+    db.compte_id = livret
+    with db.batch():
+        for mois in range(1, AUJOURDHUI.month + 1):
+            d = date(AUJOURDHUI.year, mois, 5)
+            if d > AUJOURDHUI:
+                continue
+            db.insert_tx(_tx(f"e{mois}", d, "Virement Epargne", "Épargne",
+                             "", 150.00, "Virement"))
+    # Les captures montrent le compte courant : on y revient, et c'est lui que
+    # l'application rouvrira (`set_compte_courant` mémorise le choix).
+    db.set_compte_courant(courant)
 
 
 def _laisser_dessiner(app, secondes):
