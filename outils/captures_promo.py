@@ -34,8 +34,17 @@ from comptesbudget.database import Database               # noqa: E402
 from comptesbudget.ui.main_window import MainWindow       # noqa: E402
 
 AUJOURDHUI = date.today()
-LARGEUR, HAUTEUR = 1668, 913          # taille demandée ; la fenêtre peut être
-                                      # un peu plus grande (taille minimale)
+LARGEUR, HAUTEUR = 1668, 1080         # taille demandée ; la fenêtre peut être
+                                      # un peu plus grande (taille minimale).
+                                      # 913 suffisait jusqu'à la 1.23.x ; le
+                                      # Bilan a grandi depuis (menu de gauche
+                                      # avec ses titres de sections, bandeaux
+                                      # d'information) et la légende du
+                                      # graphique d'évolution se retrouvait
+                                      # coupée en bas de la capture — sans que
+                                      # l'application y soit pour quelque
+                                      # chose, elle l'affiche bien dès que la
+                                      # fenêtre est assez haute.
 GRAINE = 20260809                     # captures reproductibles
 
 # ── Le jeu de données inventé ────────────────────────────────────────────────
