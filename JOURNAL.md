@@ -48,6 +48,17 @@ affichent 1.26.0. La page de présentation, interrogée avec une chaîne de requ
 contourner les deux caches, sert bien le nouveau JSON-LD. L'archive contient l'exécutable
 reconstruit le matin, empreinte identique à celle installée sur le poste.
 
+**Contrôle Scoop de bout en bout**, fait après coup : `scoop update` — le bucket ne se
+rafraîchit pas tout seul — puis `scoop install pecule`, qui télécharge l'archive depuis
+l'adresse publique et **vérifie lui-même son empreinte** (« Checking hash … ok »). Le
+`pre_install` a bien créé `comptes.db` comme **fichier** vide et non comme dossier, le
+piège qui faisait mourir l'application sur « unable to open database file ». Exe installé
+en 1.26.0, empreinte identique à celle du poste. Puis
+`scoop uninstall pecule --purge` **aussitôt** : cette copie est vide et son raccourci du
+menu Démarrer masquerait l'installation réelle. Vérifié après coup qu'il ne reste ni
+dossier, ni données persistées, ni raccourci, et que l'installation de `F:udget-app` est
+intacte.
+
 **Reste.** Ne **jamais** supprimer la release `v1.23.0` ni son archive tant que la PR
 Winget n'est pas soldée : l'empreinte du manifeste en dépend, et la casser condamnerait
 la demande. À la clôture de la PR seulement, remonter les manifestes Winget.
