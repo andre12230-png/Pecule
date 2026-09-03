@@ -13,6 +13,36 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (captures) — Les images de la vitrine refaites pour la 1.26.0
+
+**Fait.** Les quatre captures de `docs/media/` dataient du 9 août : elles montraient
+l'interface d'avant le multicomptes, l'archivage et l'import OFX — menu de gauche encore
+en colonne uniforme, sans « Mes comptes » ni « Archiver », bouton « Importer CSV » au lieu
+d'« Importer un relevé ». Refaites avec `outils/captures_promo.py`, qui invente ses
+données dans une base temporaire : aucune opération réelle n'y figure jamais.
+
+**Hauteur de capture portée de 913 à 1080.** À l'ancienne valeur, la légende du graphique
+d'évolution (« Revenus / Dépenses ») se retrouvait **coupée** en bas de l'image. Vérifié
+que l'application n'y est pour rien en rendant la même vue à deux hauteurs : à 1200 px la
+légende revient entière. C'est le contenu qui a grandi — le menu de gauche porte désormais
+ses titres de sections, et les bandeaux d'information du Bilan tiennent plus de place.
+
+**Pourquoi.** Ces images sont la première chose que voit un visiteur, et `promo_1_bilan`
+sert aussi d'image de partage (`og:image`) et de vignette agrandissable sur la fiche
+Gratilog. Montrer une interface qui n'existe plus dessert la version qu'on vient de
+publier. La fiche Gratilog pointe vers l'URL de la vitrine : elle se met donc à jour
+d'elle-même, sans rien à redéposer.
+
+Contrôle après publication : la page sert bien la nouvelle image (`Content-Length` égal à
+la taille du fichier commité).
+
+**Reste.** `docs/media/promo_cover_630x500.png` porte encore l'**ancien nom du logiciel**,
+« Comptes et Budget », mais n'est **référencée nulle part** : c'est un vestige de la
+couverture itch.io, plateforme abandonnée en août. Sans conséquence donc, mais à supprimer
+ou à refaire — laissé à André.
+
+---
+
 ## 2026-09-03 (Gratilog) — La fiche et le fil mis à jour pour la 1.26.0
 
 **Fait.** Deux gestes sur Gratilog, seul annuaire encore vivant où Pécule est référencé.
