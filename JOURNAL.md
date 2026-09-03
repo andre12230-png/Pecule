@@ -36,10 +36,18 @@ d'elle-même, sans rien à redéposer.
 Contrôle après publication : la page sert bien la nouvelle image (`Content-Length` égal à
 la taille du fichier commité).
 
-**Reste.** `docs/media/promo_cover_630x500.png` porte encore l'**ancien nom du logiciel**,
-« Comptes et Budget », mais n'est **référencée nulle part** : c'est un vestige de la
-couverture itch.io, plateforme abandonnée en août. Sans conséquence donc, mais à supprimer
-ou à refaire — laissé à André.
+**La couverture refaite dans la foulée.** `docs/media/promo_cover_630x500.png` portait
+encore « Comptes et Budget », l'ancien nom, près d'un mois après le renommage — et un sac
+d'argent frappé d'un **dollar**, alors que le logiciel ne connaît que l'euro. Personne ne
+l'avait vue : elle n'est référencée nulle part, vestige de la couverture itch.io,
+plateforme abandonnée en août.
+
+Elle est désormais **fabriquée par `outils/couverture.py`** au lieu d'être composée à la
+main, et reprend le logo du projet (le sac frappé d'un €). C'est la vraie leçon de
+l'épisode : **un fichier qu'on ne sait pas refabriquer vieillit en silence**. Les quatre
+captures, elles, avaient leur script — c'est pour cela qu'il a suffi de le relancer.
+
+**Reste.** Rien d'ouvert sur les images.
 
 ---
 
