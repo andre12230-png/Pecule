@@ -110,6 +110,22 @@ C'est la relecture de la *valeur précédente* renvoyée par le formulaire qui l
 Même chose pour le drapeau en tête. À noter aussi : un champ annoncé « vide » par la
 lecture de page ne l'était pas — l'adresse de l'ancienne archive s'y trouvait bien.
 
+**Signature du forum ajoutée, en texte et non en image.** Aucune règle écrite n'encadre les
+signatures sur Gratilog, mais **aucun membre n'y met d'image** — pas même la webmestre,
+7 806 messages au compteur : ce sont des configurations matérielles ou des citations. Le
+champ est d'ailleurs un simple textarea, sans la barre BBCode qu'ont les messages. Une
+bannière du logiciel sous chaque message y aurait détonné et ressemblé à de l'affichage
+publicitaire de la part de l'auteur. Deux lignes de texte à la place, dans le ton du site,
+avec le lien vers la page de présentation.
+
+L'option **« Toujours attacher ma signature » était sur Non** : sans elle, le champ ne sert
+à rien. Passée sur Oui, et vérifié que la signature apparaît bien sous les messages — y
+compris les anciens, XOOPS l'appliquant à l'affichage et non à l'enregistrement.
+
+Méthode retenue pour ce genre de question : **quand aucune règle écrite n'existe, regarder
+ce que font les membres les plus actifs, et le webmestre en premier.** L'usage tient lieu
+de règle, et il était ici sans ambiguïté.
+
 **Reste.** Attendre la validation de la fiche. Framalibre, en revanche, n'a rien à recevoir :
 son formulaire crée une notice et n'en modifie aucune, et une notice n'y porte pas de
 numéro de version.
