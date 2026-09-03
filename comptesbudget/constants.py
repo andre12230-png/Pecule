@@ -486,6 +486,15 @@ SYNC_VERSION = 3
 #            fait pas partie de Segoe UI, la police des boîtes de dialogue.
 #            La ligne est désormais en texte seul. Les symboles des lignes
 #            voisines (✔, ⏳, ⚠) sont bien dans la police et restent.
+#          • Correction : pointer une échéance saisie d'avance la CONFIRME.
+#            Elle gardait jusqu'ici les deux étiquettes à la fois, « prévue »
+#            et « pointée ». Sans conséquence sur le solde — qui ne regarde
+#            que le pointage — mais l'opération restait affichée comme une
+#            prévision alors qu'elle était passée, et se trouvait écartée des
+#            échéances à rattacher au prochain import : un doublon ne tenait
+#            plus qu'aux filets d'identité. Dépointer ne rend pas son statut
+#            de prévision à l'opération : rien ne permettrait de deviner
+#            qu'elle avait été saisie d'avance.
 APP_VERSION = "1.26.0"
 
 CATEGORIES_DEFAUT = [

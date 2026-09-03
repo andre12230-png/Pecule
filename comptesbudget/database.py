@@ -501,9 +501,22 @@ class Database:
         self._commit()
 
     def toggle_pointee(self, tx_id: str):
+        """Bascule le pointage — et CONFIRME l'opération si elle était prévue.
+
+        Pointer, c'est dire « la banque l'a passée » : une échéance saisie
+        d'avance cesse alors d'être une prévision. Sans cela elle gardait les
+        deux étiquettes à la fois, ce qui la faisait écarter des échéances à
+        rattacher au prochain import (`csv_import.py`) et affaiblissait la
+        détection des doublons.
+
+        Le retour en arrière ne rend pas son statut de prévision à l'opération :
+        en la dépointant, rien ne permet de deviner qu'elle avait été saisie
+        d'avance. Dans le CASE, `pointee` vaut encore sa valeur AVANT la
+        bascule : elle est à 0 quand on est en train de pointer."""
         self.conn.execute(
-            "UPDATE transactions SET pointee = 1 - pointee, updated_at = ? "
-            "WHERE id = ?", (_now_iso(), tx_id))
+            "UPDATE transactions SET pointee = 1 - pointee, "
+            "prevue = CASE WHEN pointee = 0 THEN 0 ELSE prevue END, "
+            "updated_at = ? WHERE id = ?", (_now_iso(), tx_id))
         self._commit()
 
     def all_categories_used(self) -> list[str]:
