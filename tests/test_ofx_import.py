@@ -18,7 +18,7 @@ VERSION:102
 <STMTRS>
 <CURDEF>EUR
 <BANKACCTFROM>
-<ACCTID>04210755852</ACCTID>
+<ACCTID>00000000000</ACCTID>
 </BANKACCTFROM>
 <BANKTRANLIST>
 <DTSTART>20260801
@@ -26,32 +26,32 @@ VERSION:102
 <STMTTRN>
 <TRNTYPE>DEBIT
 <DTPOSTED>20260831
-<TRNAMT>-34.99
-<FITID>2101260002
-<CHECKNUM>2623984G1015
-<NAME>BOUYGUES TELECOM
-<MEMO>PRLV Bouygues Telecom 2623984G10152224
+<TRNAMT>-30.00
+<FITID>1000000001
+<CHECKNUM>0000000A0000
+<NAME>GAMMA TELECOM
+<MEMO>PRLV Gamma Telecom 0000000A00000000
 </STMTTRN>
 <STMTTRN>
 <TRNTYPE>CREDIT
 <DTPOSTED>20260807
-<TRNAMT>+1160.16
-<FITID>2084568278
+<TRNAMT>+1200.00
+<FITID>1000000002
 <CHECKNUM>REFERENCE
-<NAME>CARSAT SUD EST
-<MEMO>VIR SEPA CARSAT SUD EST ASSURANCE RETRAITE 12426971
+<NAME>CAISSE RETRAITE
+<MEMO>VIR SEPA CAISSE RETRAITE ASSURANCE RETRAITE 00000000
 </STMTTRN>
 <STMTTRN>
 <TRNTYPE>DEBIT
 <DTPOSTED>20260804
-<TRNAMT>-1016.31
-<FITID>2081133335
-<NAME>DEBIT DIFFERE N 7209
+<TRNAMT>-1000.00
+<FITID>1000000003
+<NAME>DEBIT DIFFERE N 0000
 <MEMO>CUMUL DES DEBITS DIFFERES
 </STMTTRN>
 </BANKTRANLIST>
 <LEDGERBAL>
-<BALAMT>+398.15
+<BALAMT>+500.00
 <DTASOF>20260901
 </LEDGERBAL>
 </STMTRS>
@@ -66,7 +66,7 @@ _OFX_CARTE = """OFXHEADER:100
 <CREDITCARDMSGSRSV1>
 <CCSTMTRS>
 <CCACCTFROM>
-<ACCTID>142650060004210755852</ACCTID>
+<ACCTID>00000000000000000000</ACCTID>
 </CCACCTFROM>
 <BANKTRANLIST>
 <DTSTART>20260801
@@ -90,9 +90,9 @@ _OFX_CARTE = """OFXHEADER:100
 # ── Montants ────────────────────────────────────────────────────────────────
 
 def test_montant_point_ou_virgule():
-    assert parse_montant_ofx("-34.99") == -34.99
+    assert parse_montant_ofx("-30.00") == -30.00
     assert parse_montant_ofx("+52,51") == 52.51
-    assert parse_montant_ofx("1160.16") == 1160.16
+    assert parse_montant_ofx("1200.00") == 1200.00
 
 
 def test_montant_illisible():
@@ -123,15 +123,15 @@ def test_date_illisible():
 # ── Lecture des balises, versions 1.x et 2.x ────────────────────────────────
 
 def test_champ_balise_non_refermee_sgml():
-    assert champ("<TRNAMT>-34.99\n<FITID>21012\n", "TRNAMT") == "-34.99"
+    assert champ("<TRNAMT>-30.00\n<FITID>21012\n", "TRNAMT") == "-30.00"
 
 
 def test_champ_balise_refermee_xml():
-    assert champ("<TRNAMT>-34.99</TRNAMT>", "TRNAMT") == "-34.99"
+    assert champ("<TRNAMT>-30.00</TRNAMT>", "TRNAMT") == "-30.00"
 
 
 def test_champ_absent():
-    assert champ("<TRNAMT>-34.99\n", "MEMO") == ""
+    assert champ("<TRNAMT>-30.00\n", "MEMO") == ""
 
 
 def test_lecture_ofx_version_2_en_xml():
@@ -151,8 +151,8 @@ def test_lecture_ofx_version_2_en_xml():
 # ── Type d'opération ────────────────────────────────────────────────────────
 
 def test_type_prelevement():
-    assert type_operation("BOUYGUES TELECOM", "PRLV Bouygues Telecom 26239",
-                          "DEBIT", -34.99) == "Prelevement"
+    assert type_operation("GAMMA TELECOM", "PRLV Gamma Telecom 00000",
+                          "DEBIT", -30.00) == "Prelevement"
 
 
 def test_type_virement_recu_selon_le_sens():
@@ -163,7 +163,7 @@ def test_type_virement_recu_selon_le_sens():
 
 
 def test_type_pret_et_frais():
-    assert type_operation("ECHEANCE DE CREDIT", "ECH PRET 5600445", "DEBIT",
+    assert type_operation("ECHEANCE DE CREDIT", "ECH PRET 0000000", "DEBIT",
                           -826.96) == "Pret"
     assert type_operation("COTISATIONS BANCAIRES", " OFFRE CONFORT", "DEBIT",
                           -16.20) == "Frais bancaires"
@@ -177,11 +177,11 @@ def test_type_frais_avant_carte():
 
 def test_type_retraite_n_est_pas_un_retrait():
     """Les motifs sont cherchés comme des mots entiers : sans cela, la
-    pension de la Carsat (« ASSURANCE RETRAITE ») partait en retrait
+    pension de retraite (« ASSURANCE RETRAITE ») partait en retrait
     d'espèces."""
-    assert type_operation("CARSAT SUD EST",
-                          "VIR SEPA CARSAT SUD EST ASSURANCE RETRAITE",
-                          "CREDIT", 1160.16) == "Virement recu"
+    assert type_operation("CAISSE RETRAITE",
+                          "VIR SEPA CAISSE RETRAITE ASSURANCE RETRAITE",
+                          "CREDIT", 1200.00) == "Virement recu"
 
 
 def test_type_remboursement_carte_n_est_pas_un_paiement_carte():
@@ -212,23 +212,23 @@ def test_type_deduit_du_trntype_a_defaut_de_libelle():
 
 def test_lecture_releve_de_compte():
     operations, comptes, illisibles = lire_ofx(_OFX_COMPTE)
-    assert (len(operations), comptes, illisibles) == (3, ["04210755852"], 0)
+    assert (len(operations), comptes, illisibles) == (3, ["00000000000"], 0)
     op = operations[0]
     assert op.date == "31/08/2026"
     assert op.date_valeur == "31/08/2026"      # pas de débit différé ici
-    assert op.montant == -34.99
-    assert op.libelle == "BOUYGUES TELECOM"
-    assert op.reference == "2101260002"        # le FITID de la banque
+    assert op.montant == -30.00
+    assert op.libelle == "GAMMA TELECOM"
+    assert op.reference == "1000000001"        # le FITID de la banque
     assert op.type == "Prelevement"
-    assert op.info == "PRLV Bouygues Telecom 2623984G10152224"
+    assert op.info == "PRLV Gamma Telecom 0000000A00000000"
 
 
 def test_lecture_numero_de_reference_bidon_ecarte():
     """La BPCE écrit le mot « REFERENCE » quand elle n'en a pas : ce n'en est
     pas une, elle n'a rien à faire dans la note."""
     operations, _, _ = lire_ofx(_OFX_COMPTE)
-    carsat = next(o for o in operations if o.montant == 1160.16)
-    assert "REFERENCE" not in carsat.info
+    pension = next(o for o in operations if o.montant == 1200.00)
+    assert "REFERENCE" not in pension.info
 
 
 def test_lecture_releve_de_carte_date_du_debit_groupe():
@@ -254,7 +254,7 @@ def test_lecture_achat_de_fin_de_mois_precedent():
 
 
 def test_operation_illisible_comptee_et_ecartee():
-    abime = _OFX_COMPTE.replace("<TRNAMT>-34.99", "<TRNAMT>abc")
+    abime = _OFX_COMPTE.replace("<TRNAMT>-30.00", "<TRNAMT>abc")
     operations, _, illisibles = lire_ofx(abime)
     assert (len(operations), illisibles) == (2, 1)
 
@@ -266,13 +266,13 @@ def test_import_ofx_insere(tmp_path):
     # 2 importées, 0 doublon, 0 illisible, 0 pointée, 1 récapitulatif écarté.
     assert import_ofx_text(_OFX_COMPTE, db) == (2, 0, 0, 0, 1, 0)
     rows = [dict(r) for r in db.list_tx()]
-    assert sorted(r["montant"] for r in rows) == [-34.99, 1160.16]
-    bouygues = next(r for r in rows if r["montant"] == -34.99)
-    assert bouygues["date"] == "2026-08-31"
-    assert bouygues["libelle"] == "BOUYGUES TELECOM"
-    assert bouygues["type"] == "Prelevement"
+    assert sorted(r["montant"] for r in rows) == [-30.00, 1200.00]
+    abonnement = next(r for r in rows if r["montant"] == -30.00)
+    assert abonnement["date"] == "2026-08-31"
+    assert abonnement["libelle"] == "GAMMA TELECOM"
+    assert abonnement["type"] == "Prelevement"
     # Un relevé ne porte que des opérations déjà passées en banque.
-    assert bouygues["pointee"] == 1
+    assert abonnement["pointee"] == 1
 
 
 def test_import_ofx_recapitulatif_debit_differe_ecarte(tmp_path):
@@ -280,7 +280,7 @@ def test_import_ofx_recapitulatif_debit_differe_ecarte(tmp_path):
     détaillés du relevé de carte : elle n'est jamais importée."""
     db = Database(str(tmp_path / "t.db"))
     import_ofx_text(_OFX_COMPTE, db)
-    assert not [r for r in db.list_tx() if r["montant"] == -1016.31]
+    assert not [r for r in db.list_tx() if r["montant"] == -1000.00]
 
 
 def test_import_ofx_dedup_au_reimport(tmp_path):
@@ -294,7 +294,7 @@ def test_import_ofx_dedup_meme_apres_renommage(tmp_path):
     libellés : un relevé réimporté ne crée pas de doublon."""
     db = Database(str(tmp_path / "t.db"))
     import_ofx_text(_OFX_COMPTE, db)
-    ligne = next(dict(r) for r in db.list_tx() if r["montant"] == -34.99)
+    ligne = next(dict(r) for r in db.list_tx() if r["montant"] == -30.00)
     db.update_tx(ligne["id"], {"libelle": "Bouygues Telecom"})
     imported, skipped, _, _, _, _ = import_ofx_text(_OFX_COMPTE, db)
     assert (imported, skipped) == (0, 2)
@@ -305,7 +305,7 @@ def test_import_ofx_dedup_avec_un_csv_deja_importe(tmp_path):
     from comptesbudget.csv_import import import_csv_text
     db = Database(str(tmp_path / "t.db"))
     csv = ("Date;Libelle;Montant\n"
-           "31/08/2026;BOUYGUES TELECOM;-34,99\n")
+           "31/08/2026;GAMMA TELECOM;-30,00\n")
     assert import_csv_text(csv, db) == (1, 0, 0, 0, 0, 0)
     imported, skipped, _, _, _, _ = import_ofx_text(_OFX_COMPTE, db)
     assert (imported, skipped) == (1, 1)
@@ -315,11 +315,11 @@ def test_import_ofx_applique_les_regles(tmp_path):
     """Les règles de catégorisation valent aussi pour l'OFX : c'est tout
     l'intérêt d'avoir réutilisé la mécanique de l'import CSV."""
     db = Database(str(tmp_path / "t.db"))
-    db.insert_rule({"id": "r1", "pattern": "bouygues", "amount": None,
+    db.insert_rule({"id": "r1", "pattern": "gamma", "amount": None,
                     "categorie": "Abonnements", "sous_cat": "Internet",
                     "no_overwrite": 0, "created_at": "2026-01-01"})
     import_ofx_text(_OFX_COMPTE, db)
-    ligne = next(dict(r) for r in db.list_tx() if r["montant"] == -34.99)
+    ligne = next(dict(r) for r in db.list_tx() if r["montant"] == -30.00)
     assert (ligne["categorie"], ligne["sous_cat"]) == ("Abonnements", "Internet")
 
 
@@ -332,7 +332,7 @@ def test_import_ofx_carte_date_de_valeur_conservee(tmp_path):
 
 def test_import_ofx_fichier_multi_comptes_refuse(tmp_path):
     db = Database(str(tmp_path / "t.db"))
-    deux = _OFX_COMPTE + _OFX_COMPTE.replace("04210755852", "04062692527")
+    deux = _OFX_COMPTE + _OFX_COMPTE.replace("00000000000", "00000000001")
     with pytest.raises(ValueError, match="plusieurs comptes"):
         import_ofx_text(deux, db)
     assert list(db.list_tx()) == []
@@ -356,7 +356,7 @@ def test_import_ofx_depuis_un_fichier_windows_1252(tmp_path):
     """Les banques françaises annoncent CHARSET:1252 dans l'en-tête."""
     db = Database(str(tmp_path / "t.db"))
     p = tmp_path / "releve.ofx"
-    p.write_bytes(_OFX_COMPTE.replace("BOUYGUES TELECOM",
+    p.write_bytes(_OFX_COMPTE.replace("GAMMA TELECOM",
                                       "SOCIÉTÉ FRANÇAISE").encode("cp1252"))
     import_ofx(str(p), db)
     assert any(r["libelle"] == "SOCIÉTÉ FRANÇAISE" for r in db.list_tx())

@@ -231,9 +231,9 @@ def test_echeances_du_mois_deux_recurrences_meme_libelle():
 
 def test_echeances_du_mois_montant_variable_reste_rapproche():
     """La tolérance sur le montant ne doit pas casser le cas d'une facture qui
-    varie : -110,00 € prévu, -124,00 € prélevé."""
+    varie : -110,00 € prévu, -125,00 € prélevé."""
     ech = echeances_du_mois([_rec(libelle="ENERGIA VERTE", montant=-110.00)],
-                            [_op(libelle="ENERGIA VERTE", montant=-124.00)],
+                            [_op(libelle="ENERGIA VERTE", montant=-125.00)],
                             2026, 8, aujourdhui=date(2026, 8, 1))
     assert ech[0]["_deja"] is True
 

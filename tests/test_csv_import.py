@@ -333,12 +333,12 @@ def test_echeance_prevue_montant_variable(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     _echeance(db, libelle="ENERGIA VERTE", montant=-110.00,
               categorie="Logement", date="2026-08-15", date_valeur="2026-08-15")
-    p = _releve(tmp_path, "17/08/2026;ENERGIA VERTE SAS;-124,00;x\n")
+    p = _releve(tmp_path, "17/08/2026;ENERGIA VERTE SAS;-125,00;x\n")
 
     res = import_csv(p, db)
     assert (res.importees, res.rapprochees) == (0, 1)
     t = [dict(x) for x in db.list_tx()][0]
-    assert t["montant"] == -124.00          # montant réel repris
+    assert t["montant"] == -125.00          # le montant du relevé l'emporte
     assert t["categorie"] == "Logement"
 
 

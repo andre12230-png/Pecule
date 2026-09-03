@@ -13,6 +13,46 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (nettoyage) — Purge des données réelles restées dans le dépôt public
+
+**Fait.** Passe complète sur tous les fichiers versionnés, à la recherche de ce qui
+identifie André ou son argent. Le journal a d'abord été nettoyé de ses montants (solde,
+encours de carte, prix d'un abonnement) et d'un nom de commerce. Mais la recherche élargie
+a trouvé bien pire, dans les **tests de l'import OFX** écrits le 1er septembre : le
+fixture était un extrait **littéral** d'un relevé, avec le **numéro de compte** (répété
+dans l'identifiant de carte, et un second compte dans le test multi-comptes), le montant
+d'une pension et le nom de sa caisse, une **référence de mandat SEPA**, les **quatre
+derniers chiffres de la carte**, un **numéro de prêt**, l'encours et le solde. Tout est
+remplacé par des valeurs rondes ou nulles, manifestement inventées.
+
+Trois autres endroits corrigés au passage : la docstring d'en-tête de `ofx_import.py`, qui
+illustrait le format OFX avec la même référence SEPA réelle ; un montant réel dans
+`test_csv_import.py` et dans `test_recurring.py` ; et surtout **`docs/import-csv-bpce.html`,
+page publiée du site**, dont l'exemple de nom de fichier portait le vrai numéro de compte.
+
+**Pourquoi.** Le dépôt est public : page GitHub Pages, releases, manifeste Scoop. Le même
+nettoyage avait été fait en août 2026 ; les tests écrits depuis ont réintroduit des données
+réelles, parce qu'ils partent de cas vécus et en gardent les chiffres. **Ce n'est donc pas
+un incident isolé mais un risque récurrent** : tout fixture recopié d'un relevé est à
+neutraliser avant le commit, pas après.
+
+Deux pièges rencontrés dans le nettoyage lui-même :
+1. **Changer une valeur Python sans changer la ligne CSV correspondante casse les tests** —
+   c'est arrivé, un test est tombé aussitôt. Un montant vit souvent en trois écritures :
+   valeur Python, chaîne du fichier de relevé, et format français `-125,00`.
+2. Neutraliser un **libellé** oblige à revoir ce qui s'y accroche : le motif d'une règle de
+   catégorisation visait « bouygues », devenu inutile une fois le libellé remplacé.
+
+227 tests au vert après coup.
+
+**Reste.** Les données neutralisées **restent dans l'historique git** et sur GitHub :
+retirer une valeur d'un fichier ne l'efface pas des commits antérieurs. Les effacer
+vraiment demanderait de réécrire l'historique et de forcer la publication — opération
+destructrice, et GitHub conserve un temps les objets devenus orphelins. Décidé de s'en
+tenir au nettoyage du contenu actuel, qui est ce que lisent les visiteurs.
+
+---
+
 ## 2026-09-03 (fin) — Audit des récurrences contre douze mois de relevés
 
 **Fait.** Chaque récurrence du compte courant confrontée aux opérations réellement passées
@@ -206,7 +246,7 @@ Scoop + JSON-LD + `APP_VERSION`, puis tagguer la release.
 **Fait.** Nouveau module `comptesbudget/ofx_import.py` et son jeu de 33 tests.
 Pécule lit désormais les relevés OFX (et leur variante `.qfx`), en plus du CSV
 et du QIF : même bouton, même glisser-déposer, notice et README à jour.
-Au passage, le remboursement Amazon du 06/08/2026 est repassé de « Carte
+Au passage, un remboursement de marchand du 06/08/2026 est repassé de « Carte
 bancaire » à « Virement reçu », rejoignant les quatorze autres remboursements
 d'achat. Et le compte rendu d'import ne montre plus de rectangle noir à la
 ligne du débit différé : le pictogramme de carte bancaire ne fait pas partie
@@ -230,9 +270,10 @@ Trois décisions méritent d'être retenues :
   le relevé de compte de la BPCE n'écrit que DEBIT ou CREDIT, alors que le
   mémo annonce « PRLV », « VIR SEPA », « ECH PRET ». Les motifs sont cherchés
   comme des **mots entiers** — sans cela, « ASSURANCE RETRAITE » faisait
-  partir la pension de la Carsat en retrait d'espèces. Et sur un relevé de
+  partir une pension de retraite en retrait d'espèces. Et sur un relevé de
   compte, une somme **reçue** n'est jamais un paiement par carte : c'est ce
-  qui range « CB AMAZON » créditeur en remboursement, comme André le fait.
+  qui range un remboursement de marchand au crédit en remboursement, comme
+  André le fait.
 - **La date de débit d'un achat carte vient de la FIN DU RELEVÉ**, pas de la
   date de l'achat. Un achat du 31/07 que la banque ne comptabilise qu'en août
   est prélevé le 4 septembre avec les autres, et non le 4 août.
@@ -240,8 +281,8 @@ Trois décisions méritent d'être retenues :
 **Vérifié.** Sur une **copie** de la base : les deux vrais relevés d'août
 n'ajoutent rien (57 doublons reconnus, 1 récapitulatif de débit différé
 écarté, solde inchangé). Puis, août effacé de la copie et reconstruit à partir
-des seuls relevés : 57 opérations restituées, solde de retour à **398,15 €**
-au centime, les 25 achats carte tous datés du 04/09. Les deux seules
+des seuls relevés : 57 opérations restituées, solde **identique au centime**,
+les 25 achats carte tous datés du 04/09. Les deux seules
 différences de type avec la saisie d'André étaient des corrections. L'import a
 enfin été rejoué **par la fenêtre principale** elle-même, hors écran, pour
 contrôler le branchement du bouton et du glisser-déposer. 225 tests au vert.
@@ -259,7 +300,7 @@ un jour.
 ## 2026-09-01 — L'abonnement Claude AI en récurrence mensuelle
 
 **Fait.** Ajout de l'opération récurrente « Anthropique (Claude AI) » sur le
-Compte courant : 21,60 € le 1er de chaque mois, catégorie Abonnements,
+Compte courant, le 1er de chaque mois, catégorie Abonnements,
 type Carte bancaire, à partir du 1er septembre 2026. Insertion faite avec
 `Database.insert_recurring()` plutôt qu'en SQL direct, base sauvegardée avant.
 
@@ -274,8 +315,8 @@ chaque import. En commençant par le mot de la banque, la clé devient
 rapprochement fonctionne. Vérifié en simulant l'arrivée du relevé sur une
 copie de la base.
 
-**Puis.** André a signalé que les 21,60 € de septembre n'étaient pas encore
-en banque et devaient donc apparaître non pointés. Il avait raison, et le
+**Puis.** André a signalé que l'échéance de septembre n'était pas encore
+en banque et devait donc apparaître non pointée. Il avait raison, et le
 motif est plus intéressant qu'il n'y paraît : ses 23 opérations prévues de
 septembre étaient déjà générées (`prevue=1`, `pointee=0`) ; seule Claude AI
 manquait, la récurrence ayant été créée après cette génération. La ligne a
@@ -331,20 +372,20 @@ l'archive — `CArchiveReader` puis `ZlibArchiveReader`, et inspection des
 `co_names` du module embarqué. Les deux modules la portent bien.
 
 **Classeur, puis alignement des deux outils.** Deux écritures dans
-« Budget 2026.xlsx » par Excel COM : Anthropic 21,60 € porté à l'encours CB de
-septembre, et « Les Voûtes » (27 €, non pointé) reporté de l'encours d'août
-vers celui de septembre — la banque ne l'ayant pas rattaché au lot du 4/09, il
-partira au suivant. Le prélèvement du 4 septembre passe de 1006,51 € à
-979,51 €. Contrôle après coup en comparant le XML du fichier à celui de sa
+« Budget 2026.xlsx » par Excel COM : l'abonnement porté à l'encours CB de
+septembre, et un achat non pointé reporté de l'encours d'août vers celui de
+septembre — la banque ne l'ayant pas rattaché au lot du 4/09, il partira au
+suivant. Le prélèvement du 4 septembre diminue d'autant. Contrôle après coup
+en comparant le XML du fichier à celui de sa
 sauvegarde : graphiques, graphiques miniatures, tableaux et validations
 intacts ; une seule mise en forme conditionnelle a bougé, étendue d'une ligne
 pour suivre le tableau.
 
-Restait un désaccord entre les deux outils : Pécule datait le débit de
-« Les Voûtes » au 04/09, le classeur au 04/10. Sa date de valeur a été
+Restait un désaccord entre les deux outils : Pécule datait ce débit
+au 04/09, le classeur au 04/10. Sa date de valeur a été
 décalée d'un lot (`date_debit_differe` appliqué à la date de valeur, pas à la
 date d'achat). Les deux disent maintenant la même chose — lot du 4 septembre
-à 979,51 € sur 26 opérations, 48,60 € reportés au 4 octobre. Le prévisionnel
+sur 26 opérations, une seule reportée au 4 octobre. Le prévisionnel
 n'a pas bougé : depuis la correction du matin, les cartes se rapprochent sur
 la date d'achat, que la date de valeur ne concerne plus.
 

@@ -7,10 +7,10 @@ qu'un relevé CSV, mais rangé dans des balises plutôt qu'en colonnes :
     <STMTTRN>
     <TRNTYPE>DEBIT
     <DTPOSTED>20260831
-    <TRNAMT>-34.99
-    <FITID>2101260002
-    <NAME>BOUYGUES TELECOM
-    <MEMO>PRLV Bouygues Telecom 2623984G10152224
+    <TRNAMT>-30.00
+    <FITID>1000000001
+    <NAME>GAMMA TELECOM
+    <MEMO>PRLV Gamma Telecom 0000000A00000000
     </STMTTRN>
 
 Deux versions coexistent. La 1.x est écrite en SGML : les balises simples
@@ -115,7 +115,7 @@ def champ(bloc: str, nom: str) -> str:
 # les deux (« COM CB INT ANTHROPIC CLAU »).
 #
 # Les motifs sont cherchés comme des MOTS ENTIERS. Sans cela, « retrait »
-# reconnaîtrait « ASSURANCE RETRAITE » et la pension de la Carsat arriverait
+# reconnaîtrait « ASSURANCE RETRAITE » et une pension de retraite arriverait
 # en retrait d'espèces.
 TYPES_PAR_MOTIF = [
     ("Frais bancaires",   ("frais bancaires", "cotisations bancaires",
