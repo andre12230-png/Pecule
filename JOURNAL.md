@@ -100,6 +100,20 @@ bouton dans le menu ne suffisait pas : il fallait deux comptes pour que l'interf
 qu'elle en gère plusieurs. À vérifier de la même façon pour toute fonction qui ne s'affiche
 que sous condition.
 
+**Puis André a demandé de regarder les trois autres captures — à raison.** Le sélecteur y
+était bien, mais le passage à 1080 px, décidé pour la légende du Bilan, avait **agrandi
+d'autant le vide** sous leurs tableaux : la capture du Budget montrait huit lignes dans une
+fenêtre aux deux tiers vide. Corriger un défaut sur une vue en avait créé un sur trois
+autres, faute de les avoir regardées après coup.
+
+Le script utilise désormais **une hauteur par onglet** : 1080 px pour le Bilan, 984 pour les
+autres — la hauteur minimale de la fenêtre, sous laquelle Qt refuse de descendre. Le vide
+qui subsiste sur le Budget est **structurel** et non corrigeable : le menu de gauche
+descend plus bas que le tableau, et c'est exactement ce que voit l'utilisateur.
+
+**Deuxième leçon, plus large :** après un réglage qui vaut pour tout le lot, revoir **tout
+le lot**, pas seulement la vue qui avait motivé le réglage.
+
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
 le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
 n'a pas été vérifié.
