@@ -19,8 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.23.2**. La **1.26.0** — plusieurs comptes, archivage,
-> import OFX — est en cours de développement et n'est pas encore téléchargeable.
+> Version publiée : **1.26.0** — plusieurs comptes, archivage, import OFX.
 
 ---
 
@@ -41,10 +40,6 @@ Python d'une ancienne application HTML/JS.
 for tracking personal bank accounts and budgets. It is built with **PySide6 (Qt)** and stores
 everything in a **local SQLite** file: no account to create, no cloud, no
 telemetry — your financial data never leaves your computer.
-
-> ⏳ **In development (1.26.0, not yet released):** multiple accounts, archiving
-> and OFX import (listed below) are part of the upcoming 1.26.0; the downloadable
-> build (**1.23.2**) does not include them yet.
 
 **What it does**
 
@@ -90,10 +85,6 @@ and runs on Linux and macOS.
 ---
 
 ## Fonctionnalités
-
-> ⏳ **En développement (1.26.0, non encore publiée)** — le suivi de **plusieurs
-> comptes**, l'**archivage** et l'**import OFX** décrits ci-dessous font partie de
-> la 1.26.0 ; la version téléchargeable (**1.23.2**) ne les propose pas encore.
 
 L'application s'organise en onglets :
 
