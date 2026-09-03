@@ -36,9 +36,13 @@ from PySide6.QtGui import (QColor, QFont, QImage, QLinearGradient,  # noqa: E402
                            QPainter)
 from PySide6.QtWidgets import QApplication                          # noqa: E402
 
-# Les deux bleus du logo : le foncé du lien du sac, le clair de sa panse.
-BLEU_FONCE = QColor("#1E3A8A")
-BLEU_MOYEN = QColor("#2B4EAE")
+# Le fond : un bleu marine profond, volontairement plus sombre que le logo.
+# Le lien du sac est un #2d4fb3 presque identique au #2B4EAE utilisé ici
+# auparavant — 1,03 de rapport de contraste, autant dire invisible : le haut du
+# sac se fondait dans le fond. Ces deux bleus-ci le détachent nettement (2,15 et
+# 2,38) sans toucher au logo, et font mieux ressortir le texte blanc.
+BLEU_FONCE = QColor("#0A1740")
+BLEU_MOYEN = QColor("#0F2050")
 BLANC = QColor("#FFFFFF")
 BLEU_PALE = QColor("#C7D8FA")
 
