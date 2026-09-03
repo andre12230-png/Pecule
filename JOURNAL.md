@@ -13,6 +13,47 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (publication) — La 1.26.0 est sortie, le gel levé
+
+**Fait.** Publication de la **1.26.0** : multicomptes (1.24.0), archivage (1.25.x),
+import OFX et la correction du pointage faite le matin même. Les cinq porteurs du
+numéro remontés ensemble — `APP_VERSION` et l'historique de `constants.py` y étaient
+déjà, restaient l'en-tête de `Lisez-moi.txt`, la ligne de version du README, le
+`softwareVersion` du JSON-LD et le manifeste Scoop. Les deux encadrés ⏳ « en
+développement » retirés du README, en français et en anglais.
+
+Archive construite avec `outils/faire_archive.py` (jamais `Compress-Archive`) : 182
+fichiers, aucune entrée de dossier. Release `v1.26.0` créée sur le tag du commit de
+préparation.
+
+**Pourquoi.** Le gel décidé la veille visait à ne pas déplacer la cible pendant la revue
+Winget. Mais la PR #416272 est en revue manuelle **depuis le 22 août**, la relance du
+29 août est restée sans réponse, et ces revues durent souvent des mois. Priver les
+utilisateurs du multicomptes, de l'archivage et de l'import OFX pendant une durée
+inconnue coûtait plus cher que le risque, qui est réparable : si un modérateur demande
+la version courante, mettre la PR à jour est courant chez `winget-pkgs`, et le CLA, la
+politique de confidentialité et l'échange sur Policy 1.8 sont acquis.
+
+**Ce qui protège la PR, vérifié et non supposé.** Son manifeste déclare une adresse et
+une empreinte figées, celles de l'archive `v1.23.0`. Publier une nouvelle release ne les
+touche pas : contrôle fait après coup en téléchargeant l'archive `v1.23.0` depuis
+l'adresse publique — son empreinte correspond **au bit près** à celle du manifeste
+soumis. Les manifestes Winget du dépôt sont restés en 1.23.0, et le `git status` du
+dossier `winget/` a été vérifié vide avant le commit.
+
+**Contrôles après publication.** Archive `v1.26.0` retéléchargée depuis l'adresse
+publique : son empreinte correspond à celle du manifeste Scoop. Les deux badges — celui
+du README qui lit le dernier *tag*, celui de la page qui lit la dernière *release* —
+affichent 1.26.0. La page de présentation, interrogée avec une chaîne de requête pour
+contourner les deux caches, sert bien le nouveau JSON-LD. L'archive contient l'exécutable
+reconstruit le matin, empreinte identique à celle installée sur le poste.
+
+**Reste.** Ne **jamais** supprimer la release `v1.23.0` ni son archive tant que la PR
+Winget n'est pas soldée : l'empreinte du manifeste en dépend, et la casser condamnerait
+la demande. À la clôture de la PR seulement, remonter les manifestes Winget.
+
+---
+
 ## 2026-09-03 (nettoyage) — Purge des données réelles restées dans le dépôt public
 
 **Fait.** Passe complète sur tous les fichiers versionnés, à la recherche de ce qui
