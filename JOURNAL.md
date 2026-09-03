@@ -47,7 +47,30 @@ main, et reprend le logo du projet (le sac frappé d'un €). C'est la vraie le�
 l'épisode : **un fichier qu'on ne sait pas refabriquer vieillit en silence**. Les quatre
 captures, elles, avaient leur script — c'est pour cela qu'il a suffi de le relancer.
 
-**Reste.** Rien d'ouvert sur les images.
+**Puis la couverture est devenue l'image de partage.** `og:image` pointait jusqu'ici vers
+la **capture du tableau de bord**. Réduite à la vignette qu'affichent les messageries, les
+réseaux et les forums, une capture de 1668 pixels de large devient une grille de chiffres
+illisible — et le nom du logiciel n'y apparaît nulle part. C'est le rôle d'une couverture,
+pas d'une capture.
+
+Une variante **1200 x 630** a donc été ajoutée, dans le rapport 1,91:1 que ces sites
+attendent : avec un autre, l'image est recadrée sur les côtés ou rétrogradée en petite
+vignette carrée. `og:image:width` et `og:image:height` sont déclarées, ce qui évite aux
+sites de deviner. Le 630 x 500 est inchangé et `outils/couverture.py` produit les deux à
+partir de la même composition.
+
+Détail de composition : sur l'image large, le bloc est posé **un peu au-dessus du centre
+géométrique**. L'œil place le milieu plus haut qu'il n'est ; centré à la règle, l'ensemble
+paraissait tomber — 74 pixels de marge en haut contre 152 en bas au premier essai.
+
+Contrôlé après publication : la page déclare bien la nouvelle image et celle-ci répond en
+200. Ce qui n'a **pas** été retenu : une bannière en tête du README, qui repousserait la
+description sous la ligne de flottaison alors que trois badges et trois appels à l'action
+occupent déjà le haut.
+
+**Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
+le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
+n'a pas été vérifié.
 
 ---
 
