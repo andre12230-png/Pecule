@@ -34,17 +34,17 @@ from comptesbudget.database import Database               # noqa: E402
 from comptesbudget.ui.main_window import MainWindow       # noqa: E402
 
 AUJOURDHUI = date.today()
-LARGEUR, HAUTEUR = 1668, 1080         # taille demandée ; la fenêtre peut être
-                                      # un peu plus grande (taille minimale).
-                                      # 913 suffisait jusqu'à la 1.23.x ; le
-                                      # Bilan a grandi depuis (menu de gauche
-                                      # avec ses titres de sections, bandeaux
-                                      # d'information) et la légende du
-                                      # graphique d'évolution se retrouvait
-                                      # coupée en bas de la capture — sans que
-                                      # l'application y soit pour quelque
-                                      # chose, elle l'affiche bien dès que la
-                                      # fenêtre est assez haute.
+LARGEUR = 1668
+# Une hauteur par onglet, et non une seule pour tous. Le Bilan a besoin de
+# place : il a grandi avec les versions (menu de gauche à sections, bandeaux
+# d'information) et, en dessous de 1080, la légende de son graphique
+# d'évolution se retrouve coupée — l'application n'y est pour rien, elle
+# l'affiche bien dès que la fenêtre est assez haute. Les autres onglets, eux,
+# ont un contenu court : leur donner la même hauteur ne ferait qu'agrandir le
+# vide sous leur tableau. On leur laisse donc la hauteur MINIMALE de la
+# fenêtre (984 px), sous laquelle Qt refuse de descendre.
+HAUTEUR_BILAN = 1080
+HAUTEUR_AUTRES = 984
 GRAINE = 20260809                     # captures reproductibles
 
 # ── Le jeu de données inventé ────────────────────────────────────────────────
@@ -214,7 +214,7 @@ def photographier(db, dossier):
     app.setPalette(pal)
 
     w = MainWindow(db)
-    w.resize(LARGEUR, HAUTEUR)
+    w.resize(LARGEUR, HAUTEUR_BILAN)
     w.statusBar().showMessage("Base : demo.db   —   données de démonstration")
     w.show()
     _laisser_dessiner(app, 1.5)
@@ -223,6 +223,8 @@ def photographier(db, dossier):
             ("promo_3_budget", w.budget_view), ("promo_4_previsionnel", w.prev_view)]
     os.makedirs(dossier, exist_ok=True)
     for nom, vue in vues:
+        w.resize(LARGEUR, HAUTEUR_BILAN if vue is w.bilan_view
+                 else HAUTEUR_AUTRES)
         w.tabs.setCurrentWidget(vue)
         for methode in ("refresh", "reload_from_db"):
             if hasattr(vue, methode):
