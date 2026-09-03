@@ -114,6 +114,27 @@ descend plus bas que le tableau, et c'est exactement ce que voit l'utilisateur.
 **Deuxième leçon, plus large :** après un réglage qui vaut pour tout le lot, revoir **tout
 le lot**, pas seulement la vue qui avait motivé le réglage.
 
+**Contrôle du site, à la demande d'André.** Les six images ont été retéléchargées depuis
+l'adresse publique : empreintes **identiques au bit près** aux fichiers du dépôt. Les six
+images référencées par la page répondent 200. Et les dimensions réellement chargées par le
+navigateur ont été relevées — 1668 × 1080 pour le Bilan, 1668 × 984 pour les trois autres :
+ce sont les nouvelles, l'ancienne capture du Bilan faisait 1700 × 984. Un cache qui aurait
+servi l'ancienne se serait vu immédiatement.
+
+**Enfin, le cache de Facebook a été vidé pour la page.** Facebook garde l'aperçu d'une
+adresse pendant des semaines : sans cela, il aurait continué de montrer l'ancienne image de
+partage — la capture du tableau de bord — malgré le changement. Passage par le Débogueur de
+partage (`developers.facebook.com/tools/debug/`), bouton « Re-collecter » : « Dernière
+analyse » repasse à deux secondes, et Facebook a bien retenu `promo_share_1200x630.png`.
+
+Deux avertissements y sont **sans gravité** et ne doivent pas inquiéter : l'alerte
+« il manque `fb:app_id` » ne concerne que les statistiques Facebook, pas l'affichage de
+l'aperçu ; et le « code de réponse 206 » est une particularité de GitHub Pages, acceptée
+sans problème.
+
+Le lien à partager est celui de la **vitrine**, pas celui de GitHub, qui imposerait son
+propre habillage.
+
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
 le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
 n'a pas été vérifié.
