@@ -1,6 +1,4 @@
-PECULE - version 1.23.2 (derniere version publiee)
-La 1.26.0 (import OFX) est en cours de developpement : elle n'est pas encore
-telechargeable ; ce fichier en decrit deja les nouveautes.
+PECULE - version 1.26.0
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
