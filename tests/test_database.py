@@ -31,6 +31,34 @@ def test_toggle_pointee(tmp_path):
     assert [dict(r) for r in db.list_tx()][0]["pointee"] == 1
 
 
+def test_pointer_une_prevision_la_confirme(tmp_path):
+    """Pointer une échéance prévue doit la faire passer en opération réelle.
+
+    Le solde bancaire ne regarde que le pointage : une prévision pointée y
+    entre déjà. La laisser marquée « prévue » n'apportait rien et la faisait
+    écarter des échéances à rattacher au prochain import du relevé."""
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx(_tx(prevue=1, pointee=0))
+    db.toggle_pointee("tx1")
+    ligne = [dict(r) for r in db.list_tx()][0]
+    assert ligne["pointee"] == 1
+    assert ligne["prevue"] == 0
+
+
+def test_depointer_ne_recree_pas_une_prevision(tmp_path):
+    """Le retour en arrière ne rend pas son statut de prévision à l'opération.
+
+    Une fois confirmée, une opération reste réelle : on ne peut pas deviner,
+    en la dépointant, qu'elle avait été saisie d'avance."""
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx(_tx(prevue=1, pointee=0))
+    db.toggle_pointee("tx1")     # confirmée
+    db.toggle_pointee("tx1")     # dépointée
+    ligne = [dict(r) for r in db.list_tx()][0]
+    assert ligne["pointee"] == 0
+    assert ligne["prevue"] == 0
+
+
 def test_delete_tx_pose_tombstone(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     db.insert_tx(_tx())

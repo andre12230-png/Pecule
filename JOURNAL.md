@@ -13,6 +13,170 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (fin) — Audit des récurrences contre douze mois de relevés
+
+**Fait.** Chaque récurrence du compte courant confrontée aux opérations réellement passées
+en banque sur douze mois (montant médian, jour, régularité), puis recherche inverse : les
+opérations mensuelles qu'aucune récurrence ne déclare, via `detect_recurring_candidates`.
+Trois corrections appliquées — deux montants revalorisés sans que la récurrence suive, et
+un abonnement mensuel que rien ne déclarait. Le script d'audit est conservé dans
+`outils/audit_recurrences.py`.
+
+**Pourquoi.** Une récurrence fausse ne se voit pas : le prévisionnel reste plausible. Seule
+la confrontation aux relevés la débusque. Le rapprochement de l'audit se fait sur
+`_recurring_norm_label`, la même clé que l'application, pour raisonner comme elle.
+
+Quatre pièges méthodologiques rencontrés, à retenir pour un prochain audit :
+
+1. **La médiane sur douze mois ment quand un montant vient de changer** — elle garde
+   l'ancien. Regarder les trois ou quatre derniers passages, pas la moyenne.
+2. **Un libellé bancaire peut couvrir plusieurs contrats.** Un assureur en portait quatre
+   sous le même libellé : l'audit criait « montant instable » alors que la récurrence, qui
+   n'en vise qu'un, est juste. C'est la **sous-catégorie** qui sépare les contrats, pas le
+   libellé.
+3. **« N mois sur 12 » ne veut rien dire sans regarder si ces N mois sont consécutifs.**
+   Une récurrence couvrant six mois sur douze semblait sporadique ; ces six-là étaient
+   consécutifs et tous le même jour — un abonnement récent. La supprimer aurait creusé un
+   trou mensuel dans le prévisionnel. Un compteur de couverture ne distingue pas les deux ;
+   seules les dates le font.
+4. **Les tranches futures créées volontairement** (voir l'entrée sur les prêts ci-dessous)
+   n'ont par construction aucune contrepartie dans le passé : les écarter du rapport avant
+   de conclure.
+
+**Le compte secondaire n'avait aucune récurrence** — son prévisionnel était vide. Une seule
+lui a été créée, la seule qu'il ait. Son libellé reprend exactement celui de son relevé, qui
+diffère d'un caractère de celui du compte courant : les deux clés de rapprochement ne
+coïncident pas, et reprendre le libellé d'un compte sur l'autre aurait cassé le pointage.
+Vérifié que la nouvelle récurrence ne fait pas doublon avec les échéances déjà saisies
+d'avance sur ce compte : elles ressortent « déjà couvertes ».
+
+**Les saisies anticipées vérifiées ensuite.** Quatre opérations étaient à la fois `prevue=1`
+et `pointee=1` — combinaison contradictoire, puisque le solde bancaire réel se calcule sur
+les opérations **pointées** (`bilan.py`), drapeau `prevue` indifférent : deux d'entre elles
+pesaient donc déjà sur le solde sans être confirmées.
+
+**Cause trouvée dans le code, ce n'était pas une fausse manœuvre** : le prévisionnel crée
+bien ses échéances avec `pointee: 0` (`previsionnel.py`), et `toggle_pointee`
+(`operations.py`) **ne retirait pas le drapeau `prevue`** quand on pointe. Une prévision
+confirmée à la main restait donc éternellement affichée comme prévision — et se retrouvait
+exclue des candidates au rattachement à l'import (`csv_import.py`, qui exige `prevue and
+not pointee`), ne laissant contre les doublons que les filets d'identité.
+
+Trois de ces opérations étaient bien passées : drapeau `prevue` retiré. La quatrième est un
+achat par carte **en cours** — fait, pas encore débité : laissée telle quelle, et c'est le
+bon état, sa date de valeur au 4 du mois suivant faisant qu'elle n'entrera dans le solde
+qu'au débit différé, exactement comme la banque le fera.
+
+**Puis la correction dans l'application.** `toggle_pointee` (`database.py`) retire désormais
+le drapeau `prevue` quand on pointe : pointer, c'est dire « la banque l'a passée », donc
+l'échéance cesse d'être une prévision. Le retour en arrière ne le rend pas — en dépointant,
+rien ne permettrait de deviner que l'opération avait été saisie d'avance.
+
+Fait dans l'ordre : **deux tests écrits d'abord**, vus échouer
+(`test_pointer_une_prevision_la_confirme`, `test_depointer_ne_recree_pas_une_prevision`),
+puis la correction. Le `CASE WHEN pointee = 0` lit la valeur d'AVANT la bascule — c'est ce
+qui distingue « on est en train de pointer » de « on dépointe ». 227 tests passent, et le
+comportement a été vérifié sur une **copie** de la base réelle.
+
+Entrée ajoutée au journal de version **sous la 1.26.0**, non publiée et donc encore ouverte,
+plutôt que d'ouvrir une 1.26.1 avant même que la précédente soit sortie.
+
+**Exe reconstruit et installé dans la foulée.** `Construire-Exe.bat` n'a pas été lancé
+(interactif, et son étape 4 écrase l'installation réelle sans contrôle) : ses étapes 2 et 3
+ont été rejouées à la main — `outils/version_exe.py`, puis PyInstaller `--onedir
+--windowed` avec chemins **absolus** pour `--icon`, `--version-file` et `--add-data`,
+résolus depuis le `--specpath` et non depuis le dossier courant. Mise à jour de
+l'installation à l'identique de l'étape 4 : `Pecule.exe` copié et `_internal` synchronisé
+par `robocopy /MIR`, rien d'autre — ni la base, ni `sauvegardes/`, qui vivent à la racine
+de l'installation et non dans `_internal`. Ancien exécutable conservé.
+
+Contrôles : empreinte SHA-256 identique entre `dist/` et l'installation, titre de la
+fenêtre « Pécule — v1.26.0 », base de données inchangée au bit près, intégrité ok.
+
+Note : chercher la chaîne SQL corrigée dans l'exe ne prouve rien — PyInstaller compresse les
+`.pyc` dans son archive, les littéraux n'y sont pas en clair. La preuve tient à la chaîne
+source → build : les 227 tests passent sur le source, et PyInstaller a lu ce source-là.
+
+**Reste.** Rien d'ouvert.
+
+---
+
+## 2026-09-03 (suite) — Rachat de crédits : des échéances manquaient au prévisionnel
+
+**Fait.** Le tableau d'amortissement d'un rachat de crédits à la consommation confronté à la
+récurrence correspondante : elle s'arrêtait **neuf mois trop tôt**, autant d'échéances
+absentes du prévisionnel. Corrigé, et la dernière échéance — celle qui solde le prêt, d'un
+montant légèrement différent — modélisée à part comme pour les prêts immobiliers.
+L'assurance externalisée de ce rachat n'avait **aucune date de fin** : bornée à la dernière
+échéance du prêt, une assurance emprunteur ne survivant pas à son crédit.
+
+**Pourquoi.** Le prélèvement a changé de jour en cours de route : fin de mois d'abord, puis
+le 10, avec un mois qui n'a rien vu passer — l'échéance avait glissé au mois suivant. Le
+tableau, antérieur de huit mois, raisonne encore en fin de mois. Tout le calendrier a donc
+été décalé d'un cran. Contrôle : le prévisionnel génère désormais **exactement** le nombre
+d'échéances restantes du tableau, et leur total tombe au centime.
+
+**Reste.** Deux points à confirmer sur pièce, le tableau utilisé datant de huit mois : le
+**glissement d'un mois** est déduit des relevés, pas d'un document — un tableau réédité
+trancherait ; et la date de fin de l'assurance est une hypothèse (fin du prêt), qui tombera
+plus tôt si ce contrat porte une limite d'âge.
+
+---
+
+## 2026-09-03 — Prévisionnel : deux prêts immobiliers remis d'aplomb
+
+**Fait.** Lecture des certificats et des tableaux d'amortissement de deux prêts immobiliers
+souscrits ensemble, puis mise à jour des récurrences. La mensualité du prêt principal était
+juste ; les deux autres non. L'assurance du prêt à taux zéro courait jusqu'à la fin de
+celui-ci alors qu'elle s'arrête bien plus tôt, et le **remboursement du PTZ lui-même**
+n'était pas déclaré du tout.
+
+**Pourquoi.** Un PTZ est un long différé suivi d'une phase d'amortissement : il ne coûte que
+son assurance pendant des années, puis prend le relais du prêt principal qui vient de
+s'éteindre. Le prévisionnel modélisait donc une assurance qui ne sera plus prélevée et
+ignorait tout le capital à rembourser ensuite. Deux erreurs qui se compensaient à peu près
+en montant mensuel, jamais dans le temps. L'assurance s'arrête le même mois sur les deux
+prêts : c'est l'âge limite du contrat.
+
+**Trois échéances sortent du rythme** (deux au mois de bascule de l'assurance, une au solde
+final). Chaque récurrence a été **découpée en tranches** plutôt que complétée par une ligne
+d'ajustement, pour qu'un mois ne porte jamais qu'une seule échéance attendue, du bon
+montant : sinon le rapprochement du mois de bascule aurait soldé l'échéance ordinaire et
+laissé traîner un complément. Les libellés restent identiques d'une tranche à l'autre, sans
+quoi la clé de rapprochement change et la passe 1 (libellé **et** montant) ne joue plus.
+
+Contrôle : aucun mois en double, aucun trou dans les trois familles, et le capital du PTZ
+tombe désormais au centime exact.
+
+**Reste.** Rien d'ouvert sur ces prêts.
+
+---
+
+## 2026-09-02 — Audit des notices : l'intégrée est juste, la copie déployée était en retard
+
+**Fait.** Les trois documents d'aide ont été confrontés au code, pas à leur date.
+La **notice intégrée** (`comptesbudget/ui/views/notice.py`, bouton 📖 Notice) est
+**exacte** : ses 14 outils du menu de gauche sont exactement les 14 `add_btn` de
+`main_window.py`, ses 7 onglets les 7 onglets réels, et les nouveautés des trois
+dernières versions y figurent — « Plusieurs comptes » (1.24.0) en section 2,
+« Archiver » (1.25.0) en section 7, l'import OFX (1.26.0) avec ses deux versions
+de format. Le `Lisez-moi.txt` du dépôt était déjà juste depuis le matin. Seule la
+copie déployée dans `F:\budget-app\Pecule\` était restée à l'en-tête
+« version 1.26.0 » d'avant le gel : elle a été remplacée par la version du dépôt.
+La sauvegarde prise au passage a été supprimée dans la foulée, une fois vérifié
+que le fichier en place était identique à celui du dépôt : son contenu vit de
+toute façon dans l'historique git.
+
+**Pourquoi.** Un audit par mots-clés m'avait d'abord fait conclure à tort que le
+multicomptes n'était pas documenté : je cherchais « multicompte », quand la
+notice écrit « **Plusieurs comptes** » — le vocabulaire de l'utilisateur, pas
+celui du code. Leçon : comparer des **listes** (boutons réels contre boutons
+décrits), jamais la présence d'un mot choisi par moi.
+
+**Reste.** Rien d'ouvert. À noter pour les publications futures : la notice
+intégrée **ne porte aucun numéro de version**, ce qui la met à l'abri de
+vieillir toute seule — c'est un bon choix, à conserver.
+
 ## 2026-09-02 — Audit README + manifeste : gel de publication à 1.23.2
 
 **Fait.** Audit du README et du manifeste Scoop (`bucket/pecule.json`). Manifeste
