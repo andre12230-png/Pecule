@@ -13,6 +13,46 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (nettoyage) — Purge des données réelles restées dans le dépôt public
+
+**Fait.** Passe complète sur tous les fichiers versionnés, à la recherche de ce qui
+identifie André ou son argent. Le journal a d'abord été nettoyé de ses montants (solde,
+encours de carte, prix d'un abonnement) et d'un nom de commerce. Mais la recherche élargie
+a trouvé bien pire, dans les **tests de l'import OFX** écrits le 1er septembre : le
+fixture était un extrait **littéral** d'un relevé, avec le **numéro de compte** (répété
+dans l'identifiant de carte, et un second compte dans le test multi-comptes), le montant
+d'une pension et le nom de sa caisse, une **référence de mandat SEPA**, les **quatre
+derniers chiffres de la carte**, un **numéro de prêt**, l'encours et le solde. Tout est
+remplacé par des valeurs rondes ou nulles, manifestement inventées.
+
+Trois autres endroits corrigés au passage : la docstring d'en-tête de `ofx_import.py`, qui
+illustrait le format OFX avec la même référence SEPA réelle ; un montant réel dans
+`test_csv_import.py` et dans `test_recurring.py` ; et surtout **`docs/import-csv-bpce.html`,
+page publiée du site**, dont l'exemple de nom de fichier portait le vrai numéro de compte.
+
+**Pourquoi.** Le dépôt est public : page GitHub Pages, releases, manifeste Scoop. Le même
+nettoyage avait été fait en août 2026 ; les tests écrits depuis ont réintroduit des données
+réelles, parce qu'ils partent de cas vécus et en gardent les chiffres. **Ce n'est donc pas
+un incident isolé mais un risque récurrent** : tout fixture recopié d'un relevé est à
+neutraliser avant le commit, pas après.
+
+Deux pièges rencontrés dans le nettoyage lui-même :
+1. **Changer une valeur Python sans changer la ligne CSV correspondante casse les tests** —
+   c'est arrivé, un test est tombé aussitôt. Un montant vit souvent en trois écritures :
+   valeur Python, chaîne du fichier de relevé, et format français `-125,00`.
+2. Neutraliser un **libellé** oblige à revoir ce qui s'y accroche : le motif d'une règle de
+   catégorisation visait « bouygues », devenu inutile une fois le libellé remplacé.
+
+227 tests au vert après coup.
+
+**Reste.** Les données neutralisées **restent dans l'historique git** et sur GitHub :
+retirer une valeur d'un fichier ne l'efface pas des commits antérieurs. Les effacer
+vraiment demanderait de réécrire l'historique et de forcer la publication — opération
+destructrice, et GitHub conserve un temps les objets devenus orphelins. Décidé de s'en
+tenir au nettoyage du contenu actuel, qui est ce que lisent les visiteurs.
+
+---
+
 ## 2026-09-03 (fin) — Audit des récurrences contre douze mois de relevés
 
 **Fait.** Chaque récurrence du compte courant confrontée aux opérations réellement passées
