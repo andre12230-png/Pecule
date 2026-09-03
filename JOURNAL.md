@@ -135,6 +135,16 @@ sans problème.
 Le lien à partager est celui de la **vitrine**, pas celui de GitHub, qui imposerait son
 propre habillage.
 
+**La publication a été faite dans la foulée**, et son texte remplacé : André avait d'abord
+laissé l'adresse nue en guise de message. Une adresse seule n'explique pas pourquoi on
+partage — trois courts paragraphes à la place (la version, les trois nouveautés, les
+garanties : gratuit, français, open source, données locales). L'aperçu reste attaché quand
+on modifie le texte : il n'y a rien à craindre de ce côté.
+
+À savoir pour la prochaine fois : **la page « Statistiques de la publication » ne permet
+pas de modifier quoi que ce soit** — c'est là qu'André s'était arrêté. Il faut ouvrir la
+publication sur le profil, menu « ⋯ » → « Modifier la publication ».
+
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
 le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
 n'a pas été vérifié.
