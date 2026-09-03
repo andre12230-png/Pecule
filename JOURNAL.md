@@ -68,6 +68,20 @@ Contrôlé après publication : la page déclare bien la nouvelle image et celle
 description sous la ligne de flottaison alors que trois badges et trois appels à l'action
 occupent déjà le haut.
 
+**Défaut vu par André, et confirmé par le calcul : le haut du sac disparaissait.** Le lien
+du sac, dans le logo, est un `#2d4fb3` ; le haut du dégradé était un `#2B4EAE`. Rapport de
+contraste : **1,03** — la même couleur, à un cheveu près. Le nœud se fondait dans le fond
+et le logo paraissait amputé.
+
+Les couleurs du logo ont été **mesurées** (comptage des pixels opaques) plutôt que
+supposées, et le contraste calculé sur plusieurs fonds candidats avant d'en retenir un.
+Le fond passe à un bleu marine profond (`#0F2050` → `#0A1740`) : le lien du sac remonte à
+2,15 puis 2,38, et le texte blanc ressort mieux.
+
+Recolorer le logo était l'autre voie ; elle a été écartée parce que **le € est de la même
+couleur que le lien** et doit, lui, rester foncé pour se lire sur la panse claire. Un
+remplacement de couleur les aurait touchés tous les deux.
+
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
 le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
 n'a pas été vérifié.
