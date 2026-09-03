@@ -13,6 +13,34 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-03 (Gratilog) — La fiche et le fil mis à jour pour la 1.26.0
+
+**Fait.** Deux gestes sur Gratilog, seul annuaire encore vivant où Pécule est référencé.
+La **fiche du catalogue** : demande de modification déposée (titre, version, adresse de
+l'archive, taille en octets, description). La fiche reste affichée en 1.23.2 tant que
+l'administratrice ne l'a pas validée — c'est le fonctionnement normal. Le **fil du forum** :
+une réponse dans le sujet existant plutôt que dans la rubrique « Mises à jour », parce que
+c'est là que suivent ceux qui avaient commenté en août.
+
+**Pourquoi.** La description de la fiche ne se contentait pas d'être périmée sur le numéro :
+elle affirmait encore « Le logiciel ne gère qu'un compte courant », faux depuis la 1.24.0.
+Une fiche fausse sur le fond est plus gênante qu'un numéro en retard. Le message du forum
+répond directement à un lecteur à qui il avait été répondu en août que le multicomptes ne
+viendrait jamais — autant l'assumer.
+
+**Le piège, évité de justesse.** La description se termine par une ligne BBCode qui
+n'apparaît pas dans le rendu et qui porte la **loupe d'agrandissement de la capture
+d'écran**. La réécrire sans la recopier l'aurait supprimée sans que rien ne le signale.
+C'est la relecture de la *valeur précédente* renvoyée par le formulaire qui l'a montrée.
+Même chose pour le drapeau en tête. À noter aussi : un champ annoncé « vide » par la
+lecture de page ne l'était pas — l'adresse de l'ancienne archive s'y trouvait bien.
+
+**Reste.** Attendre la validation de la fiche. Framalibre, en revanche, n'a rien à recevoir :
+son formulaire crée une notice et n'en modifie aucune, et une notice n'y porte pas de
+numéro de version.
+
+---
+
 ## 2026-09-03 (publication) — La 1.26.0 est sortie, le gel levé
 
 **Fait.** Publication de la **1.26.0** : multicomptes (1.24.0), archivage (1.25.x),
