@@ -82,6 +82,24 @@ Recolorer le logo était l'autre voie ; elle a été écartée parce que **le �
 couleur que le lien** et doit, lui, rester foncé pour se lire sur la panse claire. Un
 remplacement de couleur les aurait touchés tous les deux.
 
+**Défaut vu par André : le multicompte n'apparaissait toujours pas.** Les captures refaites
+portaient bien le bouton « Mes comptes », mais rien n'y **montrait** la fonction. La cause
+est dans `main_window._fill_comptes` : le sélecteur de comptes reste caché tant qu'il n'y
+en a qu'un seul, et le titre de la fenêtre ne porte alors aucun nom de compte. La base de
+démonstration n'ayant qu'un compte, la vitrine annonçait une nouveauté qu'aucune image
+n'illustrait.
+
+La base de démonstration ouvre désormais un **« Livret A »** à côté du compte courant,
+alimenté de 150 € par mois. Le sélecteur apparaît, et le choix montre au passage que chaque
+compte garde son propre solde de départ. Les captures restent prises sur le compte courant
+(`set_compte_courant` y ramène après la création) : aucun de ses chiffres ne bouge, ce qui
+a été vérifié en comparant les deux séries.
+
+**Leçon.** Une capture ne prouve une fonction que si le jeu de données la déclenche. Le
+bouton dans le menu ne suffisait pas : il fallait deux comptes pour que l'interface montre
+qu'elle en gère plusieurs. À vérifier de la même façon pour toute fonction qui ne s'affiche
+que sous condition.
+
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
 le forum Gratilog, visible sous chaque message — à condition que le site l'autorise, ce qui
 n'a pas été vérifié.
