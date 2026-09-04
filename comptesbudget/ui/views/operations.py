@@ -378,7 +378,7 @@ class OperationsView(QWidget):
             f"{len(a_changer)} opération(s) recatégorisée(s) par la règle.")
 
     def add_tx(self):
-        cats = sorted(set(t.get("categorie") for t in self.transactions if t.get("categorie")))
+        cats = self.db.categories_proposees()
         dlg = TxDialog(self, None, cats, self.transactions)
         if dlg.exec() != QDialog.Accepted:
             return
@@ -416,7 +416,7 @@ class OperationsView(QWidget):
         tx = next((t for t in self.transactions if t["id"] == tx_id), None)
         if not tx:
             return
-        cats = sorted(set(t.get("categorie") for t in self.transactions if t.get("categorie")))
+        cats = self.db.categories_proposees()
         dlg = TxDialog(self, tx, cats, self.transactions)
         if dlg.exec() != QDialog.Accepted:
             return

@@ -22,7 +22,7 @@ from ...utils import (
 from ...database import Database
 
 from ..models import SORT_ROLE, TxTableModel, charger_en_conservant_le_tri
-from ..dialogs import TxDialog
+from ..dialogs import CategoriesMasqueesDialog, TxDialog
 
 class CategoriesView(QWidget):
     cat_changed = Signal()
@@ -54,6 +54,15 @@ class CategoriesView(QWidget):
         self.cats_table.setSortingEnabled(True)
         self.cats_table.horizontalHeader().setSortIndicatorShown(True)
         lv.addWidget(self.cats_table)
+        # Les 17 catégories livrées d'origine sont proposées même si l'on
+        # ne s'en sert jamais. Ce bouton permet d'écarter celles qui ne
+        # servent pas — sans rien supprimer.
+        self.btn_masquer = QPushButton("👁️ Catégories proposées…")
+        self.btn_masquer.setToolTip(
+            "Retirer des listes déroulantes les catégories que vous "
+            "n'utilisez pas. Rien n'est supprimé.")
+        self.btn_masquer.clicked.connect(self._choisir_categories_proposees)
+        lv.addWidget(self.btn_masquer)
         splitter.addWidget(left)
 
         # Panneau droit : transactions de la catégorie sélectionnée
@@ -133,6 +142,13 @@ class CategoriesView(QWidget):
             self.cat_title.setText("Sélectionnez une catégorie")
             self.btn_recat.setEnabled(False)
 
+    def _choisir_categories_proposees(self):
+        """Ouvre la fenêtre de choix, puis enregistre et rafraîchit."""
+        dlg = CategoriesMasqueesDialog(self, self.db)
+        if dlg.exec():
+            self.db.set_categories_masquees(dlg.masquees())
+            self.refresh()
+
     def _on_cat_clicked(self, index):
         cat = self.cats_model.item(index.row(), 0).data(Qt.UserRole)
         if not cat:
@@ -159,7 +175,7 @@ class CategoriesView(QWidget):
         row = next((dict(r) for r in self.db.list_tx() if r["id"] == tx_id), None)
         if not row:
             return
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         all_tx = [dict(r) for r in self.db.list_tx()]
         dlg = TxDialog(self, row, cats, all_tx)
         if dlg.exec() != QDialog.Accepted:
@@ -173,7 +189,7 @@ class CategoriesView(QWidget):
     def _recategorize(self):
         if not self.current_cat:
             return
-        cats = sorted(set(self.db.all_categories_used() + CATEGORIES_DEFAUT))
+        cats = self.db.categories_proposees()
         new_cat, ok = QInputDialog.getItem(
             self, "Recatégoriser",
             f"Déplacer toutes les opérations de « {self.current_cat} » vers :",

@@ -191,7 +191,7 @@ class PrevisionnelView(QWidget):
         return self.model.item(idx.row(), 0).data(Qt.UserRole)
 
     def _new(self):
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         all_tx = [dict(r) for r in self.db.list_tx()]
         dlg = RecurringDialog(self, None, cats, all_tx)
         if dlg.exec() != QDialog.Accepted:
@@ -212,7 +212,7 @@ class PrevisionnelView(QWidget):
         row = next((dict(r) for r in self.db.list_recurring() if r["id"] == rid), None)
         if not row:
             return
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         all_tx = [dict(r) for r in self.db.list_tx()]
         dlg = RecurringDialog(self, row, cats, all_tx)
         if dlg.exec() != QDialog.Accepted:

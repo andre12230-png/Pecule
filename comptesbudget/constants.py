@@ -495,7 +495,23 @@ SYNC_VERSION = 3
 #            plus qu'aux filets d'identité. Dépointer ne rend pas son statut
 #            de prévision à l'opération : rien ne permettrait de deviner
 #            qu'elle avait été saisie d'avance.
-APP_VERSION = "1.26.0"
+# 1.27.0 : masquer les catégories qu'on n'utilise pas.
+#          • Les 17 catégories livrées d'origine étaient proposées à chaque
+#            saisie, même à qui n'a ni animaux, ni enfants, ni épargne. Le
+#            bouton « Catégories proposées… », sous la liste de l'onglet
+#            Catégories, permet de décocher celles dont on ne se sert pas :
+#            elles disparaissent des menus déroulants.
+#          • Masquer n'efface RIEN — ni catégorie, ni opération. C'est un
+#            filtre d'affichage, et recocher la case la fait revenir.
+#          • Deux garde-fous, appliqués à la LECTURE de la liste pour qu'elle
+#            se répare toute seule : une catégorie portée par au moins une
+#            opération reste proposée même si elle a été masquée (sans quoi
+#            l'opération ne pourrait plus être reclassée sous son propre
+#            libellé, et un import ressusciterait une catégorie invisible) ;
+#            « Non classé » et « Transaction exclue » ne sont jamais
+#            masquables, elles font marcher le logiciel.
+#          • Le réglage est commun à tous les comptes, comme les catégories.
+APP_VERSION = "1.27.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
@@ -504,6 +520,13 @@ CATEGORIES_DEFAUT = [
     "Revenus", "Épargne", "Retraits / dépôts", "Virements internes",
     "Transaction exclue", "Non classé",
 ]
+
+# Les deux catégories qu'on ne peut pas masquer : elles ne servent pas à
+# ranger des dépenses mais font marcher le logiciel. « Non classé » accueille
+# tout ce qui arrive d'un relevé sans être reconnu ; « Transaction exclue »
+# sort une opération du calcul du solde. Les faire disparaître des listes
+# priverait l'utilisateur du seul moyen de les choisir à la main.
+CATEGORIES_NON_MASQUABLES = ("Non classé", "Transaction exclue")
 
 CATEGORY_COLORS = {
     "Alimentation":          "#E67E22",

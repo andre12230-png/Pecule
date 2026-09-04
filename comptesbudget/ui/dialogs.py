@@ -7,11 +7,11 @@ from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
     QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter, QMessageBox,
-    QListWidget, QListWidgetItem, QPushButton, QInputDialog,
+    QListWidget, QListWidgetItem, QPushButton, QInputDialog, QScrollArea,
 )
 
 from ..constants import (
-    CATEGORIES_DEFAUT, TYPES_OPERATION, FREQUENCIES,
+    CATEGORIES_DEFAUT, CATEGORIES_NON_MASQUABLES, TYPES_OPERATION, FREQUENCIES,
 )
 from ..utils import (
     fmt_euro, fmt_date_fr, date_debit_differe, JOUR_DEBIT_DIFFERE,
@@ -98,7 +98,11 @@ class TxDialog(QDialog):
 
         self.cat = QComboBox()
         self.cat.setEditable(True)
-        all_cats = sorted(set((categories or []) + CATEGORIES_DEFAUT))
+        # La liste reçue vient de `db.categories_proposees()` : elle tient
+        # déjà compte des catégories que l'utilisateur a masquées. On n'y
+        # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
+        # aucun effet ici.
+        all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
         layout.addRow("Catégorie :", self.cat)
 
@@ -861,7 +865,11 @@ class RuleDialog(QDialog):
 
         self.cat = QComboBox()
         self.cat.setEditable(True)
-        all_cats = sorted(set((categories or []) + CATEGORIES_DEFAUT))
+        # La liste reçue vient de `db.categories_proposees()` : elle tient
+        # déjà compte des catégories que l'utilisateur a masquées. On n'y
+        # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
+        # aucun effet ici.
+        all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
         layout.addRow("Catégorie :", self.cat)
 
@@ -951,7 +959,11 @@ class RecurringDialog(QDialog):
         layout.addRow("Montant :", self.montant)
 
         self.cat = QComboBox(); self.cat.setEditable(True)
-        all_cats = sorted(set((categories or []) + CATEGORIES_DEFAUT))
+        # La liste reçue vient de `db.categories_proposees()` : elle tient
+        # déjà compte des catégories que l'utilisateur a masquées. On n'y
+        # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
+        # aucun effet ici.
+        all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
         layout.addRow("Catégorie :", self.cat)
 
@@ -1057,3 +1069,84 @@ class RecurringDialog(QDialog):
             "end_date":     ed_str,
             "actif":        1 if self.actif.isChecked() else 0,
         }
+
+
+class CategoriesMasqueesDialog(QDialog):
+    """Choisir les catégories à retirer des listes déroulantes.
+
+    Masquer n'efface rien : ni la catégorie, ni la moindre opération. C'est un
+    filtre d'affichage, et décocher la case la fait revenir aussitôt.
+
+    Deux cas ne se cochent pas, et la raison est écrite en clair à côté :
+    une catégorie **déjà utilisée** (la masquer empêcherait de reclasser les
+    opérations qui la portent), et les deux catégories qui font marcher le
+    logiciel — « Non classé » et « Transaction exclue ».
+    """
+
+    def __init__(self, parent, db):
+        super().__init__(parent)
+        self.db = db
+        self.setWindowTitle("Catégories proposées")
+        self.setMinimumWidth(460)
+
+        layout = QVBoxLayout(self)
+
+        info = QLabel(
+            "Décochez les catégories que vous n'utilisez pas : elles "
+            "disparaîtront des listes déroulantes.\n\n"
+            "Rien n'est supprimé — vous pouvez les rétablir à tout moment."
+        )
+        info.setWordWrap(True)
+        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
+                           "border:1px solid #E8D77B")
+        layout.addWidget(info)
+
+        utilisees = db.categories_utilisees_partout()
+        masquees = set(db.categories_masquees())
+        # Toutes celles qu'on peut voir : les 17 d'origine et celles que
+        # l'utilisateur a créées lui-même.
+        toutes = sorted(set(CATEGORIES_DEFAUT) | utilisees)
+
+        self.cases: dict[str, QCheckBox] = {}
+        liste = QVBoxLayout()
+        for nom in toutes:
+            ligne = QHBoxLayout()
+            case = QCheckBox(nom)
+            motif = ""
+            if nom in CATEGORIES_NON_MASQUABLES:
+                motif = "nécessaire au fonctionnement"
+            elif nom in utilisees:
+                n = db.nb_operations_categorie(nom)
+                motif = f"utilisée par {n} opération(s)"
+            if motif:
+                case.setChecked(True)
+                case.setEnabled(False)
+            else:
+                case.setChecked(nom not in masquees)
+            ligne.addWidget(case)
+            if motif:
+                etiquette = QLabel(motif)
+                etiquette.setStyleSheet("color:#888; font-style:italic")
+                ligne.addWidget(etiquette)
+            ligne.addStretch()
+            liste.addLayout(ligne)
+            self.cases[nom] = case
+
+        zone = QWidget()
+        zone.setLayout(liste)
+        defilement = QScrollArea()
+        defilement.setWidget(zone)
+        defilement.setWidgetResizable(True)
+        defilement.setMinimumHeight(320)
+        layout.addWidget(defilement)
+
+        self.btns = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns.accepted.connect(self.accept)
+        self.btns.rejected.connect(self.reject)
+        layout.addWidget(self.btns)
+
+    def masquees(self) -> list[str]:
+        """Les catégories dont la case a été décochée."""
+        return [nom for nom, case in self.cases.items()
+                if case.isEnabled() and not case.isChecked()]

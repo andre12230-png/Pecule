@@ -117,7 +117,7 @@ class RulesView(QWidget):
         return self.model.item(idx.row(), 0).data(Qt.UserRole)
 
     def new_rule(self):
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         dlg = RuleDialog(self, None, cats)
         if dlg.exec() != QDialog.Accepted:
             return
@@ -138,7 +138,7 @@ class RulesView(QWidget):
         row = next((dict(r) for r in self.db.list_rules() if r["id"] == rid), None)
         if not row:
             return
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         dlg = RuleDialog(self, row, cats)
         if dlg.exec() != QDialog.Accepted:
             return
