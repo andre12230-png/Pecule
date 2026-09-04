@@ -123,7 +123,7 @@ class GlobalSearchDialog(QDialog):
         row = next((dict(r) for r in self.db.list_tx() if r["id"] == tx_id), None)
         if not row:
             return
-        cats = self.db.all_categories_used()
+        cats = self.db.categories_proposees()
         all_tx = [dict(r) for r in self.db.list_tx()]
         dlg = TxDialog(self, row, cats, all_tx)
         if dlg.exec() != QDialog.Accepted:

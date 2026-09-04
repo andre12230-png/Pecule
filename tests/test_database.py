@@ -59,6 +59,60 @@ def test_depointer_ne_recree_pas_une_prevision(tmp_path):
     assert ligne["prevue"] == 0
 
 
+def test_categories_proposees_sans_masquage(tmp_path):
+    """Sans rien masquer, on propose les catégories livrées d'origine."""
+    db = Database(str(tmp_path / "t.db"))
+    proposees = db.categories_proposees()
+    assert "Alimentation" in proposees
+    assert "Non classé" in proposees
+    assert db.categories_masquees() == []
+
+
+def test_masquer_une_categorie_la_retire_des_propositions(tmp_path):
+    """Une catégorie masquée disparaît des listes déroulantes."""
+    db = Database(str(tmp_path / "t.db"))
+    db.set_categories_masquees(["Loisirs", "Épargne"])
+    proposees = db.categories_proposees()
+    assert "Loisirs" not in proposees
+    assert "Épargne" not in proposees
+    assert "Alimentation" in proposees          # les autres restent
+    assert sorted(db.categories_masquees()) == ["Loisirs", "Épargne"]
+
+
+def test_une_categorie_utilisee_reste_proposee(tmp_path):
+    """Masquer ne doit jamais faire disparaître une catégorie qui sert.
+
+    Sinon l'opération qui la porte deviendrait impossible à reclasser sous
+    son propre libellé. La règle s'applique à la LECTURE : si des opérations
+    arrivent plus tard dans une catégorie masquée, elle réapparaît d'elle-même.
+    """
+    db = Database(str(tmp_path / "t.db"))
+    db.set_categories_masquees(["Loisirs"])
+    assert "Loisirs" not in db.categories_proposees()
+    db.insert_tx(_tx(categorie="Loisirs"))
+    assert "Loisirs" in db.categories_proposees()
+
+
+def test_categories_structurelles_jamais_masquables(tmp_path):
+    """« Non classé » et « Transaction exclue » ont un rôle dans le calcul du
+    solde et dans l'import : elles restent proposées quoi qu'on demande."""
+    db = Database(str(tmp_path / "t.db"))
+    db.set_categories_masquees(["Non classé", "Transaction exclue", "Loisirs"])
+    proposees = db.categories_proposees()
+    assert "Non classé" in proposees
+    assert "Transaction exclue" in proposees
+    assert "Loisirs" not in proposees           # celle-ci est bien masquée
+
+
+def test_demasquer_remet_la_categorie(tmp_path):
+    """Masquer n'efface rien : le retour en arrière est immédiat."""
+    db = Database(str(tmp_path / "t.db"))
+    db.set_categories_masquees(["Loisirs"])
+    assert "Loisirs" not in db.categories_proposees()
+    db.set_categories_masquees([])
+    assert "Loisirs" in db.categories_proposees()
+
+
 def test_delete_tx_pose_tombstone(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     db.insert_tx(_tx())

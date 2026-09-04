@@ -6,7 +6,7 @@ import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
-from .constants import DB_PATH
+from .constants import CATEGORIES_DEFAUT, CATEGORIES_NON_MASQUABLES, DB_PATH
 from .utils import _now_iso
 
 def _lendemain(date_iso: str) -> str:
@@ -525,6 +525,54 @@ class Database:
             f"SELECT DISTINCT categorie FROM transactions WHERE compte_id = ?"
             f"{filtre} ORDER BY categorie", (self.compte_id,))
         return [r[0] for r in rows if r[0]]
+
+    # ── Catégories proposées ────────────────────────────────────────
+    # Les 17 catégories livrées d'origine sont toujours proposées, même
+    # inutilisées. Qui n'a ni animaux, ni enfants, ni épargne traîne des
+    # entrées qui ne lui serviront jamais : il peut les masquer. Masquer
+    # n'efface RIEN — ni catégorie, ni opération — c'est un simple filtre
+    # d'affichage, réversible à tout instant.
+    #
+    # Le réglage est global et non par compte : les catégories le sont aussi.
+    def categories_masquees(self) -> list[str]:
+        brut = self.get_setting("categories_masquees", "")
+        return [c for c in (x.strip() for x in brut.split("\n")) if c]
+
+    def set_categories_masquees(self, noms: list[str]):
+        self.set_setting("categories_masquees",
+                         "\n".join(dict.fromkeys(n.strip() for n in noms if n.strip())))
+
+    def categories_utilisees_partout(self) -> set[str]:
+        """Catégories portées par au moins une opération, TOUS comptes et
+        archives confondus. Sert de garde-fou au masquage."""
+        rows = self.conn.execute(
+            "SELECT DISTINCT categorie FROM transactions WHERE categorie <> ''")
+        return {r[0] for r in rows if r[0]}
+
+    def nb_operations_categorie(self, categorie: str) -> int:
+        """Combien d'opérations portent cette catégorie, tous comptes et
+        archives confondus. Sert à expliquer pourquoi elle n'est pas masquable."""
+        return self.conn.execute(
+            "SELECT COUNT(*) FROM transactions WHERE categorie = ?",
+            (categorie,)).fetchone()[0]
+
+    def categories_proposees(self) -> list[str]:
+        """La liste offerte dans les menus déroulants.
+
+        Deux garde-fous, appliqués ici plutôt qu'au moment de masquer, pour
+        que la liste se répare toute seule :
+
+        * une catégorie **utilisée** reste proposée même si elle figure parmi
+          les masquées — sans quoi l'opération qui la porte ne pourrait plus
+          être reclassée sous son propre libellé, et un import pourrait
+          ressusciter une catégorie devenue invisible ;
+        * `CATEGORIES_NON_MASQUABLES` reste toujours là.
+        """
+        toutes = set(self.all_categories_used()) | set(CATEGORIES_DEFAUT)
+        masquees = (set(self.categories_masquees())
+                    - self.categories_utilisees_partout()
+                    - set(CATEGORIES_NON_MASQUABLES))
+        return sorted(toutes - masquees)
 
     # ── Règles ──────────────────────────────────────────────────────
     def list_rules(self) -> list[sqlite3.Row]:

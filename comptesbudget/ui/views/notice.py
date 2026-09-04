@@ -171,6 +171,13 @@ l'année en cours compte pour 7 mois de budget, pas 12.</p>
 (nombre d'opérations et total), à droite les opérations détaillées de la
 catégorie sélectionnée. Le bouton « Recatégoriser » permet de déplacer
 en masse toutes les opérations d'une catégorie vers une autre.</p>
+<p>Le bouton « <b>Catégories proposées…</b> », sous la liste, sert à écarter
+des menus déroulants les catégories dont vous ne vous servez pas : si vous
+n'avez ni animaux ni épargne, inutile de les voir à chaque saisie. Rien n'est
+supprimé — décocher puis recocher les fait revenir. Une catégorie déjà
+utilisée par des opérations ne peut pas être masquée, et « Non classé » et
+« Transaction exclue » restent toujours proposées : elles font marcher le
+logiciel.</p>
 
 <h3>🏷️ Sous-catégories</h3>
 <p>Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
