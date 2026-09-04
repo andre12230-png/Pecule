@@ -53,6 +53,55 @@ révisé — l'arrêter ferait disparaître une charge réelle du prévisionnel.
 
 ---
 
+## 2026-09-04 (suite) — Masquer les catégories qu'on n'utilise pas (1.27.0)
+
+**Fait.** Les 17 catégories livrées d'origine étaient proposées à chaque saisie, sans
+moyen de les retirer : qui n'a ni animaux, ni enfants, ni épargne les voyait quand même.
+Un bouton « Catégories proposées… », sous la liste de l'onglet Catégories, ouvre une
+fenêtre à cocher. Masquer n'efface **rien** — ni catégorie, ni opération : c'est un filtre
+d'affichage, réversible en recochant la case.
+
+**Pourquoi.** Question d'André après avoir vérifié ce que reçoit un nouvel utilisateur :
+17 catégories, **aucune sous-catégorie** (elles se créent au fil de l'eau), aucune règle
+personnelle, et 12 règles intégrées qui reconnaissent les enseignes françaises via le
+bouton « Harmoniser » — lequel **propose** sans jamais décider. Tout est modifiable, les
+listes déroulantes étant éditables ; la seule limite était justement ces 17 entrées
+indéboulonnables.
+
+**Les deux garde-fous, et pourquoi ils sont à la LECTURE.** Ils sont appliqués dans
+`categories_proposees()` plutôt qu'au moment de masquer, pour que la liste se répare
+d'elle-même :
+
+* une catégorie portée par **au moins une opération** reste proposée même si elle figure
+  parmi les masquées. Sans cela, cette opération ne pourrait plus être reclassée sous son
+  propre libellé — et un import ultérieur ressusciterait une catégorie devenue invisible ;
+* `Non classé` et `Transaction exclue` ne sont jamais masquables : la première accueille
+  tout ce qui arrive d'un relevé sans être reconnu, la seconde sort une opération du calcul
+  du solde (cf. les deux pièges du solde).
+
+**Un piège évité.** Les trois dialogues de saisie faisaient
+`sorted(set((categories or []) + CATEGORIES_DEFAUT))` : ils **rajoutaient** les 17 d'origine
+à la liste reçue. Masquer n'aurait donc rien changé pour eux. Les huit endroits qui
+construisent une liste de catégories passent désormais par `categories_proposees()`.
+
+Le réglage est **commun à tous les comptes**, comme les catégories : vérifié que la table
+`settings` n'est pas rattachée à un compte, contrairement au solde et à la date de départ.
+
+**Vérifié.** Cinq tests écrits d'abord et vus échouer, puis le code — 232 tests au vert.
+La fenêtre a été construite hors écran avec une vraie base : « Alimentation », portant une
+opération, ressort verrouillée avec la mention « utilisée par 1 opération(s) », et les deux
+catégories structurelles avec « nécessaire au fonctionnement ». Décocher deux catégories
+les retire bien des propositions (15 au lieu de 17). L'onglet et l'application entière ont
+été rendus à l'écran pour contrôler la place du bouton.
+
+**Reste.** Version ouverte en **1.27.0** dans `constants.py`, non publiée. À la publication :
+relancer `outils/captures_promo.py` (le bouton est visible sur la capture de l'onglet
+Catégories) et suivre la marche habituelle. Détail sans gravité relevé au passage : les
+boutons des fenêtres affichent « OK / Cancel », Qt n'étant pas traduit — c'est le cas dans
+**toute** l'application depuis toujours, pas une nouveauté de cette fenêtre.
+
+---
+
 ## 2026-09-04 — Fiche Gratilog validée, et une seconde demande pour la description
 
 **Fait.** Gratilog a mis la fiche à jour. Contrôle champ par champ : titre et version en
