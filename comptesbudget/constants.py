@@ -511,6 +511,14 @@ SYNC_VERSION = 3
 #            « Non classé » et « Transaction exclue » ne sont jamais
 #            masquables, elles font marcher le logiciel.
 #          • Le réglage est commun à tous les comptes, comme les catégories.
+#          • Les boutons des boîtes de dialogue parlent enfin français :
+#            « Annuler » au lieu de « Cancel », « Oui / Non » au lieu de
+#            « Yes / No », « Enregistrer », « Fermer », « Appliquer »… Ces
+#            libellés ne viennent pas de notre code, c'est Qt qui les
+#            fabrique : on charge donc SES traductions (`qtbase_fr.qm`, livré
+#            avec PySide6) plutôt que de renommer les boutons un par un — ce
+#            qui aurait laissé de côté les questions Oui/Non et les fenêtres
+#            de choix de fichier.
 APP_VERSION = "1.27.0"
 
 CATEGORIES_DEFAUT = [

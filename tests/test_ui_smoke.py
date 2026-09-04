@@ -807,3 +807,22 @@ def test_non_pointees_ignore_la_periode(qapp, tmp_path):
     v.pt_filter.setCurrentText("Pointées")
     assert [t["id"] for t in v.filtered] == ["c"]
     assert "toutes périodes" not in v.lbl_count.text()
+
+def test_traduction_qt_francaise(qapp):
+    """Les boutons fournis par Qt doivent parler français.
+
+    L'application est entièrement en français : afficher « Cancel » sous le nez
+    de l'utilisateur détonnerait. Ces libellés ne viennent pas de notre code,
+    c'est Qt qui les fabrique — on charge donc ses traductions.
+    """
+    from PySide6.QtWidgets import QDialogButtonBox
+    from comptesbudget.app import installer_traduction_qt
+
+    assert installer_traduction_qt(qapp), "traduction française de Qt introuvable"
+    boite = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+                             | QDialogButtonBox.Yes | QDialogButtonBox.No)
+    libelles = [b.text().replace("&", "") for b in boite.buttons()]
+    assert "Annuler" in libelles
+    assert "Oui" in libelles
+    assert "Non" in libelles
+    assert "Cancel" not in libelles
