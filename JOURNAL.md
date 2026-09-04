@@ -115,7 +115,17 @@ Deux précautions qui comptent :
   l'application démarre quand même — quelques mots en anglais valent mieux qu'un refus de
   démarrer.
 
-**Reste.** Version ouverte en **1.27.0** dans `constants.py`, non publiée. À la publication :
+**Exe reconstruit et installé** en 1.27.0, pour qu'André profite tout de suite des deux
+ajouts sans attendre une publication. Étapes 2 et 3 du `.bat` rejouées à la main, comme la
+veille. Contrôles : empreinte identique entre `dist/` et l'installation, titre de la fenêtre
+« Pécule — v1.27.0 — Compte courant », `comptes.db` inchangée au bit près (2 101 248 octets),
+intégrité ok, 6 181 opérations et 33 récurrences intactes. Vérifié aussi que
+`_internal/PySide6/translations/qtbase_fr.qm` est bien présent dans l'installation : sans ce
+fichier, la francisation des boutons ne vaudrait qu'en développement. Ancien exécutable
+conservé sous `Pecule.exe.avant-1.27.0`.
+
+**Reste.** Version **1.27.0** installée localement mais **non publiée** : le site, Scoop et
+la release restent en 1.26.0. À la publication :
 relancer `outils/captures_promo.py` (le bouton est visible sur la capture de l'onglet
 Catégories) et suivre la marche habituelle. Détail sans gravité relevé au passage : les
 boutons des fenêtres affichent « OK / Cancel », Qt n'étant pas traduit — c'est le cas dans
