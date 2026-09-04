@@ -94,6 +94,27 @@ catégories structurelles avec « nécessaire au fonctionnement ». Décocher de
 les retire bien des propositions (15 au lieu de 17). L'onglet et l'application entière ont
 été rendus à l'écran pour contrôler la place du bouton.
 
+**Puis la francisation des boutons, demandée dans la foulée.** L'application est
+entièrement en français mais ses boîtes de dialogue affichaient « Cancel », « Yes », « No » :
+ces libellés ne viennent pas du code du projet, **c'est Qt qui les fabrique**.
+
+Solution retenue : charger les traductions que **Qt livre lui-même**
+(`qtbase_fr.qm`, fourni avec PySide6) plutôt que de renommer les boutons un par un. Le
+renommage manuel aurait laissé de côté les questions Oui/Non, les fenêtres de choix de
+fichier, et tout dialogue ajouté plus tard. Résultat vérifié sur une boîte réunissant huit
+boutons standard : « Annuler », « Oui », « Non », « Enregistrer », « Fermer »,
+« Appliquer », « Aide ».
+
+Deux précautions qui comptent :
+* le traducteur est rangé **sur l'objet application** pour rester vivant — ramassé par le
+  garbage collector, il cesserait silencieusement de traduire, et le défaut serait
+  déroutant à diagnostiquer ;
+* trois chemins sont essayés, dont le dossier livré avec PySide6. **Vérifié dans l'exe déjà
+  construit** que PyInstaller le recopie bien dans `_internal/PySide6/translations/` : la
+  traduction vaudra donc aussi une fois l'application gelée. Si aucun chemin ne répond,
+  l'application démarre quand même — quelques mots en anglais valent mieux qu'un refus de
+  démarrer.
+
 **Reste.** Version ouverte en **1.27.0** dans `constants.py`, non publiée. À la publication :
 relancer `outils/captures_promo.py` (le bouton est visible sur la capture de l'onglet
 Catégories) et suivre la marche habituelle. Détail sans gravité relevé au passage : les
