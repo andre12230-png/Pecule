@@ -13,6 +13,77 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-04 — Relevé du 1er au 4 septembre : concordance vérifiée, deux dates recalées
+
+**Fait.** André avait déjà importé le relevé du compte courant (6 opérations) et
+mis le classeur à jour avant la séance ; le travail a donc été de **vérifier**, puis
+de corriger trois détails.
+
+* **Contrôle croisé à zéro centime près** : banque (copie d'écran de l'espace
+  client), Pécule et classeur donnent tous le même solde au 04/09, et le même
+  encours carte sur les mêmes quatre achats. Le lot carte prélevé le 04/09
+  (26 opérations) égale exactement la ligne « CUMUL DES DEBITS DIFFERES » du
+  relevé — qui n'a donc pas à être importée telle quelle.
+* **Récurrence d'une assurance auto : jour 5 → 4.** L'échéancier de
+  l'assureur fixe le prélèvement au 4 ; la récurrence créée le matin même
+  portait le 5, parce que celui d'août était tombé le 5.
+* **Échéance d'une autre assurance recalée du 05 au 07.** Le 5 est un
+  samedi et la banque l'annonce au lundi 7 dans son onglet « À venir ».
+* **Classeur, feuille Septembre : un montant corrigé de quatre centimes** (par
+  André). C'était une saisie d'avance recopiée de mars, seul mois où ce
+  montant a existé.
+
+**Pourquoi.** Recaler une échéance décalée par un week-end **avant** l'import est
+la seule façon d'éviter un doublon : une fois la ligne pointée à la main, aucune
+des clés de rapprochement ne correspond plus. Et un écart de quatre centimes dans
+le classeur ne se voit pas tant que la ligne n'a pas de date, mais fausse le mois
+dès qu'on la pointe.
+
+**Deux fausses pistes écartées.** L'assurance auto portait un `0` (« en attente »)
+dans la colonne Pointage du CSV alors qu'elle était pointée des deux côtés : la
+copie d'écran de la banque, solde à l'appui, montre qu'elle est bien
+débitée — c'est le fichier qui retardait. Et l'échéancier de l'assureur annonce
+un prélèvement en juillet jamais effectué : ce document date du 24/05 et
+l'assureur a revu son plan depuis. Rien à rattraper.
+
+**Reste.** Rien d'ouvert. Pas de date de fin posée sur la récurrence auto
+volontairement : le contrat se reconduit au 28/05/2027, seul le montant sera
+révisé — l'arrêter ferait disparaître une charge réelle du prévisionnel.
+
+---
+
+## 2026-09-04 — Fiche Gratilog validée, et une seconde demande pour la description
+
+**Fait.** Gratilog a mis la fiche à jour. Contrôle champ par champ : titre et version en
+**1.26.0**, et surtout le **lien de téléchargement** suivi jusqu'au bout — il mène bien à
+l'archive `v1.26.0`, 53 843 997 octets, celle publiée la veille. La phrase devenue fausse
+(« ne gère qu'un compte courant ») a disparu, et l'administratrice a **ajouté d'elle-même**
+un bloc « Changements » renvoyant à la page de release.
+
+Mais **les trois nouveautés n'avaient pas été reprises** dans la description : ni le
+multicompte, ni l'import OFX, ni l'archivage — celles-là mêmes que le titre annonce. La
+taille du fichier était restée celle de la version précédente. Une seconde demande de
+modification a donc été déposée, portant **uniquement** sur ces quatre points.
+
+**Pourquoi.** Une fiche qui annonce la 1.26.0 sans dire ce qu'elle apporte laisse le
+visiteur ignorer que le logiciel gère désormais plusieurs comptes — c'est justement la
+demande d'un lecteur du forum en août.
+
+**Point de méthode.** La seconde demande repart de la valeur **actuelle** du champ, celle
+que l'administratrice a laissée, pour y insérer trois phrases — et non de ma propre
+rédaction, qui aurait écrasé son travail, bloc « Changements » compris. Les trois ancres de
+remplacement ont été vérifiées une à une avant d'écrire, et la présence du drapeau, du bloc
+« Changements » et de la **loupe** contrôlée après coup : cette dernière ligne, invisible
+dans le rendu, porte le lien vers la capture d'écran et se perd au moindre copier-coller
+approximatif.
+
+**Reste.** Attendre cette seconde validation. À faire alors : relire la fiche **champ par
+champ**, la première fois ayant montré qu'une validation ne reprend pas nécessairement tout.
+Bon signe au passage : le compteur de téléchargements de la fiche est passé de 64 à **87**
+en une journée.
+
+---
+
 ## 2026-09-03 (captures) — Les images de la vitrine refaites pour la 1.26.0
 
 **Fait.** Les quatre captures de `docs/media/` dataient du 9 août : elles montraient
