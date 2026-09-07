@@ -13,120 +13,47 @@ La date la plus récente est en haut.
 
 ---
 
-## 2026-09-07 — « Pointé sur la période » devient « Mouvement pointé » (1.30.6)
+## 2026-09-07 — Le Bilan tout entier suit le mois choisi (1.30.2 → 1.30.6)
 
-**Fait.** Renommage de la quatrième tuile, et la période passe dans son
-sous-titre (« 34 opération(s) pointée(s) — Septembre 2026 »). Notice reprise
-aux trois endroits qui la citaient, test ajouté, 275 tests.
+**Fait.** Cinq pas, partis d'un constat d'André sur le bandeau des budgets
+dépassés.
 
-**Pourquoi.** André, après avoir demandé à quoi elle correspondait : le nom
-disait **où** l'on regarde, pas **ce qu'on additionne**. Il proposait
-« Opérations pointées » ; « Mouvement pointé » a été retenu parce qu'il se lit
-en face de « Mouvement du mois » juste à côté — deux chiffres égaux veulent
-dire que le mois est entièrement pointé, et leur écart mesure ce qui n'est pas
-encore passé en banque. Sur ses données : août 418,43 € = 418,43 € (57
-opérations sur 57 pointées), septembre 692,73 € contre −314,11 €, l'écart de
-−1 006,84 € étant ses 17 échéances en attente.
+- **1.30.2** — l'onglet **Budget** et son bandeau d'alerte comptent les
+  dépenses à la **date d'achat**, sans plus suivre le sélecteur « Date ».
+- **1.30.3** — le bandeau **« Budget dépassé »** suit la période : « Budget
+  dépassé en août 2026 », « Tout près du budget ».
+- **1.30.4** — les deux derniers bandeaux calés sur le mois courant, le
+  **verdict** et le bandeau vert **« Ce mois-ci »**, suivent à leur tour. Un
+  mois clos se raconte au passé (« a fini le mois à… », « ce qui est passé »,
+  tuiles « Débité » / « Encaissé »), un mois à venir annonce ce qui est prévu.
+  Deux méthodes ajoutées : `_mouvements_du_mois()` et `_creux_du_mois()`.
+- **1.30.5** — la tuile **« Mouvement du mois »** s'appelle « Mouvement de
+  l'année » ou « Mouvement — toutes périodes » selon la période.
+- **1.30.6** — **« Pointé sur la période »** devient **« Mouvement pointé »**,
+  la période passant dans son sous-titre.
 
-**Reste.** Rien sur ce point. Toujours ouvert : l'onglet Catégories et la
-publication (dernier tag `v1.23.2`).
+**Pourquoi.** « Dans le bandeau budget dépassé, la plupart sont des dépenses
+carte du mois d'avant » : vérifié, sur les cinq catégories annoncées dépassées
+le 07/09, **une seule l'était** (Banque et assurances, des prélèvements).
+Restaurants & Sorties affichait 147 % pour un mois sans un seul restaurant —
+c'était le lot de la carte d'août, débité le 4. Un budget répond à « qu'ai-je
+dépensé ? », pas à « qu'a prélevé la banque ? ». Puis, de fil en aiguille : si
+le Budget suit la période, tout le Bilan doit la suivre, sinon il dit deux
+choses à la fois sans le signaler.
 
----
+**Contrôles.** Le solde de fin de mois sort du même calcul pour les quatre
+bandeaux : ils ne peuvent pas se contredire. Vérifié sur la vraie base — août
+part de −316,43 € (fin juillet), −2 439,02 € débités, +3 873,76 € encaissés,
+−1 016,31 € de carte → **102,00 €**, le solde affiché. 275 tests, six tests
+ajoutés dont deux reproduisant le défaut avant correction. Exe reconstruit et
+installé à chaque version (`Pecule.exe.avant-1.30.x` conservés, `comptes.db`
+jamais touchée).
 
-## 2026-09-07 — La tuile « Mouvement » dit de quoi elle parle (1.30.5)
-
-**Fait.** Son titre suit la période : « Mouvement du mois », « Mouvement de
-l'année », « Mouvement — toutes périodes ». La notice précise au passage
-lesquelles des quatre tuiles suivent la période — trois sur quatre — et
-pourquoi la quatrième non.
-
-**Pourquoi.** Question d'André sur la réaction des quatre tuiles. Vérification
-faite : mouvement, taux d'épargne et pointé suivaient déjà la période ; le
-solde bancaire réel ne la suit pas, et c'est voulu (c'est le solde du jour, à
-comparer au relevé — le solde d'un mois clos est donné par le bandeau vert).
-Restait le titre « Mouvement du mois », affiché tel quel sur une année entière,
-que son propre sous-titre démentait.
-
-**Reste.** Rien sur ce point. Toujours ouvert : l'onglet Catégories et la
-publication (dernier tag `v1.23.2`).
-
----
-
-## 2026-09-07 — Tous les bandeaux du Bilan suivent le mois choisi (1.30.4)
-
-**Fait.** Les deux derniers bandeaux calés sur le mois courant — le **verdict**
-et le bandeau vert **« Ce mois-ci »** — suivent maintenant le sélecteur, comme
-l'Encours carte et l'alerte budget. Un mois clos se raconte au passé : « Août
-2026 : le compte a fini le mois à 102,00 €. Au plus bas : −316,43 € le
-01/08/2026 », et le bandeau vert devient « AOÛT 2026 — ce qui est passé » avec
-« Débité » / « Encaissé » et le solde réellement constaté. Un mois à venir
-annonce ce qui est déjà prévu. Deux méthodes ajoutées : `_mouvements_du_mois()`
-(les opérations pointées d'un mois clos, à leur date de banque) et
-`_creux_du_mois()` (le point le plus bas, en rejouant le mois depuis le solde de
-fin du mois précédent). Deux tests ajoutés, notice complétée, 273 tests.
-
-**Pourquoi.** Demande d'André : « tous les bandeaux doivent suivre le mois
-sélectionné ». Le Bilan disait trois choses à la fois — deux bandeaux sur le
-mois consulté, deux sur le mois en cours — sans que rien ne le signale.
-
-**Reste.** Le solde de fin de mois vient toujours de `_solde_fin_de_mois()`
-dans les trois cas : verdict, bandeau vert et bandeau carte ne peuvent donc pas
-se contredire. Contrôle croisé sur la vraie base : août part de −316,43 €
-(fin juillet), −2 439,02 € débités, +3 873,76 € encaissés, −1 016,31 € de
-carte → 102,00 €, le solde affiché. Toujours ouvert : l'onglet Catégories et
-la publication (dernier tag `v1.23.2`).
-
----
-
-## 2026-09-07 — Le bandeau « Budget dépassé » suit la période (1.30.3)
-
-**Fait.** Le bandeau d'alerte du Bilan ne parle plus seulement du mois en
-cours : il suit le sélecteur de période. Sur « Août 2026 » il annonce
-« Budget dépassé en août 2026 » et « Tout près du budget » — au passé, et en
-nommant le mois, pour qu'on ne prenne pas les dépassements d'août pour ceux de
-septembre. Une année ou « Toutes périodes » le ramènent au mois en cours. Il
-reprend `_mois_du_bandeau()`, le mécanisme déjà utilisé par le bandeau Encours
-carte. Test ajouté (`test_alerte_budget_suit_la_periode`), notice complétée,
-271 tests.
-
-**Pourquoi.** Demande d'André : « le bandeau devrait pouvoir suivre les mois
-antérieurs pour ce qui a été dépassé ». Un dépassement passé s'examine, même
-si on ne peut plus rien y changer — et l'onglet Budget, lui, suivait déjà la
-période : les deux se contredisaient dès qu'on remontait dans le temps.
-
-**Reste.** Rien pour ce point. Toujours en attente : l'onglet Catégories, qui
-suit le sélecteur « Date » et peut donc contredire le Budget sur un achat
-carte, et la publication (dernier tag `v1.23.2`).
-
----
-
-## 2026-09-07 — Le budget se compte à la date d'achat (1.30.2)
-
-**Fait.** L'onglet **Budget** et le bandeau « Budget dépassé ce mois-ci » du
-Bilan ne suivent plus le sélecteur « Date » de la barre du haut : ils comptent
-toujours les dépenses à leur **date d'achat**. Notice et aide de l'onglet
-complétées, un test ajouté (`test_budget_ignore_le_debit_differe`) et l'ancien
-`test_tous_les_onglets_suivent_le_mode_date` réécrit — il affirmait le
-contraire.
-
-**Pourquoi.** Constat d'André : « dans le bandeau budget dépassé, la plupart
-sont des dépenses carte du mois d'avant ». Vérifié sur sa base : sur les cinq
-catégories annoncées dépassées le 07/09, **une seule l'était vraiment**
-(Banque et assurances, 116 %, des prélèvements). Restaurants & Sorties (147 %)
-et Shopping (104 %) affichaient **zéro dépense** en septembre : c'était le lot
-de la carte d'août, débité le 4. Le sélecteur était sur « Date de valeur » —
-le bon mode pour un solde, le mauvais pour un budget, qui répond à « qu'ai-je
-dépensé ? » et non « qu'a prélevé la banque ? ». Le reste de l'application
-suivait déjà cette règle (encours carte, prévisionnel).
-
-**Reste.** L'onglet **Catégories**, lui, suit toujours le sélecteur : en date
-de valeur, il continuera d'attribuer un achat d'août à septembre. Il répond à
-une autre question (où part l'argent), mais la contradiction avec le Budget est
-visible — à trancher si elle gêne. Commit poussé sur `main` et exe reconstruit
-puis installé dans `F:udget-app\Pecule` (ancien gardé en
-`Pecule.exe.avant-1.30.2`, `comptes.db` intacte). **Aucune release** : le
-dernier tag reste `v1.23.2`, et Scoop, README, `Lisez-moi.txt` et la vitrine
-annoncent toujours cette version-là.
+**Reste.** L'onglet **Catégories** suit toujours le sélecteur « Date » : en
+date de valeur, il attribue un achat d'août à septembre et peut donc
+contredire le Budget — à trancher. **Rien n'est publié** : le dernier tag reste
+`v1.23.2`, et Scoop, README, `Lisez-moi.txt` et la vitrine annoncent toujours
+cette version-là.
 
 ---
 
