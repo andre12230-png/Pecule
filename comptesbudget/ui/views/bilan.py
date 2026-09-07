@@ -361,7 +361,20 @@ class BilanView(QWidget):
         lay.addWidget(l_label); lay.addWidget(l_value); lay.addWidget(l_sub)
         f._value = l_value
         f._sub = l_sub
+        f._label = l_label          # le titre du « Mouvement » suit la période
         return f
+
+    @staticmethod
+    def _titre_mouvement(period: str) -> str:
+        """Titre de la tuile « Mouvement », accordé à la période choisie.
+
+        Elle s'appelait « Mouvement du mois » même sur une année entière ou
+        sur tout l'historique — ce que son propre sous-titre démentait."""
+        if len(period) == 7:
+            return "Mouvement du mois"
+        if len(period) == 4:
+            return "Mouvement de l'année"
+        return "Mouvement — toutes périodes"
 
     def _colorer_kpi(self, cle: str, couleur: str):
         """Recolore une tuile : le montant ET le liseré du haut, pour qu'ils
@@ -1113,6 +1126,7 @@ class BilanView(QWidget):
         self.kpis["solde"]._sub.setText(sub)
 
         net = net_periode
+        self.kpis["net"]._label.setText(self._titre_mouvement(self.period))
         self.kpis["net"]._value.setText(fmt_euro(net))
         # Les deux moitiés du mouvement, là où elles occupaient deux tuiles.
         self.kpis["net"]._sub.setText(

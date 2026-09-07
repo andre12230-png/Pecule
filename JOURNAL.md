@@ -13,6 +13,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — La tuile « Mouvement » dit de quoi elle parle (1.30.5)
+
+**Fait.** Son titre suit la période : « Mouvement du mois », « Mouvement de
+l'année », « Mouvement — toutes périodes ». La notice précise au passage
+lesquelles des quatre tuiles suivent la période — trois sur quatre — et
+pourquoi la quatrième non.
+
+**Pourquoi.** Question d'André sur la réaction des quatre tuiles. Vérification
+faite : mouvement, taux d'épargne et pointé suivaient déjà la période ; le
+solde bancaire réel ne la suit pas, et c'est voulu (c'est le solde du jour, à
+comparer au relevé — le solde d'un mois clos est donné par le bandeau vert).
+Restait le titre « Mouvement du mois », affiché tel quel sur une année entière,
+que son propre sous-titre démentait.
+
+**Reste.** Rien sur ce point. Toujours ouvert : l'onglet Catégories et la
+publication (dernier tag `v1.23.2`).
+
+---
+
 ## 2026-09-07 — Tous les bandeaux du Bilan suivent le mois choisi (1.30.4)
 
 **Fait.** Les deux derniers bandeaux calés sur le mois courant — le **verdict**

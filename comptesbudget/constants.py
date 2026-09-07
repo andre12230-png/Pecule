@@ -665,7 +665,14 @@ SYNC_VERSION = 3
 #          « AOUT 2026 - ce qui est passe » avec « Debite » et « Encaisse » —
 #          un mois a venir annonce ce qui est deja prevu, et une annee ou
 #          « Toutes periodes » ramenent au mois en cours.
-APP_VERSION = "1.30.4"
+# 1.30.5 : la tuile « Mouvement du mois » s'appelle « Mouvement de l'annee »
+#          sur une annee et « Mouvement - toutes periodes » sur tout
+#          l'historique. Elle suivait deja la periode pour son chiffre ; seul
+#          son titre parlait encore du mois, ce que son propre sous-titre
+#          dementait. La notice dit desormais lesquelles des quatre tuiles
+#          suivent la periode (trois) et pourquoi le solde bancaire reel,
+#          lui, reste au jour d'aujourd'hui.
+APP_VERSION = "1.30.5"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

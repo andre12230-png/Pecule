@@ -575,6 +575,21 @@ def test_bandeau_du_mois_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert _euros(v.mois_sorties.text()) == -60.0
 
 
+def test_titre_du_mouvement_suit_la_periode(qapp, tmp_path, monkeypatch):
+    """La tuile « Mouvement » dit de quoi elle parle : du mois, de l'année ou
+    de tout l'historique. Elle s'appelait « Mouvement du mois » même sur une
+    année entière, ce que son propre sous-titre démentait."""
+    BilanView, d = _bilan_trois_mois(tmp_path, monkeypatch)
+
+    def titre(periode: str) -> str:
+        v = BilanView(d); v.period = periode; v.refresh()
+        return v.kpis["net"]._label.text()
+
+    assert titre("2026-08") == "Mouvement du mois"
+    assert titre("2026") == "Mouvement de l'année"
+    assert titre("all") == "Mouvement — toutes périodes"
+
+
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
     au prochain prélèvement = pointés) et un encours incluant les achats
