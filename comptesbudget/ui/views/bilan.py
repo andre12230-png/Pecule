@@ -885,15 +885,19 @@ class BilanView(QWidget):
         self.mois_banner.setVisible(bool(lignes))
 
     def _refresh_budget_alert(self, txs: list[dict]):
-        """Alerte sur le MOIS EN COURS (toujours, quelle que soit la période
-        affichée — c'est là qu'on peut encore agir) : catégories dont les
-        dépenses dépassent le budget mensuel (rouge) ou en approchent ≥ 85 %
-        (orange). Masqué si tout va bien."""
+        """Catégories dont les dépenses dépassent le budget mensuel (rouge) ou
+        en approchent ≥ 85 % (orange). Masqué si tout va bien.
+
+        Le bandeau suit la période choisie en haut, comme celui de l'Encours
+        carte (voir _mois_du_bandeau) : choisir « Août 2026 » montre ce qui a
+        été dépassé en août. Une année ou « Toutes périodes » ne désignent
+        aucun mois — un budget mensuel ne se juge qu'au mois — et le bandeau
+        revient alors au mois en cours, le seul où l'on peut encore agir."""
         budgets = self.db.list_budgets()
         if not budgets:
             self.budget_alert.setVisible(False)
             return
-        month = date.today().strftime("%Y-%m")
+        month, consultation = self._mois_du_bandeau()
         spent: dict[str, float] = {}
         for t in txs:
             # Date d'ACHAT, comme l'onglet Budget vers lequel l'alerte renvoie
@@ -929,9 +933,15 @@ class BilanView(QWidget):
 
         parts = []
         if depasses:
-            parts.append("🚨 <b>Budget dépassé ce mois-ci :</b> " + _fmt(depasses))
+            # Un mois clos se raconte au passé, et il faut dire lequel : sinon
+            # « ce mois-ci » ferait prendre les dépassements d'août pour ceux
+            # de septembre.
+            titre = (f"Budget dépassé en {period_label(month).lower()}"
+                     if consultation else "Budget dépassé ce mois-ci")
+            parts.append(f"🚨 <b>{titre} :</b> " + _fmt(depasses))
         if proches:
-            parts.append("⚠️ <b>Bientôt atteint :</b> " + _fmt(proches))
+            titre = "Tout près du budget" if consultation else "Bientôt atteint"
+            parts.append(f"⚠️ <b>{titre} :</b> " + _fmt(proches))
         parts.append('<a href="#budget">Voir l’onglet Budget</a>')
 
         if depasses:   # rouge si au moins un dépassement, sinon orange

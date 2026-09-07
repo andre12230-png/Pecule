@@ -176,6 +176,11 @@ sélecteur « Date » en haut de l'écran : un achat par carte reste dans le moi
 où vous l'avez fait, même si votre banque le débite le mois suivant. Un budget
 répond à « qu'ai-je dépensé&nbsp;? », pas à « qu'a prélevé la banque&nbsp;? ».
 Le bandeau d'alerte du Bilan suit la même règle.</p>
+<p>Ce bandeau — « Budget dépassé… » en haut du Bilan — <b>suit la période
+choisie</b> en haut de l'écran : sur « Août 2026 » il montre ce qui a été
+dépassé en août, et le dit (« Budget dépassé en août 2026 »). Sur une année ou
+« Toutes périodes », il revient au <b>mois en cours</b> : un budget mensuel ne
+se juge qu'au mois.</p>
 <p>Double-cliquez sur une catégorie pour modifier son budget mensuel.</p>
 
 <h3>🏷️ Catégories</h3>

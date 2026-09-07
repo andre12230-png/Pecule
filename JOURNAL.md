@@ -13,6 +13,28 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — Le bandeau « Budget dépassé » suit la période (1.30.3)
+
+**Fait.** Le bandeau d'alerte du Bilan ne parle plus seulement du mois en
+cours : il suit le sélecteur de période. Sur « Août 2026 » il annonce
+« Budget dépassé en août 2026 » et « Tout près du budget » — au passé, et en
+nommant le mois, pour qu'on ne prenne pas les dépassements d'août pour ceux de
+septembre. Une année ou « Toutes périodes » le ramènent au mois en cours. Il
+reprend `_mois_du_bandeau()`, le mécanisme déjà utilisé par le bandeau Encours
+carte. Test ajouté (`test_alerte_budget_suit_la_periode`), notice complétée,
+271 tests.
+
+**Pourquoi.** Demande d'André : « le bandeau devrait pouvoir suivre les mois
+antérieurs pour ce qui a été dépassé ». Un dépassement passé s'examine, même
+si on ne peut plus rien y changer — et l'onglet Budget, lui, suivait déjà la
+période : les deux se contredisaient dès qu'on remontait dans le temps.
+
+**Reste.** Rien pour ce point. Toujours en attente : l'onglet Catégories, qui
+suit le sélecteur « Date » et peut donc contredire le Budget sur un achat
+carte, et la publication (dernier tag `v1.23.2`).
+
+---
+
 ## 2026-09-07 — Le budget se compte à la date d'achat (1.30.2)
 
 **Fait.** L'onglet **Budget** et le bandeau « Budget dépassé ce mois-ci » du
