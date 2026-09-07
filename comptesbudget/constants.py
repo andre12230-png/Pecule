@@ -635,7 +635,12 @@ SYNC_VERSION = 3
 #            liste des operations, et pour les lignes pointees, qui restent
 #            distinctes du texte normal sans etre penibles a lire — sur une
 #            base tenue a jour, elles sont l'immense majorite des lignes.
-APP_VERSION = "1.30.0"
+# 1.30.1 : « Reste pour la carte » ne descend plus sous zero. Quand le mois
+#          se termine deja dans le rouge, la reponse a « combien puis-je encore
+#          mettre sur la carte ? » est 0,00 € (en rouge), pas un montant
+#          negatif : ce qui MANQUE est une autre question, deja repondue dans
+#          le detail a droite du bandeau.
+APP_VERSION = "1.30.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

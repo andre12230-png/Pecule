@@ -13,6 +13,21 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — « Reste pour la carte » ne descend plus sous zéro (1.30.1)
+
+**Fait.** Le chiffre pouvait afficher un montant **négatif** quand le mois se
+terminait déjà dans le rouge. Il est désormais borné à **0,00 €**, en rouge.
+
+**Pourquoi.** Remarque d'André : « comme à la fin du mois le prévisionnel est
+négatif, pour les achats carte il reste 0 € ». Il a raison — « ce qui reste »
+répond à « combien puis-je encore dépenser ? », et la réponse est *rien*, pas
+*moins tant*. Le montant qui **manque** est une autre question, et il était
+déjà dit dans le détail à droite du bandeau : rien n'est perdu.
+
+**Reste.** Rien. Notice et journal de version à jour, 269 tests.
+
+---
+
 ## 2026-09-07 — Le bandeau Encours dit ce qui reste vraiment (1.30.0)
 
 > Les montants de ce journal sont volontairement absents ou donnés en exemple :
