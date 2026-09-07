@@ -482,12 +482,15 @@ def test_encours_carte_reste_ce_que_le_compte_laisse(qapp, tmp_path):
     assert v.cb_dispo_lbl.text() == "Reste pour la carte"
 
 
-def test_encours_carte_reste_negatif_en_rouge(qapp, tmp_path):
-    """Quand les achats dépassent ce que le compte laisse, le chiffre dit ce
-    qui va manquer, en rouge."""
+def test_encours_carte_reste_ne_descend_pas_sous_zero(qapp, tmp_path):
+    """Quand les achats dépassent ce que le compte laisse, ce qui reste vaut
+    ZÉRO, pas un montant négatif : à « combien puis-je encore mettre sur la
+    carte ? », la réponse est « rien ». Le montant qui manque est une autre
+    question — il se lit dans le détail."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -1200.0)])
-    assert v.cb_dispo.text() == fmt_euro(-200.0)         # 1 000 - 1 200
-    assert "#C0392B" in v.cb_dispo.styleSheet()
+    assert v.cb_dispo.text() == fmt_euro(0)              # et non -200 €
+    assert "#C0392B" in v.cb_dispo.styleSheet()          # rouge : rien ne reste
+    assert "il MANQUE " + fmt_euro(200.0) in v.cb_detail.text()
 
 
 def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):

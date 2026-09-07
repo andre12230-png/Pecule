@@ -350,10 +350,14 @@ chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
       toutes échéances confondues.</li>
   <li><b>Reste pour la carte</b> — le solde que votre compte aura à la
       <b>fin du mois</b>, une fois tout payé, <b>moins</b> les achats déjà
-      passés à la carte. En vert s'il reste quelque chose, en rouge s'il va
-      manquer. Il se met à jour tout seul dès qu'une dépense est enregistrée,
-      modifiée ou supprimée.</li>
+      passés à la carte. En vert s'il reste quelque chose. Il se met à jour
+      tout seul dès qu'une dépense est enregistrée, modifiée ou supprimée.</li>
 </ul>
+<p><b>Ce chiffre ne descend jamais sous zéro.</b> Si le mois se termine déjà
+dans le rouge, la réponse à « combien puis-je encore mettre sur la carte ? »
+est <b>0,00 €</b> — affiché en rouge — et non un montant négatif. Ce qui
+<i>manque</i> est une autre question : elle est répondue juste à droite, dans
+le détail (« il MANQUE tant »).</p>
 <p><b>Pourquoi ce chiffre-là ?</b> Jusqu'à la version 1.30.0, il se comparait à
 un <i>plafond</i> saisi dans les Paramètres. Ce repère fixe pouvait annoncer
 « il reste 247 € » pendant que le bandeau juste en dessous prévoyait un solde

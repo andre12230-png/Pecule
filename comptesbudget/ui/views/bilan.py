@@ -650,7 +650,11 @@ class BilanView(QWidget):
         # bandeau voisin prévoyait un solde négatif en fin de mois.
         solde_ref = solde_compte if solde_compte is not None else 0.0
         disponible = self._reste_du_mois(txs, mois, solde_ref, encours_mois)
-        self.cb_dispo.setText(fmt_euro(disponible))
+        # Ce qui RESTE ne descend pas sous zéro : quand le mois finit déjà
+        # dans le rouge, la réponse à « combien puis-je encore mettre sur la
+        # carte ? » est « rien », pas « moins 433 € ». Le montant qui manque
+        # est une autre question — il est dit dans le détail, à droite.
+        self.cb_dispo.setText(fmt_euro(max(0.0, disponible)))
         self.cb_dispo.setStyleSheet(
             ("color:#C0392B" if disponible < 0 else "color:#1A7A3A")
             + "; font-size:12pt; font-weight:bold")
