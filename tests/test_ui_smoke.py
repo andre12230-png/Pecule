@@ -362,12 +362,15 @@ def test_rapport_et_recherche(qapp, db):
     GlobalSearchDialog(None, db)     # construit + indexe + recherche initiale
 
 
-def test_tous_les_onglets_suivent_le_mode_date(qapp, tmp_path):
-    """Bilan, Budget et Catégories doivent compter les MÊMES opérations pour
-    une période donnée. Un achat carte du 28/07 débité le 04/08 appartient à
-    août en mode « date de valeur » et à juillet en mode « date d'opération » :
-    les trois vues doivent être d'accord, sinon les chiffres se contredisent
-    d'un onglet à l'autre."""
+def test_bilan_et_categories_suivent_le_mode_date(qapp, tmp_path):
+    """Bilan et Catégories comptent les mêmes opérations pour une période
+    donnée : un achat carte du 28/07 débité le 04/08 appartient à août en mode
+    « date de valeur » et à juillet en mode « date d'opération ». Les deux vues
+    doivent être d'accord, sinon les chiffres se contredisent d'un onglet à
+    l'autre.
+
+    Le Budget, lui, ne suit PAS le sélecteur : il compte toujours à la date
+    d'achat (voir test_budget_ignore_le_debit_differe)."""
     from comptesbudget.ui.views.bilan import BilanView
     from comptesbudget.ui.views.budget import BudgetView
     from comptesbudget.ui.views.categories import CategoriesView
@@ -386,25 +389,77 @@ def test_tous_les_onglets_suivent_le_mode_date(qapp, tmp_path):
         v.refresh()
         return v
 
-    # Juillet en date de valeur : l'opération n'y est pour aucune des vues.
+    # Juillet en date de valeur : l'opération n'y est pour aucune des deux vues.
     # Le montant des dépenses se lit dans le mouvement du mois : la tuile
     # « Dépenses » a fusionné avec lui le 07/09/2026.
-    assert depenses(BilanView, "2026-07", "valeur").kpis["net"]._value.text() \
-        == fmt_euro(0)
-    assert depenses(BudgetView, "2026-07", "valeur").model.rowCount() == 0
+    assert depenses(BilanView, "2026-07", "valeur").kpis["net"]._value.text()         == fmt_euro(0)
     assert depenses(CategoriesView, "2026-07", "valeur").cats_model.rowCount() == 0
 
-    # Août en date de valeur : les trois vues la voient.
-    assert depenses(BilanView, "2026-08", "valeur").kpis["net"]._value.text() \
-        == fmt_euro(-100.0)
-    assert depenses(BudgetView, "2026-08", "valeur").model.rowCount() == 1
+    # Août en date de valeur : les deux vues la voient.
+    assert depenses(BilanView, "2026-08", "valeur").kpis["net"]._value.text()         == fmt_euro(-100.0)
     assert depenses(CategoriesView, "2026-08", "valeur").cats_model.rowCount() == 1
 
-    # Mode « date d'opération » : tout bascule sur juillet, pour les trois.
-    assert depenses(BilanView, "2026-07", "operation").kpis["net"]._value.text() \
-        == fmt_euro(-100.0)
-    assert depenses(BudgetView, "2026-07", "operation").model.rowCount() == 1
+    # Mode « date d'opération » : tout bascule sur juillet, pour les deux.
+    assert depenses(BilanView, "2026-07", "operation").kpis["net"]._value.text()         == fmt_euro(-100.0)
     assert depenses(CategoriesView, "2026-07", "operation").cats_model.rowCount() == 1
+
+    # Le Budget reste sur juillet — le mois de l'achat — dans les deux modes.
+    for mode in ("valeur", "operation"):
+        assert depenses(BudgetView, "2026-07", mode).model.rowCount() == 1
+        assert depenses(BudgetView, "2026-08", mode).model.rowCount() == 0
+
+
+def test_budget_ignore_le_debit_differe(qapp, tmp_path, monkeypatch):
+    """Le Budget compte un achat sur sa DATE D'ACHAT, jamais sur sa date de
+    valeur — même quand la barre du haut est sur « Date de valeur ».
+
+    Sinon le lot de la carte à débit différé, débité le 4, faisait déborder
+    les budgets du mois suivant : le 07/09/2026, le bandeau du Bilan annonçait
+    « Restaurants & Sorties 147 % » pour un mois où André n'avait rien dépensé
+    au restaurant — c'étaient ses additions d'août.
+    """
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.ui.views.budget import BudgetView
+
+    _fige_aujourdhui(monkeypatch, date(2026, 9, 7))
+
+    d = Database(str(tmp_path / "differe.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+    # Achat carte du 20 août, débité le 4 septembre avec tout le lot.
+    d.insert_tx(_tx(id="cb", date="2026-08-20", date_valeur="2026-09-04",
+                    libelle="RESTAURANT", type="Carte bancaire",
+                    categorie="Restaurants & Sorties", montant=-100.0,
+                    pointee=1))
+    # Un vrai prélèvement de septembre, lui, doit bien compter.
+    d.insert_tx(_tx(id="pr", date="2026-09-05", date_valeur="2026-09-05",
+                    libelle="SAUR", type="Prélèvement",
+                    categorie="Logement - maison", montant=-90.0, pointee=1))
+    d.set_budget("Restaurants & Sorties", 80.0)
+    d.set_budget("Logement - maison", 80.0)
+
+    v = BilanView(d)
+    v.date_mode = "valeur"
+    v.refresh()
+    texte = v.budget_alert.text()
+    assert v.budget_alert.isVisibleTo(v)            # le vrai dépassement reste
+    assert "Logement - maison" in texte
+    # (le bandeau échappe le HTML : « & » y devient « &amp; », d'où « Restaurants » seul)
+    assert "Restaurants" not in texte               # l'addition d'août n'est pas de septembre
+
+    # Même règle dans l'onglet Budget, vers lequel le bandeau renvoie :
+    # l'achat compte en août, pas en septembre.
+    def depense(periode: str) -> float:
+        b = BudgetView(d)
+        b.period = periode
+        b.date_mode = "valeur"
+        b.refresh()
+        lignes = {b.model.item(i, 0).text(): b.model.item(i, 2).text()
+                  for i in range(b.model.rowCount())}
+        return _euros(lignes.get("Restaurants & Sorties", "0"))
+
+    assert depense("2026-09") == 0.0
+    assert depense("2026-08") == 100.0
 
 
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):

@@ -640,7 +640,17 @@ SYNC_VERSION = 3
 #          mettre sur la carte ? » est 0,00 € (en rouge), pas un montant
 #          negatif : ce qui MANQUE est une autre question, deja repondue dans
 #          le detail a droite du bandeau.
-APP_VERSION = "1.30.1"
+# 1.30.2 : le BUDGET compte a la date d'ACHAT, plus a la date de valeur.
+#          Sur une carte a debit differe, tout le lot du mois part le 4 du
+#          mois suivant : les achats d'aout faisaient donc deborder les
+#          budgets de septembre. Le 07/09/2026, le bandeau du Bilan annoncait
+#          « Restaurants & Sorties 147 % » et « Shopping 104 % » pour un mois
+#          ou rien n'avait ete depense dans ces deux categories. L'onglet
+#          Budget et le bandeau d'alerte ignorent desormais le selecteur
+#          « Date » : un budget repond a « qu'ai-je depense ? », pas a « qu'a
+#          preleve la banque ? ». Bilan, Operations et Categories, qui
+#          regardent le solde, continuent de le suivre.
+APP_VERSION = "1.30.2"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

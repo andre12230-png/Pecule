@@ -896,11 +896,13 @@ class BilanView(QWidget):
         month = date.today().strftime("%Y-%m")
         spent: dict[str, float] = {}
         for t in txs:
-            # Même date que l'onglet Budget (vers lequel l'alerte renvoie) :
-            # sinon les deux écrans annonceraient des dépenses différentes.
+            # Date d'ACHAT, comme l'onglet Budget vers lequel l'alerte renvoie
+            # (voir BudgetView._eff_date) : sinon les deux écrans annonceraient
+            # des dépenses différentes, et le lot de la carte à débit différé,
+            # parti le 4, ferait déborder les budgets du mois suivant.
             if (t.get("categorie") == "Transaction exclue"
                     or t.get("montant", 0) >= 0
-                    or not self._eff_date(t).startswith(month)):
+                    or not t.get("date", "").startswith(month)):
                 continue
             c = t.get("categorie", "Non classé")
             spent[c] = spent.get(c, 0) + abs(t["montant"])
