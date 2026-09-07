@@ -13,6 +13,32 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — Tous les bandeaux du Bilan suivent le mois choisi (1.30.4)
+
+**Fait.** Les deux derniers bandeaux calés sur le mois courant — le **verdict**
+et le bandeau vert **« Ce mois-ci »** — suivent maintenant le sélecteur, comme
+l'Encours carte et l'alerte budget. Un mois clos se raconte au passé : « Août
+2026 : le compte a fini le mois à 102,00 €. Au plus bas : −316,43 € le
+01/08/2026 », et le bandeau vert devient « AOÛT 2026 — ce qui est passé » avec
+« Débité » / « Encaissé » et le solde réellement constaté. Un mois à venir
+annonce ce qui est déjà prévu. Deux méthodes ajoutées : `_mouvements_du_mois()`
+(les opérations pointées d'un mois clos, à leur date de banque) et
+`_creux_du_mois()` (le point le plus bas, en rejouant le mois depuis le solde de
+fin du mois précédent). Deux tests ajoutés, notice complétée, 273 tests.
+
+**Pourquoi.** Demande d'André : « tous les bandeaux doivent suivre le mois
+sélectionné ». Le Bilan disait trois choses à la fois — deux bandeaux sur le
+mois consulté, deux sur le mois en cours — sans que rien ne le signale.
+
+**Reste.** Le solde de fin de mois vient toujours de `_solde_fin_de_mois()`
+dans les trois cas : verdict, bandeau vert et bandeau carte ne peuvent donc pas
+se contredire. Contrôle croisé sur la vraie base : août part de −316,43 €
+(fin juillet), −2 439,02 € débités, +3 873,76 € encaissés, −1 016,31 € de
+carte → 102,00 €, le solde affiché. Toujours ouvert : l'onglet Catégories et
+la publication (dernier tag `v1.23.2`).
+
+---
+
 ## 2026-09-07 — Le bandeau « Budget dépassé » suit la période (1.30.3)
 
 **Fait.** Le bandeau d'alerte du Bilan ne parle plus seulement du mois en

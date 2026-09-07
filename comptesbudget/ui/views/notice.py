@@ -340,8 +340,12 @@ ouvrant l'application : <b>est-ce que je passe le mois ?</b> « Septembre 2026 :
 le compte finit le mois à −120,00 €, négatif à partir du 13/09/2026
 (−30,00 € après “Électricité”). Au plus bas : −250,00 € le 05/10/2026. »
 Elle passe au vert quand le compte tient.</p>
-<p>Elle parle <b>toujours du mois en cours</b>, même quand vous consultez un mois
-passé : c'est un verdict pour agir, pas une fiche de consultation.</p>
+<p>Elle <b>suit la période choisie</b> en haut de l'écran, en changeant de
+temps avec elle : sur un mois clos elle se met au passé (« Août 2026 : le compte
+a fini le mois à 102,00 €. Au plus bas : −316,43 € le 01/08/2026 »), sur un mois
+à venir elle annonce ce qui est déjà prévu, et sur le mois en cours elle reste
+un verdict pour agir. Une année ou « Toutes périodes » ne désignent aucun mois :
+le bandeau revient alors au mois en cours.</p>
 <p><b>Pourquoi le jour et pas seulement le total.</b> Un creux vient souvent du
 <b>calendrier</b>, pas du niveau de dépenses : le prélèvement de la carte tombe
 le 4 ou le 5, alors que les pensions n'arrivent que le 7 et le 9. Un mois peut
@@ -434,6 +438,13 @@ sont des <b>échéances déjà saisies ⏳</b> : les autres viennent du Prévisi
 et n'existent pas encore dans vos opérations.</p>
 <p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
 banque, le compter ici le compterait deux fois.</p>
+<p>Comme les autres bandeaux, il <b>suit la période choisie</b>. Sur un mois
+clos, il ne montre plus ce qui « reste à passer » — il n'y a plus rien à
+attendre — mais <b>ce qui est passé</b> : le titre le dit (« AOÛT 2026 — ce qui
+est passé »), les deux premières tuiles se mettent au passé (« Débité »,
+« Encaissé ») et le solde est celui réellement constaté le dernier jour. Sur un
+mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année ou
+« Toutes périodes » le ramènent au mois en cours.</p>
 <p>La ligne <b>« Prochaines : »</b> nomme les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
 Prévisionnel.</p>

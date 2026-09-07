@@ -657,7 +657,15 @@ SYNC_VERSION = 3
 #          annee ou « Toutes periodes » le ramenent au mois en cours — un
 #          budget mensuel ne se juge qu'au mois. Meme regle que le bandeau
 #          Encours carte, dont il reprend le mecanisme.
-APP_VERSION = "1.30.3"
+# 1.30.4 : TOUS les bandeaux du Bilan suivent le mois choisi. Le verdict et
+#          le bandeau vert restaient sur le mois en cours ; ils suivent
+#          maintenant le selecteur, comme l'Encours carte et l'alerte budget.
+#          Un mois clos se raconte au passe — « Aout 2026 : le compte a fini
+#          le mois a 102,00 EUR. Au plus bas : -316,43 EUR le 01/08/2026 »,
+#          « AOUT 2026 - ce qui est passe » avec « Debite » et « Encaisse » —
+#          un mois a venir annonce ce qui est deja prevu, et une annee ou
+#          « Toutes periodes » ramenent au mois en cours.
+APP_VERSION = "1.30.4"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
