@@ -149,7 +149,7 @@ class BilanView(QWidget):
             ("solde",    "💼 Solde bancaire réel (pointé)", "#1F3A6B"),
             ("net",      "Mouvement du mois",              "#34495E"),
             ("epargne",  "Taux d'épargne",                 "#16A085"),
-            ("pointe",   "✔ Pointé sur la période",         "#1A7A3A"),
+            ("pointe",   "✔ Mouvement pointé",             "#1A7A3A"),
         ]
         for key, label, color in defs:
             card = self._make_kpi(label, "—", color)
@@ -1148,7 +1148,10 @@ class BilanView(QWidget):
         self.kpis["pointe"]._value.setText(fmt_euro(solde_p_periode))
         # Couleur dynamique : vert si le solde pointé est positif, rouge s'il est négatif
         self._colorer_kpi("pointe", "#1A7A3A" if solde_p_periode >= 0 else "#C0392B")
-        self.kpis["pointe"]._sub.setText(f"{n_pt} opération(s) pointée(s)")
+        # La période est rappelée ici : le titre ne la porte plus depuis qu'il
+        # dit ce qu'on additionne (« Mouvement pointé »).
+        self.kpis["pointe"]._sub.setText(
+            f"{n_pt} opération(s) pointée(s) — {period_label(self.period)}")
 
         # ── Graphique en barres : douze mois ──────────────────────────
         # Il reçoit TOUTES les opérations, pas celles de la période : sur un

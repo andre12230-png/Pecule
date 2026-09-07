@@ -672,7 +672,15 @@ SYNC_VERSION = 3
 #          dementait. La notice dit desormais lesquelles des quatre tuiles
 #          suivent la periode (trois) et pourquoi le solde bancaire reel,
 #          lui, reste au jour d'aujourd'hui.
-APP_VERSION = "1.30.5"
+# 1.30.6 : la tuile « Pointe sur la periode » devient « Mouvement pointe ».
+#          Son ancien nom disait OU l'on regarde, pas CE QU'ON additionne :
+#          la somme des operations que la banque a confirmees. Le nouveau se
+#          lit en face de « Mouvement du mois » juste a cote — memes chiffres
+#          quand tout le mois est pointe, l'ecart etant ce qui n'est pas
+#          encore passe en banque. La periode passe dans le sous-titre
+#          (« 34 operation(s) pointee(s) - Septembre 2026 »), rien n'est
+#          perdu. Elle s'appelait « Solde pointe » jusqu'a la 1.30.0.
+APP_VERSION = "1.30.6"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

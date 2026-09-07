@@ -13,6 +13,26 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — « Pointé sur la période » devient « Mouvement pointé » (1.30.6)
+
+**Fait.** Renommage de la quatrième tuile, et la période passe dans son
+sous-titre (« 34 opération(s) pointée(s) — Septembre 2026 »). Notice reprise
+aux trois endroits qui la citaient, test ajouté, 275 tests.
+
+**Pourquoi.** André, après avoir demandé à quoi elle correspondait : le nom
+disait **où** l'on regarde, pas **ce qu'on additionne**. Il proposait
+« Opérations pointées » ; « Mouvement pointé » a été retenu parce qu'il se lit
+en face de « Mouvement du mois » juste à côté — deux chiffres égaux veulent
+dire que le mois est entièrement pointé, et leur écart mesure ce qui n'est pas
+encore passé en banque. Sur ses données : août 418,43 € = 418,43 € (57
+opérations sur 57 pointées), septembre 692,73 € contre −314,11 €, l'écart de
+−1 006,84 € étant ses 17 échéances en attente.
+
+**Reste.** Rien sur ce point. Toujours ouvert : l'onglet Catégories et la
+publication (dernier tag `v1.23.2`).
+
+---
+
 ## 2026-09-07 — La tuile « Mouvement » dit de quoi elle parle (1.30.5)
 
 **Fait.** Son titre suit la période : « Mouvement du mois », « Mouvement de
