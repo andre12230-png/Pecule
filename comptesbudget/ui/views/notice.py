@@ -200,6 +200,16 @@ se juge qu'au mois.</p>
 (nombre d'opérations et total), à droite les opérations détaillées de la
 catégorie sélectionnée. Le bouton « Recatégoriser » permet de déplacer
 en masse toutes les opérations d'une catégorie vers une autre.</p>
+<p><b>À quelle date ces totaux sont comptés</b> — une ligne sous le tableau le
+rappelle. Cet onglet suit le sélecteur « Date » du haut : réglé sur « date de
+valeur », il range un achat par carte dans le mois où la banque l'a prélevé.
+L'onglet <b>Budget</b>, lui, compte toujours à la <b>date d'achat</b> : les deux
+écrans peuvent donc afficher des totaux différents pour le même mois — 248,90 €
+en Shopping d'un côté, 0,00 € de l'autre, si tout venait du lot de la carte du
+mois précédent. Aucun des deux ne se trompe : l'un dit ce qui est sorti du
+compte, l'autre ce que vous avez dépensé. Passer le sélecteur en « date
+d'opération » les fait coïncider. L'avertissement ne s'affiche que si votre
+carte est à débit différé — sinon les deux dates se confondent.</p>
 <p>Le bouton « <b>Catégories proposées…</b> », sous la liste, sert à écarter
 des menus déroulants les catégories dont vous ne vous servez pas : si vous
 n'avez ni animaux ni épargne, inutile de les voir à chaque saisie. Rien n'est

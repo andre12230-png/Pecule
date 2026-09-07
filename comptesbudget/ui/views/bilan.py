@@ -18,8 +18,8 @@ from PySide6.QtCharts import (
 )
 
 from ...utils import (
-    cat_color, date_debit_differe, est_paiement_carte, fmt_euro, fmt_date_fr,
-    in_period, period_label,
+    carte_a_debit_differe, cat_color, date_debit_differe, est_paiement_carte,
+    fmt_euro, fmt_date_fr, in_period, period_label,
 )
 from ...database import Database
 from ...labels import clean_libelle
@@ -481,21 +481,6 @@ class BilanView(QWidget):
         return [t for t in cartes
                 if t.get("date", "").startswith(mois) and t["montant"] < 0]
 
-    @staticmethod
-    def _carte_a_debit_differe(cartes: list[dict]) -> bool:
-        """La carte de ce compte est-elle à débit différé ?
-
-        Reconnu à la trace qu'il laisse dans les données : une opération carte
-        dont la date de valeur dépasse la date d'achat. Sur une carte à débit
-        immédiat, les deux dates sont toujours les mêmes.
-
-        Aucun réglage à saisir : c'est la banque qui décide, et une seule
-        opération suffit à le dire. Un compte sans la moindre opération carte
-        répond « non », ce qui efface un bandeau qui n'aurait rien à montrer.
-        """
-        return any(t.get("date_valeur") and t.get("date")
-                   and t["date_valeur"] > t["date"] for t in cartes)
-
     def _prochain_decouvert(self, txs: list[dict], solde_compte: float,
                             jours: int = HORIZON_DECOUVERT) -> dict:
         """Suit le solde jour après jour et dit quand il passe sous zéro.
@@ -668,7 +653,7 @@ class BilanView(QWidget):
         # de fin de mois le compterait deux fois, puisqu'il en est déjà
         # sorti. Le bandeau s'efface donc entièrement : le solde prévu du
         # bandeau « Ce mois-ci » répond déjà à la question.
-        if not self._carte_a_debit_differe(cartes):
+        if not carte_a_debit_differe(cartes):
             self.cb_banner.setVisible(False)
             return
 

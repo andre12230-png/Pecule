@@ -680,7 +680,15 @@ SYNC_VERSION = 3
 #          encore passe en banque. La periode passe dans le sous-titre
 #          (« 34 operation(s) pointee(s) - Septembre 2026 »), rien n'est
 #          perdu. Elle s'appelait « Solde pointe » jusqu'a la 1.30.0.
-APP_VERSION = "1.30.6"
+# 1.30.7 : l'onglet Categories dit a quelle date il compte. Il suit le
+#          selecteur « Date » tandis que le Budget compte a la date d'achat :
+#          les deux affichaient 248,93 EUR et 0,00 EUR pour le meme Shopping
+#          de septembre, sans rien pour l'expliquer. Une ligne sous le tableau
+#          nomme la date utilisee, et ne previent de l'ecart avec le Budget
+#          que si le compte montre du debit differe. La detection
+#          (carte_a_debit_differe) passe du Bilan dans utils.py, les deux
+#          ecrans s'en servent.
+APP_VERSION = "1.30.7"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

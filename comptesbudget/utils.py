@@ -267,6 +267,23 @@ def est_paiement_carte(type_op: str) -> bool:
     return "carte" in (type_op or "").lower()
 
 
+def carte_a_debit_differe(operations: list[dict]) -> bool:
+    """La carte de ce compte est-elle à débit différé ?
+
+    Reconnu à la trace qu'il laisse dans les données : une opération carte dont
+    la date de valeur dépasse la date d'achat. Sur une carte à débit immédiat,
+    les deux dates sont toujours les mêmes.
+
+    Aucun réglage à saisir : c'est la banque qui décide, et une seule opération
+    suffit à le dire. Un compte sans la moindre opération carte répond « non »,
+    ce qui efface les explications et les bandeaux qui n'auraient rien à
+    montrer chez lui."""
+    return any(est_paiement_carte(t.get("type"))
+               and t.get("date_valeur") and t.get("date")
+               and t["date_valeur"] > t["date"]
+               for t in operations)
+
+
 def date_debit_differe(date_op_iso: str, jour: int = JOUR_DEBIT_DIFFERE) -> str:
     """Date de valeur d'un achat payé par carte à débit différé.
 

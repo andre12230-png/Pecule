@@ -14,7 +14,8 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils import (
-    cat_color, deaccent, fmt_euro, in_period, period_label,
+    carte_a_debit_differe, cat_color, deaccent, fmt_euro, in_period,
+    period_label,
 )
 from ...database import Database
 
@@ -94,6 +95,15 @@ class CategoriesView(QWidget):
         splitter.setSizes([320, 700])
         v.addWidget(splitter)
 
+        # À quelle date ces totaux sont comptés. Sans cette ligne, l'onglet
+        # affiche 248,93 € en Shopping là où le Budget affiche 0,00 € pour le
+        # même mois, sans que rien n'explique l'écart : ici on suit le
+        # sélecteur « Date », le Budget compte toujours à la date d'achat.
+        self.info_date = QLabel("")
+        self.info_date.setWordWrap(True)
+        self.info_date.setStyleSheet("color:#555; font-size:9pt; padding:4px 2px")
+        v.addWidget(self.info_date)
+
     def _eff_date(self, t: dict) -> str:
         """Date utilisée pour la période affichée : elle suit le sélecteur
         « Date » de la barre du haut, comme le Bilan et les Opérations."""
@@ -101,9 +111,33 @@ class CategoriesView(QWidget):
             return t.get("date_valeur") or t.get("date", "")
         return t.get("date", "")
 
+    def _maj_info_date(self, toutes: list[dict]):
+        """Dit à quelle date les totaux sont comptés, et prévient quand cela
+        les éloigne de l'onglet Budget.
+
+        L'avertissement ne s'affiche que s'il peut arriver : il faut à la fois
+        compter en date de valeur et une carte à débit différé — sur une carte
+        à débit immédiat, les deux dates se confondent et il n'y a rien à
+        signaler."""
+        if self.date_mode != "valeur":
+            self.info_date.setText(
+                "Totaux comptés à la <b>date d'opération</b> — le jour de "
+                "l'achat, comme l'onglet Budget.")
+            return
+        texte = ("Totaux comptés à la <b>date de valeur</b> — le jour où la "
+                 "banque débite.")
+        if carte_a_debit_differe(toutes):
+            texte += (" Vos achats par carte comptent donc dans le mois du "
+                      "prélèvement, pas dans celui de l'achat : l'onglet "
+                      "Budget, lui, compte toujours à la date d'achat, et ses "
+                      "totaux diffèrent d'autant. Le sélecteur « Date » en "
+                      "haut de l'écran change ce choix.")
+        self.info_date.setText(texte)
+
     def refresh(self):
-        txs = [t for t in (dict(r) for r in self.db.list_tx())
-               if in_period(self._eff_date(t), self.period)]
+        toutes = [dict(r) for r in self.db.list_tx()]
+        self._maj_info_date(toutes)
+        txs = [t for t in toutes if in_period(self._eff_date(t), self.period)]
         by_cat = {}
         for t in txs:
             c = t.get("categorie", "Non classé")

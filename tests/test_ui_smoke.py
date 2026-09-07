@@ -614,6 +614,47 @@ def test_mouvement_pointe_se_lit_en_face_du_mouvement(qapp, tmp_path, monkeypatc
     assert _euros(v.kpis["net"]._value.text()) == -80.0        # avec l'échéance
 
 
+def test_categories_dit_a_quelle_date_elle_compte(qapp, tmp_path):
+    """L'onglet Catégories suit le sélecteur « Date » et peut donc afficher
+    d'autres totaux que le Budget, qui compte à la date d'achat. Il doit le
+    dire : 248,93 € d'un côté et 0 € de l'autre, sans explication, ne peut que
+    dérouter.
+
+    Sur un compte SANS débit différé, les deux dates se confondent : la
+    comparaison avec le Budget n'a pas lieu d'être et n'est pas affichée."""
+    from comptesbudget.ui.views.categories import CategoriesView
+
+    d = Database(str(tmp_path / "cats.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="cb", date="2026-08-28", date_valeur="2026-09-04",
+                    libelle="ACHAT CB", type="Carte bancaire",
+                    categorie="Shopping", montant=-100.0, pointee=1))
+
+    v = CategoriesView(d); v.period = "2026-09"; v.date_mode = "valeur"; v.refresh()
+    txt = v.info_date.text()
+    assert "date de valeur" in txt and "diffèrent" in txt
+    assert v.info_date.isVisibleTo(v)
+
+    # En date d'opération, les deux onglets comptent pareil : plus rien à dire
+    # sinon quelle date est utilisée.
+    v.date_mode = "operation"; v.refresh()
+    assert "date d'opération" in v.info_date.text()
+    assert "comme l'onglet Budget" in v.info_date.text()
+    assert "diffèrent" not in v.info_date.text()
+
+    # Compte à débit immédiat : pas de décalage possible, pas d'avertissement.
+    d2 = Database(str(tmp_path / "cats2.db"))
+    d2.set_setting("initial_balance", "0")
+    d2.insert_tx(_tx(id="cb2", date="2026-09-03", date_valeur="2026-09-03",
+                     libelle="ACHAT CB", type="Carte bancaire",
+                     categorie="Shopping", montant=-100.0, pointee=1))
+    v2 = CategoriesView(d2); v2.period = "2026-09"; v2.date_mode = "valeur"
+    v2.refresh()
+    assert "date de valeur" in v2.info_date.text()
+    assert "diffèrent" not in v2.info_date.text()
+
+
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
     au prochain prélèvement = pointés) et un encours incluant les achats

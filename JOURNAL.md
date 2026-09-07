@@ -13,6 +13,28 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — L'onglet Catégories dit à quelle date il compte (1.30.7)
+
+**Fait.** Une ligne sous le tableau nomme la date utilisée. En date de valeur
+et sur un compte à débit différé, elle prévient que l'onglet Budget, qui compte
+à la date d'achat, affiche d'autres totaux — et pourquoi. En date d'opération,
+elle dit simplement que les deux onglets comptent pareil. La détection du débit
+différé (`carte_a_debit_differe`) quitte le Bilan pour `utils.py` : deux écrans
+s'en servent maintenant. Test ajouté, notice complétée, 276 tests.
+
+**Pourquoi.** Le point resté ouvert depuis la 1.30.2 : pour septembre, l'onglet
+Catégories affichait 248,93 € en Shopping quand le Budget affichait 0,00 €.
+Aucun des deux n'a tort — l'un dit ce qui est sorti du compte, l'autre ce qui a
+été dépensé — mais rien ne l'expliquait. Trois sorties étaient possibles ;
+André a choisi de garder les deux logiques et de les écrire, plutôt que
+d'aligner Catégories (ce qui l'aurait éloigné du Bilan) ou de changer de mode
+de date (ce qui fausserait la lecture du solde).
+
+**Reste.** Rien sur ce point. Toujours ouvert : la publication — dernier tag
+`v1.23.2`, alors que le code et l'exe installé sont en 1.30.7.
+
+---
+
 ## 2026-09-07 — Le Bilan tout entier suit le mois choisi (1.30.2 → 1.30.6)
 
 **Fait.** Cinq pas, partis d'un constat d'André sur le bandeau des budgets
