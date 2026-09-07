@@ -481,10 +481,14 @@ class MainWindow(QMainWindow):
         if dlg.exec() != QDialog.Accepted:
             return
         nd, nb = dlg.values()
-        # set_setting range ces deux valeurs dans le compte affiché.
+        # Le plafond d'encours carte a été retiré le 07/09/2026 : le bandeau
+        # du Bilan calcule maintenant ce qui reste d'après les mouvements
+        # réels du mois. L'ancienne valeur dort encore dans la table
+        # `settings`, inutilisée — rien n'est effacé des données.
         self.db.set_setting("initial_date", nd)
         self.db.set_setting("initial_balance", str(nb))
-        QMessageBox.information(self, "Paramètres",
+        QMessageBox.information(
+            self, "Paramètres",
             f"« {self.db.nom_compte()} » — solde de départ : "
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()

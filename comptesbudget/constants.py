@@ -519,7 +519,123 @@ SYNC_VERSION = 3
 #            avec PySide6) plutôt que de renommer les boutons un par un — ce
 #            qui aurait laissé de côté les questions Oui/Non et les fenêtres
 #            de choix de fichier.
-APP_VERSION = "1.27.0"
+# 1.28.0 : plafond d'encours carte — un repère chiffré, en rouge quand il est
+#          dépassé.
+#          • Nouveau réglage « Plafond d'encours carte » dans Paramètres :
+#            le montant que l'encours de la carte ne devrait pas dépasser
+#            sur un mois. Quand le « Total des achats à débiter » du bandeau
+#            Encours le dépasse, le chiffre passe en rouge et le détail dit
+#            de combien ; en dessous, il annonce ce qu'il reste à dépenser.
+#          • C'est le total qui est comparé, pas les deux chiffres de gauche :
+#            eux ne sont que des morceaux du même lot (ce que la banque a déjà
+#            rattaché au prélèvement, et ce qu'elle n'a pas encore intégré).
+#          • Zéro = pas de plafond, et le bandeau reste exactement comme avant.
+#          • Le réglage est commun à tous les comptes et vit dans la table
+#            `settings` : aucune modification de la structure de la base, donc
+#            aucun risque pour les données existantes.
+# 1.29.0 : le sélecteur de période coupé en deux — « ‹ année mois › ».
+#          • La barre du haut ne présente plus une liste unique où les mois se
+#            rangeaient sous leur année : un menu pour l'année, un pour le
+#            mois, encadrés de deux flèches qui reculent ou avancent d'un cran
+#            à échelle constante (un mois reste un mois, une année une année).
+#          • Les flèches se grisent en bout de course, et le menu des mois se
+#            grise sur « Toutes périodes », qui est à cheval sur les années.
+#            Changer d'année garde le mois affiché s'il existe là-bas.
+#          • Même sélecteur que pv-dashboard et Recharges VE : les trois
+#            applications se manœuvrent désormais pareil.
+#          • Les valeurs internes (« all », « 2026 », « 2026-09 ») n'ont pas
+#            bougé : aucune vue n'a été touchée, le filtrage est identique.
+#            Le mode « Date » et la case « Voir les archives » non plus.
+# 1.30.0 : le bandeau Encours carte dit ce qui reste vraiment, et ce qu'ont
+#          donne les mois ecoules.
+#          - Nouveau chiffre « Reste pour la carte » : le solde que le compte
+#            aura a la fin du mois, tout paye, moins les achats deja engages
+#            sur la carte. Vert s'il reste quelque chose, rouge s'il manque.
+#          - Le PLAFOND d'encours carte est RETIRE, du bandeau comme des
+#            Parametres. Un repere fixe pouvait annoncer « il reste 247 € »
+#            pendant que le bandeau voisin prevoyait un solde negatif en fin
+#            de mois : les deux bandeaux se contredisaient. Le calcul part
+#            desormais des mouvements reels du mois. L'ancienne valeur reste
+#            dans la table `settings`, simplement inutilisee : aucune donnee
+#            n'est effacee.
+#          - Le bandeau suit la periode choisie en haut : sur un mois passe il
+#            montre l'encours de ce mois-la, ce qu'il restait, et la date a
+#            laquelle il a ete preleve ; les deux chiffres du prochain
+#            prelevement s'effacent. Sur une annee ou « Toutes periodes », il
+#            reste au mois en cours — un encours ne se juge qu'au mois.
+#          - Le verdict du mois ecoule est rappele en clair (« aout 2026 :
+#            939,51 € depenses a la carte, il a MANQUE 837,51 € une fois tout
+#            paye ») et bascule seul au changement de mois.
+#          - A partir du 10 du mois, une estimation de fin de mois. Avant le
+#            10, rien : une grosse course en debut de mois fausse tout.
+#            (Une seconde ligne a montre un temps ce qui restait sur les six
+#            derniers mois ; retiree le meme jour, le graphique douze mois
+#            disant la meme tendance en mieux.)
+#          - Les achats du mois se comptent sur la DATE D'ACHAT : c'est le
+#            mois ou l'on depense qui est juge, pas celui ou la banque
+#            preleve.
+#          - Nouvelle ligne sous les tuiles : LE JOUR ou le compte passera
+#            sous zero, le montant a ce moment-la, l'operation qui fait
+#            basculer, et le point le plus bas. Rouge s'il plonge, vert s'il
+#            tient. Horizon de 45 jours : assez pour couvrir le prelevement
+#            carte du mois suivant et la remontee des pensions derriere. Un
+#            total de fin de mois ne dit pas QUAND on plonge, or le creux
+#            vient du calendrier (lot carte le 4-5, pensions le 7 et le 9).
+#          - CARTES SANS DEBIT DIFFERE : le bandeau Encours s'efface
+#            entierement. Sur une carte a debit immediat l'achat sort le jour
+#            meme : il n'y a rien « a debiter », et retrancher ces achats du
+#            solde de fin de mois les comptait DEUX FOIS (500 € annonces la ou
+#            il en restait 750). Reconnu sans reglage, a la trace laissee dans
+#            les donnees : une operation carte dont la date de valeur depasse
+#            la date d'achat. La saisie manuelle ne decale plus la date de
+#            valeur non plus, sauf si le compte montre deja du differe.
+#          - Le Bilan DEFILE : sa hauteur minimale imposait 1087 px a la
+#            fenetre, et davantage a chaque bandeau ajoute ; en dessous, Qt
+#            comprimait et les libelles des panneaux du bas se chevauchaient.
+#            La fenetre descend maintenant a 811 px sans rien ecraser.
+#          - Vocabulaire unifie : les deux bandeaux de projection portent les
+#            memes intitules (« A debiter (hors carte) », « A encaisser »),
+#            seule la date du « Solde au ... » disant l'horizon. Quatre
+#            formulations proches faisaient croire a quatre chiffres.
+#          - Le taux d'epargne s'ecrit « -10,6 % » : il etait le seul chiffre
+#            de l'application a garder le point decimal anglais.
+#          - BANDEAU DE VERDICT en tete du Bilan : la reponse en une phrase a
+#            « est-ce que je passe le mois ? » — ou le compte finit, a partir
+#            de quand il est negatif, l'operation qui fait basculer, et le
+#            point le plus bas. Vert quand le compte tient. Il parle toujours
+#            du mois EN COURS, meme si l'on consulte un mois passe.
+#          - Le bandeau « Ce qui est prevu » (15 jours) est RETIRE : son
+#            « solde au 22 » etait un jalon arbitraire la ou le verdict donne
+#            le pire moment. Ses deux apports — les prochaines echeances
+#            nommees et les operations carte en cours — sont repris dans le
+#            bandeau « Ce mois-ci », qui reste seul. Un bloc de moins a
+#            l'ecran, aucun chiffre perdu.
+#          - Le graphique montre TOUJOURS DOUZE MOIS, quelle que soit la
+#            periode : sur un mois affiche, il ne dessinait qu'une barre, un
+#            quart de l'ecran pour un chiffre donne six fois ailleurs. La
+#            periode deplace la fenetre au lieu de la reduire (un mois : les
+#            douze qui s'achevent sur lui ; une annee : ses douze mois ;
+#            toutes periodes : les douze derniers). Repli sur les derniers
+#            mois connus si la fenetre choisie est vide.
+#          - Les bornes passent dans le TITRE du cadre (« Evolution sur 12
+#            mois — OCT 2025 -> SEP 2026 ») : sur douze colonnes, l'axe n'a
+#            la place que du mois, et Qt tronquait « Oct 25 » en « Oc... ».
+#          - QUATRE TUILES au lieu de six. « Revenus » et « Depenses »
+#            repetaient le mouvement net, dont ils sont les deux moities :
+#            ils passent en sous-titre de « Mouvement du mois » (« 2 951,41 €
+#            entres (5) - 3 265,52 € sortis (46) »), aucun chiffre perdu.
+#          - « Solde pointe » devient « Pointe sur la periode » : ce n'est pas
+#            un solde mais la somme des operations pointees de la periode
+#            affichee, et son nom le faisait confondre avec le solde reel
+#            juste a cote, pour une valeur souvent voisine.
+#          - LISIBILITE DES TEXTES GRIS : les sous-titres des tuiles
+#            passent de #999 a #555 et de 8 a 9 points (contraste 2,8:1 ->
+#            7,5:1, le minimum lisible etant 4,5:1). Meme correction pour les
+#            pourcentages des listes du Bilan, pour la date de valeur de la
+#            liste des operations, et pour les lignes pointees, qui restent
+#            distinctes du texte normal sans etre penibles a lire — sur une
+#            base tenue a jour, elles sont l'immense majorite des lignes.
+APP_VERSION = "1.30.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

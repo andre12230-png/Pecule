@@ -288,7 +288,7 @@ class PrefillRecurringDialog(QDialog):
             it_cat.setForeground(QBrush(QColor(cat_color(c["categorie"]))))
 
             it_range = QStandardItem(f"{fmt_euro(c['_min'])} … {fmt_euro(c['_max'])}")
-            it_range.setForeground(QBrush(QColor("#888")))
+            it_range.setForeground(QBrush(QColor("#5A5A5A")))
             if not c["_stable"]:
                 it_range.setForeground(QBrush(QColor("#C77B00")))
 
@@ -469,7 +469,7 @@ class GenererEcheancesDialog(QDialog):
             it_cat.setForeground(QBrush(QColor(cat_color(e["categorie"]))))
 
             if verrou:
-                etat, couleur = "✔ déjà enregistrée", "#888"
+                etat, couleur = "✔ déjà enregistrée", "#5A5A5A"
             elif e["_passee"]:
                 etat, couleur = "⚠ date déjà passée", "#C77B00"
             else:
@@ -489,7 +489,7 @@ class GenererEcheancesDialog(QDialog):
                 # Ligne informative : elle montre que l'échéance est couverte,
                 # mais il n'y a rien à faire dessus.
                 for it in row:
-                    it.setForeground(QBrush(QColor("#999")))
+                    it.setForeground(QBrush(QColor("#5A5A5A")))
             self.model.appendRow(row)
         self._update_summary()
 
@@ -587,7 +587,7 @@ class HarmonizeLabelsDialog(QDialog):
 
             it_old = QStandardItem(row["old"])
             it_old.setEditable(False)
-            it_old.setForeground(QBrush(QColor("#888")))
+            it_old.setForeground(QBrush(QColor("#5A5A5A")))
 
             it_n = QStandardItem(str(row["n"]))
             it_n.setTextAlignment(Qt.AlignCenter)

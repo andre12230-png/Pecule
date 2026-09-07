@@ -293,6 +293,29 @@ class TxDialog(QDialog):
         self._dv_user_edited = False
         self._sync_date_valeur()
 
+    def _compte_en_debit_differe(self) -> bool:
+        """Ce compte a-t-il une carte à débit différé ?
+
+        Beaucoup de cartes sont à débit IMMÉDIAT : l'achat sort du compte le
+        jour même. Reporter d'office la date de valeur au 4 du mois suivant
+        fausserait leur solde à chaque saisie. On se fie donc à ce que les
+        données montrent — une opération carte dont la date de valeur dépasse
+        la date d'achat —, plutôt qu'à un réglage de plus à comprendre.
+
+        L'opération en cours de modification compte elle aussi : corriger le
+        type d'un achat déjà daté du 4 du mois suivant doit pouvoir revenir à
+        cette date-là, même si rien d'autre ne l'atteste.
+
+        Sur une base encore vide, la réponse est « non » : la date de valeur
+        suit la date d'achat, ce qui est vrai pour la majorité des cartes et
+        reste corrigeable à la main."""
+        def differee(t: dict) -> bool:
+            return bool(t.get("date_valeur") and t.get("date")
+                        and t["date_valeur"] > t["date"]
+                        and "carte" in (t.get("type") or "").lower())
+
+        return differee(self.tx or {}) or any(differee(t) for t in self.all_tx)
+
     def _sync_date_valeur(self):
         """Aligne la date de valeur sur le type d'opération choisi.
 
@@ -307,7 +330,8 @@ class TxDialog(QDialog):
 
         Ne fait rien si la date de valeur a été saisie à la main."""
         est_carte = (self.type_combo.currentText() == "Carte bancaire"
-                     and self.rb_debit.isChecked())
+                     and self.rb_debit.isChecked()
+                     and self._compte_en_debit_differe())
         # isVisibleTo (et non isVisible) : tant que la fenêtre n'est pas encore
         # ouverte, isVisible() renvoie toujours False et le rappel resterait
         # affiché à tort après un changement de sens.
@@ -1126,7 +1150,7 @@ class CategoriesMasqueesDialog(QDialog):
             ligne.addWidget(case)
             if motif:
                 etiquette = QLabel(motif)
-                etiquette.setStyleSheet("color:#888; font-style:italic")
+                etiquette.setStyleSheet("color:#555; font-style:italic")
                 ligne.addWidget(etiquette)
             ligne.addStretch()
             liste.addLayout(ligne)

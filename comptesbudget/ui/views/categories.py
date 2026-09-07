@@ -13,9 +13,6 @@ from PySide6.QtWidgets import (
     QInputDialog,
 )
 
-from ...constants import (
-    CATEGORIES_DEFAUT,
-)
 from ...utils import (
     cat_color, deaccent, fmt_euro, in_period, period_label,
 )

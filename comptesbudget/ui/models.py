@@ -91,7 +91,11 @@ class TxTableModel(QStandardItemModel):
             it.setData(tx["id"], Qt.UserRole)
             it.setData(tri, SORT_ROLE)
             if pointee:
-                it.setForeground(QBrush(QColor("#888")))
+                # Gris foncé (#5A5A5A, contraste 7:1) et non gris pâle : une
+                # opération pointée doit se distinguer des autres sans
+                # devenir pénible à lire — et sur une base tenue à jour,
+                # elles sont l'immense majorité des lignes.
+                it.setForeground(QBrush(QColor("#5A5A5A")))
 
         # Couleur P
         if pointee:
@@ -111,7 +115,9 @@ class TxTableModel(QStandardItemModel):
             items[2].setForeground(QBrush(QColor("#E67E22")))
             items[2].setToolTip("Débit différé : la banque débitera à cette date")
         else:
-            items[2].setForeground(QBrush(QColor("#999")))
+            # Même remarque : #999 sur blanc rendait la date de valeur
+            # presque illisible, alors qu'elle sert au rapprochement.
+            items[2].setForeground(QBrush(QColor("#5A5A5A")))
 
         # Pastille de catégorie : couleur de catégorie
         items[4].setForeground(QBrush(QColor(cat_color(tx.get("categorie", "")))))

@@ -13,6 +13,226 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — Le bandeau Encours dit ce qui reste vraiment (1.30.0)
+
+> Les montants de ce journal sont volontairement absents ou donnés en exemple :
+> le dépôt est public, et les chiffres d'un compte réel n'y ont pas leur place.
+> Le détail chiffré des séances vit dans un journal privé, hors dépôt.
+
+**Fait.** Le bandeau Encours carte du Bilan a été repris en plusieurs temps
+dans la même séance.
+
+*D'abord :* un chiffre « disponible », le bandeau qui suit la période choisie,
+le verdict du mois écoulé, et une estimation de fin de mois à partir du 10.
+
+*Puis la correction de fond.* Le disponible se comparait au **plafond fixe**
+saisi dans les Paramètres (1.28.0) et pouvait annoncer qu'il restait de la
+marge pendant que le bandeau juste en dessous prévoyait un solde **négatif** en
+fin de mois. Les deux se contredisaient.
+
+**Ce qui a changé.** Le chiffre s'appelle **« Reste pour la carte »** et vaut :
+*solde du compte à la fin du mois, une fois tout payé* **moins** *les achats
+déjà engagés sur la carte*. Pour le mois en cours, ce solde est celui du
+bandeau « Ce mois-ci » — les deux ne peuvent donc plus se contredire. Pour un
+mois clos, c'est le solde réellement constaté au dernier jour.
+
+**Le plafond est retiré**, du bandeau comme des Paramètres. La valeur reste
+dans la table `settings`, simplement inutilisée : aucune donnée n'est effacée.
+
+**Deux lectures ont été chiffrées avant de trancher** : partir du **compte**
+(report des mois précédents compris) ou juger le **mois seul** (entrées moins
+sorties hors lot carte). La première a été retenue — la seule qui ne puisse pas
+contredire le bandeau voisin, puisqu'elle en part.
+
+**Puis le jour du découvert.** Après un tour d'horizon critique de l'écran
+Bilan (cinq points pour, cinq contre, puis cinq améliorations classées), une
+ligne annonce désormais **le jour** où le compte passera sous zéro, l'opération
+qui fait basculer et le point le plus bas. Un total de fin de mois ne dit pas
+QUAND on plonge, or le creux vient souvent du **calendrier** : le lot carte est
+prélevé le 4-5 quand les pensions arrivent le 7 et le 9. Un mois peut finir à
+l'équilibre en étant passé dans le rouge au milieu.
+
+**Horizon de 45 jours**, pas la fin du mois : il faut voir le prélèvement carte
+du 4 du mois suivant **et** la remontée derrière. Le calcul réutilise
+`_lignes_a_venir` (opérations enregistrées + échéances du Prévisionnel non
+couvertes), cumule dans l'ordre des dates, retient le premier jour négatif et
+le point le plus bas. Il ne compte que le **connu** : les achats à venir
+creuseront le trou d'autant.
+
+**Cartes SANS débit différé.** Défaut reproduit par un test avant d'être
+corrigé : sur un compte à débit immédiat, le bandeau s'affichait avec trois
+zéros et **retranchait les achats une seconde fois** du solde de fin de mois,
+alors qu'ils en étaient déjà sortis. Il s'efface désormais entièrement — le
+« Solde au … » du bandeau vert répond déjà à la question. Reconnu **sans
+réglage**, à la trace laissée dans les données : une opération carte dont la
+date de valeur dépasse la date d'achat. Un réglage aurait obligé l'utilisateur
+à savoir ce qu'est un débit différé avant de s'en servir.
+
+**La saisie manuelle imposait le différé elle aussi** : tout achat par carte en
+débit voyait sa date de valeur reportée au 4 du mois suivant. Corrigé, avec la
+même détection — l'opération en cours de modification comptant elle-même, pour
+que corriger le type d'un achat déjà différé lui rende sa date. **Les imports,
+eux, étaient déjà justes** : l'OFX n'applique le différé qu'à un relevé de
+carte séparé, le CSV suit la date de valeur du relevé.
+
+**Le Bilan défile maintenant.** Sa hauteur minimale imposait **1 087 px** à la
+fenêtre — 986 pour lui seul — et montait à chaque bandeau ; en dessous, Qt
+comprimait et les libellés des panneaux du bas se chevauchaient. Un
+`QScrollArea` autour de son contenu : la fenêtre descend désormais à **811 px**
+sans rien écraser, et les ajouts futurs ne la feront plus monter.
+
+**Un verdict en tête.** La ligne du découvert ouvre par le résultat du mois :
+où le compte finit, à partir de quand il est négatif, l'opération qui fait
+basculer, le point le plus bas. Vert quand le compte tient. Il parle toujours
+du mois **en cours**, même en consultant un mois passé : c'est un verdict pour
+agir. En contrepartie, **le bandeau « Ce qui est prévu » (15 jours) est
+retiré** : son « solde à quinze jours » était un jalon arbitraire là où le
+verdict donne le **pire** moment. Ses deux apports uniques — les trois
+prochaines échéances nommées et les opérations carte en cours — sont repris
+dans le bandeau « Ce mois-ci », qui reste seul.
+
+**Le graphique montre douze mois.** Il suivait la période affichée et ne
+dessinait qu'**une seule barre** sur un mois — un quart de l'écran pour un
+chiffre donné six fois ailleurs. La période **déplace** désormais la fenêtre au
+lieu de la réduire (un mois → les douze qui s'achèvent sur lui ; une année →
+ses douze mois ; toutes périodes → les douze derniers), avec repli sur les
+derniers mois connus si la fenêtre choisie est vide.
+
+**Six tuiles ramenées à quatre.** « Revenus » et « Dépenses » répétaient le
+« Mouvement net », dont ils sont les deux moitiés : trois cases pour deux
+informations. Ils passent en sous-titre de la tuile devenue **« Mouvement du
+mois »**. Et **« Solde pointé » n'était pas un solde** : c'est la somme des
+opérations pointées **de la période affichée**, donc un mouvement. À une valeur
+voisine du solde réel juste à côté, les deux se confondaient — la tuile
+s'appelle maintenant **« Pointé sur la période »**.
+
+**Lisibilité des textes gris.** Les sous-titres des tuiles étaient en **#999
+sur blanc**, soit un contraste de **2,8 pour 1** là où le minimum lisible est
+4,5. Ils passent en **#555** (7,5:1) et de 8 à 9 points. Même correction pour
+les pourcentages des listes du Bilan, pour la **date de valeur** de la liste
+des opérations (presque illisible alors qu'elle sert au rapprochement), pour
+les **lignes pointées** — qui restent plus claires que le texte normal, comme
+le veut le signal « déjà vérifiée », mais lisibles — et pour les assistants.
+
+**Trois pièges rencontrés.**
+
+- **Rendu hors écran** : les captures montraient un graphique **vide**.
+  `QChart.SeriesAnimations` part de zéro et le rendu arrivait avant la fin de
+  l'animation ; les valeurs des `QBarSet`, elles, étaient justes. Même piège
+  pour une ligne du bandeau, invisible parce que le script rendait la fenêtre
+  **sans `show()`** — le layout n'était pas encore appliqué.
+- **Étiquettes d'axe** : sur douze colonnes, « Oct 25 » ne tient pas et Qt
+  tronque en « Oc… ». **Réduire la police n'y change rien**, le découpage se
+  faisant à la largeur de la colonne. Les bornes sont passées dans le **titre**
+  du cadre, où elles ont toute la place.
+- **Largeur des blocs** : le repli des libellés (`setWordWrap`) ramène la
+  largeur minimale de la fenêtre, mais rétrécit les blocs au point de couper
+  les montants — d'où un `setMinimumWidth` sur les valeurs.
+
+**Vérifié.** 269 tests, dont une trentaine de neufs. Les tests du bandeau ont
+été entièrement réécrits sur la nouvelle base de calcul, et ceux qui portaient
+sur la fenêtre des 15 jours reportés sur celle du mois, **date figée** — leurs
+échéances relatives auraient débordé du mois en fin de mois.
+
+**Reste.** Rien n'est publié : ni release, ni tag, ni manifeste Scoop, et les
+fichiers qui s'adressent au visiteur restent sur la version publiée.
+
+---
+
+## 2026-09-07 — Le sélecteur de période coupé en deux (1.29.0)
+
+**Fait.** La barre du haut affiche désormais **‹ [année] [mois] ›** au lieu
+d'une seule liste. Le menu de gauche porte « Toutes périodes » et les années,
+celui de droite les mois de l'année choisie ; deux flèches reculent ou avancent
+d'un cran à échelle constante (un mois reste un mois, une année une année) et
+se grisent en bout de course. Le menu des mois se grise sur « Toutes
+périodes », qui est à cheval sur toutes les années. Changer d'année garde le
+mois affiché s'il existe là-bas, pour comparer un même mois d'une année sur
+l'autre.
+
+C'est **le sélecteur de pv-dashboard et de Recharges VE**, tous deux refaits le
+même jour : les trois applications se manœuvrent maintenant pareil.
+
+**Pourquoi.** L'ancienne liste rangeait les mois en retrait sous leur année, et
+ne dépliait que l'année en cours pour ne pas devenir interminable : atteindre
+un mois d'une année passée demandait de choisir l'année, puis de rouvrir la
+liste et d'y viser la bonne ligne. Surtout, le geste le plus fréquent — « et le
+mois d'avant ? » — tient maintenant en un clic. Coupée en deux, la liste ne
+s'allongera plus : le menu des années gagne une entrée par an, celui des mois
+n'en gagnera jamais.
+
+**Ce qui n'a pas bougé.** Les valeurs internes (`all`, `2026`, `2026-09`) sont
+inchangées : **aucune vue n'a été touchée**, elles filtrent exactement comme
+avant. Le mode « Date » et la case « Voir les archives » restent à leur place,
+et l'ouverture sur le mois en cours fonctionne comme avant, repli sur « Toutes
+périodes » compris quand le mois en cours ne porte encore aucune opération.
+
+**Un choix à noter.** Le mois en cours est **toujours proposé** dans le menu,
+même vide — sinon on ne pourrait pas y aller — alors qu'on n'**ouvre** pas
+dessus s'il est vide. Proposer et ouvrir sont deux questions distinctes.
+
+**Où.** Cinq fonctions de calcul ajoutées à `utils.py` (`annees_disponibles`,
+`mois_disponibles`, `annee_de_periode`, `periode_voisine`, `nom_mois_fr`),
+pures et testées à part de l'écran ; `PeriodBar` réécrit dans `ui/widgets.py` ;
+section 4 de la Notice remise d'accord avec l'écran. `list_periods` reste comme
+liste de référence de ce qui est sélectionnable. 11 tests neufs.
+
+**Vérifié.** Fenêtre rendue hors écran sur une **copie** d'une base réelle :
+ouverture sur le mois en cours, flèche gauche vers le mois précédent, passage à
+l'année précédente en gardant le mois, « Toutes périodes » qui grise le menu
+des mois et les flèches. Balayage de toutes les périodes de toutes les années
+sans une erreur. Largeur minimale de la fenêtre **inchangée à 1 082 px**.
+
+---
+
+## 2026-09-05 — Le plafond d'encours carte s'affiche en rouge (1.28.0)
+
+**Fait.** Nouveau réglage **« Plafond d'encours carte »** dans Paramètres : le
+montant que l'encours de la carte ne devrait pas dépasser sur un mois. Quand le
+**« Total des achats à débiter »** du bandeau Encours du Bilan le dépasse, le
+chiffre passe en **rouge** et le détail annonce de combien ; en dessous du
+plafond, il annonce ce qu'il reste.
+
+Trois fichiers touchés : `SettingsDialog` (nouveau champ), `action_settings` de
+`main_window` (lecture/écriture), et `_refresh_cb_banner` de `bilan.py`
+(couleur + ligne de détail). Zéro = pas de plafond, et le bandeau reste
+exactement comme avant. Le réglage est commun à tous les comptes et vit dans la
+table `settings` : aucune modification de la structure de la base.
+
+**Reste.** *(Ajouté le 07/09/2026 : ce plafond a été retiré en 1.30.0. Un
+repère fixe pouvait annoncer qu'il restait de la marge pendant que le bandeau
+voisin prévoyait un solde négatif en fin de mois ; le calcul part désormais des
+mouvements réels. La valeur reste dans la base, inutilisée.)*
+
+---
+
+## 2026-09-05 — Ce que peut peser l'encours carte : une analyse hors dépôt
+
+**Fait.** Calcul, à partir d'une base réelle, du montant maximum d'encours
+carte compatible avec un mois à l'équilibre. Deux lectures selon ce qu'on met
+en face des recettes garanties : les charges récurrentes « nues » de la table
+`recurring`, ou les charges réellement passées sur un mois complet et sans
+exceptionnel. L'écart entre les deux tient aux **factures variables**, qui
+peuvent doubler ou décupler d'un mois sur l'autre.
+
+**Ce qu'on en retient pour le logiciel** — le reste étant propre à un compte
+donné, et consigné hors du dépôt :
+
+- **Un plafond met à l'équilibre, pas en remboursement.** Le solde cesse de se
+  dégrader mais ne remonte pas seul ; ce qui reconstitue un matelas, ce sont
+  les recettes exceptionnelles.
+- **Le creux de début de mois est un problème de calendrier, pas de niveau** :
+  le lot carte est prélevé le 4-5, alors que les pensions n'arrivent que le 7
+  et le 9. C'est ce constat qui a fait naître, le 07/09, la ligne « quand le
+  compte passe sous zéro ».
+- **Une projection linéaire de fin de mois est trompeuse** quand une grosse
+  dépense tombe en début de mois : elle peut annoncer un encours cinq fois
+  supérieur au réel. D'où le seuil du 10 du mois avant d'oser une tendance.
+- **Le mois où l'on dépense n'est pas celui où l'on paie** : juger un mois sur
+  son propre encours, jamais sur son solde.
+
+---
+
 ## 2026-09-04 — Relevé du 1er au 4 septembre : concordance vérifiée, deux dates recalées
 
 **Fait.** André avait déjà importé le relevé du compte courant (6 opérations) et
