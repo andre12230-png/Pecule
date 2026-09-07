@@ -272,8 +272,10 @@ class BilanView(QWidget):
             l.addWidget(lbl); l.addWidget(val)
             return w, val, lbl
 
-        m1, self.mois_sorties, _ = _mini_vert("À débiter (hors carte)")
-        m2, self.mois_entrees, _ = _mini_vert("À encaisser")
+        # Les deux libellés sont conservés : ils se mettent au passé quand on
+        # consulte un mois clos (« Débité » plutôt que « À débiter »).
+        m1, self.mois_sorties, self.mois_sorties_lbl = _mini_vert("À débiter (hors carte)")
+        m2, self.mois_entrees, self.mois_entrees_lbl = _mini_vert("À encaisser")
         m3, self.mois_solde, self.mois_solde_lbl = _mini_vert("Solde au terme")
         mo_lay.addWidget(m1); mo_lay.addWidget(m2); mo_lay.addWidget(m3)
         mo_lay.addStretch()
@@ -518,16 +520,87 @@ class BilanView(QWidget):
         return {"bascule": bascule, "creux": creux, "fin": fin.isoformat(),
                 "deja": solde_compte < 0}
 
+    def _mouvements_du_mois(self, txs: list[dict], mois: str) -> list[tuple]:
+        """Ce qui a réellement bougé sur le compte pendant un mois CLOS.
+
+        Mêmes opérations que le solde bancaire : celles que la banque a
+        confirmées (pointées), prises à leur date de valeur — le jour où elle
+        débite ou crédite vraiment. Le mois est fini : plus rien n'y est « à
+        venir », tout y est passé. Chaque ligne a la forme des autres bandeaux :
+        (date, libellé, montant, est_carte)."""
+        an, m = int(mois[:4]), int(mois[5:7])
+        debut = date(an, m, 1).isoformat()
+        fin = date(an, m, monthrange(an, m)[1]).isoformat()
+        return [(self._date_banque(t), t.get("libelle", ""), t["montant"],
+                 est_paiement_carte(t.get("type")))
+                for t in txs
+                if t.get("categorie") != "Transaction exclue" and t.get("pointee")
+                and debut <= self._date_banque(t) <= fin]
+
+    def _creux_du_mois(self, txs: list[dict], mois: str,
+                       solde_compte: float) -> tuple[str, float]:
+        """Le point le plus bas d'un mois CLOS, et le jour où il tombe.
+
+        On repart du solde constaté à la fin du mois précédent, puis on rejoue
+        les mouvements du mois dans l'ordre des dates : le total du mois ne
+        dirait pas si le compte a plongé en cours de route — chez André, le
+        creux vient de l'ordre des dates, le lot carte partant avant l'arrivée
+        des pensions."""
+        debut = date(int(mois[:4]), int(mois[5:7]), 1).isoformat()
+        solde = self._solde_fin_de_mois(
+            txs, self._mois_precedent(mois), solde_compte)
+        creux = (debut, solde)
+        for d, _lbl, montant, _c in sorted(self._mouvements_du_mois(txs, mois),
+                                           key=lambda x: x[0]):
+            solde += montant
+            if solde < creux[1]:
+                creux = (d, solde)
+        return creux
+
+    def _poser_verdict(self, texte: str, ok: bool):
+        """Écrit le verdict et le colore : vert quand le compte tient."""
+        style = (("background:#EAF6EC; border:1px solid #229954; color:#1A5E32;")
+                 if ok else
+                 ("background:#FDEDEB; border:1px solid #E74C3C; color:#7B241C;"))
+        self.verdict_banner.setStyleSheet(
+            f"QLabel {{ {style} border-radius:4px; padding:6px 14px; }}")
+        self.verdict_banner.setText(texte)
+        self.verdict_banner.setVisible(True)
+
     def _refresh_verdict_banner(self, txs: list[dict], solde_compte: float):
         """La réponse en une phrase : où le mois finit, et quand le compte
         passe sous zéro.
 
         Toujours affichée, verte quand le compte tient : une absence de
-        message se lirait comme un calcul qui n'a pas été fait. Elle porte
-        sur le mois EN COURS quelle que soit la période consultée — c'est un
-        verdict pour agir, pas une fiche de consultation."""
-        mois = date.today().strftime("%Y-%m")
+        message se lirait comme un calcul qui n'a pas été fait. Elle suit la
+        période choisie (voir _mois_du_bandeau), en changeant de temps avec
+        elle : un mois clos se raconte au passé — où il a fini, jusqu'où il est
+        descendu — un mois à venir se dit au conditionnel, et le mois en cours
+        reste un verdict pour agir, tourné vers le prochain découvert."""
+        mois, _consultation = self._mois_du_bandeau()
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_compte)
+        an, m = int(mois[:4]), int(mois[5:7])
+        fin_mois = date(an, m, monthrange(an, m)[1])
+        today = date.today()
+
+        if fin_mois < today:                      # mois clos : consultation
+            creux_date, creux_solde = self._creux_du_mois(txs, mois, solde_compte)
+            texte = (f"{'✅' if creux_solde >= 0 else '🚨'} "
+                     f"<b>{period_label(mois)}</b> : le compte a fini le mois à "
+                     f"<b>{fmt_euro(solde_fin)}</b>. Au plus bas : "
+                     f"<b>{fmt_euro(creux_solde)}</b> "
+                     f"le {fmt_date_fr(creux_date)}.")
+            self._poser_verdict(texte, creux_solde >= 0)
+            return
+
+        if mois > today.strftime("%Y-%m"):        # mois à venir : projection
+            texte = (f"{'✅' if solde_fin >= 0 else '🚨'} "
+                     f"<b>{period_label(mois)}</b> : au vu de ce qui est déjà "
+                     f"prévu, le compte finirait le mois à "
+                     f"<b>{fmt_euro(solde_fin)}</b>.")
+            self._poser_verdict(texte, solde_fin >= 0)
+            return
+
         info = self._prochain_decouvert(txs, solde_compte)
         bascule, (creux_date, creux_solde) = info["bascule"], info["creux"]
 
@@ -538,8 +611,6 @@ class BilanView(QWidget):
             texte = (f"✅ {debut}, et reste positif jusqu'au "
                      f"{fmt_date_fr(info['fin'])} — au plus bas "
                      f"{fmt_euro(creux_solde)} le {fmt_date_fr(creux_date)}.")
-            style = ("background:#EAF6EC; border:1px solid #229954; "
-                     "color:#1A5E32;")
         else:
             jour, montant, libelle = bascule
             if info["deja"]:
@@ -552,13 +623,8 @@ class BilanView(QWidget):
             texte = (f"🚨 {debut}, {suite}. Au plus bas : "
                      f"<b>{fmt_euro(creux_solde)}</b> "
                      f"le {fmt_date_fr(creux_date)}.")
-            style = ("background:#FDEDEB; border:1px solid #E74C3C; "
-                     "color:#7B241C;")
 
-        self.verdict_banner.setStyleSheet(
-            f"QLabel {{ {style} border-radius:4px; padding:6px 14px; }}")
-        self.verdict_banner.setText(texte)
-        self.verdict_banner.setVisible(True)
+        self._poser_verdict(texte, bascule is None)
 
     def _refresh_cb_banner(self, txs: list[dict], solde_compte: float = None):
         """Encours de la carte à débit différé, présenté comme la banque.
@@ -815,71 +881,101 @@ class BilanView(QWidget):
         return lignes, en_cours_carte
 
     def _refresh_mois_banner(self, txs: list[dict], solde_compte: float):
-        """Ce qu'il reste à passer d'ici la FIN DU MOIS en cours.
+        """Le mois choisi en trois chiffres : ce qui sort, ce qui rentre, et le
+        solde à la fin.
 
-        C'est la lecture du budget mensuel tenu sur papier : le solde en banque
-        d'un côté, tout ce qui doit encore tomber de l'autre, et le solde qu'on
-        aura à la fin. La fenêtre part du 1er du mois : une échéance du 5
-        encore en attente reste comptée.
+        C'est la lecture du budget mensuel tenu sur papier. Le bandeau suit la
+        période choisie (voir _mois_du_bandeau) et change de sens avec elle :
+
+          • mois EN COURS — ce qui reste à passer d'ici le dernier jour ; la
+            fenêtre part du 1er, donc une échéance du 5 encore en attente
+            reste comptée ;
+          • mois CLOS — ce qui est passé, tel que la banque l'a enregistré ;
+          • mois À VENIR — ce qui est déjà prévu pour ce mois-là.
+
+        Le solde de fin vient dans les trois cas de `_solde_fin_de_mois`, comme
+        le verdict et le bandeau carte : les trois ne peuvent pas se
+        contredire.
 
         Depuis le 07/09/2026, ce bandeau est le seul de sa sorte : celui des
         15 jours a été retiré, et ses deux apports — les prochaines échéances
         nommées et les opérations carte en cours — ont été repris ici."""
         today = date.today()
-        debut = today.replace(day=1)
-        fin = date(today.year, today.month, monthrange(today.year, today.month)[1])
+        mois, _consultation = self._mois_du_bandeau()
+        an, m = int(mois[:4]), int(mois[5:7])
+        debut = date(an, m, 1)
+        fin = date(an, m, monthrange(an, m)[1])
+        clos = fin < today
+        a_venir = mois > today.strftime("%Y-%m")
 
-        lignes, en_cours_carte = self._lignes_a_venir(txs, debut, fin)
+        if clos:
+            lignes, en_cours_carte = self._mouvements_du_mois(txs, mois), []
+        else:
+            lignes, en_cours_carte = self._lignes_a_venir(txs, debut, fin)
 
-        carte = sum(m for _d, _l, m, c in lignes if c)
-        sorties = sum(m for _d, _l, m, c in lignes if not c and m < 0)
-        entrees = sum(m for _d, _l, m, c in lignes if not c and m > 0)
-        solde_fin = solde_compte + carte + sorties + entrees
+        carte = sum(m_ for _d, _l, m_, c in lignes if c)
+        sorties = sum(m_ for _d, _l, m_, c in lignes if not c and m_ < 0)
+        entrees = sum(m_ for _d, _l, m_, c in lignes if not c and m_ > 0)
+        solde_fin = self._solde_fin_de_mois(txs, mois, solde_compte)
 
         self.mois_sorties.setText(fmt_euro(sorties))
         self.mois_entrees.setText(fmt_euro(entrees))
         self.mois_solde.setText(fmt_euro(solde_fin))
+        # Les libellés se mettent au passé sur un mois fini.
+        self.mois_sorties_lbl.setText(
+            "Débité (hors carte)" if clos else "À débiter (hors carte)")
+        self.mois_entrees_lbl.setText("Encaissé" if clos else "À encaisser")
         self.mois_solde_lbl.setText(f"Solde au {fmt_date_fr(fin.isoformat())}")
         self.mois_solde.setStyleSheet(
             "font-size:12pt; font-weight:bold; color:"
             + ("#1A7A3A" if solde_fin >= 0 else "#C0392B"))
 
-        self.mois_title.setText(
-            f"🗓 CE MOIS-CI — reste à passer d'ici le {fmt_date_fr(fin.isoformat())}")
+        if clos:
+            self.mois_title.setText(
+                f"🗓 {period_label(mois).upper()} — ce qui est passé")
+        elif a_venir:
+            self.mois_title.setText(
+                f"🗓 {period_label(mois).upper()} — ce qui est prévu "
+                f"d'ici le {fmt_date_fr(fin.isoformat())}")
+        else:
+            self.mois_title.setText(
+                f"🗓 CE MOIS-CI — reste à passer d'ici le {fmt_date_fr(fin.isoformat())}")
 
-        n_sorties = sum(1 for _d, _l, m, c in lignes if not c and m < 0)
-        n_entrees = sum(1 for _d, _l, m, c in lignes if not c and m > 0)
+        n_sorties = sum(1 for _d, _l, m_, c in lignes if not c and m_ < 0)
+        n_entrees = sum(1 for _d, _l, m_, c in lignes if not c and m_ > 0)
         detail = f"{n_sorties} prélèvement(s)  •  {n_entrees} rentrée(s)"
         if carte:
-            prochaine_carte = min((d for d, _l, _m, c in lignes if c), default="")
+            jour_carte = min((d for d, _l, _m, c in lignes if c), default="")
             detail += (f"  •  débit carte {fmt_euro(carte)}"
-                       + (f" le {fmt_date_fr(prochaine_carte)}"
-                          if prochaine_carte else ""))
+                       + (f" le {fmt_date_fr(jour_carte)}" if jour_carte else ""))
         if en_cours_carte:
             # Écartées du calcul : elles iront au prélèvement d'après.
             somme = sum(t["montant"] for t in en_cours_carte)
             detail += (f"  •  {len(en_cours_carte)} opération(s) carte en cours "
                        f"({fmt_euro(somme)}) au prélèvement suivant")
-        # Part déjà saisie en opérations (⏳) : le reste vient du Prévisionnel
-        # et n'existe pas encore dans la liste des opérations.
-        debut_iso, fin_iso = debut.isoformat(), fin.isoformat()
-        n_prevues = sum(
-            1 for t in txs
-            if t.get("prevue") and not t.get("pointee")
-            and debut_iso <= (t.get("date_valeur") or t.get("date", "")) <= fin_iso)
-        if n_prevues:
-            detail += f"  •  dont {n_prevues} échéance(s) déjà saisie(s) ⏳"
-        # Les trois prochaines échéances, pour situer. Elles venaient du
-        # bandeau des 15 jours : ne comptant que ce qui est ENCORE à venir,
-        # elles gardent tout leur sens dans une fenêtre qui part du 1er.
-        today_iso = today.isoformat()
-        suivantes = sorted((l for l in lignes if not l[3] and l[0] >= today_iso),
-                           key=lambda x: x[0])[:3]
-        if suivantes:
-            detail += "\nProchaines : " + "  •  ".join(
-                f"{fmt_date_fr(d)[:5]} {lbl[:22]} {fmt_euro(m)}"
-                for d, lbl, m, _c in suivantes)
-        detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
+        if not clos:
+            # Part déjà saisie en opérations (⏳) : le reste vient du
+            # Prévisionnel et n'existe pas encore dans la liste des opérations.
+            debut_iso, fin_iso = debut.isoformat(), fin.isoformat()
+            n_prevues = sum(
+                1 for t in txs
+                if t.get("prevue") and not t.get("pointee")
+                and debut_iso <= (t.get("date_valeur") or t.get("date", "")) <= fin_iso)
+            if n_prevues:
+                detail += f"  •  dont {n_prevues} échéance(s) déjà saisie(s) ⏳"
+            # Les trois prochaines échéances, pour situer. Elles venaient du
+            # bandeau des 15 jours : ne comptant que ce qui est ENCORE à venir,
+            # elles gardent tout leur sens dans une fenêtre qui part du 1er.
+            today_iso = today.isoformat()
+            suivantes = sorted((l for l in lignes if not l[3] and l[0] >= today_iso),
+                               key=lambda x: x[0])[:3]
+            if suivantes:
+                detail += "\nProchaines : " + "  •  ".join(
+                    f"{fmt_date_fr(d)[:5]} {lbl[:22]} {fmt_euro(m_)}"
+                    for d, lbl, m_, _c in suivantes)
+            detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
+        else:
+            detail += "\nConsultation : le bandeau suit la période choisie."
         self.mois_detail.setText(detail)
 
         self.mois_banner.setVisible(bool(lignes))

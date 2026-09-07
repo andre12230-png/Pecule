@@ -496,6 +496,85 @@ def test_alerte_budget_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert bandeau("all") == ""
 
 
+def _bilan_trois_mois(tmp_path, monkeypatch):
+    """Bilan figé au 07/09/2026 sur un jeu simple : août est clos, septembre
+    court, octobre n'a qu'une échéance à venir.
+
+    Août : 1 000 € au départ, −200 € le 5, +500 € le 20 → fini à 1 300 €,
+    au plus bas 800 € le 5.
+    """
+    from comptesbudget.ui.views.bilan import BilanView
+
+    _fige_aujourdhui(monkeypatch, date(2026, 9, 7))
+    d = Database(str(tmp_path / "mois.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="a1", date="2026-08-05", date_valeur="2026-08-05",
+                    libelle="SAUR", type="Prélèvement",
+                    categorie="Logement - maison", montant=-200.0, pointee=1))
+    d.insert_tx(_tx(id="a2", date="2026-08-20", date_valeur="2026-08-20",
+                    libelle="PENSION", type="Virement", categorie="Revenus",
+                    montant=500.0, pointee=1))
+    d.insert_tx(_tx(id="s1", date="2026-09-03", date_valeur="2026-09-03",
+                    libelle="EDF", type="Prélèvement",
+                    categorie="Logement - maison", montant=-50.0, pointee=1))
+    d.insert_tx(_tx(id="o1", date="2026-10-15", date_valeur="2026-10-15",
+                    libelle="IMPOTS", type="Prélèvement",
+                    categorie="Impôts et taxes", montant=-60.0, pointee=0))
+    return BilanView, d
+
+
+def test_verdict_suit_la_periode(qapp, tmp_path, monkeypatch):
+    """Le verdict parle du mois choisi : au passé pour un mois clos (« a fini
+    le mois »), au présent pour le mois en cours."""
+    BilanView, d = _bilan_trois_mois(tmp_path, monkeypatch)
+
+    def verdict(periode: str) -> str:
+        v = BilanView(d); v.period = periode; v.refresh()
+        return v.verdict_banner.text()
+
+    aout = verdict("2026-08")
+    assert "Août 2026" in aout and "a fini le mois" in aout
+    assert fmt_euro(1300.0) in aout          # solde constaté au 31/08
+    assert fmt_euro(800.0) in aout           # le plus bas du mois
+    assert "05/08/2026" in aout
+
+    # Mois en cours : la phrase reste au présent, tournée vers ce qui vient.
+    septembre = verdict("2026-09")
+    assert "Septembre 2026" in septembre and "finit le mois" in septembre
+
+    # Une année ne désigne aucun mois : retour au mois en cours.
+    assert verdict("2026") == septembre
+
+
+def test_bandeau_du_mois_suit_la_periode(qapp, tmp_path, monkeypatch):
+    """Le bandeau vert suit lui aussi la période : « ce qui est passé » pour
+    un mois clos, « reste à passer » pour le mois en cours."""
+    BilanView, d = _bilan_trois_mois(tmp_path, monkeypatch)
+
+    def bandeau(periode: str):
+        v = BilanView(d); v.period = periode; v.refresh()
+        return v
+
+    v = bandeau("2026-08")
+    assert "AOÛT 2026" in v.mois_title.text()
+    assert "est passé" in v.mois_title.text()
+    assert _euros(v.mois_sorties.text()) == -200.0
+    assert _euros(v.mois_entrees.text()) == 500.0
+    assert _euros(v.mois_solde.text()) == 1300.0
+    assert "31/08/2026" in v.mois_solde_lbl.text()
+
+    # Mois en cours : le bandeau garde son titre et son sens d'origine.
+    v = bandeau("2026-09")
+    assert "CE MOIS-CI" in v.mois_title.text()
+    assert "reste à passer" in v.mois_title.text()
+
+    # Mois à venir : ce qui est prévu d'ici la fin de ce mois-là.
+    v = bandeau("2026-10")
+    assert "OCTOBRE 2026" in v.mois_title.text()
+    assert _euros(v.mois_sorties.text()) == -60.0
+
+
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
     au prochain prélèvement = pointés) et un encours incluant les achats
