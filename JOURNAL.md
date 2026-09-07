@@ -35,8 +35,11 @@ suivait déjà cette règle (encours carte, prévisionnel).
 **Reste.** L'onglet **Catégories**, lui, suit toujours le sélecteur : en date
 de valeur, il continuera d'attribuer un achat d'août à septembre. Il répond à
 une autre question (où part l'argent), mais la contradiction avec le Budget est
-visible — à trancher si elle gêne. Rien n'est publié : le dernier tag reste
-`v1.23.2`, la 1.30.2 n'existe que dans le code.
+visible — à trancher si elle gêne. Commit poussé sur `main` et exe reconstruit
+puis installé dans `F:udget-app\Pecule` (ancien gardé en
+`Pecule.exe.avant-1.30.2`, `comptes.db` intacte). **Aucune release** : le
+dernier tag reste `v1.23.2`, et Scoop, README, `Lisez-moi.txt` et la vitrine
+annoncent toujours cette version-là.
 
 ---
 
