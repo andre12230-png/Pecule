@@ -650,7 +650,14 @@ SYNC_VERSION = 3
 #          « Date » : un budget repond a « qu'ai-je depense ? », pas a « qu'a
 #          preleve la banque ? ». Bilan, Operations et Categories, qui
 #          regardent le solde, continuent de le suivre.
-APP_VERSION = "1.30.2"
+# 1.30.3 : le bandeau « Budget depasse » suit la PERIODE choisie. Il ne
+#          parlait que du mois en cours : choisir « Aout 2026 » montre
+#          desormais ce qui a ete depasse en aout, et le bandeau le dit
+#          (« Budget depasse en aout 2026 », « Tout pres du budget »). Une
+#          annee ou « Toutes periodes » le ramenent au mois en cours — un
+#          budget mensuel ne se juge qu'au mois. Meme regle que le bandeau
+#          Encours carte, dont il reprend le mecanisme.
+APP_VERSION = "1.30.3"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

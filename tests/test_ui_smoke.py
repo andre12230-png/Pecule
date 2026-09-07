@@ -462,6 +462,40 @@ def test_budget_ignore_le_debit_differe(qapp, tmp_path, monkeypatch):
     assert depense("2026-08") == 100.0
 
 
+def test_alerte_budget_suit_la_periode(qapp, tmp_path, monkeypatch):
+    """Le bandeau d'alerte suit la période choisie en haut, comme le bandeau
+    Encours carte : sélectionner « Août 2026 » montre les budgets dépassés en
+    août. Une année ou « Toutes périodes » ne désignent aucun mois — un budget
+    mensuel ne se juge qu'au mois — et le bandeau revient au mois en cours."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    _fige_aujourdhui(monkeypatch, date(2026, 9, 7))
+
+    d = Database(str(tmp_path / "periode.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+    d.insert_tx(_tx(id="a", date="2026-08-12", date_valeur="2026-08-12",
+                    libelle="GARAGE", type="Prélèvement",
+                    categorie="Transports", montant=-150.0, pointee=1))
+    d.set_budget("Transports", 100.0)
+
+    def bandeau(periode: str) -> str:
+        v = BilanView(d)
+        v.period = periode
+        v.refresh()
+        return v.budget_alert.text() if v.budget_alert.isVisibleTo(v) else ""
+
+    # Septembre (mois en cours) : rien de dépassé, le bandeau s'efface.
+    assert bandeau("2026-09") == ""
+    # Août : le dépassement est là, et le bandeau dit de quel mois il parle.
+    aout = bandeau("2026-08")
+    assert "Transports" in aout and "150 %" in aout
+    assert "août 2026" in aout and "ce mois-ci" not in aout
+    # Une année ou toutes périodes ramènent au mois en cours.
+    assert bandeau("2026") == ""
+    assert bandeau("all") == ""
+
+
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
     au prochain prélèvement = pointés) et un encours incluant les achats
