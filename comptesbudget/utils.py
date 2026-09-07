@@ -99,19 +99,128 @@ def list_periods(transactions: list[dict], date_mode: str = "operation") -> list
     return out
 
 
+MOIS_FR = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+           "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
+
+
 def period_label(p: str) -> str:
     if p == "all":
         return "Toutes périodes"
     if len(p) == 4:
         return f"Année {p}"
     if len(p) == 7:
-        mois = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-                "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
         try:
-            return f"{mois[int(p[5:7])]} {p[:4]}"
+            return f"{MOIS_FR[int(p[5:7]) - 1]} {p[:4]}"
         except (ValueError, IndexError):
             return p
     return p
+
+
+# ── Sélecteur de période en deux menus (année, puis mois) ───────────────────
+# Une seule liste finissait par mélanger les années et leurs mois : pour
+# atteindre « Mars 2024 » il fallait d'abord choisir l'année, puis rouvrir la
+# liste. Coupée en deux et encadrée de deux flèches, elle tient en quelques
+# entrées et le geste le plus fréquent — le mois d'avant — se fait en un clic.
+# Les valeurs restent celles que in_period a toujours comprises (« all »,
+# « 2026 », « 2026-09 ») : les vues ne voient aucune différence.
+
+MOIS_TOUS = "*"      # entrée « Toute l'année » du menu des mois
+
+
+def nom_mois_fr(period: str) -> str:
+    """Nom du mois seul d'une période « 2026-09 » → « Septembre ».
+
+    Le menu des mois n'a pas à répéter l'année : elle est dans le menu d'à
+    côté. Retourne la période telle quelle si ce n'en est pas une."""
+    if len(period) == 7:
+        try:
+            return MOIS_FR[int(period[5:7]) - 1]
+        except (ValueError, IndexError):
+            pass
+    return period
+
+
+def annee_de_periode(period: str) -> Optional[str]:
+    """Année portée par une période (« 2026 », « 2026-09 »), ou None pour
+    « toutes périodes », qui est à cheval sur toutes les années."""
+    if len(period) >= 4 and period[:4].isdigit():
+        return period[:4]
+    return None
+
+
+def _mois_des_transactions(transactions: list[dict],
+                           date_mode: str = "operation") -> list[str]:
+    """Mois « AAAA-MM » présents dans les données, du plus ancien au plus
+    récent. Comme list_periods, on lit la date qui sert réellement à filtrer
+    (date d'opération ou date de valeur)."""
+    mois = set()
+    for t in transactions:
+        if date_mode == "valeur":
+            d = t.get("date_valeur") or t.get("date", "")
+        else:
+            d = t.get("date", "")
+        if len(d) >= 7:
+            mois.add(d[:7])
+    return sorted(mois)
+
+
+def annees_disponibles(transactions: list[dict],
+                       date_mode: str = "operation") -> list[str]:
+    """Contenu du menu de gauche : « all », puis les années de la plus
+    récente à la plus ancienne.
+
+    L'année en cours y figure toujours, même sans aucune opération : sinon
+    l'application ne pourrait pas s'ouvrir dessus en début d'année."""
+    annees = {m[:4] for m in _mois_des_transactions(transactions, date_mode)}
+    annees.add(date.today().strftime("%Y"))
+    return ["all"] + sorted(annees, reverse=True)
+
+
+def mois_disponibles(transactions: list[dict], annee: str,
+                     date_mode: str = "operation") -> list[str]:
+    """Contenu du menu de droite pour une année : « toute l'année », puis les
+    mois qui portent des opérations, du plus récent au plus ancien.
+
+    Le mois en cours est toujours proposé, même vide : c'est celui sur lequel
+    l'application s'ouvre, et « aucune opération ce mois-ci » est une
+    réponse."""
+    mois = {m for m in _mois_des_transactions(transactions, date_mode)
+            if m[:4] == annee}
+    courant = date.today().strftime("%Y-%m")
+    if annee == courant[:4]:
+        mois.add(courant)
+    return [MOIS_TOUS] + sorted(mois, reverse=True)
+
+
+def _echelle_de_navigation(transactions: list[dict], period: str,
+                           date_mode: str = "operation") -> list[str]:
+    """Suite ordonnée, du plus ancien au plus récent, dans laquelle les deux
+    flèches se déplacent — les mois entre eux, les années entre elles.
+
+    Les mois traversent les années : depuis « Janvier 2026 », la flèche
+    gauche mène à « Décembre 2025 »."""
+    mois = _mois_des_transactions(transactions, date_mode)
+    if len(period) == 7:
+        courant = date.today().strftime("%Y-%m")
+        return sorted(set(mois) | {courant})
+    if len(period) == 4:
+        annees = {m[:4] for m in mois}
+        annees.add(date.today().strftime("%Y"))
+        return sorted(annees)
+    return []      # « toutes périodes » n'a ni précédent ni suivant
+
+
+def periode_voisine(transactions: list[dict], period: str, sens: int,
+                    date_mode: str = "operation") -> Optional[str]:
+    """Période d'un cran plus ancienne (sens=-1) ou plus récente (sens=+1).
+
+    None quand il n'y a plus rien de ce côté : c'est ce qui grise la flèche,
+    plutôt que de la laisser cliquable sans effet."""
+    echelle = _echelle_de_navigation(transactions, period, date_mode)
+    if period not in echelle:
+        return None
+    i = echelle.index(period) + sens
+    return echelle[i] if 0 <= i < len(echelle) else None
 
 
 def deaccent(s: str) -> str:

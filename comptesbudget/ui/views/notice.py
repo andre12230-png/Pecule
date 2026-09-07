@@ -133,15 +133,22 @@ rattachées à un compte nommé <b>Compte courant</b> : rien n'a bougé.</p>
 <h2>3. Les onglets</h2>
 
 <h3>🏠 Bilan (tableau de bord)</h3>
-<p>Vue d'ensemble avec 6 indicateurs clés, l'évolution mensuelle revenus/dépenses,
-la répartition des dépenses par catégorie, et les listes top dépenses / sources de revenus /
-plus grosses dépenses individuelles.</p>
+<p>Vue d'ensemble avec 4 indicateurs clés, le verdict du mois, l'évolution sur
+12 mois, la répartition des dépenses par catégorie, et les listes top dépenses /
+sources de revenus / plus grosses dépenses individuelles.</p>
 <p>Le KPI <b>« 💼 Solde bancaire réel (pointé) »</b> donne le solde réel du compte :
 solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Il est
 <b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de
 l'app : les achats par carte à débit différé n'y entrent donc que le jour où la banque les
 prélève (le 4 du mois suivant), pas avant. Le KPI
-<b>« ✔ Solde pointé »</b> en donne le détail sur la période choisie.</p>
+<b>« ✔ Pointé sur la période »</b>, lui, additionne les opérations pointées de la
+période affichée : ce n'est pas un solde mais un mouvement, à comparer à votre
+relevé. Il s'appelait « Solde pointé » jusqu'à la 1.30.0 ; le mot « solde » le
+faisait confondre avec celui d'à côté, pour une valeur souvent voisine.</p>
+<p>La tuile <b>« Mouvement du mois »</b> porte sous son chiffre les deux moitiés
+qui le composent — « 2 000,00 € entrés (5) − 2 300,00 € sortis (46) ». Elles
+occupaient deux tuiles séparées (« Revenus » et « Dépenses ») jusqu'à la
+1.30.0 : trois cases pour deux informations.</p>
 
 <h3>📋 Opérations</h3>
 <p>Liste complète des transactions avec filtres (catégorie, type, sens, pointage) et un champ
@@ -235,10 +242,21 @@ opération : cochez-la pour toute saisie faite d'avance (remboursement annoncé,
 virement attendu) afin qu'elle profite du même rattachement.</p>
 
 <h3>📊 Les chiffres sur les graphiques</h3>
-<p>Sur le Bilan, l'<b>évolution mensuelle</b> affiche le montant à l'intérieur
-de chaque barre. Au-delà de six mois à l'écran, les barres deviennent trop
-étroites pour rester lisibles : les chiffres sont alors masqués (choisissez un
-mois ou un trimestre pour les revoir).</p>
+<p>Sur le Bilan, l'<b>évolution sur 12 mois</b> montre toujours douze colonnes,
+quelle que soit la période choisie en haut : sur un seul mois, il n'y aurait
+qu'une barre, et un graphique d'une barre n'apprend rien. La période déplace la
+fenêtre au lieu de la réduire :</p>
+<ul>
+  <li><b>un mois choisi</b> — les douze mois qui s'achèvent sur lui, pour le
+      situer dans sa propre histoire ;</li>
+  <li><b>une année</b> — ses douze mois, de janvier à décembre ;</li>
+  <li><b>toutes périodes</b> — les douze derniers mois.</li>
+</ul>
+<p>Les bornes exactes sont rappelées dans le <b>titre</b> du cadre
+(« Évolution sur 12 mois — oct 2025 → sep 2026 ») : sur douze colonnes, les
+libellés de l'axe n'ont la place que du mois. À douze barres, les montants ne
+sont plus écrits à l'intérieur — ils ne tiendraient pas ; ils réapparaissent
+si votre historique compte moins de six mois.</p>
 <p>Pour la <b>répartition des dépenses</b>, le montant de chaque catégorie est
 indiqué dans la <b>légende</b>, à droite du camembert — écrit autour des parts,
 il se chevaucherait et masquerait les noms de catégories.</p>
@@ -254,12 +272,21 @@ petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
 Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 
 <h2>4. Période et mode date</h2>
-<p>La liste <b>Période</b> range les mois sous leur année. Pour qu'elle reste
-courte, <b>seules l'année en cours et l'année choisie montrent leurs mois</b> ;
-les autres n'affichent que leur ligne « Année … ». Choisissez une année
-passée et ses mois s'ouvrent aussitôt.</p>
 <p>La barre <b>Période</b> en haut de l'app filtre toutes les vues (sauf Règles).
-Vous pouvez choisir « Toutes périodes », une année entière, ou un mois précis.</p>
+Elle se lit <b>‹ année mois ›</b> : le menu de gauche choisit l'année (ou
+« Toutes périodes », tout l'historique), celui de droite le mois dans cette
+année (ou « Toute l'année »).</p>
+<p>Les deux <b>flèches</b> qui les encadrent reculent et avancent d'un cran sans
+ouvrir de liste : d'un mois si vous affichez un mois, d'une année si vous
+affichez une année. Elles <b>se grisent</b> quand il n'y a plus rien de ce côté,
+et le menu des mois se grise sur « Toutes périodes », qui est à cheval sur
+toutes les années. En changeant d'année, le mois affiché est conservé s'il
+existe là-bas — pratique pour comparer un même mois d'une année sur l'autre.</p>
+<p>L'application <b>s'ouvre toujours sur le mois en cours</b> : elle ne se
+souvient pas de la période que vous consultiez la fois précédente, pour ne pas
+vous faire prendre de vieux chiffres pour ceux du mois courant. Si le mois en
+cours ne porte encore aucune opération, elle ouvre sur « Toutes périodes »
+plutôt que sur un écran vide.</p>
 <p>Le sélecteur <b>Date</b> à côté contrôle la chronologie :</p>
 <table>
   <tr><th>Mode</th><th>Quand l'utiliser</th></tr>
@@ -284,18 +311,78 @@ de valeur d'aplomb, y compris sur une opération déjà enregistrée.</p>
 <p>Dans tous les champs de montant, le <b>point</b> du pavé numérique et la
 <b>virgule</b> donnent le même résultat : « 12.50 » comme « 12,50 » valent
 12,50&nbsp;€.</p>
+<div class="tip"><b>Votre carte n'est pas à débit différé ?</b> Alors ce
+bandeau ne s'affiche pas du tout, et c'est normal : sur une carte à débit
+immédiat, l'achat sort du compte le jour même. Il n'y a donc rien « à
+débiter » plus tard, et le « Solde au … » du bandeau vert répond déjà à la
+question. Pécule le reconnaît tout seul, sans réglage : il regarde si vos
+opérations par carte portent une date de valeur postérieure à la date d'achat.
+Pour la même raison, la <b>saisie</b> d'un achat par carte ne décale la date de
+valeur que si votre compte montre déjà du débit différé.</div>
+
+<h3>Le verdict, en haut de page</h3>
+<p>Sous les quatre tuiles, une phrase répond à la seule question qu'on se pose en
+ouvrant l'application : <b>est-ce que je passe le mois ?</b> « Septembre 2026 :
+le compte finit le mois à −120,00 €, négatif à partir du 13/09/2026
+(−30,00 € après “Électricité”). Au plus bas : −250,00 € le 05/10/2026. »
+Elle passe au vert quand le compte tient.</p>
+<p>Elle parle <b>toujours du mois en cours</b>, même quand vous consultez un mois
+passé : c'est un verdict pour agir, pas une fiche de consultation.</p>
+<p><b>Pourquoi le jour et pas seulement le total.</b> Un creux vient souvent du
+<b>calendrier</b>, pas du niveau de dépenses : le prélèvement de la carte tombe
+le 4 ou le 5, alors que les pensions n'arrivent que le 7 et le 9. Un mois peut
+finir à l'équilibre en étant passé dans le rouge au milieu.</p>
+<p>Le calcul part du solde en banque d'aujourd'hui et applique, jour après jour,
+tout ce qui doit encore passer sur <b>45 jours</b> — assez pour couvrir le
+prélèvement carte du mois suivant et la remontée derrière. Il ne compte que ce
+qui est <b>connu</b> : vos opérations enregistrées et les échéances du
+Prévisionnel. Les achats que vous ferez d'ici là creuseront le trou d'autant.</p>
 <p>Le bandeau <b>« 💳 Encours carte bancaire »</b> du Bilan reprend les deux
 chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
 <ul>
-  <li><b>Prochain prélèvement (confirmé)</b> — les achats que la banque a déjà
-      rattachés au prélèvement à venir. Ce sont vos opérations
-      <b>pointées</b> : c'est le montant « débit différé au 4 » de la banque.</li>
+  <li><b>Prochain prélèvement</b> — les achats que la banque a déjà rattachés
+      au prélèvement à venir. Ce sont vos opérations <b>pointées</b> : c'est le
+      montant « débit différé au 4 » de la banque.</li>
   <li><b>Opérations en cours</b> — faites, mais pas encore passées chez la
       banque (non pointées). Ce peut être un achat comme un
       <b>remboursement</b>.</li>
   <li><b>Total des achats à débiter</b> — ce qu'il reste à payer par la carte,
       toutes échéances confondues.</li>
+  <li><b>Reste pour la carte</b> — le solde que votre compte aura à la
+      <b>fin du mois</b>, une fois tout payé, <b>moins</b> les achats déjà
+      passés à la carte. En vert s'il reste quelque chose, en rouge s'il va
+      manquer. Il se met à jour tout seul dès qu'une dépense est enregistrée,
+      modifiée ou supprimée.</li>
 </ul>
+<p><b>Pourquoi ce chiffre-là ?</b> Jusqu'à la version 1.30.0, il se comparait à
+un <i>plafond</i> saisi dans les Paramètres. Ce repère fixe pouvait annoncer
+« il reste 247 € » pendant que le bandeau juste en dessous prévoyait un solde
+négatif en fin de mois : les deux se contredisaient. Le plafond a donc été retiré,
+et le calcul part maintenant de vos mouvements réels — ce qui rentre, ce qui sort,
+ce qui est déjà engagé sur la carte.</p>
+<p><b>Les achats se comptent sur le mois de l'achat</b>, pas sur celui du
+prélèvement. Le lot d'un mois part le 4 du mois suivant : il reste l'encours du
+mois où vous avez dépensé. C'est pourquoi « Total des achats à débiter » et
+« Reste pour la carte » ne reposent pas sur les mêmes opérations.</p>
+<p><b>Le bandeau suit la période choisie en haut.</b> Sélectionnez « Août 2026 »
+et il montre l'encours d'août : ses achats, ce qu'il restait, et la date à laquelle
+la banque l'a prélevé. Les deux premiers chiffres disparaissent alors — plus rien
+n'est « en attente » sur un mois passé — et le bandeau annonce qu'il est en
+consultation. Sur une année ou « Toutes périodes », qui ne désignent aucun mois,
+il revient au mois en cours : un encours de carte ne se juge qu'au mois.</p>
+<p><b>Le verdict du mois écoulé</b> est rappelé sous les chiffres : « Mois
+précédent — août 2026 : 600,00 € dépensés à la carte, il a MANQUÉ 150,00 € une
+fois tout payé », ou « il restait 400,00 € ». Le 1<sup>er</sup> du mois, il
+bascule tout seul sur le mois qui vient de finir : plus besoin d'aller le
+chercher.</p>
+<p><b>À partir du 10 du mois</b>, une estimation s'ajoute : « À ce rythme :
+environ 750,00 € à la carte d'ici la fin du mois ». Avant le 10, le bandeau se
+tait — une seule grosse course en début de mois ferait annoncer n'importe quoi.
+Et même après, ce n'est qu'une projection : le chiffre sûr reste ce qui est déjà
+dépensé.</p>
+<p>Pour voir la <b>tendance</b> sur plusieurs mois, c'est le graphique
+<b>« Évolution sur 12 mois »</b> plus bas qu'il faut regarder : il compare
+revenus et dépenses mois par mois.</p>
 <p><b>Un remboursement par carte ne réduit jamais l'encours</b> : la banque le
 porte directement au compte courant, il n'attend pas le prélèvement groupé.
 C'est pourquoi il n'entre pas dans le total à débiter, et pourquoi le
@@ -306,62 +393,56 @@ en cours</b> : c'est le montant que votre banque affiche au-dessus de la liste
 « Opérations carte en cours ». Les deux doivent être identiques — sinon, il
 manque une opération dans l'application (ou un pointage).</p>
 
-<h3>Le bandeau « 📅 Ce qui est prévu »</h3>
-<p>Juste en dessous, ce bandeau projette votre compte sur les
-<b>15 prochains jours</b> : il additionne les opérations déjà enregistrées dont
-le débit est à venir (l'encours carte, notamment) et les échéances de votre
-onglet <b>🔮 Prévisionnel</b> qui n'ont pas encore d'opération correspondante.
-Rien n'est compté deux fois.</p>
+<h3>Le bandeau « 🗓 Ce mois-ci »</h3>
+<p>Le bandeau vert répond à la question : <b>que reste-t-il à passer avant la
+fin du mois, et où en sera le compte le dernier jour ?</b> C'est la lecture d'un
+budget mensuel tenu sur papier — le solde en banque d'un côté, ce qui doit
+encore tomber de l'autre. Il additionne les opérations déjà enregistrées dont le
+débit est à venir et les échéances de votre onglet <b>🔮 Prévisionnel</b> qui
+n'ont pas encore d'opération correspondante. Rien n'est compté deux fois.</p>
 <ul>
-  <li><b>Prélèvements prévus (hors carte)</b> — ce qui va sortir, la carte
-      étant déjà comptée dans son propre bandeau.</li>
-  <li><b>Rentrées prévues</b> — pensions, remboursements attendus…</li>
-  <li><b>Solde prévu</b> — votre solde d'aujourd'hui, moins le débit carte,
-      moins les prélèvements, plus les rentrées. C'est la réponse à
-      « où en sera mon compte dans quinze jours ? »</li>
+  <li><b>À débiter (hors carte)</b> — prélèvements et dépenses attendus
+      jusqu'au dernier jour du mois.</li>
+  <li><b>À encaisser</b> — pensions, virements et remboursements attendus
+      d'ici là.</li>
+  <li><b>Solde au …</b> — la date est celle du dernier jour du mois : solde en
+      banque aujourd'hui, moins ce qui reste à débiter, plus ce qui reste à
+      encaisser.</li>
 </ul>
-<p>Le <b>débit carte</b> annoncé est celui de votre relevé : il ne compte que
-les achats que la banque a déjà rattachés au prélèvement (vos opérations
+<p>La fenêtre <b>commence au 1er</b> du mois et s'arrête à son dernier jour.
+Une échéance du 5 qui n'est toujours pas passée reste donc comptée — c'est bien
+ce qu'on veut d'un budget mensuel. En fin de ligne, l'application rappelle combien de ces lignes
+sont des <b>échéances déjà saisies ⏳</b> : les autres viennent du Prévisionnel
+et n'existent pas encore dans vos opérations.</p>
+<p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
+banque, le compter ici le compterait deux fois.</p>
+<p>La ligne <b>« Prochaines : »</b> nomme les trois échéances qui arrivent, avec
+leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
+Prévisionnel.</p>
+<p>Le <b>débit carte</b> annoncé est celui de votre relevé : il ne compte que les
+achats que la banque a déjà rattachés au prélèvement (vos opérations
 <b>pointées</b>). Une opération encore « en cours » — un remboursement, par
-exemple — ne réduit pas ce prélèvement-ci : elle partira au suivant. Elle est
-signalée à part en fin de ligne.</p>
+exemple — ne réduit pas ce prélèvement-ci : elle partira au suivant, et elle est
+signalée à part.</p>
 <p><b>Attention</b> : ce chiffre ne correspond pas à celui que votre banque
-affiche sous « X € d'opérations prévues prochainement ». La banque n'annonce
-que les prélèvements dont elle a <i>déjà reçu l'avis</i> ; l'application, elle,
+affiche sous « X € d'opérations prévues prochainement ». La banque n'annonce que
+les prélèvements dont elle a <i>déjà reçu l'avis</i> ; l'application, elle,
 connaît toutes vos échéances récurrentes. Le montant de l'application est donc
 normalement plus élevé — ce n'est pas une erreur.</p>
 <p>La qualité de cette projection dépend directement de votre onglet
 Prévisionnel : plus vos opérations récurrentes y sont à jour, plus le solde
 prévu est fiable.</p>
-
-<h3>Le bandeau « 🗓 Ce mois-ci »</h3>
-<p>Le bandeau vert répond à une autre question : <b>que reste-t-il à passer
-avant la fin du mois, et où en sera le compte le dernier jour ?</b> C'est la
-lecture d'un budget mensuel tenu sur papier — le solde en banque d'un côté, ce
-qui doit encore tomber de l'autre.</p>
-<ul>
-  <li><b>Reste à débiter (hors carte)</b> — prélèvements et dépenses attendus
-      jusqu'au dernier jour du mois.</li>
-  <li><b>Reste à encaisser</b> — pensions, virements et remboursements
-      attendus d'ici là.</li>
-  <li><b>Solde prévu en fin de mois</b> — solde en banque aujourd'hui, moins ce
-      qui reste à débiter, plus ce qui reste à encaisser.</li>
-</ul>
-<p>Deux différences avec le bandeau des 15 jours : la fenêtre s'arrête au
-dernier jour du mois, et elle <b>commence au 1er</b>. Une échéance du 5 qui
-n'est toujours pas passée reste donc comptée — c'est bien ce qu'on veut d'un
-budget mensuel. En fin de ligne, l'application rappelle combien de ces lignes
-sont des <b>échéances déjà saisies ⏳</b> : les autres viennent du Prévisionnel
-et n'existent pas encore dans vos opérations.</p>
-<p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
-banque, le compter ici le compterait deux fois.</p>
+<p class="tip">Un bandeau « Ce qui est prévu » projetait aussi le compte à
+<b>15 jours</b>. Il a été retiré : son « solde au 22 » était un jalon
+arbitraire, alors que le bandeau de verdict, en haut de page, donne le
+<b>pire</b> moment — celui qui compte vraiment.</p>
 
 <h2>5. Pointage et rapprochement</h2>
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations
 correspondent bien à votre relevé bancaire (rapprochement bancaire).</div>
 <p>Quand vous recevez votre relevé, ouvrez l'onglet Opérations et cliquez sur
 la colonne <b>P</b> de chaque ligne présente sur le relevé. Le KPI
-<b>« Solde pointé »</b> du Bilan vous indique alors le total des opérations
+<b>« Pointé sur la période »</b> du Bilan vous indique alors le total des opérations
 vérifiées. Si tout est pointé, ce solde doit correspondre exactement à votre
 solde bancaire.</p>
 <p>Gain de temps : si vos exports CSV contiennent une colonne <b>Pointage</b>
@@ -604,9 +685,10 @@ Sert de base pour tous les calculs de solde. <b>Propre à chaque compte.</b>
 Si vous archivez des opérations, il se décale à la date de coupure et englobe
 tout ce qui a été archivé — le solde affiché reste donc le même.</dd>
 
-<dt>Solde pointé</dt>
+<dt>Pointé sur la période</dt>
 <dd>Somme des opérations marquées comme pointées sur la période. Indicateur
-de cohérence avec le relevé bancaire.</dd>
+de cohérence avec le relevé bancaire. Ce n'est pas un solde : c'est un
+mouvement, celui de la période affichée.</dd>
 
 <dt>Sous-catégorie</dt>
 <dd>Précision facultative à l'intérieur d'une catégorie

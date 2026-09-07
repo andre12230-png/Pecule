@@ -6,13 +6,16 @@ erreurs de câblage (imports, signaux, calculs au refresh) sans simuler
 d'interaction — rapide, headless, peu fragile.
 """
 import importlib
+from calendar import monthrange
 from datetime import date, timedelta
 
 import pytest
 
 from comptesbudget.constants import CATEGORIES_DEFAUT
 from comptesbudget.database import Database
-from comptesbudget.utils import fmt_euro
+from comptesbudget.utils import (
+    date_debit_differe, fmt_date_fr, fmt_euro, period_label,
+)
 
 
 def _tx(**kw):
@@ -99,6 +102,65 @@ def test_main_window_construit(qapp, db):
     w.refresh_all()                  # second passage : ne doit pas lever
 
 
+def test_reste_carte_suit_une_depense_saisie(qapp, tmp_path):
+    """Bout en bout : une dépense enregistrée depuis l'onglet Opérations
+    remonte jusqu'au bandeau, sans rien rafraîchir à la main. C'est le signal
+    `tx_changed` qui porte l'information."""
+    from comptesbudget.ui.main_window import MainWindow
+
+    d = Database(str(tmp_path / "interactif.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    today = date.today().isoformat()
+    d.insert_tx(_tx(id="cb1", date=today, date_valeur=date_debit_differe(today),
+                    libelle="HYPERMARCHE", type="Carte bancaire",
+                    montant=-200.0, pointee=1))
+    w = MainWindow(d)
+    assert w.bilan_view.cb_dispo.text() == fmt_euro(800.0)
+
+    d.insert_tx(_tx(id="cb2", date=today, date_valeur=date_debit_differe(today),
+                    libelle="OMNISHOP", type="Carte bancaire",
+                    montant=-62.0, pointee=0))
+    w.ops_view.tx_changed.emit()          # ce que fait toute saisie
+    assert w.bilan_view.cb_dispo.text() == fmt_euro(738.0)
+
+
+def test_bandeau_carte_suit_la_periode_choisie(qapp, tmp_path):
+    """Bout en bout : changer la période dans la barre du haut emmène le
+    bandeau sur le mois consulté."""
+    from comptesbudget.ui.main_window import MainWindow
+
+    d = Database(str(tmp_path / "periode.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    today = date.today()
+    mois_dernier = today.replace(day=1) - timedelta(days=1)
+    d.insert_tx(_tx(id="cb-avant", date=mois_dernier.isoformat(),
+                    date_valeur=date_debit_differe(mois_dernier.isoformat()),
+                    libelle="HYPERMARCHE", type="Carte bancaire",
+                    montant=-600.0, pointee=1))
+    d.insert_tx(_tx(id="cb-ce-mois", date=today.isoformat(),
+                    date_valeur=date_debit_differe(today.isoformat()),
+                    libelle="OMNISHOP", type="Carte bancaire",
+                    montant=-100.0, pointee=0))
+    # Un prélèvement du mois dernier, sans différé : sans lui, ce mois
+    # n'existerait pas dans le menu en « date de valeur », les achats carte
+    # y étant datés du 4 du mois suivant.
+    d.insert_tx(_tx(id="prel-avant", date=mois_dernier.isoformat(),
+                    date_valeur=mois_dernier.isoformat(),
+                    libelle="SAUR", type="Prélèvement",
+                    montant=-30.0, pointee=1))
+    w = MainWindow(d)
+    # 1 000 - 30 de prélèvement - 600 de lot carte prélevé le 4 = 370 au
+    # compte, moins 100 déjà passés à la carte ce mois-ci.
+    assert w.bilan_view.cb_dispo.text() == fmt_euro(270.0)
+
+    w.period_bar._appliquer(mois_dernier.strftime("%Y-%m"))
+    assert w.bilan_view.cb_dispo.text() == fmt_euro(370.0)      # 970 - 600
+    assert period_label(mois_dernier.strftime("%Y-%m")).upper() in \
+        w.bilan_view.cb_title.text()
+
+
 # (module, classe, méthode de rafraîchissement)
 VIEW_SPECS = [
     ("bilan", "BilanView", "refresh"),
@@ -119,12 +181,14 @@ def test_view_se_rafraichit(qapp, db, module, cls, method):
 
 
 def _barre_periodes(qapp):
-    """Une PeriodBar remplie avec trois annees : l'annee en cours et les
-    deux precedentes."""
+    """Une PeriodBar remplie avec trois annees : l'annee en cours (mars,
+    avril et le mois courant) et les deux precedentes."""
     from comptesbudget.ui.widgets import PeriodBar
     an = date.today().year
+    mois_courant = date.today().strftime("%Y-%m")
     txs = [{"date": f"{an}-03-01", "date_valeur": f"{an}-03-01"},
            {"date": f"{an}-04-01", "date_valeur": f"{an}-04-01"},
+           {"date": f"{mois_courant}-01", "date_valeur": f"{mois_courant}-01"},
            {"date": f"{an - 1}-05-01", "date_valeur": f"{an - 1}-05-01"},
            {"date": f"{an - 2}-07-01", "date_valeur": f"{an - 2}-07-01"}]
     barre = PeriodBar()
@@ -132,34 +196,73 @@ def _barre_periodes(qapp):
     return barre, an
 
 
-def _donnees(barre):
-    return [barre.combo.itemData(i) for i in range(barre.combo.count())]
+def _donnees(combo):
+    return [combo.itemData(i) for i in range(combo.count())]
 
 
-def test_periodes_seule_annee_en_cours_est_depliee(qapp):
-    """Les annees passees n'affichent que leur ligne « Annee ... » : avec
-    plusieurs annees d'historique, tout derouler donnait une liste
-    interminable."""
+def test_periodes_deux_menus_annee_puis_mois(qapp):
+    """Le selecteur est coupe en deux : le menu de gauche ne porte que les
+    annees, celui de droite les mois de l'annee choisie. Une seule liste
+    melangeait les deux et s'allongeait d'une ligne chaque mois."""
     barre, an = _barre_periodes(qapp)
-    donnees = _donnees(barre)
-    assert f"{an}-03" in donnees and f"{an}-04" in donnees   # annee en cours
-    assert str(an - 1) in donnees and str(an - 2) in donnees  # les lignes
-    assert f"{an - 1}-05" not in donnees                      # mais pas les mois
-    assert f"{an - 2}-07" not in donnees
+    annees = _donnees(barre.annee_combo)
+    assert annees == ["all", str(an), str(an - 1), str(an - 2)]
+    # Ouverture sur le mois en cours : le menu des mois montre ceux de
+    # l'annee en cours, et aucun mois d'une autre annee.
+    mois = _donnees(barre.mois_combo)
+    assert f"{an}-03" in mois and f"{an}-04" in mois
+    assert f"{an - 1}-05" not in mois
 
 
-def test_periodes_choisir_une_annee_ouvre_ses_mois(qapp):
-    barre, an = _barre_periodes(qapp)
-    idx = barre.combo.findData(str(an - 1))
-    barre.combo.setCurrentIndex(idx)
-    barre.update_periods([
-        {"date": f"{an}-03-01", "date_valeur": f"{an}-03-01"},
-        {"date": f"{an - 1}-05-01", "date_valeur": f"{an - 1}-05-01"},
-        {"date": f"{an - 2}-07-01", "date_valeur": f"{an - 2}-07-01"}])
-    donnees = _donnees(barre)
-    assert f"{an - 1}-05" in donnees      # l'annee choisie s'est ouverte
-    assert f"{an}-03" in donnees          # l'annee en cours reste ouverte
-    assert f"{an - 2}-07" not in donnees  # les autres restent repliees
+def test_periodes_ouvre_sur_le_mois_en_cours(qapp):
+    """L'application s'ouvre sur le mois en cours, jamais sur une periode
+    memorisee : de vieux chiffres passeraient pour ceux du mois courant."""
+    barre, _ = _barre_periodes(qapp)
+    assert barre.current_period() == date.today().strftime("%Y-%m")
+
+
+def test_periodes_mois_en_cours_vide_replie_sur_tout(qapp):
+    """Mois en cours sans aucune operation : on montre tout l'historique
+    plutot qu'un ecran vide qui ne dit pas pourquoi."""
+    from comptesbudget.ui.widgets import PeriodBar
+    barre = PeriodBar()
+    barre.update_periods([{"date": "2020-05-01", "date_valeur": "2020-05-01"}])
+    assert barre.current_period() == "all"
+    # Le menu des mois n'a pas de sens sur « toutes periodes » : il est grise.
+    assert not barre.mois_combo.isEnabled()
+
+
+def test_periodes_fleche_recule_dun_mois(qapp):
+    """La fleche gauche recule d'un cran a echelle constante, et traverse
+    les annees : depuis janvier, elle mene a decembre precedent."""
+    from comptesbudget.ui.widgets import PeriodBar
+    barre = PeriodBar()
+    barre.update_periods([{"date": "2025-12-10", "date_valeur": "2025-12-10"},
+                          {"date": "2026-01-10", "date_valeur": "2026-01-10"}])
+    barre._appliquer("2026-01")
+    barre._decaler(-1)
+    assert barre.current_period() == "2025-12"
+    # Plus rien avant : la fleche se grise au lieu de rester sans effet.
+    barre._decaler(-1)
+    assert barre.current_period() == "2025-12"
+    assert not barre.prev_btn.isEnabled()
+
+
+def test_periodes_changer_dannee_garde_le_mois(qapp):
+    """Changer d'annee garde le mois affiche s'il existe la-bas — c'est ce
+    qu'on veut pour comparer un mois d'une annee sur l'autre."""
+    from comptesbudget.ui.widgets import PeriodBar
+    barre = PeriodBar()
+    barre.update_periods([{"date": "2025-05-10", "date_valeur": "2025-05-10"},
+                          {"date": "2026-05-10", "date_valeur": "2026-05-10"},
+                          {"date": "2026-08-10", "date_valeur": "2026-08-10"}])
+    barre._appliquer("2026-05")
+    barre.annee_combo.setCurrentIndex(barre.annee_combo.findData("2025"))
+    assert barre.current_period() == "2025-05"
+    # Mois absent de l'autre annee : on montre l'annee entiere.
+    barre._appliquer("2026-08")
+    barre.annee_combo.setCurrentIndex(barre.annee_combo.findData("2025"))
+    assert barre.current_period() == "2025"
 
 
 def test_notice_view(qapp):
@@ -179,7 +282,12 @@ def test_dialogs_creation_et_values(qapp, db):
     # Mode édition : exerce la branche de pré-remplissage
     TxDialog(None, txs[0], categories=cats, all_transactions=txs)
 
+    # Les Paramètres se réduisent à la date et au solde de départ : le plafond
+    # d'encours carte a été retiré le 07/09/2026, le Bilan calculant désormais
+    # ce qui reste d'après les mouvements réels du mois.
     assert SettingsDialog(None, "2026-01-01", 1000.0).values() == ("2026-01-01", 1000.0)
+    assert SettingsDialog(None, "2026-01-01", 1000.0, "Compte courant").values() \
+        == ("2026-01-01", 1000.0)
     assert "pattern" in RuleDialog(None, None, categories=cats).values()
     assert "frequency" in RecurringDialog(None, None, categories=cats, all_tx=txs).values()
 
@@ -279,19 +387,21 @@ def test_tous_les_onglets_suivent_le_mode_date(qapp, tmp_path):
         return v
 
     # Juillet en date de valeur : l'opération n'y est pour aucune des vues.
-    assert depenses(BilanView, "2026-07", "valeur").kpis["depenses"]._value.text() \
+    # Le montant des dépenses se lit dans le mouvement du mois : la tuile
+    # « Dépenses » a fusionné avec lui le 07/09/2026.
+    assert depenses(BilanView, "2026-07", "valeur").kpis["net"]._value.text() \
         == fmt_euro(0)
     assert depenses(BudgetView, "2026-07", "valeur").model.rowCount() == 0
     assert depenses(CategoriesView, "2026-07", "valeur").cats_model.rowCount() == 0
 
     # Août en date de valeur : les trois vues la voient.
-    assert depenses(BilanView, "2026-08", "valeur").kpis["depenses"]._value.text() \
+    assert depenses(BilanView, "2026-08", "valeur").kpis["net"]._value.text() \
         == fmt_euro(-100.0)
     assert depenses(BudgetView, "2026-08", "valeur").model.rowCount() == 1
     assert depenses(CategoriesView, "2026-08", "valeur").cats_model.rowCount() == 1
 
     # Mode « date d'opération » : tout bascule sur juillet, pour les trois.
-    assert depenses(BilanView, "2026-07", "operation").kpis["depenses"]._value.text() \
+    assert depenses(BilanView, "2026-07", "operation").kpis["net"]._value.text() \
         == fmt_euro(-100.0)
     assert depenses(BudgetView, "2026-07", "operation").model.rowCount() == 1
     assert depenses(CategoriesView, "2026-07", "operation").cats_model.rowCount() == 1
@@ -330,6 +440,329 @@ def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     assert v.cb_banner.isVisibleTo(v)
 
 
+def _bilan_carte(tmp_path, achats, initial: float = 1000.0,
+                 autres=(), nom: str = "carte.db"):
+    """Bilan avec un solde de départ et des achats par carte.
+
+    `achats` : liste de (date ISO, montant). Chaque achat reçoit sa date de
+    valeur au 4 du mois suivant, comme la vraie carte à débit différé.
+    `autres` : opérations hors carte, en (date ISO, montant), passées telles
+    quelles — ce sont elles qui font entrer ou sortir l'argent du mois.
+    """
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / nom))
+    d.set_setting("initial_balance", str(initial))
+    d.set_setting("initial_date", "2020-01-01")
+    for i, (jour, montant) in enumerate(achats):
+        d.insert_tx(_tx(id=f"cb{i}", date=jour,
+                        date_valeur=date_debit_differe(jour),
+                        libelle="HYPERMARCHE", type="Carte bancaire",
+                        montant=montant, pointee=1))
+    for i, (jour, montant) in enumerate(autres):
+        d.insert_tx(_tx(id=f"op{i}", date=jour, date_valeur=jour,
+                        libelle="PENSION" if montant > 0 else "SAUR",
+                        type="Virement" if montant > 0 else "Prélèvement",
+                        categorie="Revenus" if montant > 0 else "Logement - maison",
+                        montant=montant, pointee=1))
+    v = BilanView(d)
+    v.refresh()
+    return v
+
+
+def test_encours_carte_reste_ce_que_le_compte_laisse(qapp, tmp_path):
+    """« Reste pour la carte » = le solde que le compte aura en fin de mois,
+    tout payé, moins ce qui est déjà engagé sur la carte. Plus aucun plafond
+    fixe : un repère figé pouvait annoncer « il reste 247 € » pendant que le
+    bandeau voisin prévoyait un solde négatif."""
+    v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
+    # 1 000 € au compte, aucune autre échéance, 200 € déjà passés à la carte.
+    assert v.cb_dispo.text() == fmt_euro(800.0)
+    assert "#1A7A3A" in v.cb_dispo.styleSheet()          # vert : il reste
+    assert v.cb_dispo_lbl.text() == "Reste pour la carte"
+
+
+def test_encours_carte_reste_negatif_en_rouge(qapp, tmp_path):
+    """Quand les achats dépassent ce que le compte laisse, le chiffre dit ce
+    qui va manquer, en rouge."""
+    v = _bilan_carte(tmp_path, [(date.today().isoformat(), -1200.0)])
+    assert v.cb_dispo.text() == fmt_euro(-200.0)         # 1 000 - 1 200
+    assert "#C0392B" in v.cb_dispo.styleSheet()
+
+
+def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):
+    """Une charge qui doit encore passer d'ici la fin du mois réduit d'autant
+    ce qui reste pour la carte : c'est là que l'ancien plafond mentait."""
+    today = date.today()
+    fin_mois = today.replace(
+        day=monthrange(today.year, today.month)[1]).isoformat()
+    v = _bilan_carte(tmp_path, [(today.isoformat(), -200.0)],
+                     autres=[(fin_mois, -500.0)], nom="echeance.db")
+    # 1 000 - 500 d'échéance à venir = 500 en fin de mois, moins 200 de carte.
+    assert v.cb_dispo.text() == fmt_euro(300.0)
+
+
+def test_encours_carte_reste_suit_une_nouvelle_depense(qapp, tmp_path):
+    """Une dépense enregistrée, et le chiffre baisse d'autant au
+    rafraîchissement suivant : c'est ce qui le rend utilisable."""
+    v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
+    assert v.cb_dispo.text() == fmt_euro(800.0)
+    jour = date.today().isoformat()
+    v.db.insert_tx(_tx(id="cb2", date=jour, date_valeur=date_debit_differe(jour),
+                       libelle="OMNISHOP", type="Carte bancaire",
+                       montant=-62.0, pointee=0))
+    v.refresh()
+    assert v.cb_dispo.text() == fmt_euro(738.0)
+
+
+def _bilan_deux_mois(tmp_path):
+    """Bilan avec un achat carte le mois dernier et un ce mois-ci, sur un
+    compte parti de 1 000 €."""
+    today = date.today()
+    mois_dernier = today.replace(day=1) - timedelta(days=1)
+    v = _bilan_carte(tmp_path,
+                     [(mois_dernier.isoformat(), -600.0),
+                      (today.isoformat(), -100.0)],
+                     nom="consult.db")
+    return v, today, mois_dernier
+
+
+def test_encours_carte_suit_le_mois_consulte(qapp, tmp_path):
+    """Choisir un mois passé fait parler le bandeau de CE mois-là : ses
+    achats, ce qu'il restait, sa date de prélèvement."""
+    v, today, mois_dernier = _bilan_deux_mois(tmp_path)
+    # Le lot du mois dernier (600 €) a été prélevé le 4 : le compte est à
+    # 400 €, moins les 100 € déjà passés à la carte ce mois-ci.
+    assert v.cb_dispo.text() == fmt_euro(300.0)
+    assert v.cb_bloc1.isVisibleTo(v)
+
+    v.period = mois_dernier.strftime("%Y-%m")
+    v.refresh()
+    assert v.cb_total.text() == fmt_euro(-600.0)       # les achats du mois passé
+    # Fin du mois dernier, le compte était encore à 1 000 € : les 600 € de
+    # carte n'en sortent que le 4 du mois suivant.
+    assert v.cb_dispo.text() == fmt_euro(400.0)
+    assert v.cb_dispo_lbl.text().startswith("Restait sur")
+    assert period_label(v.period).upper() in v.cb_title.text()
+    assert fmt_date_fr(date_debit_differe(mois_dernier.isoformat())) in v.cb_title.text()
+    assert "Consultation" in v.cb_detail.text()
+    # Les deux chiffres du prochain prélèvement n'ont aucun sens sur un mois
+    # passé, où plus rien n'est en attente : ils s'effacent.
+    assert not v.cb_bloc1.isVisibleTo(v)
+    assert not v.cb_bloc2.isVisibleTo(v)
+
+
+def test_encours_carte_annee_reste_sur_le_mois_en_cours(qapp, tmp_path):
+    """Une année ne désigne aucun mois : le bandeau garde le mois en cours
+    plutôt que de cumuler douze mois."""
+    v, today, _ = _bilan_deux_mois(tmp_path)
+    v.period = today.strftime("%Y")
+    v.refresh()
+    assert v.cb_dispo.text() == fmt_euro(300.0)
+    assert v.cb_dispo_lbl.text() == "Reste pour la carte"
+    assert v.cb_bloc1.isVisibleTo(v)
+
+
+def test_encours_carte_mois_sans_achat_masque_le_bandeau(qapp, tmp_path):
+    """Un mois consulté sans un seul achat par carte n'a rien à montrer."""
+    v, _, _ = _bilan_deux_mois(tmp_path)
+    v.period = "2021-03"
+    v.refresh()
+    assert not v.cb_banner.isVisibleTo(v)
+
+
+def test_encours_carte_verdict_du_mois_precedent(qapp, tmp_path):
+    """Le mois fini, le bandeau dit ce qu'il a laissé — sans qu'on ait à
+    changer de période pour aller le chercher."""
+    v, today, mois_dernier = _bilan_deux_mois(tmp_path)
+    assert "Mois précédent" in v.cb_detail.text()
+    assert period_label(mois_dernier.strftime("%Y-%m")).lower() in v.cb_detail.text()
+    assert fmt_euro(600.0) in v.cb_detail.text()      # dépensé à la carte
+    assert fmt_euro(400.0) in v.cb_detail.text()      # ce qu'il restait
+    assert "il restait" in v.cb_detail.text()
+
+
+def test_encours_carte_verdict_mois_ou_il_a_manque(qapp, tmp_path):
+    """Un mois dont les achats dépassent ce que le compte laissait est annoncé
+    comme tel, avec le montant qui a manqué."""
+    today = date.today()
+    mois_dernier = today.replace(day=1) - timedelta(days=1)
+    v = _bilan_carte(tmp_path, [(mois_dernier.isoformat(), -1300.0)],
+                     nom="manque.db")
+    assert "il a MANQUÉ" in v.cb_detail.text()
+    assert fmt_euro(300.0) in v.cb_detail.text()      # 1 300 - 1 000
+
+
+def test_encours_carte_tendance_de_fin_de_mois(qapp, tmp_path, monkeypatch):
+    """À partir du 10, le bandeau annonce où finira le mois au rythme actuel.
+    Avant, il se tait : une grosse course en début de mois ferait dire
+    n'importe quoi."""
+    from comptesbudget.ui.views import bilan as mod
+
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 20))
+    d = Database(str(tmp_path / "tendance.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    d.insert_tx(_tx(id="cb", date="2026-06-05", date_valeur="2026-07-04",
+                    libelle="HYPERMARCHE", type="Carte bancaire",
+                    montant=-300.0, pointee=1))
+    v = mod.BilanView(d)
+    v.refresh()
+    # 300 € en 20 jours sur un mois de 30 → environ 450 € en fin de mois,
+    # sur 1 000 € au compte : il resterait 550 €.
+    assert "À ce rythme" in v.cb_detail.text()
+    assert fmt_euro(450.0) in v.cb_detail.text()
+    assert "il resterait" in v.cb_detail.text()
+
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 3))   # trop tôt : il se tait
+    v.refresh()
+    assert "À ce rythme" not in v.cb_detail.text()
+
+
+# ── Cartes SANS débit différé ───────────────────────────────────────────────
+# Tout le bandeau Encours suppose une carte à débit différé : des achats faits
+# ce mois-ci et prélevés en une fois le mois suivant. Beaucoup de cartes sont
+# à débit immédiat — l'achat sort du compte le jour même. Pécule doit rester
+# juste pour ces comptes-là.
+
+def _bilan_debit_immediat(tmp_path, nom="immediat.db"):
+    """Deux achats par carte débités le jour même, sur un compte de 1 000 €."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / nom))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    today = date.today()
+    for i, (recul, montant) in enumerate([(0, -200.0), (3, -50.0)]):
+        jour = (today - timedelta(days=recul)).isoformat()
+        d.insert_tx(_tx(id=f"ci{i}", date=jour, date_valeur=jour,
+                        libelle="HYPERMARCHE", type="Carte bancaire",
+                        categorie="Alimentation", montant=montant, pointee=1))
+    v = BilanView(d)
+    v.refresh()
+    return v
+
+
+def test_bandeau_carte_masque_sans_debit_differe(qapp, tmp_path):
+    """Sans débit différé, le bandeau n'a rien à dire : ses trois chiffres
+    valent zéro (rien n'est « à débiter »), et « ce qui reste » ferait double
+    emploi avec le solde prévu du bandeau « Ce mois-ci »."""
+    v = _bilan_debit_immediat(tmp_path)
+    assert not v.cb_banner.isVisibleTo(v)
+
+
+def test_reste_carte_ne_compte_pas_deux_fois_en_debit_immediat(qapp, tmp_path):
+    """Le piège : un achat débité le jour même est DÉJÀ sorti du compte. Le
+    retrancher une seconde fois du solde de fin de mois annonçait 500 € là où
+    il en restait 750."""
+    v = _bilan_debit_immediat(tmp_path, nom="immediat2.db")
+    txs = [dict(r) for r in v.db.list_tx()]
+    mois = date.today().strftime("%Y-%m")
+    assert v._solde_fin_de_mois(txs, mois, 750.0) == 750.0
+    # Le bandeau étant masqué, aucun chiffre erroné n'est affiché.
+    assert not v.cb_banner.isVisibleTo(v)
+
+
+def test_debit_differe_reconnu_des_quune_operation_le_montre(qapp, tmp_path):
+    """Une seule opération carte dont la date de valeur dépasse la date
+    d'achat suffit à reconnaître le différé : c'est la banque qui décide, pas
+    un réglage à saisir."""
+    v = _bilan_debit_immediat(tmp_path, nom="mixte.db")
+    jour = date.today().isoformat()
+    v.db.insert_tx(_tx(id="cd", date=jour, date_valeur=date_debit_differe(jour),
+                       libelle="OMNISHOP", type="Carte bancaire",
+                       montant=-30.0, pointee=1))
+    v.refresh()
+    assert v.cb_banner.isVisibleTo(v)
+
+
+# ── Le jour où le compte passe sous zéro ────────────────────────────────────
+
+def _bilan_projection(tmp_path, mouvements, initial: float = 100.0,
+                      nom: str = "decouvert.db"):
+    """Bilan avec un solde de départ et des mouvements À VENIR.
+
+    `mouvements` : liste de (jours à partir d'aujourd'hui, montant). Ils sont
+    enregistrés non pointés, donc encore attendus sur le compte."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / nom))
+    d.set_setting("initial_balance", str(initial))
+    d.set_setting("initial_date", "2020-01-01")
+    today = date.today()
+    for i, (jours, montant) in enumerate(mouvements):
+        jour = (today + timedelta(days=jours)).isoformat()
+        d.insert_tx(_tx(id=f"m{i}", date=jour, date_valeur=jour,
+                        libelle="EDF" if montant < 0 else "PENSION",
+                        type="Prélèvement" if montant < 0 else "Virement",
+                        categorie="Logement - maison" if montant < 0 else "Revenus",
+                        montant=montant, pointee=0))
+    v = BilanView(d)
+    v.refresh()
+    return v
+
+
+def _texte(label):
+    """Le texte d'un bandeau, débarrassé de sa mise en forme HTML."""
+    import re
+    return re.sub("<[^>]+>", "", label.text())
+
+
+def test_decouvert_annonce_le_jour_et_lorigine(qapp, tmp_path):
+    """Un total de fin de mois ne dit pas QUAND le compte plonge. Le bandeau
+    donne le jour, le montant, et l'opération qui fait basculer."""
+    today = date.today()
+    v = _bilan_projection(tmp_path, [(5, -150.0)])
+    texte = _texte(v.verdict_banner)
+    assert v.verdict_banner.isVisibleTo(v)
+    assert fmt_date_fr((today + timedelta(days=5)).isoformat()) in texte
+    assert fmt_euro(-50.0) in texte           # 100 - 150
+    assert "EDF" in texte                     # l'opération qui fait basculer
+    assert "#E74C3C" in v.verdict_banner.styleSheet()      # bordure rouge
+
+
+def test_decouvert_trouve_le_point_le_plus_bas(qapp, tmp_path):
+    """Le creux peut arriver APRÈS une remontée : c'est lui qu'il faut voir,
+    pas seulement le premier jour négatif."""
+    today = date.today()
+    v = _bilan_projection(tmp_path, [(5, -150.0), (10, 500.0), (20, -600.0)],
+                          nom="creux.db")
+    texte = _texte(v.verdict_banner)
+    # 100 → -50 (J+5) → 450 (J+10) → -150 (J+20)
+    assert fmt_euro(-150.0) in texte
+    assert fmt_date_fr((today + timedelta(days=20)).isoformat()) in texte
+
+
+def test_decouvert_solde_qui_tient(qapp, tmp_path):
+    """Quand le compte tient, le bandeau le dit en vert plutôt que de
+    disparaître : une absence de message se lirait comme un calcul oublié."""
+    v = _bilan_projection(tmp_path, [(5, -50.0), (10, 200.0)], nom="tient.db")
+    texte = _texte(v.verdict_banner)
+    assert "reste positif" in texte
+    assert fmt_euro(50.0) in texte             # au plus bas : 100 - 50
+    assert "#229954" in v.verdict_banner.styleSheet()      # bordure verte
+
+
+def test_decouvert_deja_a_decouvert_aujourdhui(qapp, tmp_path):
+    """Compte déjà négatif : inutile d'annoncer une date future."""
+    v = _bilan_projection(tmp_path, [], initial=-80.0, nom="deja.db")
+    texte = _texte(v.verdict_banner)
+    assert "aujourd'hui" in texte
+    assert fmt_euro(-80.0) in texte
+
+
+def test_decouvert_ignore_ce_qui_est_au_dela_de_lhorizon(qapp, tmp_path):
+    """L'horizon est de 45 jours : il couvre toujours le prélèvement carte du
+    4 du mois suivant et la remontée des pensions, sans aller deviner plus
+    loin que le Prévisionnel ne sait le faire."""
+    from comptesbudget.ui.views.bilan import HORIZON_DECOUVERT
+
+    assert HORIZON_DECOUVERT == 45
+    v = _bilan_projection(tmp_path, [(HORIZON_DECOUVERT + 10, -500.0)],
+                          nom="horizon.db")
+    assert "reste positif" in _texte(v.verdict_banner)
+
+
 def test_encours_carte_avec_remboursement_en_cours(qapp, tmp_path):
     """Un REMBOURSEMENT par carte est porté directement au compte courant : il
     ne vient JAMAIS en déduction de l'encours de la carte. Il reste pourtant
@@ -363,16 +796,20 @@ def test_encours_carte_avec_remboursement_en_cours(qapp, tmp_path):
         in v.cb_detail.text()
 
 
-def test_bandeau_ce_qui_est_prevu(qapp, tmp_path):
-    """Projection à 15 jours : les opérations déjà enregistrées dont le débit
-    est à venir (encours carte) PLUS les échéances du Prévisionnel, sans
-    double compte quand l'opération réelle existe déjà."""
+def test_bandeau_ce_mois_ci(qapp, tmp_path, monkeypatch):
+    """Projection du mois : les opérations déjà enregistrées dont le débit est
+    à venir (encours carte) PLUS les échéances du Prévisionnel, sans double
+    compte quand l'opération réelle existe déjà.
+
+    La date est figée au 5 : les échéances de ce test sont placées quelques
+    jours plus loin, et déborderaient du mois en fin de mois."""
     from comptesbudget.ui.views.bilan import BilanView
 
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 5))
     d = Database(str(tmp_path / "prev.db"))
     d.set_setting("initial_balance", "1000")
     d.set_setting("initial_date", "2026-01-01")
-    today = date.today()
+    today = date(2026, 6, 5)          # la date que voit la vue
     dans_5j = (today + timedelta(days=5)).isoformat()
 
     # Solde du jour : 1000 € (une opération pointée déjà débitée à 0)
@@ -396,22 +833,25 @@ def test_bandeau_ce_qui_est_prevu(qapp, tmp_path):
     v = BilanView(d)
     v.refresh()
     assert v.kpis["solde"]._value.text() == fmt_euro(1000.0)   # carte non débitée
-    assert v.prev_sorties.text() == fmt_euro(-750.0)           # hors carte
-    assert v.prev_entrees.text() == fmt_euro(1500.0)
+    assert v.mois_sorties.text() == fmt_euro(-750.0)           # hors carte
+    assert v.mois_entrees.text() == fmt_euro(1500.0)
     # 1000 − 200 (carte) − 750 (loyer) + 1500 (pension)
-    assert v.prev_solde.text() == fmt_euro(1550.0)
-    assert "débit carte" in v.prev_detail.text()
+    assert v.mois_solde.text() == fmt_euro(1550.0)
+    assert "débit carte" in v.mois_detail.text()
+    # Les prochaines échéances nommées, reprises du bandeau des 15 jours.
+    assert "Prochaines : " in v.mois_detail.text()
 
 
-def test_bandeau_prevu_ne_compte_pas_deux_fois(qapp, tmp_path):
+def test_bandeau_mois_ne_compte_pas_deux_fois(qapp, tmp_path, monkeypatch):
     """Si l'opération réelle est déjà enregistrée pour une échéance à venir,
     la récurrence correspondante ne doit pas s'y ajouter."""
     from comptesbudget.ui.views.bilan import BilanView
 
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 5))
     d = Database(str(tmp_path / "prev2.db"))
     d.set_setting("initial_balance", "0")
     d.set_setting("initial_date", "2026-01-01")
-    today = date.today()
+    today = date(2026, 6, 5)          # la date que voit la vue
     dans_3j = (today + timedelta(days=3)).isoformat()
 
     d.insert_tx(_tx(id="loyer-reel", date=dans_3j, date_valeur=dans_3j,
@@ -425,20 +865,21 @@ def test_bandeau_prevu_ne_compte_pas_deux_fois(qapp, tmp_path):
 
     v = BilanView(d)
     v.refresh()
-    assert v.prev_sorties.text() == fmt_euro(-750.0)   # une seule fois
+    assert v.mois_sorties.text() == fmt_euro(-750.0)   # une seule fois
 
 
-def test_prevu_debit_carte_ignore_les_operations_en_cours(qapp, tmp_path):
+def test_debit_carte_ignore_les_operations_en_cours(qapp, tmp_path, monkeypatch):
     """Le débit annoncé pour le prochain prélèvement ne compte QUE les
     opérations que la banque y a rattachées (les pointées). Un remboursement
     carte encore « en cours » ne réduit pas ce prélèvement-là : il partira au
     suivant. Sinon le montant annoncé ne correspond pas au relevé."""
     from comptesbudget.ui.views.bilan import BilanView
 
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 5))
     d = Database(str(tmp_path / "cb-prev.db"))
     d.set_setting("initial_balance", "0")
     d.set_setting("initial_date", "2026-01-01")
-    today = date.today()
+    today = date(2026, 6, 5)          # la date que voit la vue
     dans_4j = (today + timedelta(days=4)).isoformat()
 
     d.insert_tx(_tx(id="cb-conf", date=today.isoformat(), date_valeur=dans_4j,
@@ -451,9 +892,9 @@ def test_prevu_debit_carte_ignore_les_operations_en_cours(qapp, tmp_path):
     v = BilanView(d)
     v.refresh()
     # Le débit annoncé est celui du relevé, sans le remboursement en cours
-    assert "débit carte " + fmt_euro(-120.00) in v.prev_detail.text()
-    assert "au prélèvement suivant" in v.prev_detail.text()
-    assert v.prev_solde.text() == fmt_euro(-120.00)
+    assert "débit carte " + fmt_euro(-120.00) in v.mois_detail.text()
+    assert "au prélèvement suivant" in v.mois_detail.text()
+    assert v.mois_solde.text() == fmt_euro(-120.00)
     # Le bandeau carte, lui, continue d'afficher les deux chiffres
     assert v.cb_courant.text() == fmt_euro(-120.00)
     assert v.cb_precedent.text() == fmt_euro(15.00)
@@ -600,6 +1041,39 @@ def test_changer_le_type_recale_la_date_de_valeur(qapp):
     assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
 
 
+def test_pas_de_debit_differe_impose_a_la_saisie(qapp):
+    """Sur un compte à débit immédiat, la date de valeur d'un achat par carte
+    suit la date d'achat. Reporter d'office au 4 du mois suivant fausserait le
+    solde de tous ceux qui n'ont pas de carte à débit différé."""
+    from PySide6.QtCore import QDate
+
+    from comptesbudget.ui.dialogs import TxDialog
+
+    immediates = [_tx(id="a", date="2026-08-05", date_valeur="2026-08-05",
+                      type="Carte bancaire", montant=-20.0)]
+    dlg = TxDialog(categories=CATEGORIES_DEFAUT, all_transactions=immediates)
+    dlg.date_edit.setDate(QDate(2026, 8, 12))
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    dlg.rb_debit.setChecked(True)
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-08-12"
+
+
+def test_debit_differe_repere_dans_lhistorique_est_applique(qapp):
+    """Dès qu'une opération du compte montre le différé, la saisie suivante en
+    profite : c'est la banque qui décide, pas un réglage à comprendre."""
+    from PySide6.QtCore import QDate
+
+    from comptesbudget.ui.dialogs import TxDialog
+
+    differees = [_tx(id="a", date="2026-08-05", date_valeur="2026-09-04",
+                     type="Carte bancaire", montant=-20.0)]
+    dlg = TxDialog(categories=CATEGORIES_DEFAUT, all_transactions=differees)
+    dlg.date_edit.setDate(QDate(2026, 8, 12))
+    dlg.type_combo.setCurrentText("Carte bancaire")
+    dlg.rb_debit.setChecked(True)
+    assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
+
+
 def test_date_de_valeur_saisie_a_la_main_est_respectee(qapp):
     """Une date de valeur saisie à la main ne doit pas être écrasée tant que
     le type et le sens ne changent pas (achat carte de fin de mois débité au
@@ -650,9 +1124,9 @@ def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
 
     bilan = BilanView(db)
     bilan.refresh()
-    sans_assurance = _euros(bilan.prev_sorties.text())
+    sans_assurance = _euros(bilan.mois_sorties.text())
 
-    cible = date.today() + timedelta(days=3)      # dans la fenêtre des 15 jours
+    cible = date.today() + timedelta(days=3)      # dans la fenêtre du mois
     db.insert_recurring({"id": "rec-test", "libelle": "ASSURANCE TEST",
                          "montant": -123.45, "categorie": "Assurances",
                          "sous_cat": "", "type": "Prelevement",
@@ -661,7 +1135,7 @@ def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
                          "actif": 1})
 
     bilan.refresh()
-    avant = bilan.prev_sorties.text()
+    avant = bilan.mois_sorties.text()
     # La récurrence est bien prévue : le total a baissé d'exactement 123,45 €.
     # On mesure l'écart, car le jeu d'essai contient d'autres échéances dont
     # la présence dans la fenêtre dépend du jour du mois.
@@ -673,7 +1147,96 @@ def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
     assert prev._creer_operations(a_creer) == len(a_creer)
 
     bilan.refresh()
-    assert bilan.prev_sorties.text() == avant      # inchangé : pas de doublon
+    assert bilan.mois_sorties.text() == avant      # inchangé : pas de doublon
+
+
+# ── Graphique « Évolution sur 12 mois » ─────────────────────────────────────
+
+def _bilan_douze_mois(tmp_path):
+    """Bilan avec une dépense et une rentrée chaque mois sur deux ans."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "graph.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2024-01-01")
+    n = 0
+    for an in (2025, 2026):
+        for mois in range(1, 13):
+            jour = f"{an}-{mois:02d}-10"
+            d.insert_tx(_tx(id=f"r{n}", date=jour, date_valeur=jour,
+                            libelle="PENSION", type="Virement",
+                            categorie="Revenus", montant=1000.0, pointee=1))
+            d.insert_tx(_tx(id=f"d{n}", date=jour, date_valeur=jour,
+                            libelle="SAUR", type="Prélèvement",
+                            categorie="Logement - maison", montant=-400.0,
+                            pointee=1))
+            n += 1
+    v = BilanView(d)
+    v.refresh()
+    return v
+
+
+def _barres(v):
+    """Les valeurs des deux séries du graphique."""
+    return {bs.label(): [bs.at(i) for i in range(bs.count())]
+            for s in v.bar_chart.series() for bs in s.barSets()}
+
+
+def test_graphique_montre_douze_mois_meme_sur_un_mois(qapp, tmp_path):
+    """Sur un mois affiché, le graphique dessinait UNE barre : un quart de
+    l'écran pour un chiffre donné six fois ailleurs. Il montre désormais
+    toujours douze mois, ce qui répond à « est-ce que ça se dégrade ? »."""
+    v = _bilan_douze_mois(tmp_path)
+    v.period = "2026-05"
+    v.refresh()
+    barres = _barres(v)
+    assert len(barres["Revenus"]) == 12
+    assert len(barres["Dépenses"]) == 12
+    # Les douze mois s'achèvent sur le mois affiché, pour le situer dans son
+    # histoire : juin 2025 → mai 2026.
+    assert "JUN 2025" in v.bar_panel._header.text()
+    assert "MAI 2026" in v.bar_panel._header.text()
+
+
+def test_graphique_sur_une_annee_montre_ses_douze_mois(qapp, tmp_path):
+    """Une année choisie montre janvier à décembre de cette année-là."""
+    v = _bilan_douze_mois(tmp_path)
+    v.period = "2025"
+    v.refresh()
+    assert v._mois_du_graphique([]) == [f"2025-{m:02d}" for m in range(1, 13)]
+    assert "JAN 2025" in v.bar_panel._header.text()
+    assert "DÉC 2025" in v.bar_panel._header.text()
+
+
+def test_graphique_ignore_le_filtre_de_periode(qapp, tmp_path):
+    """Les barres portent tous les mois, pas seulement les opérations de la
+    période : sinon onze colonnes sur douze resteraient vides."""
+    v = _bilan_douze_mois(tmp_path)
+    v.period = "2026-05"
+    v.refresh()
+    barres = _barres(v)
+    assert all(x == 1000.0 for x in barres["Revenus"])
+    assert all(x == 400.0 for x in barres["Dépenses"])
+
+
+def test_graphique_replie_sur_les_derniers_mois_connus(qapp, tmp_path):
+    """Une base dont les données s'arrêtent il y a longtemps donnerait douze
+    colonnes vides : on retombe sur les douze derniers mois qui portent
+    quelque chose."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    d = Database(str(tmp_path / "vieux.db"))
+    d.set_setting("initial_balance", "0")
+    d.set_setting("initial_date", "2020-01-01")
+    anciens = [_tx(id=f"v{m}", date=f"2021-{m:02d}-10",
+                   date_valeur=f"2021-{m:02d}-10", libelle="SAUR",
+                   type="Prélèvement", montant=-50.0, pointee=1)
+               for m in range(1, 13)]
+    for t in anciens:
+        d.insert_tx(t)
+    v = BilanView(d)
+    v.refresh()
+    assert v._mois_du_graphique(anciens)[-1] == "2021-12"
 
 
 def test_bilan_bandeau_fin_de_mois(qapp, tmp_path):
@@ -770,7 +1333,7 @@ def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path,
     vue.refresh()
     assert vue.kpis["solde"]._value.text() == fmt_euro(900.00)
     # Ni le bandeau des 15 jours ni celui du mois ne doivent l'annoncer encore
-    assert vue.prev_entrees.text() == fmt_euro(0)
+    assert vue.mois_entrees.text() == fmt_euro(0)
     assert vue.mois_entrees.text() == fmt_euro(0)
     assert vue.mois_solde.text() == fmt_euro(900.00)
 

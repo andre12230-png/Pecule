@@ -2,15 +2,15 @@
 
 from datetime import date
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
-    QLabel, QComboBox, QDoubleSpinBox, QCheckBox,
+    QLabel, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton,
 )
 
 from ..utils import (
-    list_periods, period_label,
+    MOIS_TOUS, _mois_des_transactions, annee_de_periode, annees_disponibles,
+    mois_disponibles, nom_mois_fr, period_label, periode_voisine,
 )
 
 
@@ -63,6 +63,20 @@ def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
 
 
 class PeriodBar(QWidget):
+    """Barre du haut : « Période : ‹ [année] [mois] › », mode de date et
+    archives.
+
+    Le sélecteur de période était une seule liste où les mois se rangeaient
+    en retrait sous leur année ; pour atteindre un mois d'une année passée,
+    il fallait choisir l'année, puis rouvrir la liste. Il est coupé en deux
+    menus courts, encadrés de deux flèches qui reculent ou avancent d'un
+    cran à échelle constante (un mois reste un mois, une année une année) —
+    le même sélecteur que dans pv-dashboard et Recharges VE.
+
+    La valeur manipulée n'a pas changé (« all », « 2026 », « 2026-09 ») :
+    les vues filtrent exactement comme avant.
+    """
+
     period_changed = Signal(str)
     date_mode_changed = Signal(str)
     archives_toggled = Signal(bool)
@@ -72,13 +86,28 @@ class PeriodBar(QWidget):
         h = QHBoxLayout(self); h.setContentsMargins(8, 4, 8, 4)
 
         h.addWidget(QLabel("Période :"))
-        self.combo = QComboBox()
-        self.combo.setMinimumWidth(220)
-        self.combo.setToolTip(
-            "Période affichée. Seule l'année en cours montre ses mois ; "
-            "choisissez une autre année pour ouvrir les siens.")
-        self.combo.currentIndexChanged.connect(self._emit)
-        h.addWidget(self.combo)
+
+        # Les deux flèches font le geste le plus fréquent — « et le mois
+        # d'avant ? » — en un clic, sans ouvrir de liste.
+        self.prev_btn = self._fleche("‹", "Période précédente", -1)
+        h.addWidget(self.prev_btn)
+
+        self.annee_combo = QComboBox()
+        self.annee_combo.setMinimumWidth(120)
+        self.annee_combo.setToolTip(
+            "Année affichée, ou « Toutes périodes » pour tout l'historique.")
+        self.annee_combo.currentIndexChanged.connect(self._on_annee)
+        h.addWidget(self.annee_combo)
+
+        self.mois_combo = QComboBox()
+        self.mois_combo.setMinimumWidth(120)
+        self.mois_combo.setToolTip(
+            "Mois affiché dans l'année choisie, ou l'année entière.")
+        self.mois_combo.currentIndexChanged.connect(self._on_mois)
+        h.addWidget(self.mois_combo)
+
+        self.next_btn = self._fleche("›", "Période suivante", +1)
+        h.addWidget(self.next_btn)
 
         h.addSpacing(20)
         h.addWidget(QLabel("Date :"))
@@ -105,67 +134,153 @@ class PeriodBar(QWidget):
         h.addWidget(self.archives_check)
 
         h.addStretch()
+        self._transactions: list[dict] = []
         self._current = "all"
         self._current_mode = "valeur"
-        # Au tout premier remplissage, on présélectionne le mois en cours
-        # (s'il existe dans la liste), au lieu de « Toutes périodes ».
+        # Au tout premier remplissage, on se place sur le mois en cours
+        # (s'il porte des opérations), au lieu de « Toutes périodes ».
         self._first_fill = True
+        self._peupler()
 
+    def _fleche(self, signe: str, infobulle: str, sens: int) -> QPushButton:
+        """Un des deux boutons de navigation. Grisé quand il n'y a plus rien
+        de ce côté : cliquable mais sans effet, il ferait croire à une
+        panne."""
+        b = QPushButton(signe)
+        b.setFixedWidth(26)
+        # Le chevron est un caractère fin : sans mise en gras il se perd à
+        # côté des deux menus.
+        police = b.font()
+        police.setBold(True)
+        police.setPointSize(police.pointSize() + 3)
+        b.setFont(police)
+        b.setToolTip(infobulle)
+        b.clicked.connect(lambda: self._decaler(sens))
+        return b
+
+    # ── Remplissage ─────────────────────────────────────────────────
     def update_periods(self, transactions: list[dict]):
-        cur_data = self.combo.currentData()
-        self.combo.blockSignals(True)
-        self.combo.clear()
-        # Les périodes proposées suivent le mode d'affichage : c'est la même
-        # date qui sert à remplir cette liste et à filtrer les opérations.
-        # Une année ouvre son groupe (en gras) ; ses mois sont décalés
-        # dessous. Une liste déroulante Qt ne connaît pas les sous-titres :
-        # le retrait et la graisse en tiennent lieu.
-        #
-        # Les années passées restent repliées : seule la ligne « Année … »
-        # apparaît. Sont dépliées l'année en cours et celle de la période
-        # choisie — choisir « Année 2024 » ouvre donc ses mois au passage.
-        # Sans cela, quatre ans d'historique donnaient cinquante entrées.
-        depliees = {date.today().strftime("%Y")}
-        if cur_data and cur_data != "all":
-            depliees.add(cur_data[:4])
+        """Reçoit les opérations du compte affiché et remet la barre
+        d'aplomb. Appelée à chaque rafraîchissement : de nouveaux mois
+        peuvent être apparus, ou la période choisie avoir disparu."""
+        self._transactions = list(transactions)
+        mode = self.current_date_mode()
 
-        grasse = QFont()
-        grasse.setBold(True)
-        for p in list_periods(transactions, self.current_date_mode()):
-            if len(p) == 7 and p[:4] not in depliees:
-                continue
-            libelle = period_label(p)
-            if len(p) == 7:
-                libelle = "      " + libelle
-            self.combo.addItem(libelle, p)
-            if len(p) == 4:
-                self.combo.setItemData(self.combo.count() - 1, grasse,
-                                       Qt.FontRole)
-        # Premier remplissage : sélectionner le mois en cours s'il est présent.
         if self._first_fill:
-            current_month = date.today().strftime("%Y-%m")
-            idx = self.combo.findData(current_month)
-            if idx >= 0:
-                self.combo.setCurrentIndex(idx)
-                self._current = current_month
+            # Le mois en cours est toujours proposé dans le menu, même vide ;
+            # mais on n'OUVRE pas dessus s'il ne porte aucune opération, ce
+            # qui donnerait un écran vide sans dire pourquoi.
+            courant = date.today().strftime("%Y-%m")
+            reels = _mois_des_transactions(self._transactions, mode)
+            self._current = courant if courant in reels else "all"
             self._first_fill = False
-        elif cur_data:
-            idx = self.combo.findData(cur_data)
-            if idx >= 0:
-                self.combo.setCurrentIndex(idx)
-        self.combo.blockSignals(False)
-        # Changer de mode peut faire disparaître la période choisie (juillet
-        # devient août pour un achat carte). On note ce qui est réellement
-        # sélectionné, sinon un futur choix de cette même période serait
-        # considéré comme « inchangé » et n'actualiserait rien.
-        self._current = self.combo.currentData() or "all"
+        elif not self._periode_valide(self._current, mode):
+            # Changer de mode peut faire disparaître la période choisie
+            # (juillet devient août pour un achat carte).
+            self._current = "all"
 
-    def _emit(self):
-        p = self.combo.currentData() or "all"
-        if p != self._current:
-            self._current = p
-            self.period_changed.emit(p)
+        self._peupler()
 
+    def _periode_valide(self, period: str, mode: str) -> bool:
+        """La période choisie existe-t-elle encore dans les deux menus ?"""
+        if period == "all":
+            return True
+        annee = annee_de_periode(period)
+        if annee not in annees_disponibles(self._transactions, mode):
+            return False
+        return (len(period) == 4
+                or period in mois_disponibles(self._transactions, annee, mode))
+
+    def _peupler(self):
+        """Remet les deux menus d'aplomb sur self._current.
+
+        Les signaux sont coupés pendant l'opération : sans cela, remplir un
+        menu déclencherait le changement de période qu'on est en train
+        d'appliquer."""
+        mode = self.current_date_mode()
+        for c in (self.annee_combo, self.mois_combo):
+            c.blockSignals(True)
+
+        self.annee_combo.clear()
+        for a in annees_disponibles(self._transactions, mode):
+            self.annee_combo.addItem(period_label(a) if a == "all" else a, a)
+        annee = annee_de_periode(self._current)
+        self.annee_combo.setCurrentIndex(
+            self._index_de(self.annee_combo, annee or "all"))
+
+        # Le menu des mois n'a de sens que sous une année : « toutes
+        # périodes » est à cheval sur toutes les années.
+        self.mois_combo.clear()
+        if annee is None:
+            self.mois_combo.addItem("Toute l'année", MOIS_TOUS)
+        else:
+            for m in mois_disponibles(self._transactions, annee, mode):
+                self.mois_combo.addItem(
+                    "Toute l'année" if m == MOIS_TOUS else nom_mois_fr(m), m)
+            cible = self._current if len(self._current) == 7 else MOIS_TOUS
+            self.mois_combo.setCurrentIndex(
+                self._index_de(self.mois_combo, cible))
+
+        for c in (self.annee_combo, self.mois_combo):
+            c.blockSignals(False)
+        self._maj_etat()
+
+    @staticmethod
+    def _index_de(combo: QComboBox, valeur: str) -> int:
+        """Rang de `valeur` dans un menu, 0 si elle n'y est pas."""
+        return next((i for i in range(combo.count())
+                     if combo.itemData(i) == valeur), 0)
+
+    def _maj_etat(self):
+        """Active ou grise le menu des mois et les deux flèches."""
+        mode = self.current_date_mode()
+        self.mois_combo.setEnabled(annee_de_periode(self._current) is not None)
+        for bouton, sens in ((self.prev_btn, -1), (self.next_btn, +1)):
+            bouton.setEnabled(periode_voisine(
+                self._transactions, self._current, sens, mode) is not None)
+
+    # ── Changements de période ──────────────────────────────────────
+    def _appliquer(self, period: str):
+        """Change la période affichée, remet la barre d'aplomb et prévient la
+        fenêtre principale."""
+        period = period or "all"
+        if period == self._current:
+            return
+        self._current = period
+        self._peupler()
+        self.period_changed.emit(period)
+
+    def _on_annee(self, idx: int):
+        valeur = self.annee_combo.itemData(idx)
+        if valeur is None:
+            return
+        # En changeant d'année on garde le mois affiché s'il existe là-bas :
+        # c'est ce qu'on veut pour comparer un mois d'une année sur l'autre.
+        # Sinon on montre l'année entière plutôt qu'un écran vide.
+        if valeur != "all" and len(self._current) == 7:
+            candidat = f"{valeur}-{self._current[5:7]}"
+            if candidat in mois_disponibles(self._transactions, valeur,
+                                            self.current_date_mode()):
+                valeur = candidat
+        self._appliquer(valeur)
+
+    def _on_mois(self, idx: int):
+        valeur = self.mois_combo.itemData(idx)
+        if valeur is None:
+            return
+        if valeur == MOIS_TOUS:
+            valeur = self.annee_combo.currentData() or "all"
+        self._appliquer(valeur)
+
+    def _decaler(self, sens: int):
+        """Un cran en arrière (sens=-1) ou en avant (+1), à échelle constante :
+        un mois reste un mois, une année reste une année."""
+        voisine = periode_voisine(self._transactions, self._current, sens,
+                                  self.current_date_mode())
+        if voisine is not None:
+            self._appliquer(voisine)
+
+    # ── Le reste de la barre ────────────────────────────────────────
     def _emit_date_mode(self):
         m = self.date_mode_combo.currentData() or "operation"
         if m != self._current_mode:
@@ -187,7 +302,7 @@ class PeriodBar(QWidget):
         self._first_fill = True
 
     def current_period(self) -> str:
-        return self.combo.currentData() or "all"
+        return self._current
 
     def current_date_mode(self) -> str:
         return self.date_mode_combo.currentData() or "operation"

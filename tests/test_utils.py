@@ -1,7 +1,11 @@
 """Tests des utilitaires (formatage, normalisation, périodes)."""
+from datetime import date
+
 from comptesbudget.utils import (
-    canonical_cat, cat_color, date_debit_differe, deaccent, fmt_date_fr,
-    fmt_euro, in_period, list_periods, period_label, suggest_category,
+    MOIS_TOUS, annee_de_periode, annees_disponibles, canonical_cat, cat_color,
+    date_debit_differe, deaccent, fmt_date_fr, fmt_euro, in_period,
+    list_periods, mois_disponibles, nom_mois_fr, period_label, periode_voisine,
+    suggest_category,
 )
 
 
@@ -81,6 +85,65 @@ def test_list_periods_suit_le_mode_date():
     val = list_periods(txs, "valeur")
     assert "2026-07" in op and "2026-08" not in op
     assert "2026-08" in val and "2026-07" not in val
+
+
+# ── Sélecteur de période en deux menus ──────────────────────────────────────
+
+def test_nom_mois_fr():
+    # Le menu des mois ne répète pas l'année : elle est dans le menu d'à côté.
+    assert nom_mois_fr("2026-09") == "Septembre"
+    assert nom_mois_fr("2026") == "2026"          # pas un mois → tel quel
+
+
+def test_annee_de_periode():
+    assert annee_de_periode("2026-09") == "2026"
+    assert annee_de_periode("2026") == "2026"
+    assert annee_de_periode("all") is None        # à cheval sur toutes
+
+
+def test_annees_disponibles_contient_toujours_lannee_en_cours():
+    """Sans cette garantie, l'application ne pourrait pas s'ouvrir sur
+    l'année en cours tant qu'aucune opération n'y figure."""
+    txs = [{"date": "2024-05-01"}, {"date": "2025-03-01"}]
+    out = annees_disponibles(txs)
+    an = date.today().strftime("%Y")
+    assert out[0] == "all"
+    assert out[1:] == sorted({"2024", "2025", an}, reverse=True)
+
+
+def test_mois_disponibles_dune_annee():
+    txs = [{"date": "2025-03-01"}, {"date": "2025-08-15"}, {"date": "2024-12-01"}]
+    assert mois_disponibles(txs, "2025") == [MOIS_TOUS, "2025-08", "2025-03"]
+
+
+def test_mois_disponibles_propose_toujours_le_mois_en_cours():
+    courant = date.today().strftime("%Y-%m")
+    out = mois_disponibles([], courant[:4])
+    assert out == [MOIS_TOUS, courant]
+
+
+def test_periode_voisine_traverse_les_annees():
+    """Les flèches se déplacent à échelle constante — un mois reste un mois —
+    et passent d'une année à l'autre : de janvier à décembre précédent."""
+    txs = [{"date": "2025-12-10"}, {"date": "2026-01-10"}, {"date": "2026-02-10"}]
+    assert periode_voisine(txs, "2026-01", -1) == "2025-12"
+    assert periode_voisine(txs, "2026-01", +1) == "2026-02"
+    assert periode_voisine(txs, "2025-12", -1) is None      # plus rien avant
+    # Sur une année, on se déplace d'année en année.
+    assert periode_voisine(txs, "2026", -1) == "2025"
+    # « Toutes périodes » n'a ni précédent ni suivant : les deux flèches
+    # se grisent.
+    assert periode_voisine(txs, "all", -1) is None
+    assert periode_voisine(txs, "all", +1) is None
+
+
+def test_periode_voisine_suit_le_mode_date():
+    # Achat carte du 28/07 débité le 04/08 : en « date de valeur », le mois
+    # voisin de juin est août, pas juillet.
+    txs = [{"date": "2026-06-10", "date_valeur": "2026-07-04"},
+           {"date": "2026-07-28", "date_valeur": "2026-08-04"}]
+    assert periode_voisine(txs, "2026-06", +1, "operation") == "2026-07"
+    assert periode_voisine(txs, "2026-07", +1, "valeur") == "2026-08"
 
 
 def test_date_debit_differe():
