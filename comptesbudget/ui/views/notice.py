@@ -171,6 +171,11 @@ selon votre consommation pour la période sélectionnée.</p>
 <p>Sur une année, le budget comparé est le budget mensuel multiplié par le
 nombre de mois <b>réellement couverts</b> par des opérations : en juillet,
 l'année en cours compte pour 7 mois de budget, pas 12.</p>
+<p>Les dépenses sont comptées à leur <b>date d'achat</b>, quel que soit le
+sélecteur « Date » en haut de l'écran : un achat par carte reste dans le mois
+où vous l'avez fait, même si votre banque le débite le mois suivant. Un budget
+répond à « qu'ai-je dépensé&nbsp;? », pas à « qu'a prélevé la banque&nbsp;? ».
+Le bandeau d'alerte du Bilan suit la même règle.</p>
 <p>Double-cliquez sur une catégorie pour modifier son budget mensuel.</p>
 
 <h3>🏷️ Catégories</h3>
@@ -301,6 +306,10 @@ retrouver à l'euro près le solde de votre relevé bancaire. Le KPI
 <b>« 💼 Solde bancaire réel »</b> du Bilan, lui, utilise la date de valeur dans
 tous les cas : passer en « Date d'opération » ne le fait plus gonfler de
 l'encours carte pas encore prélevé.</p>
+<p>Deux écrans ignorent ce sélecteur, chacun dans son sens : le KPI ci-dessus,
+toujours en date de valeur, et l'onglet <b>Budget</b> (avec le bandeau d'alerte
+du Bilan), toujours en <b>date d'achat</b> — sinon le prélèvement groupé du 4
+ferait déborder les budgets du mois suivant.</p>
 <p>Quand vous saisissez une opération de type <b>Carte bancaire</b>, la
 <b>date de valeur</b> est proposée automatiquement au <b>4 du mois suivant</b>
 l'achat (jour du prélèvement groupé). Vous pouvez la corriger : dès que vous

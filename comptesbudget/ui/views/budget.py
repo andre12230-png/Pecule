@@ -24,12 +24,16 @@ class BudgetView(QWidget):
         super().__init__(parent)
         self.db = db
         self.period = "all"
-        self.date_mode = "valeur"   # suit le sélecteur « Date » de la barre du haut
+        # Posé par la fenêtre principale quand le sélecteur « Date » change,
+        # mais le Budget ne s'en sert pas : voir _eff_date.
+        self.date_mode = "valeur"
         v = QVBoxLayout(self); v.setContentsMargins(8, 8, 8, 8)
 
         info = QLabel(
             "Définissez un budget mensuel par catégorie. La barre de progression montre le pourcentage "
-            "dépensé pour la période sélectionnée (rapporté au nombre de mois)."
+            "dépensé pour la période sélectionnée (rapporté au nombre de mois). "
+            "Les dépenses sont comptées à leur date d'achat : un achat par carte reste dans le mois "
+            "où vous l'avez fait, même si la banque le débite le mois suivant."
         )
         info.setWordWrap(True); info.setStyleSheet("color:#555; padding:6px")
         v.addWidget(info)
@@ -63,10 +67,16 @@ class BudgetView(QWidget):
         v.addLayout(h)
 
     def _eff_date(self, t: dict) -> str:
-        """Date utilisée pour la période affichée : elle suit le sélecteur
-        « Date » de la barre du haut, comme le Bilan et les Opérations."""
-        if self.date_mode == "valeur":
-            return t.get("date_valeur") or t.get("date", "")
+        """Date utilisée pour la période affichée : TOUJOURS la date d'achat,
+        quel que soit le sélecteur « Date » de la barre du haut.
+
+        Un budget répond à « qu'ai-je dépensé ce mois-ci ? », pas à « qu'a
+        prélevé la banque ? ». Les deux ne se confondent que sur une carte à
+        débit immédiat : sur une carte à débit différé, tout le lot du mois
+        part le 4 du mois suivant et faisait déborder les budgets du mois
+        d'après (le 07/09/2026 : « Restaurants & Sorties 147 % » pour un mois
+        sans un seul restaurant). Le sélecteur reste maître ailleurs — Bilan et
+        Opérations, où l'on regarde le solde du compte, pas la dépense."""
         return t.get("date", "")
 
     def _month_count(self, txs: list[dict]) -> int:

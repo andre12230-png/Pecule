@@ -13,6 +13,33 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-07 — Le budget se compte à la date d'achat (1.30.2)
+
+**Fait.** L'onglet **Budget** et le bandeau « Budget dépassé ce mois-ci » du
+Bilan ne suivent plus le sélecteur « Date » de la barre du haut : ils comptent
+toujours les dépenses à leur **date d'achat**. Notice et aide de l'onglet
+complétées, un test ajouté (`test_budget_ignore_le_debit_differe`) et l'ancien
+`test_tous_les_onglets_suivent_le_mode_date` réécrit — il affirmait le
+contraire.
+
+**Pourquoi.** Constat d'André : « dans le bandeau budget dépassé, la plupart
+sont des dépenses carte du mois d'avant ». Vérifié sur sa base : sur les cinq
+catégories annoncées dépassées le 07/09, **une seule l'était vraiment**
+(Banque et assurances, 116 %, des prélèvements). Restaurants & Sorties (147 %)
+et Shopping (104 %) affichaient **zéro dépense** en septembre : c'était le lot
+de la carte d'août, débité le 4. Le sélecteur était sur « Date de valeur » —
+le bon mode pour un solde, le mauvais pour un budget, qui répond à « qu'ai-je
+dépensé ? » et non « qu'a prélevé la banque ? ». Le reste de l'application
+suivait déjà cette règle (encours carte, prévisionnel).
+
+**Reste.** L'onglet **Catégories**, lui, suit toujours le sélecteur : en date
+de valeur, il continuera d'attribuer un achat d'août à septembre. Il répond à
+une autre question (où part l'argent), mais la contradiction avec le Budget est
+visible — à trancher si elle gêne. Rien n'est publié : le dernier tag reste
+`v1.23.2`, la 1.30.2 n'existe que dans le code.
+
+---
+
 ## 2026-09-07 — « Reste pour la carte » ne descend plus sous zéro (1.30.1)
 
 **Fait.** Le chiffre pouvait afficher un montant **négatif** quand le mois se
