@@ -590,6 +590,30 @@ def test_titre_du_mouvement_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert titre("all") == "Mouvement — toutes périodes"
 
 
+def test_mouvement_pointe_se_lit_en_face_du_mouvement(qapp, tmp_path, monkeypatch):
+    """La tuile « Mouvement pointé » additionne les opérations pointées de la
+    période — et rien d'autre. Sur un mois entièrement pointé elle affiche le
+    même chiffre que « Mouvement du mois » ; l'écart, sinon, est ce qui n'est
+    pas encore passé en banque."""
+    BilanView, d = _bilan_trois_mois(tmp_path, monkeypatch)
+    # Une échéance de septembre encore en attente : elle ne doit pas y entrer.
+    d.insert_tx(_tx(id="s2", date="2026-09-20", date_valeur="2026-09-20",
+                    libelle="ASSURANCE", type="Prélèvement",
+                    categorie="Banque et assurances", montant=-30.0, pointee=0))
+
+    v = BilanView(d); v.period = "2026-08"; v.refresh()
+    assert v.kpis["pointe"]._label.text() == "✔ Mouvement pointé"
+    # Août est entièrement pointé : les deux tuiles disent la même chose.
+    assert _euros(v.kpis["pointe"]._value.text()) == 300.0     # -200 + 500
+    assert v.kpis["pointe"]._value.text() == v.kpis["net"]._value.text()
+    assert "Août 2026" in v.kpis["pointe"]._sub.text()
+
+    # Septembre : l'échéance en attente creuse l'écart entre les deux.
+    v = BilanView(d); v.period = "2026-09"; v.refresh()
+    assert _euros(v.kpis["pointe"]._value.text()) == -50.0     # la seule pointée
+    assert _euros(v.kpis["net"]._value.text()) == -80.0        # avec l'échéance
+
+
 def test_encours_carte_reprend_les_deux_chiffres_de_la_banque(qapp, tmp_path):
     """La banque affiche « Débit différé au JJ/MM » (achats qu'elle a intégrés
     au prochain prélèvement = pointés) et un encours incluant les achats
