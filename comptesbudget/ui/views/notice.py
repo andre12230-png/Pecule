@@ -148,7 +148,15 @@ faisait confondre avec celui d'à côté, pour une valeur souvent voisine.</p>
 <p>La tuile <b>« Mouvement du mois »</b> porte sous son chiffre les deux moitiés
 qui le composent — « 2 000,00 € entrés (5) − 2 300,00 € sortis (46) ». Elles
 occupaient deux tuiles séparées (« Revenus » et « Dépenses ») jusqu'à la
-1.30.0 : trois cases pour deux informations.</p>
+1.30.0 : trois cases pour deux informations. Son <b>titre suit la période</b> :
+« Mouvement de l'année » sur une année, « Mouvement — toutes périodes » sur
+tout l'historique.</p>
+<p>Des quatre tuiles, <b>trois suivent la période</b> choisie en haut : le
+mouvement, le taux d'épargne qui en découle, et le pointé. Seul le
+<b>solde bancaire réel</b> n'en dépend pas : c'est le solde de votre compte
+<b>aujourd'hui</b>, celui que vous comparez à votre relevé — il porte d'ailleurs
+sa date sous le chiffre. Pour le solde d'un mois passé, lisez le bandeau vert,
+qui donne celui du dernier jour de ce mois-là.</p>
 
 <h3>📋 Opérations</h3>
 <p>Liste complète des transactions avec filtres (catégorie, type, sens, pointage) et un champ
