@@ -761,7 +761,18 @@ SYNC_VERSION = 3
 #            L'avertissement en capitales disait le contraire ; remplace par
 #            ce qu'il faut vraiment eviter, et par la marche a suivre quand
 #            l'application s'ouvre vide.
-APP_VERSION = "1.33.0"
+# 1.33.1 : la sauvegarde automatique quotidienne ne se supprimait plus
+#          elle-meme. La rotation gardait les 10 fichiers les plus recents en
+#          triant par NOM, sur tout ce qui commence par « comptes- » : une
+#          copie manuelle « comptes-avant-quelque-chose.db » se classait donc
+#          APRES les sauvegardes datees (« a » vient apres « 2 »). Dix copies
+#          de ce genre suffisaient a faire supprimer, a chaque lancement, la
+#          sauvegarde du jour qui venait d'etre creee — plus aucune sauvegarde
+#          automatique, sans un mot. Constate sur une vraie installation :
+#          aucune depuis le 3 septembre. La rotation ne regarde plus que les
+#          noms dates (comptes-AAAA-MM-JJ.db) ; les copies faites a la main
+#          ne sont ni comptees ni supprimees.
+APP_VERSION = "1.33.1"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",
