@@ -1,6 +1,8 @@
 """Fenêtre principale de l'application."""
 
 import os
+import shutil
+import sqlite3
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import (
@@ -9,7 +11,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QStatusBar, QDialog, QMessageBox, QFileDialog,
-    QLabel, QComboBox,
+    QLabel, QComboBox, QScrollArea, QFrame,
 )
 
 from ..constants import (
@@ -20,8 +22,8 @@ from ..utils import (
     suggest_category,
 )
 from ..database import Database
-from ..labels import clean_libelle
-from ..csv_import import import_csv
+from ..labels import charger_alias, clean_libelle
+from ..csv_import import diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
 from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
@@ -153,6 +155,12 @@ class MainWindow(QMainWindow):
         add_btn("♻️ Restaurer (JSON)", self.action_import_json,
                 "Réimporte un export JSON en le fusionnant : pour chaque "
                 "enregistrement, la version la plus récente est conservée")
+        # Porte de secours après une mise à jour : sans elle, l'invite du
+        # premier lancement est la seule occasion de retrouver son fichier.
+        self.btn_reprendre = add_btn(
+            "📂 Reprendre un fichier", self.action_reprendre_donnees,
+            "Copie ici le comptes.db d'une ancienne installation. "
+            "Possible tant que cette installation est vide.")
 
         add_section("Réglages")
         add_btn("🏦 Mes comptes", self.action_comptes,
@@ -200,7 +208,19 @@ class MainWindow(QMainWindow):
         central = QWidget()
         root = QHBoxLayout(central)
         root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
-        root.addWidget(menu)
+        # Le menu défile si la fenêtre est trop courte pour lui. Ses seize
+        # boutons empilés réclamaient 730 px de haut — mesuré — et fixaient à
+        # eux seuls la hauteur minimale de la fenêtre à 754 px : trop pour un
+        # portable 1366 × 768, où le bas de l'écran passait sous la barre des
+        # tâches. Sur un grand écran, rien ne change : aucune barre de
+        # défilement n'apparaît tant que la place suffit.
+        menu_defilant = QScrollArea()
+        menu_defilant.setWidget(menu)
+        menu_defilant.setWidgetResizable(True)
+        menu_defilant.setFrameShape(QFrame.NoFrame)
+        menu_defilant.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        menu_defilant.setFixedWidth(menu.width())
+        root.addWidget(menu_defilant)
         root.addWidget(right, 1)
         self.setCentralWidget(central)
 
@@ -213,6 +233,8 @@ class MainWindow(QMainWindow):
         self.prev_view.changed.connect(self.refresh_all)
         self.bilan_view.goto_budget.connect(
             lambda: self.tabs.setCurrentWidget(self.budget_view))
+        # Le bandeau « solde de départ non renseigné » ouvre les Paramètres.
+        self.bilan_view.goto_parametres.connect(self.action_settings)
         self.tabs.currentChanged.connect(self.refresh_current)
         self.period_bar.period_changed.connect(self.on_period_changed)
         self.period_bar.date_mode_changed.connect(self.on_date_mode_changed)
@@ -226,7 +248,7 @@ class MainWindow(QMainWindow):
         self.refresh_all()
 
         # Premier lancement : inviter à renseigner le solde de départ
-        QTimer.singleShot(0, self._maybe_prompt_initial_setup)
+        QTimer.singleShot(0, self._premier_lancement)
 
     def _period_aware_views(self):
         return [self.bilan_view, self.ops_view, self.budget_view, self.cats_view]
@@ -245,6 +267,9 @@ class MainWindow(QMainWindow):
     def refresh_all(self):
         # Liste des comptes (et visibilité du sélecteur)
         self._fill_comptes()
+        # « Reprendre un fichier » ne sert qu'à une installation encore vide :
+        # le bouton disparaît dès qu'il y a quelque chose à perdre.
+        self.btn_reprendre.setVisible(self.db.est_vide())
         # Case « Voir les archives » : visible s'il y a des archives
         self.period_bar.set_archives_disponibles(self.db.nb_archivees())
         # Périodes disponibles
@@ -395,9 +420,24 @@ class MainWindow(QMainWindow):
         if total_bad:
             msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : montant illisible.\n"
                     "Vérifiez le fichier, ou saisissez ces opérations à la main.")
+        # Rien du tout n'a été lu : annoncer « 0 opération importée » sans un
+        # mot laissait l'utilisateur devant une énigme. On cherche la cause
+        # dans le fichier lui-même (séparateur, noms de colonnes, dates).
+        rien_lu = not any((total_imp, total_skip, total_bad,
+                           total_pt, total_recap, total_rappr))
+        if rien_lu and not errors:
+            for p in paths:
+                # Le diagnostic ne vaut que pour un CSV : appliqué à un OFX
+                # ou un QIF, il dirait n'importe quoi sur leurs colonnes.
+                if not p.lower().endswith((".csv", ".txt")):
+                    continue
+                cause = diagnostiquer_fichier(p)
+                if cause:
+                    msg += (f"\n\n⚠ Aucune ligne n'a pu être lue dans "
+                            f"« {os.path.basename(p)} ».\n\n{cause}")
         if errors:
             msg += "\n\nErreurs :\n  • " + "\n  • ".join(errors)
-        if errors or total_bad:
+        if errors or total_bad or rien_lu:
             QMessageBox.warning(self, "Import", msg)
         else:
             QMessageBox.information(self, "Import", msg)
@@ -416,16 +456,51 @@ class MainWindow(QMainWindow):
                 out.append(p)
         return out
 
+    # Formats souvent déposés par erreur, et ce qu'il faut en faire. Les
+    # ignorer en silence donnait l'impression que le glisser-déposer était
+    # cassé — or beaucoup de banques ne proposent que l'export Excel.
+    CONSEILS_DEPOT = {
+        (".xls", ".xlsx", ".xlsm", ".ods"):
+            "Un fichier tableur n'est pas un relevé texte : Pécule ne sait "
+            "pas le lire.\n\nOuvrez-le dans votre tableur, puis "
+            "« Enregistrer sous » en choisissant « CSV (séparateur : "
+            "point-virgule) ». Si votre banque propose le CSV ou l'OFX à "
+            "l'export, prenez-le directement.",
+        (".pdf",):
+            "Un relevé PDF ne peut pas être importé : c'est une image de "
+            "page, pas un tableau de données.\n\nSur le site de votre "
+            "banque, cherchez « exporter » ou « télécharger » vos opérations "
+            "au format CSV ou OFX.",
+        (".json",):
+            "Pour réimporter un export JSON de Pécule, passez par le bouton "
+            "« Restaurer (JSON) » du menu de gauche : il fusionne vos "
+            "données au lieu de les remplacer.",
+    }
+
+    def _conseil_depot(self, event) -> str:
+        """Message d'aide pour un fichier déposé que l'on ne sait pas lire."""
+        if not event.mimeData().hasUrls():
+            return ""
+        for url in event.mimeData().urls():
+            nom = url.toLocalFile().lower()
+            for extensions, conseil in self.CONSEILS_DEPOT.items():
+                if nom.endswith(extensions):
+                    return conseil
+        return ""
+
     def dragEnterEvent(self, event):
         if self._accepted_drop_paths(event):
             event.acceptProposedAction()
             self.statusBar().showMessage(
                 "📥 Relâchez pour importer le(s) relevé(s)…")
+        elif self._conseil_depot(event):
+            # On accepte le dépôt pour pouvoir expliquer le refus.
+            event.acceptProposedAction()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if self._accepted_drop_paths(event):
+        if self._accepted_drop_paths(event) or self._conseil_depot(event):
             event.acceptProposedAction()
         else:
             event.ignore()
@@ -438,7 +513,12 @@ class MainWindow(QMainWindow):
         paths = self._accepted_drop_paths(event)
         self.statusBar().showMessage(f"Base : {self.db.path}")
         if not paths:
-            event.ignore()
+            conseil = self._conseil_depot(event)
+            if conseil:
+                event.acceptProposedAction()
+                QMessageBox.information(self, "Fichier non importable", conseil)
+            else:
+                event.ignore()
             return
         event.acceptProposedAction()
         self._import_files(paths)
@@ -477,10 +557,29 @@ class MainWindow(QMainWindow):
             b = float(self.db.get_setting("initial_balance", "0"))
         except ValueError:
             b = 0.0
+        # « Jamais renseigné » n'est pas la même chose qu'un solde de zéro :
+        # la colonne solde_initial du compte vaut NULL tant que rien n'a été
+        # saisi (cf. le bandeau du Bilan).
+        compte = self.db.get_compte()
+        jamais_renseigne = compte is None or compte["solde_initial"] is None
         dlg = SettingsDialog(self, d, b, self.db.nom_compte())
         if dlg.exec() != QDialog.Accepted:
             return
         nd, nb = dlg.values()
+        # Valider le formulaire sans y toucher enregistrait 0,00 € — et
+        # l'invite du premier lancement ne revenait plus jamais, laissant un
+        # solde faux pour toujours. On demande confirmation, une seule fois.
+        if jamais_renseigne and abs(nb) < 0.005:
+            reponse = QMessageBox.question(
+                self, "Solde de départ",
+                f"Vous enregistrez un solde de départ de <b>0,00 €</b> au "
+                f"{fmt_date_fr(nd)}.<br><br>"
+                "Ce n'est juste que si votre compte était vide à cette date. "
+                "Sinon, le solde affiché par Pécule sera faux de tout ce que "
+                "vous aviez en banque.<br><br>Enregistrer quand même ?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if reponse != QMessageBox.Yes:
+                return
         # Le plafond d'encours carte a été retiré le 07/09/2026 : le bandeau
         # du Bilan calcule maintenant ce qui reste d'après les mouvements
         # réels du mois. L'ancienne valeur dort encore dans la table
@@ -492,6 +591,112 @@ class MainWindow(QMainWindow):
             f"« {self.db.nom_compte()} » — solde de départ : "
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
+
+    def _premier_lancement(self):
+        """Ce qui se joue à l'ouverture, dans l'ordre : d'abord retrouver des
+        données existantes, ensuite seulement demander le solde de départ —
+        un fichier repris apporte le sien."""
+        if self._maybe_prompt_reprise_donnees():
+            return
+        self._maybe_prompt_initial_setup()
+
+    def _maybe_prompt_reprise_donnees(self) -> bool:
+        """Base vide : dire où elle est, et proposer d'y reprendre un fichier.
+
+        C'est le piège de la mise à jour. On télécharge la nouvelle version,
+        on la décompresse dans « Téléchargements », on double-clique : comme
+        il n'y a pas de comptes.db à côté de ce nouvel exécutable, Pécule
+        ouvre une base NEUVE dans le dossier personnel. L'application s'ouvre
+        vide et on croit avoir tout perdu, alors que le fichier dort dans
+        l'ancien dossier.
+
+        Retourne True si des données ont été reprises."""
+        if not self.db.est_vide():
+            return False
+        boite = QMessageBox(self)
+        boite.setWindowTitle("Bienvenue dans Pécule")
+        boite.setTextFormat(Qt.RichText)
+        boite.setText(
+            "Cette installation ne contient <b>aucune donnée</b>.<br><br>"
+            # Sans <code> : la police à chasse fixe rallonge le chemin, qui
+            # se coupait alors au milieu (« C: » seul sur sa ligne).
+            "Vos opérations seront enregistrées dans :<br>"
+            f"<b>{self.db.path}</b><br><br>"
+            "<b>Si vous utilisiez déjà Pécule</b> — vous venez de le mettre à "
+            "jour, ou de changer d'ordinateur — vos données sont dans le "
+            "fichier <code>comptes.db</code> de votre ancienne installation. "
+            "Reprenez-le : il sera copié ici, et rien ne sera perdu.")
+        bouton_reprendre = boite.addButton("Reprendre mes données…",
+                                           QMessageBox.AcceptRole)
+        boite.addButton("Démarrer à neuf", QMessageBox.RejectRole)
+        boite.exec()
+        if boite.clickedButton() is not bouton_reprendre:
+            return False
+        return self.action_reprendre_donnees()
+
+    def action_reprendre_donnees(self) -> bool:
+        """Copie un comptes.db choisi par l'utilisateur à la place de la base
+        courante, puis recharge tout. Ne fait rien si la base a déjà servi."""
+        chemin, _ = QFileDialog.getOpenFileName(
+            self, "Reprendre un fichier de données Pécule", "",
+            "Données Pécule (comptes.db *.db);;Tous (*.*)")
+        if not chemin:
+            return False
+        if os.path.abspath(chemin) == os.path.abspath(self.db.path):
+            QMessageBox.information(
+                self, "Reprendre mes données",
+                "C'est le fichier que Pécule utilise déjà.")
+            return False
+        erreur = self._verifier_base_pecule(chemin)
+        if erreur:
+            QMessageBox.warning(self, "Reprendre mes données", erreur)
+            return False
+        if not self.db.est_vide():
+            # Garde-fou : on ne remplace jamais des données existantes.
+            QMessageBox.warning(
+                self, "Reprendre mes données",
+                "Cette installation contient déjà des opérations : elles "
+                "seraient perdues.\n\nPour fusionner deux fichiers, passez "
+                "par « Exporter (JSON) » depuis l'autre installation, puis "
+                "« Restaurer (JSON) » ici.")
+            return False
+        try:
+            self.db.conn.close()          # Windows refuse d'écraser un fichier ouvert
+            shutil.copy2(chemin, self.db.path)
+            self.db.rouvrir()
+        except (OSError, sqlite3.Error) as e:
+            self.db.rouvrir()             # on retombe sur la base d'origine
+            QMessageBox.critical(
+                self, "Reprendre mes données",
+                f"La copie a échoué :\n{e}\n\nRien n'a été modifié.")
+            return False
+        charger_alias(self.db.get_alias_libelles())
+        self._fill_comptes()
+        self.refresh_all()
+        n = len(self.db.list_tx())
+        QMessageBox.information(
+            self, "Reprendre mes données",
+            f"Vos données sont reprises : {n} opération(s) sur le compte "
+            f"« {self.db.nom_compte()} ».\n\nL'ancien fichier n'a pas été "
+            "touché — gardez-le de côté jusqu'à ce que tout vous paraisse "
+            "juste. Les sauvegardes automatiques recommencent ici, à côté de "
+            "la nouvelle base.")
+        return True
+
+    @staticmethod
+    def _verifier_base_pecule(chemin: str) -> str:
+        """Message d'erreur si ce fichier n'est pas une base Pécule, sinon ''."""
+        try:
+            with sqlite3.connect(f"file:{chemin}?mode=ro", uri=True) as conn:
+                tables = {r[0] for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'")}
+        except sqlite3.Error:
+            return ("Ce fichier n'est pas une base de données Pécule "
+                    "(il n'a pas pu être ouvert).")
+        if not {"transactions", "settings"} <= tables:
+            return ("Ce fichier ne ressemble pas à une base Pécule : il n'y "
+                    "a ni opérations ni réglages dedans.")
+        return ""
 
     def _maybe_prompt_initial_setup(self):
         """Premier lancement : le solde de départ n'est pas encore renseigné.

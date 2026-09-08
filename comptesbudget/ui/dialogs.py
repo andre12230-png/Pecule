@@ -104,6 +104,12 @@ class TxDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Le champ est libre : rien ne le disait, et les 17 catégories
+        # livrées avaient l'air imposées.
+        self.cat.setToolTip(
+            "Choisissez dans la liste, ou tapez le nom d'une catégorie à "
+            "vous (« Animaux », « Vacances »…) : elle sera créée et "
+            "proposée ensuite partout, budget compris.")
         layout.addRow("Catégorie :", self.cat)
 
         # Sous-catégorie : combobox éditable avec autocomplétion
@@ -895,6 +901,12 @@ class RuleDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Le champ est libre : rien ne le disait, et les 17 catégories
+        # livrées avaient l'air imposées.
+        self.cat.setToolTip(
+            "Choisissez dans la liste, ou tapez le nom d'une catégorie à "
+            "vous (« Animaux », « Vacances »…) : elle sera créée et "
+            "proposée ensuite partout, budget compris.")
         layout.addRow("Catégorie :", self.cat)
 
         self.sous_cat = QLineEdit()
@@ -989,6 +1001,12 @@ class RecurringDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Le champ est libre : rien ne le disait, et les 17 catégories
+        # livrées avaient l'air imposées.
+        self.cat.setToolTip(
+            "Choisissez dans la liste, ou tapez le nom d'une catégorie à "
+            "vous (« Animaux », « Vacances »…) : elle sera créée et "
+            "proposée ensuite partout, budget compris.")
         layout.addRow("Catégorie :", self.cat)
 
         self.sous_cat = QLineEdit()

@@ -59,6 +59,19 @@ def verifier_absence_de_donnees(dossier):
             "Vérifiez avant de continuer — rien n'a été modifié.")
 
 
+def retirer_le_verrou(dossier):
+    """Supprime le `pecule.lock` qu'a pu laisser un lancement d'essai.
+
+    Ce fichier réserve la base à une fenêtre (cf. verrouiller_instance dans
+    app.py). Publié dans l'archive, il arriverait chez l'utilisateur comme le
+    verrou d'un autre ordinateur — Qt le reprendrait au bout de 30 secondes,
+    mais autant ne pas le livrer du tout."""
+    chemin = os.path.join(dossier, "pecule.lock")
+    if os.path.exists(chemin):
+        os.remove(chemin)
+        print("  verrou d'essai (pecule.lock) supprimé de dist/")
+
+
 def preparer(dossier):
     """Complète le dossier de construction comme dans les versions publiées."""
     for nom in A_COPIER:
@@ -116,6 +129,7 @@ def main():
 
     print(f"Version : {APP_VERSION}")
     verifier_absence_de_donnees(DOSSIER_BUILD)
+    retirer_le_verrou(DOSSIER_BUILD)
     preparer(DOSSIER_BUILD)
 
     os.makedirs(sortie, exist_ok=True)

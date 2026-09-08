@@ -2,11 +2,11 @@
 import os
 import sys
 
-from PySide6.QtCore import QLibraryInfo, QTranslator
+from PySide6.QtCore import QLibraryInfo, QLockFile, QTranslator
 from PySide6.QtGui import QColor, QIcon, QPalette
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox
 
-from .utils import _app_dir, backup_db
+from .utils import _app_dir, _data_dir, backup_db
 from .database import Database
 from .labels import charger_alias
 from .ui.main_window import MainWindow
@@ -53,6 +53,32 @@ def installer_traduction_qt(app) -> bool:
     return False
 
 
+def verrouiller_instance(dossier: str):
+    """Réserve la base pour cette fenêtre. Retourne le verrou, ou None si une
+    autre fenêtre l'a déjà.
+
+    Deux fenêtres ouvertes sur le même fichier se marchent dessus sans rien
+    dire : chacune garde en mémoire ce qu'elle a lu, la dernière écriture
+    gagne, et un import — une longue transaction — peut échouer sur
+    « database is locked ». Rien n'empêchait de lancer l'application deux
+    fois, ce qui arrive vite en double-cliquant sur son icône.
+
+    Qt fait le reste du travail : le fichier de verrou porte le numéro du
+    processus, et si celui-ci n'existe plus (plantage, coupure de courant),
+    le verrou est repris automatiquement au lancement suivant."""
+    verrou = QLockFile(os.path.join(dossier, "pecule.lock"))
+    # Sur cette machine, c'est le numéro de processus qui tranche : un verrou
+    # tenu par une fenêtre ouverte n'est jamais volé, quel que soit son âge
+    # (vérifié par un test). Le délai ci-dessous ne sert qu'au cas où Qt ne
+    # PEUT pas savoir — un fichier de verrou venu d'un autre ordinateur,
+    # recopié avec le dossier lors d'une mise à jour ou depuis une clé USB.
+    # Sans lui, un tel fichier interdirait le démarrage pour toujours.
+    verrou.setStaleLockTime(30_000)      # 30 s
+    if not verrou.tryLock(200):
+        return None
+    return verrou
+
+
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
@@ -79,6 +105,18 @@ def main():
     pal.setColor(QPalette.Highlight,    QColor("#316AC5"))
     pal.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
     app.setPalette(pal)
+
+    # Une seule fenêtre à la fois sur une même base (cf. verrouiller_instance).
+    verrou = verrouiller_instance(_data_dir())
+    if verrou is None:
+        QMessageBox.warning(
+            None, "Pécule est déjà ouvert",
+            "Une fenêtre de Pécule utilise déjà vos données.\n\n"
+            "Deux fenêtres ouvertes en même temps se contrediraient : "
+            "l'une écraserait les saisies de l'autre. Retrouvez la fenêtre "
+            "déjà ouverte dans la barre des tâches.")
+        return
+    app._verrou_instance = verrou    # à garder vivant tant que l'appli tourne
 
     # Sauvegarde quotidienne AVANT d'ouvrir la base
     bak = backup_db()

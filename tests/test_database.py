@@ -201,3 +201,61 @@ def test_migration_colonne_prevue_sur_base_ancienne(tmp_path):
                   "type": "", "categorie": "Non classé", "sous_cat": "", "info": "",
                   "montant": -600.00, "pointee": 0, "prevue": 1})
     assert [t["prevue"] for t in db.list_tx() if t["id"] == "neuf"] == [1]
+
+
+def test_date_de_depart_par_defaut_suit_l_annee_en_cours(tmp_path):
+    """Une base neuve démarre au 1er janvier de l'année en cours, et non à
+    une date figée dans le code : en 2026, « 01/01/2025 » proposé au premier
+    lancement n'a plus de sens."""
+    from datetime import date
+    db = Database(str(tmp_path / "neuve.db"))
+    attendu = f"{date.today().year}-01-01"
+    assert db.get_setting("initial_date") == attendu
+    assert db.date_initiale() == attendu
+
+
+def test_base_existante_garde_sa_date_de_depart(tmp_path):
+    """Une base déjà réglée n'est jamais réécrite au passage d'une année."""
+    chemin = str(tmp_path / "ancienne.db")
+    db = Database(chemin)
+    db.set_setting("initial_date", "2018-06-01")
+    db.set_solde_initial(1234.0, "2018-06-01")
+    db.conn.close()
+    rouverte = Database(chemin)
+    assert rouverte.get_setting("initial_date") == "2018-06-01"
+    assert rouverte.date_initiale() == "2018-06-01"
+
+
+def test_base_vide_reconnue(tmp_path):
+    """« Vide » veut dire : rien de ce que l'utilisateur a pu saisir — même
+    dans un autre compte, même archivé."""
+    db = Database(str(tmp_path / "v.db"))
+    assert db.est_vide()
+    db.insert_tx(_tx())
+    assert not db.est_vide()
+
+
+def test_base_vide_faux_si_reglages_saisis(tmp_path):
+    """Un solde de départ renseigné suffit : l'utilisateur a commencé."""
+    db = Database(str(tmp_path / "r.db"))
+    db.set_setting("initial_balance", "1500")
+    assert not db.est_vide()
+
+
+def test_rouvrir_relit_le_fichier(tmp_path):
+    """Reprendre un fichier de données remplace la base sous les vues : la
+    connexion doit se refermer et se rouvrir sur le même chemin."""
+    import shutil
+
+    chemin = str(tmp_path / "courante.db")
+    db = Database(chemin)
+
+    autre = str(tmp_path / "autre.db")
+    plein = Database(autre)
+    plein.insert_tx(_tx(libelle="VENU D'AILLEURS"))
+    plein.conn.close()
+
+    db.conn.close()
+    shutil.copy(autre, chemin)
+    db.rouvrir()
+    assert [dict(t)["libelle"] for t in db.list_tx()] == ["VENU D'AILLEURS"]

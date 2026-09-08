@@ -6,6 +6,7 @@ erreurs de câblage (imports, signaux, calculs au refresh) sans simuler
 d'interaction — rapide, headless, peu fragile.
 """
 import importlib
+import os
 from calendar import monthrange
 from datetime import date, timedelta
 
@@ -116,13 +117,13 @@ def test_reste_carte_suit_une_depense_saisie(qapp, tmp_path):
                     libelle="HYPERMARCHE", type="Carte bancaire",
                     montant=-200.0, pointee=1))
     w = MainWindow(d)
-    assert w.bilan_view.cb_dispo.text() == fmt_euro(800.0)
+    assert "il reste " + fmt_euro(800.0) in w.bilan_view.cb_detail.text()
 
     d.insert_tx(_tx(id="cb2", date=today, date_valeur=date_debit_differe(today),
                     libelle="OMNISHOP", type="Carte bancaire",
                     montant=-62.0, pointee=0))
     w.ops_view.tx_changed.emit()          # ce que fait toute saisie
-    assert w.bilan_view.cb_dispo.text() == fmt_euro(738.0)
+    assert "il reste " + fmt_euro(738.0) in w.bilan_view.cb_detail.text()
 
 
 def test_bandeau_carte_suit_la_periode_choisie(qapp, tmp_path):
@@ -153,10 +154,11 @@ def test_bandeau_carte_suit_la_periode_choisie(qapp, tmp_path):
     w = MainWindow(d)
     # 1 000 - 30 de prélèvement - 600 de lot carte prélevé le 4 = 370 au
     # compte, moins 100 déjà passés à la carte ce mois-ci.
-    assert w.bilan_view.cb_dispo.text() == fmt_euro(270.0)
+    assert "il reste " + fmt_euro(270.0) in w.bilan_view.cb_detail.text()
 
     w.period_bar._appliquer(mois_dernier.strftime("%Y-%m"))
-    assert w.bilan_view.cb_dispo.text() == fmt_euro(370.0)      # 970 - 600
+    # 970 - 600
+    assert "il restait " + fmt_euro(370.0) in w.bilan_view.cb_detail.text()
     assert period_label(mois_dernier.strftime("%Y-%m")).upper() in \
         w.bilan_view.cb_title.text()
 
@@ -719,26 +721,24 @@ def _bilan_carte(tmp_path, achats, initial: float = 1000.0,
 
 
 def test_encours_carte_reste_ce_que_le_compte_laisse(qapp, tmp_path):
-    """« Reste pour la carte » = le solde que le compte aura en fin de mois,
-    tout payé, moins ce qui est déjà engagé sur la carte. Plus aucun plafond
-    fixe : un repère figé pouvait annoncer « il reste 247 € » pendant que le
-    bandeau voisin prévoyait un solde négatif."""
+    """Ce que le mois laisse pour la carte = le solde que le compte aura en
+    fin de mois, tout payé, moins ce qui est déjà engagé sur la carte. Le
+    chiffre n'a plus de bloc à lui depuis le 08/09/2026 : il se lit dans la
+    phrase du détail."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
     # 1 000 € au compte, aucune autre échéance, 200 € déjà passés à la carte.
-    assert v.cb_dispo.text() == fmt_euro(800.0)
-    assert "#1A7A3A" in v.cb_dispo.styleSheet()          # vert : il reste
-    assert v.cb_dispo_lbl.text() == "Reste pour la carte"
+    assert "il reste " + fmt_euro(800.0) in v.cb_detail.text()
+    # Et plus aucun bloc « Reste pour la carte » dans le bandeau.
+    assert not hasattr(v, "cb_dispo")
 
 
 def test_encours_carte_reste_ne_descend_pas_sous_zero(qapp, tmp_path):
-    """Quand les achats dépassent ce que le compte laisse, ce qui reste vaut
-    ZÉRO, pas un montant négatif : à « combien puis-je encore mettre sur la
-    carte ? », la réponse est « rien ». Le montant qui manque est une autre
-    question — il se lit dans le détail."""
+    """Quand les achats dépassent ce que le compte laisse, le détail annonce
+    ce qui MANQUE. C'est la seule lecture honnête : un mois qui finit dans le
+    rouge ne laisse rien pour aucune dépense."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -1200.0)])
-    assert v.cb_dispo.text() == fmt_euro(0)              # et non -200 €
-    assert "#C0392B" in v.cb_dispo.styleSheet()          # rouge : rien ne reste
     assert "il MANQUE " + fmt_euro(200.0) in v.cb_detail.text()
+    assert "il reste " not in v.cb_detail.text()
 
 
 def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):
@@ -750,20 +750,20 @@ def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):
     v = _bilan_carte(tmp_path, [(today.isoformat(), -200.0)],
                      autres=[(fin_mois, -500.0)], nom="echeance.db")
     # 1 000 - 500 d'échéance à venir = 500 en fin de mois, moins 200 de carte.
-    assert v.cb_dispo.text() == fmt_euro(300.0)
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
 
 
 def test_encours_carte_reste_suit_une_nouvelle_depense(qapp, tmp_path):
     """Une dépense enregistrée, et le chiffre baisse d'autant au
     rafraîchissement suivant : c'est ce qui le rend utilisable."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
-    assert v.cb_dispo.text() == fmt_euro(800.0)
+    assert "il reste " + fmt_euro(800.0) in v.cb_detail.text()
     jour = date.today().isoformat()
     v.db.insert_tx(_tx(id="cb2", date=jour, date_valeur=date_debit_differe(jour),
                        libelle="OMNISHOP", type="Carte bancaire",
                        montant=-62.0, pointee=0))
     v.refresh()
-    assert v.cb_dispo.text() == fmt_euro(738.0)
+    assert "il reste " + fmt_euro(738.0) in v.cb_detail.text()
 
 
 def _bilan_deux_mois(tmp_path):
@@ -784,7 +784,7 @@ def test_encours_carte_suit_le_mois_consulte(qapp, tmp_path):
     v, today, mois_dernier = _bilan_deux_mois(tmp_path)
     # Le lot du mois dernier (600 €) a été prélevé le 4 : le compte est à
     # 400 €, moins les 100 € déjà passés à la carte ce mois-ci.
-    assert v.cb_dispo.text() == fmt_euro(300.0)
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
     assert v.cb_bloc1.isVisibleTo(v)
 
     v.period = mois_dernier.strftime("%Y-%m")
@@ -792,8 +792,7 @@ def test_encours_carte_suit_le_mois_consulte(qapp, tmp_path):
     assert v.cb_total.text() == fmt_euro(-600.0)       # les achats du mois passé
     # Fin du mois dernier, le compte était encore à 1 000 € : les 600 € de
     # carte n'en sortent que le 4 du mois suivant.
-    assert v.cb_dispo.text() == fmt_euro(400.0)
-    assert v.cb_dispo_lbl.text().startswith("Restait sur")
+    assert "il restait " + fmt_euro(400.0) in v.cb_detail.text()
     assert period_label(v.period).upper() in v.cb_title.text()
     assert fmt_date_fr(date_debit_differe(mois_dernier.isoformat())) in v.cb_title.text()
     assert "Consultation" in v.cb_detail.text()
@@ -809,8 +808,7 @@ def test_encours_carte_annee_reste_sur_le_mois_en_cours(qapp, tmp_path):
     v, today, _ = _bilan_deux_mois(tmp_path)
     v.period = today.strftime("%Y")
     v.refresh()
-    assert v.cb_dispo.text() == fmt_euro(300.0)
-    assert v.cb_dispo_lbl.text() == "Reste pour la carte"
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
     assert v.cb_bloc1.isVisibleTo(v)
 
 
@@ -1640,3 +1638,176 @@ def test_traduction_qt_francaise(qapp):
     assert "Oui" in libelles
     assert "Non" in libelles
     assert "Cancel" not in libelles
+
+
+def test_bilan_previent_si_le_solde_de_depart_manque(qapp, tmp_path):
+    """Tant que le solde de départ n'a jamais été saisi, un bandeau le dit :
+    l'invite du premier lancement ne revient plus une fois fermée, et le gros
+    chiffre du Bilan n'additionne alors que les opérations."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    db = Database(str(tmp_path / "neuve.db"))
+    vue = BilanView(db)
+    vue.refresh()
+    assert vue.solde_depart_alert.isVisibleTo(vue)
+    assert "Solde de départ non renseigné" in vue.solde_depart_alert.text()
+
+    # Une fois renseigné — même à zéro, si c'est un choix — le bandeau s'en va.
+    db.set_setting("initial_balance", "0")
+    vue.refresh()
+    assert not vue.solde_depart_alert.isVisibleTo(vue)
+
+
+def test_bilan_previent_si_des_operations_precedent_la_date_de_depart(qapp, tmp_path):
+    """Une opération antérieure à la date de départ s'affiche dans les listes
+    mais sort du solde : sans un mot, l'écart est incompréhensible."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    db = Database(str(tmp_path / "avant.db"))
+    db.set_setting("initial_date", "2026-01-01")
+    db.set_setting("initial_balance", "1000")
+    db.insert_tx(_tx(id="vieille", date="2025-06-15", date_valeur="2025-06-15",
+                     libelle="ACHAT ANCIEN", montant=-300.0, pointee=1))
+    vue = BilanView(db)
+    vue.refresh()
+    assert vue.hors_solde_alert.isVisibleTo(vue)
+    texte = vue.hors_solde_alert.text()
+    assert "01/01/2026" in texte and "300" in texte
+
+    # Reculer la date de départ les fait rentrer dans le calcul.
+    db.set_setting("initial_date", "2025-01-01")
+    vue.refresh()
+    assert not vue.hors_solde_alert.isVisibleTo(vue)
+
+
+def test_operations_pointage_en_masse(qapp, tmp_path):
+    """Pointer ligne à ligne était le seul moyen : un an d'historique
+    demandait plusieurs centaines de clics."""
+    from comptesbudget.ui.views.operations import OperationsView
+
+    db = Database(str(tmp_path / "masse.db"))
+    db.set_setting("initial_balance", "0")
+    for i in range(3):
+        db.insert_tx(_tx(id=f"m{i}", date=f"2026-06-0{i + 1}",
+                         date_valeur=f"2026-06-0{i + 1}", montant=-10.0 * (i + 1),
+                         pointee=0))
+    vue = OperationsView(db)
+    vue.period = "all"
+    vue.reload_from_db()
+    vue.table.selectAll()
+    assert len(vue.selected_tx_ids()) == 3
+
+    vue.pointer_selection(True)
+    assert all(dict(t)["pointee"] == 1 for t in db.list_tx())
+
+    vue.table.selectAll()
+    vue.pointer_selection(False)
+    assert all(dict(t)["pointee"] == 0 for t in db.list_tx())
+
+
+def test_operations_menu_contextuel_se_construit(qapp, tmp_path):
+    """Le menu du clic droit annonce le nombre de lignes visées."""
+    from comptesbudget.ui.views.operations import OperationsView
+
+    db = Database(str(tmp_path / "menu.db"))
+    for i in range(2):
+        db.insert_tx(_tx(id=f"k{i}", date=f"2026-06-0{i + 1}",
+                         date_valeur=f"2026-06-0{i + 1}", montant=-5.0))
+    vue = OperationsView(db)
+    vue.period = "all"
+    vue.reload_from_db()
+    vue.table.selectAll()
+
+    intitules = [a.text() for a in vue._construire_menu().actions()]
+    assert any("Pointer ces 2 opérations" in t for t in intitules)
+    assert any("Supprimer ces 2 opérations" in t for t in intitules)
+
+
+def test_fenetre_tient_sur_un_petit_ecran(qapp, tmp_path):
+    """La fenêtre doit tenir sur un portable 1366 × 768 : une fois retirées
+    la barre des tâches et la barre de titre, il reste environ 700 px. Qt ne
+    descend jamais sous le minimum réclamé, et Windows laisse alors la fenêtre
+    déborder — boutons du bas hors d'atteinte."""
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "ecran.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    # Seule la HAUTEUR est vérifiée ici : la largeur dépend des polices, que
+    # le mode « offscreen » des tests ne charge pas (elle s'y mesure à 1690 px
+    # contre 1082 en vrai). Elle se contrôle à la main, écran allumé.
+    mini = fenetre.minimumSizeHint()
+    assert mini.height() <= 700, f"hauteur minimale : {mini.height()} px"
+
+
+def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):
+    """Un tableur déposé sur la fenêtre était ignoré sans un mot : rien ne
+    distinguait « format non lu » de « glisser-déposer en panne »."""
+    from PySide6.QtCore import QMimeData, QUrl
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "depot.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+
+    class _Evenement:
+        def __init__(self, chemin):
+            self._mime = QMimeData()
+            self._mime.setUrls([QUrl.fromLocalFile(chemin)])
+
+        def mimeData(self):
+            return self._mime
+
+    assert "tableur" in fenetre._conseil_depot(_Evenement("C:/releve.xlsx"))
+    assert "PDF" in fenetre._conseil_depot(_Evenement("C:/releve.pdf"))
+    assert "Restaurer (JSON)" in fenetre._conseil_depot(_Evenement("C:/sauve.json"))
+    # Un vrai relevé n'a pas besoin de conseil : il s'importe.
+    assert fenetre._conseil_depot(_Evenement("C:/releve.csv")) == ""
+
+
+def test_reprendre_un_ancien_fichier_de_donnees(qapp, tmp_path, monkeypatch):
+    """Le piège de la mise à jour : le nouvel exécutable, lancé depuis un
+    autre dossier, ouvre une base vide. On doit pouvoir reprendre l'ancien
+    comptes.db sans redémarrer, et sans y perdre une opération."""
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from comptesbudget.ui.main_window import MainWindow
+
+    ancienne = str(tmp_path / "ancienne" / "comptes.db")
+    os.makedirs(os.path.dirname(ancienne))
+    source = Database(ancienne)
+    source.set_setting("initial_balance", "1200")
+    source.set_setting("initial_date", "2026-01-01")
+    for i in range(3):
+        source.insert_tx(_tx(id=f"a{i}", date=f"2026-06-0{i + 1}",
+                             date_valeur=f"2026-06-0{i + 1}",
+                             libelle=f"ANCIENNE {i}", montant=-10.0 * (i + 1),
+                             pointee=1))
+    source.conn.close()
+
+    neuve = Database(str(tmp_path / "neuve.db"))
+    fenetre = MainWindow(neuve)
+    assert neuve.est_vide()
+
+    monkeypatch.setattr(QFileDialog, "getOpenFileName",
+                        staticmethod(lambda *a, **k: (ancienne, "")))
+    monkeypatch.setattr(QMessageBox, "information",
+                        staticmethod(lambda *a, **k: None))
+    assert fenetre.action_reprendre_donnees() is True
+
+    reprises = [dict(t) for t in neuve.list_tx()]
+    assert len(reprises) == 3
+    assert neuve.get_setting("initial_balance") == "1200"
+    assert not neuve.est_vide()
+    # Le fichier d'origine est laissé intact.
+    temoin = Database(ancienne)
+    assert len(temoin.list_tx()) == 3
+
+
+def test_reprendre_refuse_un_fichier_etranger(qapp, tmp_path):
+    """Un fichier qui n'est pas une base Pécule est écarté avec un motif."""
+    from comptesbudget.ui.main_window import MainWindow
+
+    intrus = tmp_path / "photo.jpg"
+    intrus.write_bytes(b"\xff\xd8\xff\xe0 pas une base")
+    message = MainWindow._verifier_base_pecule(str(intrus))
+    assert "Pécule" in message

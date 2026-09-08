@@ -19,7 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.26.0** — plusieurs comptes, archivage, import OFX.
+> Version publiée : **1.33.0** — le premier relevé s'importe pointé et classé, pointage en masse, reprise du fichier de données à la mise à jour.
 
 ---
 
@@ -43,11 +43,11 @@ telemetry — your financial data never leaves your computer.
 
 **What it does**
 
-- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection
+- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear or delete a whole batch at once (space bar or right-click)
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
-- **Auto-categorisation** — user-defined rules (pattern → category) applied on import
+- **Auto-categorisation** — user-defined rules (pattern → category) applied on import, backed by built-in patterns (CARREFOUR → Groceries, EDF → Home…) so the very first statement lands categorised; anything explicit — the bank's own category, your rules, your habits — always wins over the guess
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
-- **CSV, OFX and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). OFX statements are read in both flavours of the format (1.x SGML and 2.x XML), deferred-debit card statements included; QIF files exported from another program are read as well
+- **CSV, OFX and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). OFX statements are read in both flavours of the format (1.x SGML and 2.x XML), deferred-debit card statements included; QIF files exported from another program are read as well. Imported entries are marked as cleared — a statement only carries transactions the bank has already processed — unless the file itself provides a "Pointage" column (BPCE), which then has the final say. When nothing can be read, the report says why: comma separator, unrecognised column names, or dates outside DD/MM/YYYY
 - **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
 - **Archiving** — set aside older transactions so lists and period pickers stay short. Nothing is deleted: archived entries stay in the database, and their total rolls into the opening balance, so the displayed balance never changes. A checkbox brings them back, and archiving can be undone
 - **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
@@ -106,6 +106,56 @@ encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
 **export et restauration JSON** de toutes vos données, et **sauvegarde
 quotidienne automatique** de la base.
+
+### Dès le premier relevé
+
+Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
+
+- Les opérations importées sont **pointées** — un relevé ne porte que des
+  opérations déjà passées en banque —, donc le solde du Bilan est juste
+  immédiatement, sans avoir à cliquer ligne à ligne. Les relevés qui portent
+  eux-mêmes une colonne **Pointage** (BPCE) gardent la main : ce qu'ils
+  annoncent « en attente » reste non pointé.
+- Elles sont **classées d'après leur libellé** (CARREFOUR → Alimentation,
+  EDF → Logement…). Ce qui est explicite passe d'abord — catégorie fournie par
+  la banque, vos règles, vos habitudes ; la reconnaissance par motif ne comble
+  que ce qui resterait « Non classé ».
+- Si rien ne s'importe, le compte rendu **dit pourquoi** : colonnes séparées
+  par des virgules, colonnes portant d'autres noms, ou dates hors du format
+  JJ/MM/AAAA — avec la manœuvre à faire dans le tableur. Un tableur, un PDF ou
+  un export JSON déposé sur la fenêtre reçoit lui aussi son explication.
+- La **date de départ** proposée est le 1<sup>er</sup> janvier de l'année en
+  cours, et le Bilan prévient tant que le **solde de départ** n'est pas
+  renseigné — ou quand des opérations plus anciennes que cette date restent
+  hors du calcul du solde.
+
+### Au quotidien
+
+- **Pointer plusieurs lignes d'un coup** : sélection multiple dans la liste
+  (Maj+clic, Ctrl+clic, Ctrl+A), puis <kbd>barre d'espace</kbd> ou clic droit.
+  La touche <kbd>Suppr</kbd> porte elle aussi sur toute la sélection.
+- **Vos propres catégories** : le champ Catégorie s'écrit librement — tapez
+  « Animaux », elle est créée, colorée et budgétable comme les autres.
+- **Une seule fenêtre à la fois** sur un même fichier de données : deux
+  fenêtres ouvertes en même temps se contrediraient.
+
+### Mettre à jour
+
+Décompressez la nouvelle archive **par-dessus** votre dossier Pécule :
+elle ne contient ni `comptes.db` ni le dossier `sauvegardes`, vos opérations ne
+peuvent donc pas être écrasées. Avec Scoop, `scoop update pecule` suffit.
+
+Si vous lancez le nouvel exécutable **depuis un autre dossier** (celui des
+téléchargements, par exemple), il ne trouve pas votre fichier de données et en
+ouvre un neuf : l'application s'affiche vide. Rien n'est perdu — elle vous
+indique alors où elle range ses données et propose de **reprendre** le
+`comptes.db` de votre ancienne installation, qui est copié sans être touché.
+La reprise reste accessible par le bouton **📂 Reprendre un fichier** tant que
+l'installation est vide.
+
+Une version plus ancienne peut relire une base récente sans l'abîmer : ce
+qu'elle ne comprend pas, elle le laisse en place, et la version récente le
+retrouve à la réouverture.
 
 ### Plusieurs comptes
 

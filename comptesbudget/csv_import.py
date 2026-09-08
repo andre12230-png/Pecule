@@ -5,7 +5,7 @@ from collections import Counter
 from datetime import date
 from typing import NamedTuple, Optional
 
-from .utils import canonical_cat, deaccent
+from .utils import canonical_cat, deaccent, suggest_category
 from .labels import build_libelle_profiles, clean_libelle
 from .recurring import _meme_operation, _recurring_norm_label
 from .rules import apply_rules_to_tx
@@ -157,6 +157,84 @@ def _decode_csv(raw: bytes) -> str:
         return raw.decode("latin-1")
 
 
+# ──────────── Pourquoi ce relevé n'a-t-il rien donné ? ────────────
+# Un import qui échoue vient presque toujours de la FORME du fichier, pas de
+# son contenu. Plutôt qu'un « En-tête CSV introuvable » sec, on dit à
+# l'utilisateur ce qu'il doit corriger. Les mêmes explications figurent sur
+# la page « Mon relevé ne s'importe pas » du site.
+
+AIDE_ENTETE = (
+    "Ajoutez (ou renommez) la première ligne du fichier pour qu'elle nomme "
+    "les colonnes ; le minimum tient en trois mots :\n\n"
+    "    Date;Libelle;Montant\n\n"
+    "Les accents et les majuscules n'ont pas d'importance, et vous pouvez "
+    "garder vos autres colonnes.")
+
+
+def diagnostiquer_releve(texte: str) -> Optional[str]:
+    """Explication en clair quand un relevé ne donne rien, sinon None.
+
+    Trois causes couvrent la quasi-totalité des cas : le fichier est séparé
+    par des virgules (export anglo-saxon), ses colonnes portent d'autres noms
+    (« label », « description »…), ou ses dates ne sont pas au format
+    JJ/MM/AAAA — auquel cas chaque ligne est écartée en silence."""
+    lignes = [ln for ln in texte.splitlines() if ln.strip()]
+    if not lignes:
+        return "Le fichier est vide."
+
+    entete = None
+    for ln in lignes:
+        bas = deaccent(ln)
+        if "date" in bas and "libelle" in bas:
+            entete = ln
+            break
+
+    if entete is None:
+        # Séparateur : plus de virgules que de points-virgules sur l'ensemble.
+        echantillon = "\n".join(lignes[:20])
+        if echantillon.count(",") > echantillon.count(";"):
+            return ("Les colonnes de ce fichier sont séparées par des "
+                    "VIRGULES ; Pécule attend des points-virgules.\n\n"
+                    "Ouvrez-le dans votre tableur, puis « Enregistrer sous » "
+                    "en choisissant « CSV (séparateur : point-virgule) »."
+                    "\n\n" + AIDE_ENTETE)
+        return ("Aucune ligne de ce fichier ne nomme les colonnes « date » et "
+                "« libellé » : Pécule ne peut pas deviner à quoi correspond "
+                "chaque colonne.\n\n" + AIDE_ENTETE)
+
+    # En-tête reconnue : reste le format des dates.
+    colonnes = [deaccent(h) for h in entete.split(";")]
+    i_date = next((i for i, h in enumerate(colonnes) if "date" in h), -1)
+    exemples = []
+    for ln in lignes[lignes.index(entete) + 1:]:
+        cellules = ln.split(";")
+        if 0 <= i_date < len(cellules):
+            valeur = cellules[i_date].strip()
+            if valeur:
+                exemples.append(valeur)
+        if len(exemples) >= 5:
+            break
+    if exemples and not any(parse_french_date(v) for v in exemples):
+        return ("Les dates de ce relevé (« " + exemples[0] + " ») ne sont pas "
+                "au format attendu : il faut JJ/MM/AAAA, par exemple "
+                "05/01/2026 — jour et mois sur deux chiffres, année sur "
+                "quatre.\n\n"
+                "Chaque ligne concernée est écartée, d'où un import à zéro "
+                "opération. Corrigez le format des dates dans votre tableur "
+                "avant de réenregistrer le fichier en CSV.")
+    return None
+
+
+def diagnostiquer_fichier(path: str) -> Optional[str]:
+    """Même diagnostic que `diagnostiquer_releve`, à partir d'un fichier.
+    Appelé quand un import s'est terminé sans lire la moindre opération."""
+    try:
+        with open(path, "rb") as f:
+            return diagnostiquer_releve(_decode_csv(f.read()))
+    except OSError:
+        return None
+
+
 def import_csv(path: str, db: Database) -> ResultatImport:
     """Lit un CSV bancaire français et insère les transactions.
     Retourne un ResultatImport (cf. la description de ses six compteurs)."""
@@ -180,7 +258,9 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             header_idx = i
             break
     if header_idx is None:
-        raise ValueError("En-tête CSV introuvable")
+        # Le diagnostic dit la cause probable ; à défaut, l'aide générale.
+        raise ValueError(diagnostiquer_releve(text)
+                         or ("En-tête introuvable." + "\n\n" + AIDE_ENTETE))
 
     reader = csv.reader(lines[header_idx:], delimiter=";")
     rows = list(reader)
@@ -215,6 +295,13 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
     # Colonne « Pointage operation » de certaines banques (BPCE…) :
     # « x » = opération passée en banque, autre chose = en attente.
     iPtg = find_col(["pointage"])
+    # La plupart des banques ne fournissent PAS cette colonne. Leur relevé ne
+    # porte alors que des opérations déjà passées en banque : toutes sont donc
+    # pointées, exactement comme celles venues d'un OFX. Sans cela, le « solde
+    # bancaire réel » du Bilan — qui ne compte que les opérations pointées —
+    # restait figé sur le solde de départ après l'import, et il fallait
+    # pointer chaque ligne à la main.
+    releve_sans_colonne_pointage = iPtg < 0
 
     def _date_et_montant(cols) -> tuple:
         """Date ISO et montant d'une ligne du relevé, sans rien enregistrer.
@@ -335,8 +422,10 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         cat = cols[iCat].strip() if iCat >= 0 and iCat < len(cols) else ""
         sub = cols[iSub].strip() if iSub >= 0 and iSub < len(cols) else ""
         # « x » dans la colonne Pointage = la banque confirme le passage.
-        est_passee = (0 <= iPtg < len(cols)
-                      and cols[iPtg].strip().lower() == "x")
+        # Faute de colonne, toute ligne du relevé est réputée passée.
+        est_passee = (releve_sans_colonne_pointage
+                      or (0 <= iPtg < len(cols)
+                          and cols[iPtg].strip().lower() == "x"))
 
         # Normalisation catégorie
         cat = canonical_cat(cat) or cat or "Non classé"
@@ -466,6 +555,18 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             elif (not tx["sous_cat"] and prof["sous_cat"]
                   and prof["categorie"] == tx["categorie"]):
                 tx["sous_cat"] = prof["sous_cat"]
+
+        # Dernier recours : les motifs intégrés (« carrefour » → Alimentation),
+        # ceux-là mêmes qu'utilise le bouton « Harmoniser ». Ils ne passent
+        # qu'APRÈS la catégorie de la banque, les règles de l'utilisateur et
+        # l'habitude du libellé : ce qui est explicite l'emporte toujours sur
+        # ce qui est deviné. Sans cela, le premier relevé d'un nouvel
+        # utilisateur — sans règle ni historique — arrivait entièrement en
+        # « Non classé », budgets et graphiques vides.
+        if tx["categorie"] in ("", "Non classé"):
+            devinee = suggest_category(libelle, tx["sous_cat"])
+            if devinee:
+                tx["categorie"] = devinee
 
         db.insert_tx(tx)
         imported += 1
