@@ -688,7 +688,80 @@ SYNC_VERSION = 3
 #          que si le compte montre du debit differe. La detection
 #          (carte_a_debit_differe) passe du Bilan dans utils.py, les deux
 #          ecrans s'en servent.
-APP_VERSION = "1.30.7"
+# 1.31.0 : les trois obstacles du premier relevé, relevés en se mettant dans
+#          la peau d'un nouvel utilisateur (import joué pour dix formats de
+#          banques françaises).
+#          1. Un relevé sans colonne « Pointage » — la plupart des banques —
+#             arrivait entierement NON pointe : le « Solde bancaire reel » du
+#             Bilan restait fige sur le solde de depart apres l'import (1 500
+#             EUR au lieu de 2 845,26 EUR sur un relevé Credit Agricole
+#             d'essai), et il fallait pointer chaque ligne a la main. Faute
+#             de colonne, tout est desormais pointe, comme deja pour l'OFX ;
+#             quand la colonne existe (BPCE), son indication fait toujours
+#             foi et une ligne « en attente » reste non pointee.
+#          2. Les motifs integres (« carrefour » -> Alimentation) ne
+#             servaient qu'au bouton « Harmoniser » : le premier relevé d'un
+#             nouvel utilisateur, sans regle ni historique, arrivait a 100 %
+#             en « Non classe ». Ils s'appliquent maintenant a l'import, en
+#             DERNIER recours — la categorie de la banque, les regles de
+#             l'utilisateur et l'habitude du libelle passent avant.
+#          3. Un import qui ne lit rien annoncait « 0 operation importee »
+#             sans un mot d'explication (cas des dates en 2026-09-05), et un
+#             fichier non reconnu ne disait que « En-tete CSV introuvable ».
+#             diagnostiquer_releve() nomme la cause — separateur virgule,
+#             colonnes mal nommees (Boursorama, Revolut), dates hors du
+#             format JJ/MM/AAAA — et dit la manoeuvre a faire dans le
+#             tableur.
+# 1.32.0 : la suite de l'audit du nouvel utilisateur — six obstacles qui ne
+#          bloquaient pas l'import, mais l'usage.
+#          - Date de départ : le 1er janvier de l'ANNEE EN COURS remplace le
+#            « 2025-01-01 » figé dans le code (bases neuves seulement ; une
+#            base déjà réglée n'est jamais touchée).
+#          - Deux bandeaux sur le Bilan : « solde de départ non renseigné »
+#            (l'invite du premier lancement ne revenait plus une fois fermée,
+#            et valider le formulaire sans y toucher enregistrait 0 EUR pour
+#            toujours — une confirmation le demande maintenant), et
+#            « N opérations antérieures à la date de départ », dont le total
+#            sortait du solde sans un mot.
+#          - Pointage EN MASSE : la liste passe en sélection multiple ; barre
+#            d'espace ou clic droit pour pointer/dépointer d'un coup. Suppr
+#            porte aussi sur toute la sélection. Un an d'historique demandait
+#            jusque-là plusieurs centaines de clics.
+#          - Le menu de gauche défile : ses seize boutons fixaient à eux seuls
+#            la hauteur minimale de la fenêtre à 754 px (mesuré), trop pour un
+#            portable 1366 x 768. Elle descend à 383 px.
+#          - Une seule fenêtre à la fois sur une même base (QLockFile) : deux
+#            instances se marchaient dessus, « database is locked » reproduit.
+#          - Glisser-déposer : un .xlsx, un .pdf ou un .json déposé était
+#            ignoré en silence ; un message dit maintenant quoi en faire.
+#          - Le champ Catégorie s'écrit librement (créer « Animaux » marchait
+#            déjà) : infobulle et notice le disent enfin.
+# 1.33.0 : la mise a jour, examinee de bout en bout (quatre chemins joues :
+#          base ancienne migree, retour a une version anterieure, contenu
+#          reel des archives publiees, Scoop).
+#          - << J'ai mis a jour et l'application est VIDE >> : le nouvel exe
+#            lance depuis un autre dossier (Telechargements) ne trouve pas de
+#            comptes.db a cote de lui et en ouvre un neuf. Rien n'est perdu,
+#            mais rien ne le disait. Une base vide affiche desormais ou elle
+#            se trouve et propose de REPRENDRE un comptes.db existant : il est
+#            copie, l'original n'est pas touche. Bouton de secours
+#            << Reprendre un fichier >>, visible tant que l'installation est
+#            vide. Database.est_vide() et Database.rouvrir() en dessous.
+#          - Correctif du verrou d'instance unique introduit en 1.32.0 : avec
+#            setStaleLockTime(0), un pecule.lock recopie avec le dossier
+#            (mise a jour, cle USB) venait d'une AUTRE machine — Qt ne pouvait
+#            pas savoir si son processus vivait encore et l'aurait respecte
+#            pour toujours, interdisant tout demarrage. Delai porte a 30 s ;
+#            sur cette machine c'est le PID qui tranche (verifie par un test),
+#            donc la protection contre la double fenetre est intacte.
+#            outils/faire_archive.py retire un pecule.lock d'essai du zip.
+#          - Lisez-moi et notice : l'archive ne contenant NI comptes.db NI le
+#            dossier sauvegardes (verifie sur les trois zips publies), la
+#            decompresser par-dessus l'installation ne peut rien ecraser.
+#            L'avertissement en capitales disait le contraire ; remplace par
+#            ce qu'il faut vraiment eviter, et par la marche a suivre quand
+#            l'application s'ouvre vide.
+APP_VERSION = "1.33.0"
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

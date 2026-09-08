@@ -38,9 +38,16 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 <ol>
   <li><b>Configurer le solde de départ</b> : au tout premier lancement, l'application vous y invite
       automatiquement ; vous pouvez aussi y revenir à tout moment via <code>⚙️ Paramètres</code>
-      dans le menu de gauche. Indiquez la date à laquelle vous commencez votre suivi (ex. 01/01/2025)
-      et le solde que vous aviez en banque à cette date. Cette valeur sert de base pour calculer
-      votre solde réel à toute date ultérieure.
+      dans le menu de gauche. Indiquez la date à laquelle vous commencez votre suivi — le
+      1<sup>er</sup> janvier de l'année en cours vous est proposé — et le solde que vous aviez
+      en banque à cette date. Cette valeur sert de base pour calculer votre solde réel à toute
+      date ultérieure.
+      <br><b>Tant qu'il n'est pas renseigné</b>, un bandeau orange le rappelle en tête du Bilan :
+      le grand chiffre du solde n'y additionne alors que vos opérations.
+      <br><b>Les opérations antérieures à cette date</b> restent visibles dans les listes et les
+      graphiques, mais <b>n'entrent pas</b> dans le solde : leur total est censé être déjà compris
+      dans le solde de départ. Si vous importez un historique plus ancien, reculez la date de
+      départ — un second bandeau vous prévient quand le cas se présente.
       <br><b>Chaque compte a le sien</b> : si vous en suivez plusieurs, le réglage
       s'applique au compte affiché, dont le nom est rappelé dans le titre de la
       fenêtre des paramètres.</li>
@@ -56,7 +63,13 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       et même face à une opération saisie à la main — et les lignes au montant illisible sont
       écartées et signalées, jamais enregistrées à 0&nbsp;€. Si le relevé contient une colonne
       <b>Pointage</b> (« x » = passée en banque), les opérations concernées sont <b>pointées
-      automatiquement</b>. La ligne récapitulative du <b>débit différé</b> de la carte
+      automatiquement</b> ; s'il n'en contient pas — le cas de la plupart des banques —
+      <b>toutes</b> les opérations importées sont pointées, un relevé ne portant que des
+      opérations déjà passées en banque (§&nbsp;5). Elles sont aussi <b>classées d'après leur
+      libellé</b> : « CARREFOUR » part en Alimentation, « EDF » en Logement… Ce que vous avez
+      décidé passe d'abord — catégorie fournie par la banque, vos règles, vos habitudes — et
+      ce classement automatique ne comble que ce qui resterait « Non classé ».
+      La ligne récapitulative du <b>débit différé</b> de la carte
       (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES ») n'est <b>jamais importée</b> : elle
       totalise des achats qui figurent déjà un par un dans le relevé.
   </li>
@@ -217,6 +230,12 @@ supprimé — décocher puis recocher les fait revenir. Une catégorie déjà
 utilisée par des opérations ne peut pas être masquée, et « Non classé » et
 « Transaction exclue » restent toujours proposées : elles font marcher le
 logiciel.</p>
+
+<p><b>Vos propres catégories.</b> Les 17 livrées ne sont pas une liste fermée :
+dans le formulaire d'une opération, le champ <b>Catégorie</b> s'écrit
+librement. Tapez « Animaux », « Vacances » ou « Travaux » à la place d'un choix
+de la liste, et la catégorie est créée : elle apparaît ensuite dans tous les
+menus, reçoit sa couleur et peut recevoir un budget mensuel comme les autres.</p>
 
 <h3>🏷️ Sous-catégories</h3>
 <p>Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
@@ -388,26 +407,23 @@ chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
       <b>remboursement</b>.</li>
   <li><b>Total des achats à débiter</b> — ce qu'il reste à payer par la carte,
       toutes échéances confondues.</li>
-  <li><b>Reste pour la carte</b> — le solde que votre compte aura à la
-      <b>fin du mois</b>, une fois tout payé, <b>moins</b> les achats déjà
-      passés à la carte. En vert s'il reste quelque chose. Il se met à jour
-      tout seul dès qu'une dépense est enregistrée, modifiée ou supprimée.</li>
 </ul>
-<p><b>Ce chiffre ne descend jamais sous zéro.</b> Si le mois se termine déjà
-dans le rouge, la réponse à « combien puis-je encore mettre sur la carte ? »
-est <b>0,00 €</b> — affiché en rouge — et non un montant négatif. Ce qui
-<i>manque</i> est une autre question : elle est répondue juste à droite, dans
-le détail (« il MANQUE tant »).</p>
-<p><b>Pourquoi ce chiffre-là ?</b> Jusqu'à la version 1.30.0, il se comparait à
-un <i>plafond</i> saisi dans les Paramètres. Ce repère fixe pouvait annoncer
-« il reste 247 € » pendant que le bandeau juste en dessous prévoyait un solde
-négatif en fin de mois : les deux se contredisaient. Le plafond a donc été retiré,
-et le calcul part maintenant de vos mouvements réels — ce qui rentre, ce qui sort,
-ce qui est déjà engagé sur la carte.</p>
+<p><b>Ce que le mois laisse, en toutes lettres.</b> À droite des chiffres, le
+détail dit ce que votre compte aura en fin de mois une fois tout payé, moins
+les achats déjà passés à la carte : « Solde prévu fin de mois 219,10 € moins
+214,39 € déjà passés à la carte — il reste 4,71 € », ou « il MANQUE 433,49 € ».
+Il se met à jour dès qu'une dépense est enregistrée, modifiée ou supprimée.</p>
+<p><b>Pourquoi une phrase et non un chiffre.</b> Un quatrième bloc, « Reste
+pour la carte », affichait ce montant jusqu'à la version 1.30.7. Il ne
+descendait jamais sous zéro : un mois qui finissait dans le rouge montrait
+<b>0,00 €</b> — vrai, mais trompeur, car il ne reste alors rien pour aucune
+dépense, carte ou pas. Un bloc de chiffre à côté de trois autres se lit comme
+un budget encore disponible ; la phrase, elle, ne peut pas être lue de
+travers.</p>
 <p><b>Les achats se comptent sur le mois de l'achat</b>, pas sur celui du
 prélèvement. Le lot d'un mois part le 4 du mois suivant : il reste l'encours du
 mois où vous avez dépensé. C'est pourquoi « Total des achats à débiter » et
-« Reste pour la carte » ne reposent pas sur les mêmes opérations.</p>
+ce que le mois laisse ne reposent pas sur les mêmes opérations.</p>
 <p><b>Le bandeau suit la période choisie en haut.</b> Sélectionnez « Août 2026 »
 et il montre l'encours d'août : ses achats, ce qu'il restait, et la date à laquelle
 la banque l'a prélevé. Les deux premiers chiffres disparaissent alors — plus rien
@@ -502,6 +518,22 @@ de solde de votre relevé.</p>
 automatiquement ces opérations — y compris celles déjà enregistrées, qu'il
 confirme sans jamais dépointer ce que vous avez fait à la main.</p>
 
+<p><b>Et si mon relevé n'a pas cette colonne ?</b> C'est le cas de la plupart
+des banques. Les opérations importées sont alors <b>toutes pointées</b> : un
+relevé ne contient que des opérations déjà passées en banque. Votre solde est
+donc juste dès le premier import, sans un seul clic. Les fichiers OFX et QIF
+suivent la même règle. Vous gardez la main : un clic sur la colonne
+<b>P</b> dépointe une ligne, par exemple si vous constatez une erreur.</p>
+
+<p><b>Pointer plusieurs lignes d'un coup.</b> Sélectionnez-les — clic sur la
+première, <kbd>Maj</kbd>+clic sur la dernière, ou <kbd>Ctrl</kbd>+clic pour en
+prendre à la carte, <kbd>Ctrl+A</kbd> pour toutes — puis appuyez sur la
+<kbd>barre d'espace</kbd>, ou faites un <b>clic droit</b> : le menu propose
+« Pointer ces N opérations » et « Dépointer ». La barre d'espace bascule :
+elle pointe la sélection, ou la dépointe si tout est déjà pointé. La touche
+<kbd>Suppr</kbd> supprime, elle aussi, toute la sélection — le nombre est
+rappelé dans la question posée.</p>
+
 <p>Le filtre <b>Pointage → Non pointées</b> répond à la question
 « que me reste-t-il à pointer ? » : il affiche <b>toutes</b> les opérations en
 attente, sans se limiter à la période choisie en haut de la fenêtre — une ligne
@@ -585,6 +617,32 @@ aussi utiliser <code>💾 Exporter (JSON)</code> (export complet) puis
 <div class="warn">⚠️ La restauration JSON <b>fusionne</b> : pour chaque opération,
 la version la plus récente gagne. Pour revenir exactement à un état antérieur,
 préférez la copie du fichier <code>comptes.db</code>.</div>
+
+<h2>9. Mettre à jour Pécule</h2>
+<p><b>La bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
+votre dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne
+contient ni <code>comptes.db</code> ni le dossier <code>sauvegardes</code> :
+vos opérations ne peuvent pas être écrasées. Avec Scoop, il n'y a rien à
+faire — <code>scoop update pecule</code> conserve vos données.</p>
+
+<p><b>Ce qu'il ne faut pas faire</b> : supprimer l'ancien dossier avant de
+coller le nouveau, ou mettre le nouveau dossier à la place de l'ancien. Là,
+c'est bien votre fichier de données qui disparaît. Dans le doute, copiez
+<code>comptes.db</code> ailleurs avant de commencer : c'est un seul fichier.</p>
+
+<div class="tip">💡 <b>« J'ai mis à jour et l'application est vide. »</b>
+C'est que le nouveau Pécule a été lancé depuis un autre dossier — celui des
+téléchargements, le plus souvent. Ne trouvant pas de <code>comptes.db</code>
+à côté de lui, il en a ouvert un neuf. <b>Rien n'est perdu</b> : vos données
+sont restées dans l'ancien dossier. Pécule le signale au lancement et propose
+de reprendre ce fichier ; vous pouvez aussi le faire à tout moment avec
+<code>📂 Reprendre un fichier</code>, dans le menu de gauche, tant que
+l'installation est vide. Le fichier choisi est <b>copié</b> — l'original
+reste où il est.</div>
+
+<p>Une version plus ancienne peut relire une base récente sans l'abîmer : ce
+qu'elle ne comprend pas, elle le laisse tranquille, et la version récente le
+retrouve en rouvrant le fichier.</p>
 """
 
 GLOSSAIRE_HTML = """

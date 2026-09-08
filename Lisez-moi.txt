@@ -1,4 +1,4 @@
-PECULE - version 1.26.0
+PECULE - version 1.33.0
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
@@ -28,16 +28,42 @@ UTILISATION
   << sauvegardes >> sont ranges dans << scoop\persist\pecule >> :
   ils sont conserves d'une mise a jour a l'autre.
 
-MISE A JOUR depuis une version precedente : remplacez seulement
-Pecule.exe et le dossier _internal. Ne recopiez JAMAIS le dossier
-entier par-dessus une installation existante : vous ecraseriez votre
-fichier comptes.db et perdriez vos operations.
+-------------------------------------------------------------------
+MISE A JOUR depuis une version precedente
+-------------------------------------------------------------------
+La bonne facon : decompressez cette archive PAR-DESSUS votre dossier
+Pecule existant, en acceptant de remplacer les fichiers. Elle ne
+contient ni << comptes.db >> ni le dossier << sauvegardes >> : vos
+operations ne peuvent donc pas etre ecrasees. Seuls Pecule.exe et le
+dossier _internal sont remplaces.
+
+A NE PAS FAIRE : supprimer l'ancien dossier avant de coller le
+nouveau, ou renommer le nouveau dossier a la place de l'ancien. La
+c'est bien votre comptes.db qui disparait. En cas de doute, copiez
+comptes.db ailleurs avant de commencer : c'est un seul fichier.
+
+<< J'ai mis a jour et l'application est VIDE >> : vous avez lance le
+nouveau Pecule.exe depuis un autre dossier (Telechargements, par
+exemple). Vos donnees ne sont pas perdues : elles sont restees dans le
+comptes.db de votre ancien dossier. Pecule vous le dit au lancement et
+propose de reprendre ce fichier - bouton << Reprendre mes donnees >>,
+ou << Reprendre un fichier >> dans le menu de gauche. Il est copie,
+l'original n'est pas touche.
+
+Avec Scoop, rien a faire : << scoop update pecule >> conserve vos
+donnees d'une version a l'autre.
 
 -------------------------------------------------------------------
 FONCTIONS
 -------------------------------------------------------------------
 - Import des releves bancaires au format CSV. Les colonnes sont
   reconnues par leur nom, quelle que soit la banque francaise.
+  Les operations importees sont pointees : un releve ne porte que des
+  operations deja passees en banque, votre solde est donc juste des le
+  premier import. Seule exception, les releves qui portent eux-memes
+  une colonne "Pointage" (BPCE) : leur indication fait foi.
+  Si rien ne s'importe, le message explique pourquoi : separateur
+  virgule, colonnes mal nommees ou dates hors du format JJ/MM/AAAA.
 - Import au format OFX, propose par la plupart des banques a cote du
   CSV et parfois a sa place. Les deux versions du format sont lues.
   Le releve de la carte a debit differe est reconnu : ses achats ne
@@ -47,9 +73,25 @@ FONCTIONS
   europeens ou americains sont reconnus automatiquement. Un fichier
   contenant plusieurs comptes est refuse : Pecule suit un seul compte
   par fichier de donnees, exportez un compte a la fois.
-- Categorisation automatique (regles), budgets mensuels avec barres de
-  progression, previsionnel des operations recurrentes, bilan avec
-  graphiques, rapport mensuel (impression / PDF), rapprochement (pointage).
+- Categorisation automatique des le premier import : les operations sont
+  classees d'apres leur libelle (CARREFOUR -> Alimentation, EDF ->
+  Logement...). Vos propres regles et la categorie fournie par la banque
+  passent avant ; ce classement ne comble que ce qui resterait
+  "Non classe".
+- Budgets mensuels avec barres de progression, previsionnel des
+  operations recurrentes, bilan avec graphiques, rapport mensuel
+  (impression / PDF), rapprochement (pointage).
+- Pointage EN MASSE : selectionnez plusieurs lignes (Maj+clic, Ctrl+clic,
+  Ctrl+A), puis barre d'espace ou clic droit pour toutes les pointer ou
+  depointer d'un coup. La touche Suppr porte aussi sur la selection.
+- Vos propres categories : le champ Categorie s'ecrit librement. Tapez
+  "Animaux" ou "Vacances" et la categorie est creee, avec sa couleur et
+  son budget possible.
+- Le Bilan previent quand le solde de depart n'est pas renseigne, et
+  quand des operations sont anterieures a la date de depart (leur total
+  n'entre pas dans le solde : il est cense etre deja compris dedans).
+- Une seule fenetre a la fois sur les memes donnees : deux fenetres
+  ouvertes en meme temps se contrediraient.
 - Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour
   du prelevement groupe. Un bandeau reprend les chiffres de votre espace
   bancaire (prochain prelevement, operations en cours, achats a debiter).

@@ -1,6 +1,8 @@
 """Tests de l'import des relevés CSV (parsing + bout en bout)."""
+import pytest
+
 from comptesbudget.csv_import import (
-    import_csv, parse_french_amount, parse_french_date,
+    diagnostiquer_releve, import_csv, parse_french_amount, parse_french_date,
 )
 from comptesbudget.database import Database
 
@@ -408,3 +410,114 @@ def test_echeance_prevue_non_pointee_si_le_releve_ne_confirme_pas(tmp_path):
     assert res.rapprochees == 1
     t = [dict(x) for x in db.list_tx()][0]
     assert t["pointee"] == 0 and t["prevue"] == 0 and t["date"] == "2026-08-12"
+
+
+def test_import_csv_sans_colonne_pointage_tout_est_pointe(tmp_path):
+    """Relevé d'une banque qui ne fournit pas de colonne « Pointage » :
+    un relevé ne porte que des opérations déjà passées en banque, elles
+    sont donc toutes pointées — sans quoi le solde du Bilan resterait
+    figé sur le solde de départ après l'import (cf. l'OFX, qui pointe
+    tout de la même façon)."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv",
+               "Date;Libelle;Debit euros;Credit euros\n"
+               "01/09/2026;VIREMENT SALAIRE;;2450,00\n"
+               "02/09/2026;PRLV EDF;89,40;\n")
+    assert import_csv(p, db) == (2, 0, 0, 0, 0, 0)
+    assert all(dict(r)["pointee"] == 1 for r in db.list_tx())
+
+
+def test_import_csv_colonne_pointage_reste_prioritaire(tmp_path):
+    """La règle ci-dessus ne s'applique QUE faute de colonne : quand le
+    relevé en a une (BPCE), une ligne encore en attente reste non pointée."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "bpce.csv",
+               "Date;Libelle;Montant;Pointage operation\n"
+               "01/09/2026;PASSEE;-10,00;x\n"
+               "02/09/2026;EN ATTENTE;-20,00;\n")
+    assert import_csv(p, db) == (2, 0, 0, 0, 0, 0)
+    etats = {dict(r)["libelle"]: dict(r)["pointee"] for r in db.list_tx()}
+    assert etats == {"PASSEE": 1, "EN ATTENTE": 0}
+
+
+def test_import_csv_classe_d_apres_le_libelle(tmp_path):
+    """Dernier recours de la catégorisation : les motifs intégrés
+    (« carrefour » → Alimentation). Sans eux, un nouvel utilisateur — qui
+    n'a encore écrit aucune règle et n'a aucun historique — voyait tout son
+    relevé arriver en « Non classé »."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant\n"
+               "01/09/2026;VIREMENT SALAIRE SEPTEMBRE;2450,00\n"
+               "02/09/2026;PRLV EDF FACTURE;-89,40\n"
+               "03/09/2026;PAIEMENT PAR CARTE CARREFOUR MARKET;-52,30\n"
+               "04/09/2026;RETRAIT DAB 04/09;-50,00\n")
+    import_csv(p, db)
+    cats = {dict(r)["libelle"]: dict(r)["categorie"] for r in db.list_tx()}
+    assert cats["VIREMENT SALAIRE SEPTEMBRE"] == "Revenus"
+    assert cats["PRLV EDF FACTURE"] == "Logement - maison"
+    assert cats["PAIEMENT PAR CARTE CARREFOUR MARKET"] == "Alimentation"
+    # Aucun motif ne correspond : la ligne reste à classer par l'utilisateur.
+    assert cats["RETRAIT DAB 04/09"] == "Non classé"
+
+
+def test_import_csv_la_regle_de_l_utilisateur_prime_sur_le_motif(tmp_path):
+    """Une règle écrite à la main l'emporte sur les motifs intégrés."""
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_rule({"id": "r1", "pattern": "CARREFOUR", "amount": None,
+                    "categorie": "Loisirs", "sous_cat": "",
+                    "no_overwrite": 0, "created_at": "2026-01-01"})
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant\n03/09/2026;CARREFOUR MARKET;-52,30\n")
+    import_csv(p, db)
+    assert [dict(r)["categorie"] for r in db.list_tx()] == ["Loisirs"]
+
+
+def test_import_csv_la_categorie_de_la_banque_prime_sur_le_motif(tmp_path):
+    """Quand le relevé porte lui-même une catégorie, elle est respectée."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Categorie;Montant\n"
+               "03/09/2026;CARREFOUR MARKET;Shopping;-52,30\n")
+    import_csv(p, db)
+    assert [dict(r)["categorie"] for r in db.list_tx()] == ["Shopping"]
+
+
+# ── Diagnostic : pourquoi ce relevé n'a rien donné ? ─────────────────────────
+
+def test_diagnostic_separateur_virgule():
+    """Le cas Revolut / N26 : colonnes séparées par des virgules."""
+    txt = ("Type,Description,Started Date,Amount\n"
+           "CARD_PAYMENT,Carrefour,2026-09-05,-52.30\n")
+    msg = diagnostiquer_releve(txt)
+    assert msg and "virgule" in msg.lower()
+
+
+def test_diagnostic_colonnes_mal_nommees():
+    """Le cas Boursorama : une colonne « label » au lieu de « libellé »."""
+    txt = ("dateOp;dateVal;label;amount\n"
+           "05/09/2026;05/09/2026;CARREFOUR;-52,30\n")
+    msg = diagnostiquer_releve(txt)
+    assert msg and "Date;Libelle;Montant" in msg
+
+
+def test_diagnostic_dates_au_mauvais_format():
+    """En-tête reconnue, mais dates en 2026-09-05 : rien n'est importé."""
+    txt = "Date;Libelle;Montant\n2026-09-05;CARREFOUR;-52,30\n"
+    msg = diagnostiquer_releve(txt)
+    assert msg and "JJ/MM/AAAA" in msg
+
+
+def test_diagnostic_releve_correct_ne_dit_rien():
+    txt = "Date;Libelle;Montant\n05/09/2026;CARREFOUR;-52,30\n"
+    assert diagnostiquer_releve(txt) is None
+
+
+def test_entete_introuvable_explique_quoi_faire(tmp_path):
+    """Le message d'erreur dit à l'utilisateur ce qu'il doit corriger."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "boursorama.csv",
+               "dateOp;dateVal;label;amount\n05/09/2026;CARREFOUR;x;-52,30\n")
+    with pytest.raises(ValueError) as err:
+        import_csv(p, db)
+    assert "Date;Libelle;Montant" in str(err.value)

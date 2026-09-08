@@ -13,6 +13,231 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-08 — Ce que devient une installation qu'on met à jour
+
+**Fait.** Les quatre chemins de mise à jour joués pour de vrai, puis deux
+corrections.
+
+- **Une base ancienne se migre sans perte.** Une vraie sauvegarde de juin 2026
+  (avant les comptes multiples, les échéances prévues et l'archivage), remplie
+  comme l'aurait fait cette version, puis ouverte par la version actuelle :
+  4 opérations, 2 283,31 € de somme, budget et règle retrouvés à l'identique,
+  compte « Compte courant » créé avec le solde et la date d'origine, solde
+  affiché juste. Une sauvegarde du jour est écrite avant même l'ouverture.
+- **Le retour à une version antérieure ne détruit rien.** La 1.23.2 publiée,
+  extraite du dépôt, rouvre une base écrite par la version actuelle, la lit et
+  accepte un import. L'opération qu'elle ajoute n'a pas de compte (notion
+  qu'elle ignore) ; au retour, la migration la rattache — vérifié, elle
+  réapparaît.
+- **L'archive n'écrase pas les données.** Les trois zips publiés ne contiennent
+  ni `comptes.db` ni `sauvegardes/`. L'avertissement en capitales du
+  `Lisez-moi.txt` (« vous écraseriez votre fichier comptes.db ») décrivait donc
+  un risque que l'archive ne fait pas courir.
+- **Le vrai piège**, en revanche, n'était signalé nulle part : lancer le nouvel
+  exécutable depuis un AUTRE dossier (Téléchargements). Sans `comptes.db` à
+  côté de lui, Pécule ouvre une base neuve dans le dossier personnel et
+  s'affiche vide — de quoi croire tout perdu.
+
+**Les deux corrections.**
+
+1. **Reprendre un fichier.** Une base vide annonce maintenant où elle se
+   trouve et propose de reprendre un `comptes.db` existant : il est copié,
+   l'original n'est jamais touché, et l'écran se recharge sans redémarrer
+   (`Database.rouvrir()`). Un bouton **📂 Reprendre un fichier** garde la porte
+   ouverte, visible tant que l'installation est vide (`Database.est_vide()`).
+   Garde-fous : fichier vérifié comme base Pécule, refus si des opérations
+   existent déjà, refus si c'est le fichier déjà ouvert, retour à la base
+   d'origine si la copie échoue.
+2. **Le verrou de la 1.32.0 corrigé.** `setStaleLockTime(0)` faisait qu'un
+   `pecule.lock` recopié avec le dossier — mise à jour, clé USB, dossier
+   synchronisé — venait d'une autre machine : Qt ne peut pas savoir si son
+   processus vit encore et l'aurait respecté **pour toujours**, interdisant
+   tout démarrage. Délai porté à 30 s. Sur la machine, rien ne change : un test
+   prouve que le numéro de processus prime sur l'âge du fichier, donc une
+   fenêtre ouverte ne se fait jamais voler son verrou. `faire_archive.py`
+   retire un `pecule.lock` d'essai avant de fabriquer le zip.
+
+**Pourquoi.** C'est le moment où un logiciel de comptes peut faire le plus de
+dégâts, et celui où l'utilisateur est le plus démuni : il vient de suivre une
+procédure, l'écran est vide, il ne sait pas si c'est lui ou le programme.
+
+**Vérifié.** 301 tests. Parcours complet rejoué : ancienne installation à
+3 opérations, nouvel exécutable lancé ailleurs, base vide reconnue, reprise
+réussie (3 opérations, solde de départ 1 500 € retrouvé), ancien fichier
+intact, bouton de secours disparu ensuite, seconde reprise refusée.
+
+**Aussi.** `Lisez-moi.txt` : l'avertissement remplacé par ce qu'il faut
+vraiment éviter (supprimer l'ancien dossier avant de coller le nouveau) et par
+la marche à suivre quand l'application s'ouvre vide. Même chose dans la notice
+(nouvelle section 9) et dans le README. Version **1.33.0**.
+
+**Reste.** Rien de publié : la dernière release est toujours la 1.26.0.
+
+---
+
+## 2026-09-08 — Le reste de l'audit du nouvel utilisateur
+
+**Fait.** Les six points laissés ouverts le matin, traités dans l'ordre.
+
+1. **Date de départ** : le 1er janvier de l'année en cours remplace le
+   « 2025-01-01 » figé dans le code. Bases neuves seulement — une base déjà
+   réglée n'est jamais réécrite, c'est vérifié par un test.
+2. **Deux bandeaux sur le Bilan.** « Solde de départ non renseigné » : l'invite
+   du premier lancement ne revenait plus dès qu'on l'avait fermée, et valider
+   son formulaire sans y toucher enregistrait 0 € pour toujours — une
+   confirmation le demande maintenant, une seule fois. « N opérations
+   antérieures au JJ/MM/AAAA » : leur total sortait du solde sans un mot.
+3. **Pointage en masse** : la liste passe en sélection multiple, barre d'espace
+   ou clic droit pour pointer ou dépointer d'un coup ; la touche Suppr porte
+   elle aussi sur toute la sélection, avec son nombre dans la question.
+4. **Le menu de gauche défile.** Mesuré, pas supposé : ses seize boutons
+   réclamaient 730 px et fixaient à eux seuls la hauteur minimale de la fenêtre
+   à 754 px — trop pour un portable 1366 × 768. Elle tombe à 383 px, et rien ne
+   change sur un grand écran (aucune barre de défilement tant qu'il y a la
+   place).
+5. **Une seule fenêtre à la fois** sur une même base (QLockFile) : deux
+   instances se marchaient dessus en silence, et un import pouvait tomber sur
+   « database is locked » — reproduit avant correction.
+6. **Glisser-déposer** : un .xlsx, un .pdf ou un .json déposé sur la fenêtre
+   était ignoré sans un mot, ce qui faisait croire à un glisser-déposer en
+   panne. Chacun reçoit désormais son explication.
+
+**Aussi.** Le champ Catégorie s'écrivait déjà librement — créer « Animaux »
+marche, avec couleur et budget — mais rien ne le disait : infobulle sur les
+trois formulaires concernés, et un paragraphe dans la notice.
+
+**Vérifié.** 295 tests (9 de plus, chacun écrit avant son correctif). Contrôle
+de bout en bout sur une installation neuve : verrou pris puis refusé au second
+lancement, date de départ au 01/01/2026, 5 opérations importées et pointées,
+les deux bandeaux affichés, hauteur minimale 383 px, dépointage et repointage
+en masse, captures à 1280 × 800 et 1280 × 690.
+
+**Incident.** Un premier script de capture a écrit quatre opérations d'essai
+dans le `comptes.db` de la racine du projet : `sys.path.insert()` sur le
+dossier du projet en fait le « dossier du programme », et le mode portable
+choisit alors cette base — quoi qu'on mette dans `LOCALAPPDATA`. Base de
+démonstration vide, rien de réel en jeu ; les quatre lignes ont été retirées et
+l'état d'origine retrouvé (0 opération, comme la sauvegarde du 04/09). Les
+scripts passent maintenant par une copie du code, hors du projet. Noté en
+mémoire.
+
+**Reste.** Version portée à **1.32.0**, rien de publié : la dernière release
+est toujours la 1.26.0. Les manifestes Winget restent en 1.23.0 tant que la PR
+n'est pas soldée. `comptesbudget/ui/views/bilan.py` et `tests/test_ui_smoke.py`
+portaient déjà des modifications non commitées avant la séance (travail sur les
+cadres du Bilan) : elles sont intactes.
+
+---
+
+## 2026-09-08 — Les trois obstacles du premier relevé
+
+**Fait.** Trois corrections, trouvées en installant Pécule à neuf dans un bac à
+sable et en jouant le parcours d'un nouvel utilisateur : premier lancement,
+solde de départ, import du relevé de sa banque, lecture du Bilan.
+
+1. **Les opérations importées sont pointées** quand le relevé n'a pas de
+   colonne « Pointage » — le cas de presque toutes les banques hors BPCE. Le
+   « Solde bancaire réel » du Bilan ne compte que les opérations pointées : sur
+   un relevé Crédit Agricole d'essai, il restait affiché à 1 500,00 € (le solde
+   de départ) alors que le compte était à 2 845,26 €. Quand la colonne existe,
+   elle garde le dernier mot : une ligne « en attente » reste non pointée.
+2. **Le classement par motifs s'applique à l'import.** Les motifs intégrés
+   (« carrefour » → Alimentation, « edf » → Logement) ne servaient qu'au bouton
+   « Harmoniser » : le premier relevé arrivait donc à 100 % en « Non classé ».
+   Ils passent maintenant en **dernier** recours, après la catégorie fournie par
+   la banque, les règles de l'utilisateur et l'habitude du libellé.
+3. **Un import qui ne lit rien dit pourquoi.** Nouvelle fonction
+   `diagnostiquer_releve()` : séparateur virgule (Revolut, N26), colonnes
+   portant d'autres noms (Boursorama et sa colonne « label »), dates hors du
+   format JJ/MM/AAAA. Elle nourrit à la fois le message d'erreur d'en-tête —
+   qui ne disait que « En-tête CSV introuvable » — et le compte rendu d'un
+   import à zéro opération, jusque-là muet.
+
+**Pourquoi.** Le banc d'essai a joué onze formats de relevés français : sept
+passaient, trois échouaient, un s'importait à zéro ligne en silence. Ce qui
+marchait chez André marchait parce que la Caisse d'Épargne fournit la colonne
+« Pointage » — personne d'autre ne l'a. Les trois défauts se cumulaient sur le
+même écran : solde figé, camembert « 100 % Non classé », message d'erreur
+opaque. C'est la première impression du logiciel.
+
+**Vérifié.** 286 tests (11 nouveaux, chacun écrit avant son correctif et vu
+échouer). Parcours rejoué de bout en bout dans le bac à sable : solde à
+2 845,26 €, quatre catégories réparties, camembert et sources de revenus
+remplis. Les quatre messages d'import contrôlés en interceptant les boîtes de
+dialogue. Notice rendue sans erreur, balises équilibrées.
+
+**Aussi.** README (FR et EN), `Lisez-moi.txt` et la notice intégrée mis
+d'accord avec le nouveau comportement — la notice décrivait le pointage
+automatique comme réservé aux relevés à colonne « Pointage ». Version portée à
+**1.31.0** avec son entrée d'historique dans `constants.py`.
+
+**Reste.** Les autres points relevés pendant l'audit, non traités : la date de
+départ figée au 01/01/2025 (un clic sur OK au premier lancement enregistre 0 €
+pour toujours, et l'invite ne revient plus) ; l'historique antérieur à cette
+date exclu du solde sans un mot ; le pointage impossible en masse (sélection
+simple dans la liste) ; la création d'une catégorie possible mais documentée
+nulle part ; la fenêtre qui réclame 754 px de haut, trop pour un portable
+1366×768 ; deux fenêtres ouvertes sur la même base qui se marchent dessus
+(« database is locked » reproduit). Rien n'est publié : la dernière release
+reste la 1.26.0.
+
+---
+
+## 2026-09-08 — Colonnes alignées dans les trois cadres du Bilan
+
+**Fait.** Les trois listes du bas du Bilan (dépenses par catégorie, sources de
+revenus, plus grosses dépenses) posent maintenant leurs lignes dans une grille
+commune au lieu d'une rangée indépendante par ligne. Les quatre colonnes —
+pastille, libellé, pourcentage ou date, montant — sont alignées d'une ligne à
+l'autre, et les montants cadrés à droite du cadre.
+
+**Pourquoi.** Chaque ligne calculait ses largeurs dans son coin : les
+pourcentages et les dates se décalaient, et les libellés n'avaient pas deux
+fois la même longueur. Une grille laisse Qt donner à chaque colonne la largeur
+de son contenu le plus large, pour toutes les lignes à la fois.
+
+**Aussi.** Les pastilles n'étaient pas centrées sur leur ligne : c'était le
+caractère « ● » d'une police plus grande que celle du libellé, posé sur sa
+propre ligne de base. Remplacé par un vrai disque peint de 9 px — taille
+impaire, comme la hauteur d'une ligne, sans quoi il reste un pixel trop haut.
+Écart mesuré : 0 px sur les trois cadres.
+
+**Puis.** Liseré gris retiré : le style de la carte visait « tout QFrame » et
+descendait donc sur ses étiquettes, un QLabel étant un QFrame. Il vise
+maintenant la carte par son nom (`QFrame#carteBilan`) ; les étiquettes, qui
+tiraient de lui leur fond blanc, sont passées en fond transparent.
+
+**Enfin.** Même correction aux quatre autres cadres du Bilan : les tuiles du
+haut (`QFrame#tuileKpi`, création et recoloration) et les deux bandeaux
+(`#bandeauCarte`, `#bandeauMois`). Chaque étiquette y répétait la bordure et,
+sur les tuiles, le trait coloré de 3 px du haut. Une règle
+`… QWidget { background: transparent }` accompagne chaque cadre : sans elle,
+les étiquettes et les mini-blocs peignent le gris de la palette là où ils
+prenaient auparavant le fond du cadre.
+
+**Et.** Le bloc « Reste pour la carte » du bandeau Encours carte est supprimé.
+André : « c'est faux, puisque si à la fin du mois je suis en négatif il ne reste
+rien pour n'importe quelle dépense ». Le chiffre était plafonné à 0,00 € et,
+aligné avec trois autres, se lisait comme un budget encore disponible. Le
+calcul (`_reste_du_mois`) reste : il alimente la phrase du détail — « Solde
+prévu fin de mois … moins … déjà passés à la carte — il MANQUE … » — et le
+verdict du mois précédent. Notice réécrite, et les onze assertions qui
+visaient le bloc portent désormais sur cette phrase.
+
+**Exe.** Reconstruit et installé. Étapes 2 et 3 du `.bat` rejouées à la main
+(`outils/version_exe.py` puis PyInstaller, chemins absolus), puis mise à jour
+de `F:udget-app\Pecule` : `Pecule.exe` copié et `_internal\` en robocopy
+/MIR. `comptes.db` inchangée (2 101 248 octets, même horodatage) et les dix
+sauvegardes en place. Contrôlé en lançant l'application : titre « Pécule —
+v1.30.7 — Compte courant », bandeau carte à trois blocs, cadres du bas alignés
+et sans liseré.
+
+**Reste.** `APP_VERSION` est toujours 1.30.7 : l'exe installé contient donc
+plus que la 1.30.7, et aucune entrée de version n'a été écrite dans
+`constants.py`. À faire si l'on publie.
+
+---
+
 ## 2026-09-07 — L'onglet Catégories dit à quelle date il compte (1.30.7)
 
 **Fait.** Une ligne sous le tableau nomme la date utilisée. En date de valeur

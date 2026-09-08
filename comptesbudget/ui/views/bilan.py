@@ -9,7 +9,7 @@ from PySide6.QtGui import (
     QColor, QPainter,
 )
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
     QLabel, QFrame, QScrollArea,
 )
 from PySide6.QtCharts import (
@@ -36,56 +36,85 @@ JOUR_TENDANCE = 10
 HORIZON_DECOUVERT = 45
 
 class CatRowsWidget(QWidget):
-    """Liste de lignes : pastille colorée + libellé + (% optionnel) + montant à droite."""
+    """Liste de lignes : pastille colorée + libellé + (% ou date) + montant.
+
+    Les lignes sont posées dans une grille commune, et non chacune dans sa
+    rangée indépendante : c'est ce qui aligne les quatre colonnes d'une ligne
+    à l'autre — pastilles, libellés, pourcentages (ou dates) et montants se
+    retrouvent tous sous les mêmes bords.
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.lay = QVBoxLayout(self)
+        self.lay = QGridLayout(self)
         self.lay.setContentsMargins(8, 6, 8, 6)
-        self.lay.setSpacing(4)
-        self.lay.addStretch()
+        self.lay.setHorizontalSpacing(8)
+        self.lay.setVerticalSpacing(4)
+        # Seule la colonne du libellé s'étire ; les trois autres prennent la
+        # largeur de leur contenu le plus large, donc restent alignées.
+        self.lay.setColumnStretch(1, 1)
+        self.lay.setColumnMinimumWidth(0, 14)   # colonne des pastilles
+        self._nb_lignes = 0   # pour annuler l'étirement de la rangée du bas
 
     def set_items(self, items: list[tuple]):
         """items = list of (label, amount, color, optional_pct_or_date)."""
         # Reset
-        while self.lay.count() > 1:
+        while self.lay.count():
             it = self.lay.takeAt(0)
             if it.widget():
                 it.widget().deleteLater()
+        self.lay.setRowStretch(self._nb_lignes, 0)
+        self._nb_lignes = 0
         if not items:
-            self.lay.insertWidget(0, QLabel("— Aucune donnée —"))
+            self.lay.addWidget(QLabel("— Aucune donnée —"), 0, 0, 1, 4)
+            self._nb_lignes = 1
+            self.lay.setRowStretch(1, 1)   # le message reste en haut du cadre
             return
-        for tup in items:
+        for i, tup in enumerate(items):
             label = tup[0]; amount = tup[1]; color = tup[2]
             sub = tup[3] if len(tup) > 3 else None
-            row = QHBoxLayout()
-            row.setSpacing(8); row.setContentsMargins(0, 0, 0, 0)
-            dot = QLabel("●")
-            dot.setStyleSheet(f"color: {color}; font-size: 13pt")
-            dot.setFixedWidth(14)
-            row.addWidget(dot)
+            # Pastille : un vrai petit disque peint, et non le caractère « ● ».
+            # Le glyphe se posait sur la ligne de base de sa propre police,
+            # plus grande que celle du libellé, et sortait donc toujours un
+            # peu au-dessus du texte de la ligne. Un disque, lui, se centre
+            # exactement sur la hauteur de la ligne.
+            dot = QWidget()
+            # Taille impaire (9 px) : la hauteur d'une ligne l'est aussi, et
+            # un disque pair y tombait un pixel trop haut, faute de milieu.
+            dot.setFixedSize(9, 9)
+            dot.setStyleSheet(f"background: {color}; border-radius: 4px;")
+            self.lay.addWidget(dot, i, 0, Qt.AlignHCenter | Qt.AlignVCenter)
             lbl = QLabel(label)
             lbl.setTextFormat(Qt.PlainText)   # libellé affiché tel quel (jamais interprété)
-            lbl.setStyleSheet("color:#222")
-            row.addWidget(lbl, 1)
+            lbl.setStyleSheet("color:#222; background: transparent")
+            self.lay.addWidget(lbl, i, 1)
             if sub:
                 # Même correction de contraste que les sous-titres des tuiles :
                 # ces pourcentages et ces dates se lisaient mal en gris pâle.
-                s = QLabel(sub); s.setStyleSheet("color:#555; font-size:9pt")
-                row.addWidget(s)
+                s = QLabel(sub); s.setStyleSheet("color:#555; font-size:9pt; background: transparent")
+                self.lay.addWidget(s, i, 2, Qt.AlignRight | Qt.AlignVCenter)
             amt = QLabel(fmt_euro(amount))
             amt.setStyleSheet(
-                f"color: {'#C0392B' if amount < 0 else '#229954'}; font-weight:600")
-            amt.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row.addWidget(amt)
-            wrap = QWidget(); wrap.setLayout(row)
-            self.lay.insertWidget(self.lay.count() - 1, wrap)
+                f"color: {'#C0392B' if amount < 0 else '#229954'}; "
+                "font-weight:600; background: transparent")
+            self.lay.addWidget(amt, i, 3, Qt.AlignRight | Qt.AlignVCenter)
+        # Une rangée vide et extensible en dessous : sans elle, la grille
+        # étirerait les lignes pour remplir la hauteur du cadre.
+        self._nb_lignes = len(items)
+        self.lay.setRowStretch(self._nb_lignes, 1)
 
 
 def _make_panel(title: str, body: QWidget) -> QFrame:
     """Carte stylée avec en-tête bleu + corps."""
     f = QFrame()
+    # Le style vise la carte par son nom, et non « tout QFrame ». Sans cela il
+    # descendait sur tous les QFrame qu'elle contient — or un QLabel EST un
+    # QFrame : chaque libellé, chaque pourcentage et chaque montant se
+    # retrouvait entouré du liseré gris de la carte.
+    f.setObjectName("carteBilan")
     f.setStyleSheet("""
-        QFrame { background: white; border: 1px solid #C8D0DC; border-radius: 4px; }
+        QFrame#carteBilan {
+            background: white; border: 1px solid #C8D0DC; border-radius: 4px;
+        }
     """)
     v = QVBoxLayout(f); v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
     header = QLabel(title.upper())
@@ -104,6 +133,7 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
 
 class BilanView(QWidget):
     goto_budget = Signal()   # clic sur l'alerte budget → ouvrir l'onglet Budget
+    goto_parametres = Signal()   # clic sur le bandeau du solde de départ
 
     def __init__(self, db: Database, parent=None):
         super().__init__(parent)
@@ -173,10 +203,15 @@ class BilanView(QWidget):
 
         # ── Bandeau Encours Carte Bancaire ────────────────────────────
         self.cb_banner = QFrame()
+        # Style nommé (voir _make_panel) : sans cela, chaque étiquette du
+        # bandeau se retrouvait encadrée, un QLabel étant lui aussi un QFrame.
+        self.cb_banner.setObjectName("bandeauCarte")
         self.cb_banner.setStyleSheet("""
-            QFrame { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+            QFrame#bandeauCarte {
+                     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                         stop:0 #FFF8E1, stop:1 #FFECB3);
                      border: 1px solid #E8C77B; border-radius: 4px; }
+            QFrame#bandeauCarte QWidget { background: transparent; }
         """)
         cb_lay = QHBoxLayout(self.cb_banner)
         cb_lay.setContentsMargins(12, 4, 12, 4); cb_lay.setSpacing(18)
@@ -223,13 +258,14 @@ class BilanView(QWidget):
             "Opérations faites mais pas encore intégrées par la banque "
             "(non pointées). Ce peut être un achat comme un remboursement.")
         self.cb_bloc3, self.cb_total, self.cb_total_lbl = _mini("Total des achats à débiter")
-        # Ce qui reste vraiment pour la carte sur le mois affiché : le solde
-        # que le compte aura en fin de mois, tout payé, moins les achats déjà
-        # engagés. Voir _reste_du_mois.
-        self.cb_bloc4, self.cb_dispo, self.cb_dispo_lbl = _mini("Reste pour la carte")
-        w1, w2, w3 = self.cb_bloc1, self.cb_bloc2, self.cb_bloc3
-        cb_lay.addWidget(w1); cb_lay.addWidget(w2); cb_lay.addWidget(w3)
-        cb_lay.addWidget(self.cb_bloc4)
+        # Un quatrième bloc, « Reste pour la carte », a été retiré le
+        # 08/09/2026 : quand le mois finit dans le rouge, il ne reste rien
+        # pour aucune dépense, et un chiffre plancher à 0,00 € donnait
+        # l'illusion d'un budget encore disponible. Ce qui manque — ou ce
+        # qui reste — se lit en toutes lettres dans le détail, à droite.
+        cb_lay.addWidget(self.cb_bloc1)
+        cb_lay.addWidget(self.cb_bloc2)
+        cb_lay.addWidget(self.cb_bloc3)
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
         self.cb_detail.setStyleSheet("color:#7E5A18; font-size:9pt")
@@ -250,10 +286,13 @@ class BilanView(QWidget):
         # La lecture du budget mensuel tenu sur papier : en banque aujourd'hui,
         # ce qui doit encore tomber, et le solde attendu en fin de mois.
         self.mois_banner = QFrame()
+        self.mois_banner.setObjectName("bandeauMois")   # même raison
         self.mois_banner.setStyleSheet("""
-            QFrame { background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+            QFrame#bandeauMois {
+                     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                         stop:0 #EDF7EE, stop:1 #D8ECDC);
                      border: 1px solid #A6CDAF; border-radius: 4px; }
+            QFrame#bandeauMois QWidget { background: transparent; }
         """)
         mo_lay = QHBoxLayout(self.mois_banner)
         mo_lay.setContentsMargins(12, 4, 12, 4); mo_lay.setSpacing(18)
@@ -293,6 +332,35 @@ class BilanView(QWidget):
         self.budget_alert.setVisible(False)
         self.budget_alert.linkActivated.connect(lambda _l: self.goto_budget.emit())
         main.addWidget(self.budget_alert)
+
+        # Bandeau du solde de départ. Tant qu'il n'a jamais été renseigné, le
+        # « Solde bancaire réel » ne vaut que si le compte était vide à la date
+        # de départ : rien ne le disait, et l'invite du premier lancement ne
+        # revient plus dès qu'on l'a fermée une fois.
+        self.solde_depart_alert = QLabel()
+        self.solde_depart_alert.setWordWrap(True)
+        self.solde_depart_alert.setTextFormat(Qt.RichText)
+        self.solde_depart_alert.setVisible(False)
+        self.solde_depart_alert.setStyleSheet(
+            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
+            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+        self.solde_depart_alert.linkActivated.connect(
+            lambda _l: self.goto_parametres.emit())
+        main.addWidget(self.solde_depart_alert)
+
+        # Bandeau des opérations antérieures à la date de départ. Elles
+        # figurent dans les listes et les graphiques, mais sortent du calcul
+        # du solde — un écart que rien n'expliquait à l'écran.
+        self.hors_solde_alert = QLabel()
+        self.hors_solde_alert.setWordWrap(True)
+        self.hors_solde_alert.setTextFormat(Qt.RichText)
+        self.hors_solde_alert.setVisible(False)
+        self.hors_solde_alert.setStyleSheet(
+            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
+            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+        self.hors_solde_alert.linkActivated.connect(
+            lambda _l: self.goto_parametres.emit())
+        main.addWidget(self.hors_solde_alert)
 
         # ── Ligne 2 : 2 graphiques ────────────────────────────────────
         mid_row = QHBoxLayout(); mid_row.setSpacing(8)
@@ -337,11 +405,15 @@ class BilanView(QWidget):
 
     def _make_kpi(self, label: str, value: str, color: str) -> QFrame:
         f = QFrame()
+        # Style nommé : sinon le liseré gris ET le trait coloré de 3 px du
+        # haut se répétaient sur le libellé, le montant et le sous-titre.
+        f.setObjectName("tuileKpi")
         f.setStyleSheet(f"""
-            QFrame {{
+            QFrame#tuileKpi {{
                 background: white; border: 1px solid #C8D0DC;
                 border-top: 3px solid {color}; border-radius: 4px;
             }}
+            QFrame#tuileKpi QLabel {{ background: transparent; }}
         """)
         lay = QVBoxLayout(f); lay.setContentsMargins(10, 8, 10, 8); lay.setSpacing(2)
         l_label = QLabel(label)
@@ -381,10 +453,11 @@ class BilanView(QWidget):
         s'accordent toujours (vert quand c'est positif, rouge quand ça ne l'est pas)."""
         carte = self.kpis[cle]
         carte.setStyleSheet(f"""
-            QFrame {{
+            QFrame#tuileKpi {{
                 background: white; border: 1px solid #C8D0DC;
                 border-top: 3px solid {couleur}; border-radius: 4px;
             }}
+            QFrame#tuileKpi QLabel {{ background: transparent; }}
         """)
         carte._value.setStyleSheet(f"color:{couleur}; font-size:16pt; font-weight:bold")
 
@@ -707,24 +780,12 @@ class BilanView(QWidget):
         self.cb_total.setStyleSheet(
             "color:#5A2D00; font-size:12pt; font-weight:bold")
 
-        # ── Ce qui reste vraiment pour la carte ───────────────────────
-        # Calculé sur le compte, plus sur un plafond fixe : c'est le solde de
-        # fin de mois, tout payé, moins les achats carte déjà engagés. Un
-        # repère figé pouvait annoncer « il reste 247 € » pendant que le
-        # bandeau voisin prévoyait un solde négatif en fin de mois.
+        # ── Ce que le mois laisse, une fois tout payé ─────────────────
+        # Le solde de fin de mois moins les achats carte déjà engagés. Il n'a
+        # plus de bloc à lui : il sert aux phrases du détail (« il MANQUE »,
+        # « il reste ») et au verdict du mois précédent.
         solde_ref = solde_compte if solde_compte is not None else 0.0
         disponible = self._reste_du_mois(txs, mois, solde_ref, encours_mois)
-        # Ce qui RESTE ne descend pas sous zéro : quand le mois finit déjà
-        # dans le rouge, la réponse à « combien puis-je encore mettre sur la
-        # carte ? » est « rien », pas « moins 433 € ». Le montant qui manque
-        # est une autre question — il est dit dans le détail, à droite.
-        self.cb_dispo.setText(fmt_euro(max(0.0, disponible)))
-        self.cb_dispo.setStyleSheet(
-            ("color:#C0392B" if disponible < 0 else "color:#1A7A3A")
-            + "; font-size:12pt; font-weight:bold")
-        self.cb_dispo_lbl.setText(
-            f"Restait sur {period_label(mois).lower()}" if consultation
-            else "Reste pour la carte")
 
         # ── Verdict du mois précédent ─────────────────────────────────
         # Le reste descend au fil du mois, mais rien ne disait ensuite si le
@@ -773,9 +834,9 @@ class BilanView(QWidget):
 
         detail = (f"{len(confirmes)} confirmée(s)  •  {len(en_cours)} en cours"
                   f"  •  {len(lot)} au total sur ce prélèvement")
-        # D'où sort le chiffre « Reste pour la carte » : le solde qu'aura le
-        # compte à la fin du mois une fois tout passé, moins ce qui est déjà
-        # engagé sur la carte.
+        # La phrase qui porte, depuis la suppression du quatrième bloc, ce
+        # que le mois laisse : le solde qu'aura le compte à la fin du mois
+        # une fois tout passé, moins ce qui est déjà engagé sur la carte.
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_ref)
         detail += (f"\nSolde prévu fin de mois {fmt_euro(solde_fin)} moins "
                    f"{fmt_euro(abs(encours_mois))} déjà passés à la carte — "
@@ -1050,9 +1111,54 @@ class BilanView(QWidget):
         self.budget_alert.setVisible(True)
 
     # ── Rafraîchissement ─────────────────────────────────────────────
+    def _refresh_solde_depart_alert(self):
+        """Prévient tant que le solde de départ n'a jamais été enregistré.
+
+        On distingue « jamais renseigné » d'un vrai zéro : la colonne
+        `solde_initial` du compte vaut NULL dans le premier cas."""
+        compte = self.db.get_compte()
+        renseigne = compte is not None and compte["solde_initial"] is not None
+        if renseigne:
+            self.solde_depart_alert.setVisible(False)
+            return
+        self.solde_depart_alert.setText(
+            "&#9888; <b>Solde de départ non renseigné.</b> Le solde affiché "
+            "ci-dessus n'additionne que vos opérations : il ne sera juste que "
+            "si votre compte était à zéro le "
+            + fmt_date_fr(self.db.date_initiale())
+            + ". Indiquez le solde de votre relevé à cette date — "
+            "<a href='#'>Paramètres</a>.")
+        self.solde_depart_alert.setVisible(True)
+
+    def _refresh_hors_solde_alert(self, txs: list[dict]):
+        """Signale les opérations plus anciennes que la date de départ.
+
+        Le solde bancaire ne compte que ce qui suit cette date : le total
+        d'avant est réputé compris dans le solde de départ. Qui importe son
+        historique complet sans reculer la date voit donc un solde faux, sans
+        rien pour le lui dire."""
+        depart = self.db.get_setting("initial_date", "")
+        avant = [t for t in txs
+                 if t.get("categorie") != "Transaction exclue"
+                 and (t.get("date") or "") < depart]
+        if not avant:
+            self.hors_solde_alert.setVisible(False)
+            return
+        total = sum(t.get("montant", 0) for t in avant)
+        self.hors_solde_alert.setText(
+            "&#9888; <b>" + str(len(avant)) + " opération(s) antérieure(s) au "
+            + fmt_date_fr(depart) + "</b>, la date de départ du compte : leur "
+            "total (" + fmt_euro(total) + ") <b>n'entre pas</b> dans le solde "
+            "ci-dessus — il est censé être déjà compris dans le solde de "
+            "départ. Pour les compter, reculez la date de départ dans les "
+            "<a href='#'>Paramètres</a>.")
+        self.hors_solde_alert.setVisible(True)
+
     def refresh(self):
         txs = [dict(r) for r in self.db.list_tx()]
         self._refresh_budget_alert(txs)
+        self._refresh_solde_depart_alert()
+        self._refresh_hors_solde_alert(txs)
 
         # Paramètres : solde de départ
         initial_date = self.db.get_setting("initial_date", "2025-01-01")

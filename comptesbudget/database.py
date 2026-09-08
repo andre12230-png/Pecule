@@ -19,6 +19,14 @@ def _lendemain(date_iso: str) -> str:
     return (d + timedelta(days=1)).strftime("%Y-%m-%d")
 
 
+def date_depart_par_defaut() -> str:
+    """Date de départ proposée à une base NEUVE : le 1er janvier de l'année en
+    cours. Elle était figée à « 2025-01-01 » dans le code, ce qui proposait en
+    2026 une date vieille de vingt mois à qui découvrait le logiciel. Les
+    bases déjà réglées ne sont jamais touchées."""
+    return f"{datetime.now().year}-01-01"
+
+
 class Database:
     def __init__(self, path: str = DB_PATH, compte_id: str = None):
         self.path = path
@@ -37,6 +45,39 @@ class Database:
         self._init_schema()
         self._select_compte_initial(compte_id)
         self._init_defaults()
+
+    def rouvrir(self):
+        """Relit le fichier de base après qu'il a été remplacé sur le disque.
+
+        Sert à reprendre un `comptes.db` existant sans redémarrer : les vues
+        gardent toutes le même objet Database, il suffit donc de rebrancher
+        sa connexion. L'appelant referme la connexion avant de recopier le
+        fichier — Windows refuse d'écraser un fichier encore ouvert."""
+        try:
+            self.conn.close()
+        except sqlite3.Error:
+            pass
+        self.conn = sqlite3.connect(self.path)
+        self.conn.row_factory = sqlite3.Row
+        self.conn.execute("PRAGMA foreign_keys = ON")
+        self._in_batch = False
+        self.voir_archives = False
+        self._init_schema()          # migre le fichier repris s'il est ancien
+        self._select_compte_initial()
+        self._init_defaults()
+
+    def est_vide(self) -> bool:
+        """Vrai si l'utilisateur n'a encore rien saisi ni importé, nulle part.
+
+        On regarde TOUS les comptes et les archives comprises : la question
+        posée est « cette installation a-t-elle déjà servi ? ». Un solde de
+        départ renseigné suffit à répondre oui."""
+        for table in ("transactions", "rules", "recurring", "budgets"):
+            if self.conn.execute(f"SELECT 1 FROM {table} LIMIT 1").fetchone():
+                return False
+        soldes = self.conn.execute(
+            "SELECT 1 FROM comptes WHERE solde_initial IS NOT NULL LIMIT 1")
+        return soldes.fetchone() is None
 
     # ── Transaction groupée ─────────────────────────────────────────
     @contextmanager
@@ -75,7 +116,7 @@ class Database:
         (cf. MainWindow._maybe_prompt_initial_setup). Tant qu'il n'est pas
         renseigné, il est traité comme 0 par les calculs de solde."""
         if not self.get_setting("initial_date"):
-            self.set_setting("initial_date", "2025-01-01")
+            self.set_setting("initial_date", date_depart_par_defaut())
 
     def _init_schema(self):
         c = self.conn.cursor()
@@ -237,7 +278,9 @@ class Database:
                 "INSERT INTO comptes (id, nom, solde_initial, date_initiale, "
                 "ordre, updated_at) VALUES (?, ?, ?, ?, 0, ?)",
                 (self.DEFAULT_COMPTE_ID, self.DEFAULT_COMPTE_NOM, solde,
-                 self.get_setting("initial_date", "") or "2025-01-01",
+                 # Une base d'avant les comptes multiples apporte sa date ;
+                 # une base neuve démarre sur l'année en cours.
+                 self.get_setting("initial_date", "") or date_depart_par_defaut(),
                  _now_iso()))
 
         # Compte auquel rattacher les données déjà présentes : le premier.
@@ -314,8 +357,9 @@ class Database:
         self.set_setting("compte_courant", compte_id)
 
     def add_compte(self, nom: str, solde_initial: float = None,
-                   date_initiale: str = "2025-01-01") -> str:
+                   date_initiale: str = None) -> str:
         cid = str(uuid.uuid4())
+        date_initiale = date_initiale or date_depart_par_defaut()
         ordre = self.conn.execute(
             "SELECT COALESCE(MAX(ordre), -1) + 1 FROM comptes").fetchone()[0]
         self.conn.execute(

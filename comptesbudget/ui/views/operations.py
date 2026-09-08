@@ -11,7 +11,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QLineEdit, QComboBox, QTableView, QHeaderView, QAbstractItemView,
-    QDialog, QMessageBox,
+    QDialog, QMenu, QMessageBox,
 )
 
 from ...constants import (
@@ -106,7 +106,11 @@ class OperationsView(QWidget):
         self.table = QTableView()
         self.table.setModel(self.model)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.setSelectionMode(QAbstractItemView.SingleSelection)
+        # Sélection multiple : pointer un relevé entier se faisait sinon
+        # ligne à ligne, plusieurs centaines de clics pour un an d'historique.
+        self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self._menu_contextuel)
         self.table.setAlternatingRowColors(True)
         self.table.verticalHeader().setVisible(False)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -135,6 +139,7 @@ class OperationsView(QWidget):
         # et Suppr pourrait viser une ligne invisible.
         for key, slot in (("Delete", self.delete_selected),
                           ("Insert", self.add_tx),
+                          ("Space", self.basculer_pointage_selection),
                           ("Return", self.edit_selected)):
             sc = QShortcut(QKeySequence(key), self, activated=slot)
             sc.setContext(Qt.WidgetWithChildrenShortcut)
@@ -259,6 +264,74 @@ class OperationsView(QWidget):
         if not idx.isValid():
             return None
         return self.model.item(idx.row(), 0).data(Qt.UserRole)
+
+    def selected_tx_ids(self) -> list:
+        """Identifiants de toutes les lignes sélectionnées, dans l'ordre du
+        tableau. La sélection porte sur la ligne entière (SelectRows)."""
+        lignes = sorted({idx.row() for idx in self.table.selectedIndexes()})
+        ids = []
+        for r in lignes:
+            item = self.model.item(r, 0)
+            if item is not None and item.data(Qt.UserRole):
+                ids.append(item.data(Qt.UserRole))
+        return ids
+
+    def pointer_selection(self, pointee: bool):
+        """Pointe (ou dépointe) d'un coup toutes les lignes sélectionnées.
+
+        Passe par toggle_pointee, qui confirme au passage les échéances
+        saisies d'avance : pointer, c'est dire que la banque l'a passée."""
+        ids = self.selected_tx_ids()
+        if not ids:
+            return
+        par_id = {t["id"]: t for t in self.transactions}
+        with self.db.batch():
+            for tx_id in ids:
+                t = par_id.get(tx_id)
+                if t is None or bool(t.get("pointee")) == pointee:
+                    continue
+                self.db.toggle_pointee(tx_id)
+                t["pointee"] = 1 if pointee else 0
+                if pointee:
+                    t["prevue"] = 0
+        self.refresh()
+        self.tx_changed.emit()
+
+    def basculer_pointage_selection(self):
+        """Barre d'espace : pointe la sélection, ou la dépointe si tout est
+        déjà pointé — la même logique qu'une case à cocher."""
+        ids = set(self.selected_tx_ids())
+        if not ids:
+            return
+        deja = [t for t in self.transactions
+                if t["id"] in ids and t.get("pointee")]
+        self.pointer_selection(len(deja) < len(ids))
+
+    def _menu_contextuel(self, position):
+        """Clic droit sur la liste : les actions qui portent sur la
+        sélection, avec leur nombre — c'est là qu'on découvre qu'on peut
+        traiter plusieurs lignes d'un coup."""
+        menu = self._construire_menu()
+        if menu is not None:
+            menu.exec(self.table.viewport().mapToGlobal(position))
+
+    def _construire_menu(self):
+        """Le menu lui-même, sans l'ouvrir (séparé pour être vérifiable)."""
+        ids = self.selected_tx_ids()
+        if not ids:
+            return None
+        n = len(ids)
+        quoi = "cette opération" if n == 1 else f"ces {n} opérations"
+        menu = QMenu(self)
+        menu.addAction(f"\u2714 Pointer {quoi}",
+                       lambda: self.pointer_selection(True))
+        menu.addAction(f"Dépointer {quoi}",
+                       lambda: self.pointer_selection(False))
+        menu.addSeparator()
+        if n == 1:
+            menu.addAction("\u270f Modifier", self.edit_selected)
+        menu.addAction(f"\U0001f5d1 Supprimer {quoi}", self.delete_selected)
+        return menu
 
     def handle_click(self, index):
         """Clic sur la colonne P → bascule le pointage."""
@@ -436,12 +509,17 @@ class OperationsView(QWidget):
         self.tx_changed.emit()
 
     def delete_selected(self):
-        tx_id = self.selected_tx_id()
-        if not tx_id:
+        """Supprime toutes les lignes sélectionnées — le nombre est rappelé
+        dans la question, la sélection multiple rendant l'erreur plus coûteuse."""
+        ids = self.selected_tx_ids()
+        if not ids:
             return
-        if QMessageBox.question(self, "Supprimer",
-                                "Supprimer cette opération ?") != QMessageBox.Yes:
+        question = ("Supprimer cette opération ?" if len(ids) == 1
+                    else f"Supprimer ces {len(ids)} opérations ?")
+        if QMessageBox.question(self, "Supprimer", question) != QMessageBox.Yes:
             return
-        self.db.delete_tx(tx_id)
+        with self.db.batch():
+            for tx_id in ids:
+                self.db.delete_tx(tx_id)
         self.reload_from_db()
         self.tx_changed.emit()
