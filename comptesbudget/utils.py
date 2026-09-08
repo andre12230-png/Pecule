@@ -1,5 +1,6 @@
 """Utilitaires : horodatage, sauvegarde, formatage et normalisation."""
 import os
+import re
 import shutil
 import unicodedata
 from calendar import monthrange
@@ -20,6 +21,12 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# Nom d'une sauvegarde AUTOMATIQUE : « comptes-AAAA-MM-JJ.db ». Les copies
+# faites à la main (« comptes-avant-tel-changement.db ») n'entrent jamais
+# dans la rotation : elles sont conservées telles quelles.
+_EST_SAUVEGARDE_AUTO = re.compile(r"^comptes-\d{4}-\d{2}-\d{2}\.db$").match
+
+
 def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
     """Copie de sécurité QUOTIDIENNE de la base dans « sauvegardes/ ».
 
@@ -37,9 +44,17 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
         dest = os.path.join(bdir, f"comptes-{date.today().isoformat()}.db")
         if not os.path.exists(dest):
             shutil.copy2(path, dest)
-        # Rotation : noms triables lexicalement (comptes-AAAA-MM-JJ.db)
-        baks = sorted(f for f in os.listdir(bdir)
-                      if f.startswith("comptes-") and f.endswith(".db"))
+        # Rotation : UNIQUEMENT les sauvegardes automatiques, reconnues à leur
+        # nom daté (comptes-AAAA-MM-JJ.db), triables lexicalement.
+        #
+        # Le filtre était « commence par comptes- » : une copie manuelle
+        # nommée « comptes-avant-quelque-chose.db » entrait donc dans la
+        # rotation, et comme « a » vient après « 2 », elle se classait APRÈS
+        # les sauvegardes datées. Dix copies de ce genre suffisaient à faire
+        # supprimer, à chaque lancement, la sauvegarde du jour qui venait
+        # d'être créée : plus aucune sauvegarde automatique, sans un mot.
+        # Constaté le 08/09/2026 sur l'installation d'André.
+        baks = sorted(f for f in os.listdir(bdir) if _EST_SAUVEGARDE_AUTO(f))
         for old in baks[:-keep]:
             try:
                 os.remove(os.path.join(bdir, old))

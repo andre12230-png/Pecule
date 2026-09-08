@@ -13,6 +13,48 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-08 — Publication de la 1.33.0, puis 1.33.1 : les sauvegardes qui disparaissaient
+
+**Fait.** La 1.33.0 publiée (exe reconstruit, commit, push, release, Scoop,
+vitrine, installation d'André mise à jour), puis une **1.33.1** dans la foulée
+pour un défaut découvert par le contrôle final.
+
+**Le défaut.** L'installation d'André n'avait **plus aucune sauvegarde
+automatique depuis le 3 septembre**. La rotation de `backup_db` gardait les
+10 fichiers les plus récents en triant par NOM, sur tout ce qui commence par
+`comptes-`. Or une copie manuelle `comptes-avant-quelque-chose.db` se classe
+APRÈS les sauvegardes datées — « a » vient après « 2 ». Les dix copies
+manuelles du dossier suffisaient donc à faire supprimer, à chaque lancement,
+la sauvegarde du jour qui venait d'être créée. Le filet de sécurité était
+neutralisé sans un mot. La rotation ne regarde plus que les noms datés
+(`comptes-AAAA-MM-JJ.db`) ; les copies faites à la main sont ignorées.
+
+**Vérifié.** Test écrit avant le correctif et vu échouer avec l'ancien filtre
+(remis temporairement pour le prouver). Puis en conditions réelles, avec l'exe
+1.33.1 : dossier rempli de dix copies manuelles, lancement, la sauvegarde du
+jour est là. 302 tests.
+
+**Pourquoi ce défaut a tenu si longtemps.** Il ne se déclenche qu'à partir de
+dix copies manuelles dans le dossier — une pratique récente (les sauvegardes
+« comptes-avant-… » prises avant chaque modification de données). Aucun test
+ne couvrait la rotation.
+
+**Aussi.** Le premier jet du test écrivait dans le dossier `sauvegardes` du
+projet : `backup_db(path)` range ses copies dans `_data_dir()`, pas à côté du
+fichier qu'on lui passe. Fichier parasite supprimé, test isolé par
+`monkeypatch` sur `_data_dir`.
+
+**Contrôles de publication** (les deux versions) : archive retéléchargée depuis
+l'adresse publique et comparée au manifeste Scoop — identique ; `scoop install
+pecule` réel (empreinte ok, pre_install ok, persist ok) puis désinstallation ;
+badges README et vitrine à jour ; `softwareVersion` du JSON-LD servi avec un
+cache-buster ; release `v1.23.0` et manifestes Winget intacts (PR #416272 non
+soldée).
+
+**Reste.** Rien. La version publiée est la **1.33.1**.
+
+---
+
 ## 2026-09-08 — Ce que devient une installation qu'on met à jour
 
 **Fait.** Les quatre chemins de mise à jour joués pour de vrai, puis deux

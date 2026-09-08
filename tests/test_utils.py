@@ -1,4 +1,5 @@
 """Tests des utilitaires (formatage, normalisation, périodes)."""
+import os
 from datetime import date
 
 from comptesbudget.utils import (
@@ -177,3 +178,39 @@ def test_suggest_category_motifs_ambigus():
     assert suggest_category("REMBOURSEMENT SAMSE") is None
     # « BP » (2 lettres) n'attrape plus la Banque Populaire
     assert suggest_category("BANQUE BP") is None
+
+
+def test_rotation_ne_touche_pas_aux_sauvegardes_manuelles(tmp_path, monkeypatch):
+    """La rotation ne doit compter et supprimer que les sauvegardes
+    AUTOMATIQUES (« comptes-AAAA-MM-JJ.db »).
+
+    Le tri est lexicographique : « comptes-avant-truc.db » passe APRÈS
+    « comptes-2026-09-08.db » (a > 2). Dix copies manuelles dans le dossier
+    suffisaient donc à faire supprimer, à chaque lancement, la sauvegarde du
+    jour qui venait d'être créée — le filet de sécurité disparaissait sans
+    rien dire.
+    """
+    import comptesbudget.utils as u
+
+    # backup_db range TOUJOURS ses copies dans _data_dir() — pas à côté du
+    # fichier qu'on lui passe. Sans cette redirection, le test écrirait dans
+    # le dossier « sauvegardes » du projet.
+    monkeypatch.setattr(u, "_data_dir", lambda: str(tmp_path))
+    backup_db = u.backup_db
+
+    base = tmp_path / "comptes.db"
+    base.write_bytes(b"donnees")
+    dossier = tmp_path / "sauvegardes"
+    dossier.mkdir()
+    manuelles = [f"comptes-avant-essai-{i}.db" for i in range(10)]
+    for nom in manuelles:
+        (dossier / nom).write_bytes(b"copie manuelle")
+
+    dest = backup_db(str(base), keep=10)
+    assert dest is not None
+    restants = sorted(p.name for p in dossier.iterdir())
+    # La sauvegarde du jour est là...
+    assert os.path.basename(dest) in restants
+    # ...et aucune copie manuelle n'a été emportée.
+    for nom in manuelles:
+        assert nom in restants

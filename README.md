@@ -19,7 +19,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.33.0** — le premier relevé s'importe pointé et classé, pointage en masse, reprise du fichier de données à la mise à jour.
+> Version publiée : **1.33.1** — le premier relevé s'importe pointé et classé, pointage en masse, reprise du fichier de données à la mise à jour.
 
 ---
 
