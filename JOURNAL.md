@@ -13,6 +13,46 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-09 (Gratilog) — Le fil rattrape sept versions, et la taille corrigee
+
+**Fait.** Deux gestes sur Gratilog, le fil du forum etant reste a la 1.26.0 du
+3 septembre alors que la 1.33.1 est publiee.
+
+- **Message #9 poste dans le sujet** `topic_id=21527`. Un seul message pour les
+  sept versions, plutot que sept annonces. Angle choisi : ce qui bloquait un
+  nouvel utilisateur (le solde faux apres import faute de colonne de pointage,
+  le premier releve entierement en « Non classe », l'import muet qui ne disait
+  pas pourquoi), puis le pointage en masse, la fenetre qui descend a 383 px, le
+  bandeau de verdict du Bilan. Et, pour ceux qui ont deja installe, le defaut
+  des sauvegardes corrige en 1.33.1 — c'est la raison de mettre a jour.
+- **Demande de modification de la fiche** (`modfile.php?lid=3695`) portant sur
+  un seul champ : la taille annoncee etait restee a **53 843 997 octets**, celle
+  de la 1.26.0, alors que l'archive 1.33.1 en fait **53 744 013**. La fiche
+  elle-meme etait deja en 1.33.1, description complete, et son lien mene bien a
+  l'archive publiee (redirection `visit.php` suivie jusqu'au bout).
+
+**Le piege du titre, a ne pas prendre pour une fiche perimee.** L'onglet du
+navigateur et le `<title>` de la page annoncaient « Pecule v 1.23.2 » — deux
+versions majeures en arriere — pendant que le corps de la page affichait bien
+1.33.1. C'est un **cache** du site : la meme URL avec un parametre en plus
+(`&x=<horodatage>`) renvoie le bon titre. Rien a corriger, rien a redemander.
+
+**Pourquoi.** Le fil est le seul endroit ou les lecteurs de Gratilog suivent un
+logiciel : deux d'entre eux ont commente en aout, et l'un d'eux avait demande
+le multicompte. La fiche, elle, decide de ce que le visiteur telecharge.
+
+**Verifie.** Le message publie en un seul exemplaire (#9, compteur passe a
+6 messages), signature automatique presente. Fiche relue apres la demande :
+inchangee — c'est normal, une demande attend validation — drapeau `france.gif`
+et ligne de la **loupe** toujours en place, les deux elements que la mémoire du
+projet signale comme perdus au moindre copier-coller.
+
+**Reste.** Attendre la validation de la taille. La relire ensuite champ par
+champ : la validation du 4 septembre avait laisse de cote une partie de la
+demande.
+
+---
+
 ## 2026-09-09 (vitrine, suite) — Le texte du site remis d'aplomb
 
 **Fait.** Les sept pages de `docs/` confrontees une a une a ce que fait
