@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pécule — gestion de comptes et budget personnels (Windows 10/11, gratuit)</title>
-<meta name="description" content="Application gratuite et en français pour gérer ses comptes et son budget personnels sur PC Windows 10/11 (64 bits). Suivi des opérations, import CSV, budgets, prévisionnel, rapports. Données 100% locales. Open source (MIT).">
+<meta name="description" content="Application gratuite et en français pour gérer ses comptes et son budget personnels sur PC Windows 10/11 (64 bits). Suivi des opérations, import CSV, OFX et QIF, budgets, prévisionnel, plusieurs comptes, rapports. Données 100% locales. Open source (MIT).">
 <!-- Aperçu lors du partage (réseaux sociaux, forums, Discord…) -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
@@ -48,7 +48,7 @@
   "sameAs": [
     "https://github.com/andre12230-png/Pecule"
   ],
-  "description": "Application de bureau gratuite et en français pour la gestion de comptes et de budget personnels sur Windows 10/11 : suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel des opérations récurrentes, import CSV des relevés bancaires, rapports et rapprochement bancaire. Données stockées localement en SQLite, sans compte ni cloud.",
+  "description": "Application de bureau gratuite et en français pour la gestion de comptes et de budget personnels sur Windows 10/11 : suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel des opérations récurrentes, import des relevés bancaires au format CSV, OFX ou QIF, plusieurs comptes bancaires, archivage des années anciennes, rapports et rapprochement bancaire. Données stockées localement en SQLite, sans compte ni cloud.",
   "applicationCategory": "FinanceApplication",
   "applicationSubCategory": "Logiciel de comptabilité personnelle",
   "operatingSystem": "Windows 10, Windows 11",
@@ -82,7 +82,10 @@
     "Budgets mensuels par catégorie avec alertes",
     "Catégorisation automatique par règles",
     "Prévisionnel des opérations récurrentes",
-    "Import CSV des relevés bancaires des banques françaises",
+    "Import des relevés bancaires français aux formats CSV, OFX et QIF",
+    "Plusieurs comptes bancaires dans la même application",
+    "Suivi de l'encours de la carte à débit différé",
+    "Archivage des opérations anciennes sans perte de solde",
     "Rapport mensuel imprimable et export PDF",
     "Sauvegarde quotidienne automatique",
     "Données 100 % locales (SQLite), sans compte ni cloud"
@@ -185,14 +188,16 @@
     garder l'œil sur votre solde réel — sans abonnement, sans compte en ligne, et sans qu'aucune
     donnée ne quitte votre ordinateur.</p>
     <div class="grid">
-      <div class="card"><h3>📋 Suivi des opérations</h3><p>Saisie manuelle ou import de vos <a href="import-csv.html">relevés bancaires au format CSV</a>. Les colonnes sont reconnues par leur nom, quelle que soit la banque.</p></div>
+      <div class="card"><h3>📋 Suivi des opérations</h3><p>Saisie manuelle ou import de vos <a href="import-csv.html">relevés bancaires — CSV, OFX ou QIF</a>. Les colonnes sont reconnues par leur nom, quelle que soit la banque.</p></div>
       <div class="card"><h3>🧠 Catégorisation automatique</h3><p>Des règles classent vos opérations toutes seules au fil des imports.</p></div>
       <div class="card"><h3>🎯 Budgets mensuels</h3><p>Un budget par catégorie, avec barres de progression vertes / oranges / rouges.</p></div>
       <div class="card"><h3>🔮 Prévisionnel</h3><p>Déclarez vos opérations récurrentes (loyer, salaire, abonnements) et anticipez les mois à venir.</p></div>
       <div class="card"><h3>📅 Échéances du mois</h3><p>Créez d'un clic tout ce qui doit être débité ou encaissé dans le mois. L'import les complète ensuite avec la vraie ligne du relevé, sans doublon.</p></div>
       <div class="card"><h3>🖨 Rapports mensuels</h3><p>Une synthèse imprimable ou exportable en PDF, mois par mois.</p></div>
       <div class="card"><h3>✔ Rapprochement bancaire</h3><p>Pointez vos opérations pour retrouver à l'euro près le solde de votre relevé.</p></div>
-      <div class="card"><h3>💳 Débit différé</h3><p>L'encours de la carte est suivi à part : il n'entre dans votre solde bancaire qu'au jour du prélèvement, comme à la banque.</p></div>
+      <div class="card"><h3>💳 Débit différé</h3><p>L'encours de la carte est suivi à part : il n'entre dans votre solde bancaire qu'au jour du prélèvement, comme à la banque. Un chiffre dit ce qu'il vous reste pour la carte d'ici la fin du mois.</p></div>
+      <div class="card"><h3>🏦 Plusieurs comptes</h3><p>Compte courant, livret, compte joint : chacun garde ses opérations, ses budgets et son solde de départ. Vos règles et vos catégories, elles, servent partout.</p></div>
+      <div class="card"><h3>📦 Archivage</h3><p>Mettez de côté les années anciennes pour alléger les listes. Rien n'est supprimé, le solde ne bouge pas d'un centime, et une case les fait réapparaître.</p></div>
     </div>
   </section>
 
@@ -205,6 +210,12 @@
     </ol>
     <p>Aucune installation de Python n'est nécessaire. Au premier lancement, l'application vous invite à saisir votre solde de départ.</p>
     <p><b>Configuration requise :</b> Windows 10 ou 11 (64 bits).</p>
+    <p><b>Pour mettre à jour</b>, décompressez la nouvelle version <b>par-dessus l'ancienne</b>,
+    au même endroit : l'archive ne contient ni vos données ni vos sauvegardes, elle ne peut
+    donc rien écraser. Si vous lancez le nouvel exécutable depuis un autre dossier
+    (Téléchargements, par exemple), il ne trouve pas votre fichier et s'ouvre sur des comptes
+    vides — rien n'est perdu, et l'application vous propose alors de reprendre votre
+    <code>comptes.db</code> existant.</p>
     <div class="warn">
       <p style="margin-top:0">⚠️ <b>Au premier lancement, Windows affiche un avertissement.</b>
       C'est normal, et voici comment le passer :</p>
@@ -221,8 +232,12 @@
 
   <section>
     <h2>Importer vos relevés bancaires</h2>
-    <p>Pécule lit les relevés exportés en <b>CSV</b> depuis l'espace client de votre
-    banque. L'import n'est réservé à aucun établissement en particulier : les colonnes
+    <p>Pécule lit les relevés exportés depuis l'espace client de votre banque dans
+    <b>trois formats</b> : le <b>CSV</b>, l'<b>OFX</b> (parfois nommé « Microsoft
+    Money », avec sa variante <code>.qfx</code>) et le <b>QIF</b>, qui sert aussi à
+    reprendre l'historique d'un ancien logiciel de comptes. Même bouton, même
+    glisser-déposer.</p>
+    <p>L'import n'est réservé à aucun établissement en particulier : les colonnes
     sont reconnues par leur nom. Il écarte les doublons, pointe les opérations déjà
     passées en banque, et complète les échéances que vous aviez inscrites d'avance au
     lieu de les dupliquer.</p>

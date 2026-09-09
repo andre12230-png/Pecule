@@ -74,13 +74,16 @@
   <h2>Les cas les plus fréquents</h2>
 
   <div class="cas">
-    <h3>« En-tête CSV introuvable »</h3>
-    <p class="quoi">L'import s'arrête net sur ce message.</p>
+    <h3>« Aucune ligne ne nomme les colonnes date et libellé »</h3>
+    <p class="quoi">L'import s'arrête net sur ce message. (Les versions
+    antérieures à la 1.31 disaient seulement « En-tête CSV introuvable », sans
+    expliquer quoi faire.)</p>
     <p>Pécule cherche la ligne qui nomme les colonnes, en repérant les mots
     <strong>date</strong> et <strong>libellé</strong>. S'il ne trouve aucune ligne
     contenant les deux, il ne peut pas deviner à quoi correspond chaque colonne.</p>
     <p>Cela arrive quand l'export ne comporte pas d'en-tête du tout, ou quand les
-    colonnes portent d'autres noms — par exemple « Opération » au lieu de « Libellé ».</p>
+    colonnes portent d'autres noms — par exemple « Opération » au lieu de « Libellé »,
+    ou les noms anglais de certaines banques en ligne (Boursorama, Revolut).</p>
     <div class="sol"><strong>La solution :</strong> ouvrez le fichier dans un tableur
     ou dans le Bloc-notes et ajoutez, ou renommez, une ligne d'en-tête. Le minimum
     vital tient en trois mots :
@@ -91,9 +94,12 @@
 
   <div class="cas">
     <h3>Le fichier est un Excel, pas un CSV</h3>
-    <p class="quoi">Le fichier s'appelle <code>.xls</code> ou <code>.xlsx</code>, et rien ne se passe.</p>
+    <p class="quoi">Le fichier s'appelle <code>.xls</code> ou <code>.xlsx</code>, et
+    Pécule répond qu'un fichier tableur n'est pas un relevé texte.</p>
     <p>Beaucoup de banques proposent « Exporter vers Excel » plutôt que « Exporter en
-    CSV ». Un fichier Excel n'est pas du texte : Pécule ne sait pas le lire.</p>
+    CSV ». Un fichier Excel n'est pas du texte : Pécule ne sait pas le lire. Depuis la
+    1.32, il le dit — un <code>.xlsx</code>, un <code>.pdf</code> ou un
+    <code>.json</code> déposé sur la fenêtre était auparavant ignoré sans un mot.</p>
     <div class="sol"><strong>La solution :</strong> ouvrez-le dans votre tableur, puis
     <em>Fichier → Enregistrer sous</em> en choisissant
     <strong>« CSV (séparateur : point-virgule) »</strong>. Si votre banque propose les
@@ -103,8 +109,11 @@
   <div class="cas">
     <h3>Toutes les lignes sont ignorées</h3>
     <p class="quoi">L'import se termine, mais annonce zéro opération importée et zéro doublon.</p>
-    <p>Deux causes possibles, et la même vérification pour les distinguer : ouvrez le
-    fichier dans le Bloc-notes et regardez une ligne.</p>
+    <p>Depuis la 1.31, Pécule ne vous laisse plus deviner : quand un relevé ne donne
+    rien, il <strong>nomme la cause</strong> et dit la manœuvre à faire dans le
+    tableur. Si vous utilisez une version antérieure, voici les deux causes possibles
+    et la vérification qui les distingue : ouvrez le fichier dans le Bloc-notes et
+    regardez une ligne.</p>
     <p><strong>Les colonnes sont séparées par des virgules</strong> — c'est le format
     anglo-saxon. Pécule attend des points-virgules.</p>
     <p><strong>Ou les dates ne sont pas au bon format.</strong> Il faut
@@ -171,9 +180,9 @@
 
   <div class="warn">
     <strong>Vos données ne risquent rien pendant ces essais.</strong> Un import raté
-    n'abîme pas votre base, et Pécule en fait une sauvegarde automatique à chaque
-    lancement, avant même d'ouvrir le fichier. Vous pouvez réessayer autant que
-    nécessaire.
+    n'abîme pas votre base, et Pécule en fait une sauvegarde automatique au premier
+    lancement de chaque journée, avant même d'ouvrir votre fichier de données. Vous
+    pouvez réessayer autant que nécessaire.
   </div>
 </section>
 

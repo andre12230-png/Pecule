@@ -57,7 +57,8 @@
     <h1>Politique de confidentialité</h1>
     <p class="sub">Pécule traite des données financières. Voici lesquelles, où elles
       sont conservées, et pourquoi elles ne quittent jamais votre ordinateur.</p>
-    <p class="date">En vigueur depuis le 22 août 2026 · s'applique à la version 1.23.0 et aux suivantes</p>
+    <p class="date">En vigueur depuis le 22 août 2026 · s'applique à la version 1.23.0 et aux suivantes
+      · relue le 9 septembre 2026 pour la version 1.33.1</p>
   </div>
 </header>
 
@@ -81,9 +82,11 @@
     <tr><th>Donnée</th><th>Provenance</th></tr>
     <tr><td>Opérations bancaires : date, libellé, montant, catégorie et sous-catégorie,
         note, référence de l'opération, état de pointage</td>
-        <td>Saisie à la main, ou importée d'un relevé CSV ou d'un fichier QIF que
+        <td>Saisie à la main, ou importée d'un relevé CSV, OFX ou QIF que
             <em>vous</em> exportez depuis votre banque ou votre ancien logiciel</td></tr>
-    <tr><td>Solde de départ et date de début de suivi</td><td>Saisie</td></tr>
+    <tr><td>Comptes bancaires : le nom que vous leur donnez (« Compte courant »,
+        « Livret A »…), leur solde de départ et leur date de début de suivi</td>
+        <td>Saisie</td></tr>
     <tr><td>Budgets mensuels par catégorie</td><td>Saisie</td></tr>
     <tr><td>Opérations récurrentes (loyer, abonnements…)</td><td>Saisie</td></tr>
     <tr><td>Règles de catégorisation automatique</td><td>Saisie</td></tr>
@@ -116,7 +119,9 @@
 
   <p>À chaque premier lancement de la journée, Pécule range une copie de sécurité dans
   un sous-dossier <code>sauvegardes</code>, au même endroit. Les dix plus récentes sont
-  conservées, les plus anciennes sont effacées automatiquement. Ce sont des fichiers
+  conservées, les plus anciennes sont effacées automatiquement. Cette rotation ne
+  touche que les copies datées faites par l'application : un fichier que vous auriez
+  vous-même déposé dans ce dossier n'est jamais supprimé. Ce sont des fichiers
   ordinaires, sur votre disque.</p>
 
   <p>Ces fichiers ne sont ni chiffrés ni protégés par mot de passe : ils sont protégés
@@ -215,10 +220,11 @@
   <h3>1. What data the application handles</h3>
   <p>Pécule stores only what you put into it: bank entries (date, label, amount,
   category and sub-category, note, transaction reference, reconciliation status),
-  your starting balance and start date, monthly budgets per category, recurring
-  entries, and automatic categorisation rules.</p>
-  <p>Entries are either typed in by hand or imported from a CSV bank statement or a
-  QIF file that <em>you</em> export yourself from your bank or from your previous
+  the accounts you create (the name you give them, their starting balance and start
+  date), monthly budgets per category, recurring entries, and automatic
+  categorisation rules.</p>
+  <p>Entries are either typed in by hand or imported from a CSV, OFX or QIF bank
+  statement that <em>you</em> export yourself from your bank or from your previous
   accounting software. The application never connects to a bank.</p>
   <p>It asks for no name, no address, no email address and no banking credentials. It
   has no field in which to enter them.</p>
@@ -231,7 +237,8 @@
   path at the bottom of its window.</p>
   <p>On the first launch of each day, a backup copy is written to a
   <code>sauvegardes</code> sub-folder in the same location. The ten most recent are
-  kept and older ones are deleted automatically.</p>
+  kept and older ones are deleted automatically; this rotation only ever touches the
+  dated copies the application itself made, never a file you put there yourself.</p>
   <p>These files are not encrypted and not password-protected: they are protected by
   your Windows session, like your other documents.</p>
 
