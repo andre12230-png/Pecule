@@ -13,6 +13,31 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-09 (vitrine) — Les captures refaites pour la 1.33.1
+
+**Fait.** Les quatre captures de `docs/media/` refaites avec
+`outils/captures_promo.py`. Elles dataient du 3 septembre et montraient la
+1.26 : entre-temps le selecteur de periode a ete coupe en deux (1.29.0), le
+bandeau Encours carte a change de contenu (1.30.0), une tuile a ete renommee
+(1.30.5) et le Budget compte a la date d'achat (1.30.2). Aucune de ces
+nouveautes n'apparaissait sur la vitrine.
+
+**Pourquoi.** Ces images sont ce qu'un visiteur regarde avant de telecharger.
+Une capture en retard de sept versions annonce un autre logiciel que celui
+qu'il va installer.
+
+**Rien d'autre a refaire.** La couverture et l'image de partage
+(`outils/couverture.py`) ne montrent pas l'interface — logo et texte
+seulement — et `smartscreen.png` est une fenetre de Windows : elles ne
+vieillissent pas avec les versions. Le HTML de la page n'a pas bouge, les
+quatre fichiers portent les memes noms.
+
+**Reste.** La page ne parle que du **CSV** pour l'import (« relevés bancaires
+au format CSV »), alors que Pécule lit aussi le **QIF** et l'**OFX** depuis la
+1.26.0. Signale a Andre, pas corrige.
+
+---
+
 ## 2026-09-08 — Publication de la 1.33.0, puis 1.33.1 : les sauvegardes qui disparaissaient
 
 **Fait.** La 1.33.0 publiée (exe reconstruit, commit, push, release, Scoop,
