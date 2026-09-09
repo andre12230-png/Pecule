@@ -73,9 +73,9 @@
   même groupe et utilisent la même plateforme technique. Leur export d'opérations
   est donc identique&nbsp;: mêmes formats proposés, mêmes colonnes, même chemin
   dans l'espace client. Le Crédit Mutuel propose plusieurs formats d'export&nbsp;;
-  <strong>deux d'entre eux se chargent directement dans Pécule</strong>&nbsp;: le
-  <strong>CSV</strong> et le <strong>QIF</strong>. Le CSV est celui qui donne les
-  meilleurs libellés.</p>
+  <strong>trois d'entre eux se chargent directement dans Pécule</strong>&nbsp;: le
+  <strong>CSV</strong>, le <strong>QIF</strong> et l'<strong>OFX</strong>. Le CSV
+  est celui qui donne les meilleurs libellés.</p>
 </section>
 
 <section>
@@ -88,18 +88,20 @@
     <li>Cliquez sur <strong>« Exporter mes opérations »</strong> — le lien apparaît
       dans le menu latéral du compte ou sous la liste des opérations.</li>
     <li>Choisissez la <strong>période</strong> (le CIC permet des plages larges),
-      puis le format <strong>Excel (CSV)</strong>. L'option
-      <em>Quicken (QIF)</em> se charge elle aussi dans Pécule&nbsp;; en revanche
-      l'option <em>Microsoft Money (OFX)</em> n'est pas prise en charge.</li>
+      puis le format <strong>Excel (CSV)</strong>. Les options
+      <em>Quicken (QIF)</em> et <em>Microsoft Money (OFX)</em> se chargent
+      elles aussi dans Pécule&nbsp;: prenez celle que vous voulez.</li>
     <li>Enregistrez le fichier sur votre PC. Il porte un nom du type
       <code>CM_JJMMAAAA_JJMMAAAA.csv</code> (ou <code>CIC_...</code>).</li>
   </ol>
 
   <div class="ok">
-    <strong>CSV et QIF&nbsp;:</strong> ces deux formats se chargent dans
-    Pécule. Le CSV est celui qui préserve le mieux les libellés d'origine&nbsp;;
-    le QIF est plus léger si vous voulez juste les mouvements sans le détail. Le
-    format OFX, lui, n'est pas reconnu par Pécule.
+    <strong>CSV, QIF et OFX&nbsp;:</strong> ces trois formats se chargent dans
+    Pécule, sans conversion préalable. Le CSV est celui qui préserve le mieux
+    les libellés d'origine&nbsp;; le QIF est plus léger si vous voulez juste les
+    mouvements sans le détail&nbsp;; l'OFX transporte l'identifiant que la banque
+    donne à chaque opération, ce qui met définitivement à l'abri des doublons si
+    vous réimportez un relevé deux fois.
   </div>
 </section>
 
@@ -109,7 +111,7 @@
   <ol class="steps">
     <li>Ouvrez <strong>Pécule</strong>.</li>
     <li><strong>Glissez-déposez</strong> le fichier sur la fenêtre, ou cliquez sur
-      <strong><code>📥 Importer CSV</code></strong> dans le menu de gauche.</li>
+      <strong><code>📥 Importer un relevé</code></strong> dans le menu de gauche.</li>
     <li>Pécule reconnaît les colonnes par leur nom
       (<code>Date operation</code>, <code>Libelle</code>, <code>Debit</code>,
       <code>Credit</code>) et affiche un compte rendu détaillé : lignes importées,
@@ -152,12 +154,14 @@
     <li><strong>Dates&nbsp;:</strong> format <code>JJ/MM/AAAA</code>.</li>
   </ul>
 
-  <div class="warn">
+  <div class="ok">
     Le CSV du Crédit Mutuel ne contient pas de colonne de <strong>pointage</strong>.
-    Faute de cette information, Pécule importe les opérations comme
-    <strong>non pointées</strong>&nbsp;: c'est à vous de les pointer d'un clic, une
-    fois vérifiées. (Avec les banques dont le relevé comporte une colonne
-    « Pointage », Pécule les pointe automatiquement.)
+    Ce n'est pas gênant&nbsp;: un relevé qui ne dit rien du pointage ne contient
+    que des opérations déjà passées en banque, alors Pécule les enregistre
+    <strong>pointées</strong>. Votre solde est juste dès la fin de l'import, sans
+    avoir à cliquer sur chaque ligne. (Avec les banques dont le relevé comporte
+    une colonne « Pointage », c'est elle qui fait foi, et une opération encore en
+    attente reste non pointée.)
   </div>
 </section>
 

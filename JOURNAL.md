@@ -13,6 +13,53 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-09 (vitrine, suite) — Le texte du site remis d'aplomb
+
+**Fait.** Les sept pages de `docs/` confrontees une a une a ce que fait
+vraiment la 1.33.1. Trois affirmations etaient FAUSSES, pas seulement en
+retard :
+
+- « Le format OFX n'est pas reconnu par Pecule », dit deux fois sur la page
+  Credit Mutuel — l'OFX se lit depuis la 1.26.0. La page dissuadait le
+  lecteur d'un format qui marche. Sa propre balise `description` annoncait
+  pourtant deja « CSV, QIF et OFX » : le corps n'avait jamais suivi.
+- « Les operations arrivent NON POINTEES, a vous de les pointer d'un clic »
+  (pages Credit Agricole et Credit Mutuel) — depuis la 1.31.0, un releve sans
+  colonne de pointage arrive POINTE. On promettait des centaines de clics
+  inutiles.
+- Le bouton « 📥 Importer CSV » s'appelle « 📥 Importer un releve » depuis la
+  1.23.x. Corrige sur les quatre pages qui le nommaient.
+
+**Ajoute, parce que rien ne l'annoncait.** Les formats QIF et OFX sur la page
+d'accueil (texte, `description`, JSON-LD) et sur les pages BPCE, Credit
+Agricole et import-csv ; deux fiches « Plusieurs comptes » (1.24.0) et
+« Archivage » (1.25.0) ; la marche a suivre pour METTRE A JOUR sans croire
+avoir tout perdu (1.33.0) ; la categorisation du premier releve par motifs
+integres (1.31.0).
+
+**Corrige aussi.** Les deux messages d'erreur decrits dans « Mon releve ne
+s'importe pas » ont change (diagnostic en clair depuis la 1.31.0, fichier
+tableur signale depuis la 1.32.0). La politique de confidentialite parlait de
+CSV et QIF seulement, ignorait les comptes multiples, et annoncait une
+rotation des sauvegardes qui, depuis la 1.33.1, ne touche plus aux copies
+faites a la main (versions FR et EN). Dates du `sitemap.xml` au 09/09.
+
+**Pourquoi.** Une vitrine qui decrit une autre version que celle qu'on
+telecharge coute deux fois : le visiteur renonce a ce qui marche, et celui qui
+installe ne trouve pas ce qu'on lui a promis.
+
+**Verifie.** Chaque affirmation confrontee au CODE, pas au journal de version
+(`est_passee` dans `csv_import.py`, `_EST_SAUVEGARDE_AUTO` dans `utils.py`,
+le filtre de fichiers de `main_window.py`, l'ordre de categorisation).
+Balises des sept pages equilibrees (controle par `html.parser`), JSON-LD
+relu par `json.loads`, pages servies en local et relues a l'ecran.
+
+**Reste.** Le titre des trois guides par banque dit encore « au format CSV »
+alors qu'ils mentionnent maintenant les trois formats : garde tel quel, c'est
+ce que les gens tapent dans un moteur de recherche.
+
+---
+
 ## 2026-09-09 (vitrine) — Les captures refaites pour la 1.33.1
 
 **Fait.** Les quatre captures de `docs/media/` refaites avec

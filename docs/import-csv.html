@@ -69,8 +69,27 @@
   colonnes par leur nom, quel que soit l'établissement, du moment que le fichier
   respecte les trois règles ci-dessous.</p>
 
-  <p>Pour importer : bouton <code>📥 Importer CSV</code> dans le menu de gauche, ou
-  simplement <strong>glisser-déposer</strong> un ou plusieurs fichiers sur la fenêtre.</p>
+  <p>Pour importer : bouton <code>📥 Importer un relevé</code> dans le menu de gauche,
+  ou simplement <strong>glisser-déposer</strong> un ou plusieurs fichiers sur la
+  fenêtre.</p>
+
+  <div class="ok">
+    <strong>Deux autres formats se chargent aussi</strong>, par le même bouton et
+    sans réglage&nbsp;:
+    <ul style="margin:8px 0 0">
+      <li>l'<strong>OFX</strong> (et sa variante <code>.qfx</code>), proposé par
+        beaucoup de banques à côté du CSV — parfois sous le nom
+        « Microsoft Money ». Chaque opération y porte l'identifiant que lui donne
+        la banque&nbsp;: un relevé réimporté par erreur ne crée aucun doublon,
+        même si vous avez renommé des libellés entre-temps.</li>
+      <li>le <strong>QIF</strong>, pour reprendre l'historique d'un ancien logiciel
+        de comptes (Microsoft Money, Quicken, GnuCash, HomeBank…).</li>
+    </ul>
+    Le reste de cette page décrit le CSV, qui demande le plus de précautions. Les
+    deux autres formats n'ont, eux, aucune règle de forme à respecter&nbsp;: ils
+    passent ensuite par la même mécanique — doublons écartés, règles appliquées,
+    pointage, échéances rapprochées.
+  </div>
 </section>
 
 <section>
@@ -160,8 +179,14 @@ Date;Libelle;Montant;Pointage operation
   <h3>Il pointe les opérations passées en banque</h3>
   <p>Si votre relevé contient une colonne « Pointage », les lignes marquées
   <code>x</code> arrivent <strong>déjà pointées</strong>, et celles qui existaient
-  déjà en base sont confirmées. Une opération pointée n'est jamais dépointée par un
-  import : la banque ne fait qu'ajouter de la certitude, jamais en retirer.</p>
+  déjà en base sont confirmées. Une opération encore en attente, elle, reste non
+  pointée : c'est la colonne qui fait foi.</p>
+  <p>Et si le relevé n'a <strong>pas</strong> de colonne de pointage — le cas de la
+  plupart des banques — tout arrive <strong>pointé</strong> : un relevé ne montre
+  que ce qui est déjà passé en banque. Votre solde est donc juste dès la fin de
+  l'import, sans avoir à cliquer sur chaque ligne.</p>
+  <p>Dans tous les cas, une opération pointée n'est jamais dépointée par un import :
+  la banque ne fait qu'ajouter de la certitude, jamais en retirer.</p>
 
   <h3>Il écarte les récapitulatifs de débit différé</h3>
   <p>Les relevés de carte à débit différé contiennent une ligne de total, du type
@@ -180,6 +205,11 @@ Date;Libelle;Montant;Pointage operation
   La catégorie fournie par la banque sert de point de départ quand vous n'avez pas de
   règle — mais elle est souvent approximative, et rien ne vous empêche de la corriger
   ensuite.</p>
+  <p>Votre <strong>tout premier</strong> relevé n'arrive pas pour autant en bloc dans
+  « Non classé » : faute de règle et d'historique, Pécule se rabat sur une liste de
+  marchands connus (<em>Carrefour</em> → Alimentation, <em>Total</em> → Transports…).
+  C'est le dernier recours, dans cet ordre : la catégorie de la banque, vos règles et
+  l'habitude que vous avez prise avec ce libellé passent avant.</p>
 </section>
 
 <section>

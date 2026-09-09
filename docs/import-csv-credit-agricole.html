@@ -135,9 +135,9 @@
 
   <ol class="steps">
     <li>Ouvrez <strong>Pécule</strong>.</li>
-    <li>Cliquez sur <strong><code>📥 Importer CSV</code></strong> dans le menu de
-      gauche — ou <strong>glissez-déposez</strong> simplement le fichier téléchargé
-      sur la fenêtre.</li>
+    <li>Cliquez sur <strong><code>📥 Importer un relevé</code></strong> dans le
+      menu de gauche — ou <strong>glissez-déposez</strong> simplement le fichier
+      téléchargé sur la fenêtre.</li>
     <li>Pécule lit le fichier, reconnaît les colonnes par leur nom
       (<code>date</code>, <code>libellé</code>, <code>montant</code>, ou
       <code>débit</code> / <code>crédit</code> séparés), et affiche un
@@ -146,9 +146,9 @@
     <li>Vos règles de catégorisation s'appliquent au fil de l'import, et les
       échéances que vous aviez inscrites d'avance sont <strong>complétées</strong>
       par la vraie ligne du relevé, sans doublon. Le CSV du Crédit Agricole ne
-      contient pas de colonne de pointage&nbsp;: les opérations arrivent
-      <strong>non pointées</strong>, à vous de les pointer d'un clic une fois
-      vérifiées.</li>
+      contient pas de colonne de pointage&nbsp;: ses lignes étant toutes des
+      opérations déjà passées en banque, elles arrivent <strong>pointées</strong>
+      et votre solde est juste dès la fin de l'import.</li>
   </ol>
 
   <p>Vous pouvez réimporter un nouveau fichier chaque mois : les lignes déjà
@@ -188,7 +188,9 @@
   <div class="warn">
     Les formats proposés (CSV, et parfois Excel, OFX ou QIF) <strong>dépendent de
     votre Caisse régionale</strong>. Le CSV est le plus répandu et le plus fiable
-    pour récupérer le détail des opérations. Si votre relevé ne s'importe pas, voir
+    pour récupérer le détail des opérations, mais si votre Caisse propose l'OFX ou
+    le QIF, <strong>Pécule les lit aussi</strong> — même bouton, même
+    glisser-déposer. Si votre relevé ne s'importe pas, voir
     <a href="import-csv-problemes.html">« Un relevé ne s'importe pas ? »</a>.
   </div>
 </section>
