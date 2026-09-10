@@ -7,7 +7,7 @@ comptes et de budget personnel. Aucune installation de Python requise.
 UTILISATION
 -------------------------------------------------------------------
 - Deux facons d'installer Pecule :
-  * L'INSTALLEUR << Pecule-Setup-X.Y.Z.exe >> : double-cliquez dessus et
+  * L'INSTALLEUR << Pecule-Setup.exe >> : double-cliquez dessus et
     suivez l'assistant. Aucun mot de passe administrateur n'est demande.
     Pecule s'installe dans C:\Users\<votre nom>\AppData\Local\Programs\Pecule,
     avec un raccourci dans le menu Demarrer. Pour le desinstaller :

@@ -4,7 +4,7 @@
 ;  Ne pas compiler ce fichier directement : lancer
 ;      py outils/faire_installeur.py
 ;  qui vérifie le dossier construit, fournit le numéro de version et
-;  produit dist\Pecule-Setup-X.Y.Z.exe.
+;  produit dist\Pecule-Setup.exe.
 ;
 ;  Règle d'or : l'installeur ne livre QUE le programme. Les données
 ;  (comptes.db, sauvegardes\) vivent dans %LOCALAPPDATA%\Pecule — voir
@@ -54,7 +54,11 @@ ArchitecturesInstallIn64BitMode=x64compatible
 CloseApplications=no
 
 OutputDir={#Racine}dist
-OutputBaseFilename=Pecule-Setup-{#AppVersion}
+; Nom SANS numéro de version : le site pointe vers
+; .../releases/latest/download/Pecule-Setup.exe, qui mène ainsi toujours à
+; la dernière version. Le numéro reste visible dans l'assistant, dans
+; « Applications » et dans les propriétés du fichier.
+OutputBaseFilename=Pecule-Setup
 SetupIconFile={#Racine}Budget.ico
 UninstallDisplayIcon={app}\Pecule.exe
 UninstallDisplayName=Pécule

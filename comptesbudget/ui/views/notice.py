@@ -623,7 +623,7 @@ la version la plus récente gagne. Pour revenir exactement à un état antérieu
 préférez la copie du fichier <code>comptes.db</code>.</div>
 
 <h2>9. Mettre à jour Pécule</h2>
-<p><b>Avec l'installeur</b> (<code>Pecule-Setup-….exe</code>) : fermez Pécule,
+<p><b>Avec l'installeur</b> (<code>Pecule-Setup.exe</code>) : fermez Pécule,
 puis lancez le nouvel installeur. Il remplace le programme et ne touche pas à
 vos données, rangées à part. S'il trouve Pécule ouvert, il vous demande de le
 fermer.</p>
