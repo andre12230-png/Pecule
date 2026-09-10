@@ -52,7 +52,7 @@
   "applicationCategory": "FinanceApplication",
   "applicationSubCategory": "Logiciel de comptabilité personnelle",
   "operatingSystem": "Windows 10, Windows 11",
-  "softwareVersion": "1.34.0",
+  "softwareVersion": "1.35.0",
   "inLanguage": "fr-FR",
   "datePublished": "2026-08-27",
   "isAccessibleForFree": true,
@@ -153,7 +153,7 @@
     <div>
       <a class="btn" href="https://github.com/andre12230-png/Pecule/releases/latest">
         ⬇ Télécharger pour Windows
-        <small>fichier .zip — Windows 10/11 (64 bits)</small>
+        <small>installeur .exe ou archive .zip — Windows 10/11 (64 bits)</small>
       </a>
     </div>
     <a class="src" href="https://github.com/andre12230-png/Pecule">Voir le code source sur GitHub →</a>
@@ -204,16 +204,24 @@
   <section>
     <h2>Installation</h2>
     <ol class="steps">
-      <li><a href="https://github.com/andre12230-png/Pecule/releases/latest">Téléchargez le fichier <code>.zip</code></a>.</li>
-      <li><b>Décompressez-le</b> où vous voulez (gardez tout le dossier ensemble).</li>
-      <li>Double-cliquez sur <code>Pecule.exe</code>.</li>
+      <li><a href="https://github.com/andre12230-png/Pecule/releases/latest">Téléchargez l'installeur <code>Pecule-Setup-….exe</code></a> (en bas de la page, rubrique « Assets »).</li>
+      <li><b>Double-cliquez dessus</b> et suivez l'assistant — aucun mot de passe administrateur n'est demandé.</li>
+      <li>Lancez Pécule depuis le <b>menu Démarrer</b>.</li>
     </ol>
+    <p>Vous préférez une version <b>portable</b>, sans installation ? Prenez plutôt le fichier
+    <code>.zip</code> : décompressez-le où vous voulez (gardez tout le dossier ensemble), puis
+    double-cliquez sur <code>Pecule.exe</code>.</p>
     <p>Aucune installation de Python n'est nécessaire. Au premier lancement, l'application vous invite à saisir votre solde de départ.</p>
     <p>Un souci à l'installation ? <a href="#avis">Dites-le en deux minutes</a> : c'est ainsi que Pécule s'améliore.</p>
     <p><b>Configuration requise :</b> Windows 10 ou 11 (64 bits).</p>
-    <p><b>Pour mettre à jour</b>, décompressez la nouvelle version <b>par-dessus l'ancienne</b>,
-    au même endroit : l'archive ne contient ni vos données ni vos sauvegardes, elle ne peut
-    donc rien écraser. Si vous lancez le nouvel exécutable depuis un autre dossier
+    <p><b>Pour mettre à jour avec l'installeur</b>, fermez Pécule et lancez simplement le nouvel
+    installeur : il remplace le programme sans toucher à vos données, rangées à part. Vous
+    passez du <code>.zip</code> à l'installeur ? Au premier lancement, Pécule s'ouvre vide et
+    propose de reprendre votre <code>comptes.db</code> existant — il est copié, l'original reste
+    en place.</p>
+    <p><b>Pour mettre à jour avec le <code>.zip</code></b>, décompressez la nouvelle version
+    <b>par-dessus l'ancienne</b>, au même endroit : l'archive ne contient ni vos données ni vos
+    sauvegardes, elle ne peut donc rien écraser. Si vous lancez le nouvel exécutable depuis un autre dossier
     (Téléchargements, par exemple), il ne trouve pas votre fichier et s'ouvre sur des comptes
     vides — rien n'est perdu, et l'application vous propose alors de reprendre votre
     <code>comptes.db</code> existant.</p>

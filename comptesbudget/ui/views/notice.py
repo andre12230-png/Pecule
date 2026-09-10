@@ -623,7 +623,12 @@ la version la plus récente gagne. Pour revenir exactement à un état antérieu
 préférez la copie du fichier <code>comptes.db</code>.</div>
 
 <h2>9. Mettre à jour Pécule</h2>
-<p><b>La bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
+<p><b>Avec l'installeur</b> (<code>Pecule-Setup-….exe</code>) : fermez Pécule,
+puis lancez le nouvel installeur. Il remplace le programme et ne touche pas à
+vos données, rangées à part. S'il trouve Pécule ouvert, il vous demande de le
+fermer.</p>
+
+<p><b>Avec l'archive .zip, la bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
 votre dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne
 contient ni <code>comptes.db</code> ni le dossier <code>sauvegardes</code> :
 vos opérations ne peuvent pas être écrasées. Avec Scoop, il n'y a rien à
@@ -642,7 +647,9 @@ sont restées dans l'ancien dossier. Pécule le signale au lancement et propose
 de reprendre ce fichier ; vous pouvez aussi le faire à tout moment avec
 <code>📂 Reprendre un fichier</code>, dans le menu de gauche, tant que
 l'installation est vide. Le fichier choisi est <b>copié</b> — l'original
-reste où il est.</div>
+reste où il est. C'est aussi ce qui arrive la première fois que l'on passe
+de l'archive .zip à l'installeur : reprenez le <code>comptes.db</code> de
+l'ancien dossier.</div>
 
 <p>Une version plus ancienne peut relire une base récente sans l'abîmer : ce
 qu'elle ne comprend pas, elle le laisse tranquille, et la version récente le
