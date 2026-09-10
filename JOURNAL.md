@@ -13,6 +13,20 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Version 1.36.0 publiée (bouton « Mise à jour »)
+
+**Fait.** Release `v1.36.0` avec `Pecule-Setup.exe` (premier installeur publié
+directement sous son nom fixe) et `Pecule-1.36.0-win64.zip`. Porteurs de
+version remontés (`APP_VERSION` + historique, Lisez-moi, README, JSON-LD,
+manifeste Scoop). Contrôles avant publication : 311 tests ; exe et installeur
+en 1.36.0 installés, lancés et désinstallés en dossier d'essai sur une copie
+de la base (aucun `comptes.db` livré, icône = ancien logo). Installation
+d'André en 1.36.0, ancien exe gardé en `Pecule.exe.avant-1.36.0`,
+`comptes.db` inchangée.
+**Pourquoi.** André a demandé la publication. Numéro 1.36.0 : nouveauté
+visible (le bouton), plus le lien direct dans la notice et le Lisez-moi.
+**Reste.** Winget toujours en 1.23.0 (PR #416272).
+
 ## 2026-09-10 — Bouton « 🔄 Mise à jour », sans Internet
 
 **Fait.** Nouveau bouton « 🔄 Mise à jour » (rubrique Aide) et fenêtre
