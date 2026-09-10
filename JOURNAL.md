@@ -13,6 +13,24 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Lien direct vers l'installeur
+
+**Fait.** L'installeur s'appelle désormais `Pecule-Setup.exe`, sans numéro
+(`pecule.iss`, `faire_installeur.py`). Le fichier de la release `v1.35.1` a
+été renommé sur GitHub par l'API (contenu inchangé, aucun téléchargement
+perdu : il n'en avait aucun) et ses notes mises à jour. Le bouton du site, son
+étape 1 d'installation, le JSON-LD (`downloadUrl`, `installUrl`) et le README
+pointent vers `…/releases/latest/download/Pecule-Setup.exe` ; le `.zip` garde
+un lien vers la page de la release. Lisez-moi et notice citent le nouveau nom
+(ils n'arriveront chez les utilisateurs qu'à la prochaine version).
+**Pourquoi.** André voulait un lien direct vers l'installeur. Le lien
+`latest/download` de GitHub exige un nom de fichier identique d'une version à
+l'autre ; un lien vers le nom numéroté aurait fini par servir une vieille
+version.
+**Reste.** La `v1.35.0` garde son `Pecule-Setup-1.35.0.exe` : c'est de
+l'historique. Ne plus jamais publier l'installeur sous un nom numéroté, sinon
+le bouton du site renverra une erreur 404.
+
 ## 2026-09-10 — Version 1.35.1 : retour de l'ancien logo
 
 **Fait.** `Budget.ico` et `docs/media/logo.png` remis dans leur état du commit

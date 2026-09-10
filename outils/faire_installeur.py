@@ -1,4 +1,8 @@
-"""Fabrique l'installeur Windows de Pécule (Pecule-Setup-X.Y.Z.exe).
+"""Fabrique l'installeur Windows de Pécule (Pecule-Setup.exe).
+
+Le nom ne porte pas de numéro de version : le site pointe vers
+.../releases/latest/download/Pecule-Setup.exe, qui mène ainsi toujours à la
+dernière version publiée.
 
 À lancer APRÈS Construire-Exe.bat, qui produit dist/Pecule/. Nécessite
 Inno Setup 6 (gratuit) : winget install JRSoftware.InnoSetup
@@ -71,7 +75,7 @@ def main():
     if resultat.returncode != 0:
         raise SystemExit("ARRÊT : la compilation de l'installeur a échoué.")
 
-    cible = os.path.join(RACINE, "dist", f"Pecule-Setup-{APP_VERSION}.exe")
+    cible = os.path.join(RACINE, "dist", "Pecule-Setup.exe")
     if not os.path.isfile(cible):
         raise SystemExit(f"ARRÊT : {cible} n'a pas été produit.")
     with open(cible, "rb") as f:

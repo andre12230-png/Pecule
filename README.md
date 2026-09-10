@@ -6,7 +6,7 @@
 [![Dernière version](https://badgen.net/github/tag/andre12230-png/Pecule?label=version)](https://github.com/andre12230-png/Pecule/releases/latest)
 [![Licence](https://badgen.net/github/license/andre12230-png/Pecule)](LICENSE)
 
-> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [dernière version](https://github.com/andre12230-png/Pecule/releases/latest) : installeur `Pecule-Setup-X.Y.Z.exe`, ou archive portable `.zip`
+> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [installeur `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [archive portable `.zip`](https://github.com/andre12230-png/Pecule/releases/latest)
 
 > 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
 >
@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.35.1** — retour du logo précédent (sac d'argent et jeton €). La 1.35.0 avait apporté un **installeur Windows** (`Pecule-Setup-X.Y.Z.exe`) en plus de l'archive `.zip`.
+> Version publiée : **1.35.1** — retour du logo précédent (sac d'argent et jeton €). La 1.35.0 avait apporté un **installeur Windows** (`Pecule-Setup.exe`) en plus de l'archive `.zip`.
 
 ---
 
@@ -65,8 +65,8 @@ python pecule.py
 
 Windows users can instead download, from the
 [latest release](https://github.com/andre12230-png/Pecule/releases/latest),
-either the installer (`Pecule-Setup-X.Y.Z.exe`, no admin rights needed) or the
-portable `.zip`, or install via [Scoop](https://scoop.sh):
+either the installer ([`Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe),
+no admin rights needed) or the portable `.zip`, or install via [Scoop](https://scoop.sh):
 
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
@@ -149,7 +149,7 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 ### Mettre à jour
 
 **Avec l'installeur** : fermez Pécule et lancez le nouveau
-`Pecule-Setup-X.Y.Z.exe`. Il remplace le programme sans toucher à vos données,
+`Pecule-Setup.exe`. Il remplace le programme sans toucher à vos données,
 rangées à part dans `%LOCALAPPDATA%\Pecule` ; s'il trouve Pécule ouvert, il
 demande de le fermer.
 
@@ -378,7 +378,7 @@ outils/
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
 ├── faire_archive.py        Fabrique le .zip de la release et son empreinte
-├── faire_installeur.py     Fabrique l'installeur Pecule-Setup-X.Y.Z.exe
+├── faire_installeur.py     Fabrique l'installeur Pecule-Setup.exe
 ├── pecule.iss              Recette de l'installeur (Inno Setup 6)
 └── version_exe.py          Écrit les informations de version de l'exécutable
 
@@ -431,7 +431,9 @@ Un **installeur** Windows se fabrique de la même façon, avec
 python outils/faire_installeur.py
 ```
 
-Il produit `dist\Pecule-Setup-X.Y.Z.exe` d'après la recette
+Il produit `dist\Pecule-Setup.exe` — un nom **sans numéro**, pour que le lien
+`…/releases/latest/download/Pecule-Setup.exe` du site mène toujours à la
+dernière version — d'après la recette
 [`outils/pecule.iss`](outils/pecule.iss) : installation pour l'utilisateur seul
 (sans droits administrateur) dans `%LOCALAPPDATA%\Programs\Pecule`, raccourci
 dans le menu Démarrer, désinstallation depuis les Paramètres de Windows. Il ne
