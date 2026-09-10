@@ -25,7 +25,9 @@ un lien vers la page de la release. Lisez-moi et notice citent le nouveau nom
 (ils n'arriveront chez les utilisateurs qu'à la prochaine version). Partie
 anglaise du README : ligne « 📥 Download » en tête de section, et rubrique
 « Install » réordonnée (installeur d'abord, avec la marche à suivre
-SmartScreen ; puis `.zip` et Scoop ; `pip` en dernier).
+SmartScreen ; puis `.zip` et Scoop ; `pip` en dernier). `Lisez-moi.txt` :
+lien direct dans « Mise à jour » et dans « Infos » — il ne sortira qu'avec
+la prochaine version, le fichier voyageant dans le `.zip` et l'installeur.
 **Pourquoi.** André voulait un lien direct vers l'installeur. Le lien
 `latest/download` de GitHub exige un nom de fichier identique d'une version à
 l'autre ; un lien vers le nom numéroté aurait fini par servir une vieille
