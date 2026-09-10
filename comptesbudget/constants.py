@@ -772,7 +772,29 @@ SYNC_VERSION = 3
 #          aucune depuis le 3 septembre. La rotation ne regarde plus que les
 #          noms dates (comptes-AAAA-MM-JJ.db) ; les copies faites a la main
 #          ne sont ni comptees ni supprimees.
-APP_VERSION = "1.33.1"
+# 1.34.0 : << Votre avis >>. Les utilisateurs ne remontaient rien : le seul
+#          canal etait un ticket GitHub, qui exige un compte.
+#          - Bouton << Votre avis >> (rubrique Aide) : ouvre dans le
+#            navigateur un court questionnaire en ligne (Microsoft Forms), sans
+#            compte a creer, et copie au passage la version de Pecule et de
+#            Windows, a coller dans la question prevue. L'application
+#            n'envoie toujours rien elle-meme.
+#          - Une seule invitation a le remplir, deux semaines apres le premier
+#            lancement et seulement si des operations sont enregistrees ;
+#            << Non merci >> ne revient jamais. Ses deux reglages portent le
+#            prefixe _meta_ pour ne pas rajeunir l'horodatage des reglages
+#            synchronises.
+#          - Notice : le tableau des boutons liste enfin << Reprendre un
+#            fichier >> et << Votre avis >>.
+APP_VERSION = "1.34.0"
+
+# Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
+# un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
+# à la demande : le logiciel lui-même ne contacte toujours aucun serveur.
+FORMULAIRE_AVIS_URL = "https://forms.cloud.microsoft/r/gBQcGGD33d"
+TICKETS_GITHUB_URL = "https://github.com/andre12230-png/Pecule/issues"
+# Jours d'utilisation avant l'unique invitation à donner son avis.
+DELAI_INVITATION_AVIS = 14
 
 CATEGORIES_DEFAUT = [
     "Alimentation", "Transports", "Logement - maison", "Santé",

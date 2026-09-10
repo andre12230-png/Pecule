@@ -1,4 +1,4 @@
-PECULE - version 1.33.1
+PECULE - version 1.34.0
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
@@ -114,6 +114,9 @@ FONCTIONS
 - Saisie des montants : la virgule et le point du pave numerique donnent
   le meme resultat (12,50 = 12.50).
 - Notice complete integree (bouton << Notice >> du menu de gauche).
+- Un probleme, une idee ? Le bouton << Votre avis >> du menu de gauche
+  ouvre un court questionnaire dans votre navigateur (deux minutes, sans
+  compte a creer). N'y indiquez ni numero de compte ni montant.
 
 -------------------------------------------------------------------
 INFOS
@@ -122,5 +125,6 @@ INFOS
 - Pour sauvegarder : copiez le fichier << comptes.db >> ailleurs.
 - Presentation : https://andre12230-png.github.io/Pecule/
 - Code source   : https://github.com/andre12230-png/Pecule
+- Votre avis    : https://forms.cloud.microsoft/r/gBQcGGD33d
 
 Windows 10 / 11 - 64 bits.

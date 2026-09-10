@@ -13,6 +13,68 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Un bouton « 💬 Votre avis » et un questionnaire en ligne
+
+**Fait.** Questionnaire Microsoft Forms « Pécule — votre avis » créé
+(10 questions facultatives : installation, banque, import, problèmes, idées,
+version ; lien court `forms.cloud.microsoft/r/gBQcGGD33d`). Dans l'appli :
+bouton `💬 Votre avis` en rubrique Aide (`ui/avis.py`), qui copie la version
+de Pécule et de Windows puis ouvre le questionnaire dans le navigateur, avec un
+lien secondaire vers les tickets GitHub. Et une **seule** invitation, deux
+semaines après le premier lancement, seulement si la base contient des
+opérations ; « Non merci » ne revient jamais. Ligne ajoutée au tableau du § 6
+de la notice. Cinq tests ; suite complète : 307 réussis.
+**Pourquoi.** Les utilisateurs ne remontent rien : le seul canal était un
+ticket GitHub, qui exige un compte. Un questionnaire n'en demande pas et ne
+publie aucune adresse e-mail. Pécule ne fait qu'ouvrir le navigateur, à la
+demande : la promesse « ne contacte aucun serveur » reste vraie. Les deux
+réglages de l'invitation portent le préfixe `_meta_` pour ne pas rajeunir
+l'horodatage des réglages synchronisés.
+Le lien est aussi **publié sur le site et le README** (commit `ef833e8`) :
+rubrique « Un problème ? Une idée ? » et rappel après l'installation sur
+l'accueil, pied de page, page « Mon relevé ne s'importe pas », contact de la
+politique de confidentialité — qui précise que le questionnaire est hébergé par
+Microsoft Forms. Qui échoue à installer n'ouvrira jamais l'appli : c'est là
+qu'il le trouvera.
+**Livré le jour même en 1.34.0** : les cinq porteurs de version remontés
+(`constants.py`, JSON-LD d'`index.html`, README, `Lisez-moi.txt` — qui décrit
+aussi le bouton —, manifeste Scoop), et le § 3 de la politique de
+confidentialité complété, en français et en anglais : le bouton ouvre le
+navigateur, l'application ne transmet rien. Exe contrôlé sur une base
+d'essai (titre « Pécule — v1.34.0 », fermeture propre).
+**Reste.** Attendre les premières réponses (Forms → « Voir les réponses »).
+
+## 2026-09-09 (notices) — Les trois notices confrontées au code
+
+**Fait.** Nouvelle règle de travail posée par André : *avant de reconstruire
+l'exe et de déployer, vérifier que la notice est à jour*. Les notices des trois
+applications ont donc été relues à côté du code qu'elles décrivent — menus,
+libellés de boutons, fonctions ajoutées depuis la dernière relecture.
+
+- **Pécule** : un seul écart. Le tableau « 6. Outils du menu de gauche »
+  listait 14 boutons sur les 15 du menu — `📂 Reprendre un fichier` manquait.
+  Il était décrit au § 9 (mise à jour), mais introuvable pour qui lit le
+  tableau. Ligne ajoutée, avec la précision qu'il n'apparaît que tant que
+  l'installation est vide. Le reste est fidèle, y compris les points récents :
+  import pointé et classé, pointage en masse, bandeau d'encours et la
+  disparition du bloc « Reste pour la carte » en 1.30.7.
+- **pv-dashboard** et **Recharges VE** : rien à corriger, leurs notices ayant
+  été relues le jour même (TVA autoconsommation pour l'un, audit du nouvel
+  utilisateur pour l'autre).
+
+**Pourquoi.** Une notice est figée dans l'exe jusqu'à la construction suivante :
+ce qui n'y est pas au moment du `PyInstaller` reste invisible des mois durant.
+La relire est donc une étape de la publication, pas une tâche de fond.
+
+**Vérifié.** Aucun fichier source `.py` des trois projets n'a été modifié après
+la construction de son exécutable : les exe en place contiennent bien les
+notices actuelles. 78 tests d'interface passent après la retouche.
+
+**Reste.** La ligne ajoutée n'est pas dans l'exe déployé. Elle partira avec la
+prochaine version — cela ne justifie pas de republier la 1.33.1.
+
+---
+
 ## 2026-09-09 (Gratilog) — Le fil rattrape sept versions, et la taille corrigee
 
 **Fait.** Deux gestes sur Gratilog, le fil du forum etant reste a la 1.26.0 du
