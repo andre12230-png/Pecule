@@ -1811,3 +1811,81 @@ def test_reprendre_refuse_un_fichier_etranger(qapp, tmp_path):
     intrus.write_bytes(b"\xff\xd8\xff\xe0 pas une base")
     message = MainWindow._verifier_base_pecule(str(intrus))
     assert "Pécule" in message
+
+
+def test_invitation_avis_une_seule_fois_apres_deux_semaines(qapp, tmp_path):
+    """L'invitation à donner son avis vient après deux semaines d'usage, sur
+    une installation qui contient des opérations, et jamais deux fois."""
+    from comptesbudget.ui import avis
+
+    db = Database(str(tmp_path / "avis.db"))
+    avis.noter_premiere_utilisation(db, date(2026, 9, 1))
+    # Les lancements suivants ne repoussent pas la date de départ.
+    avis.noter_premiere_utilisation(db, date(2026, 9, 10))
+    # Base vide : l'utilisateur n'a pas encore d'avis à donner.
+    assert not avis.doit_inviter(db, date(2026, 9, 20))
+    db.insert_tx(_tx(id="a1"))
+    assert not avis.doit_inviter(db, date(2026, 9, 14))
+    assert avis.doit_inviter(db, date(2026, 9, 15))
+    # Une fois faite — acceptée ou refusée —, elle ne revient plus.
+    db.set_setting(avis.CLE_INVITATION_FAITE, "2026-09-15")
+    assert not avis.doit_inviter(db, date(2026, 12, 1))
+
+
+def test_invitation_refusee_ne_revient_pas(qapp, tmp_path, monkeypatch):
+    """« Non merci » : rien ne s'ouvre, et la question n'est plus posée."""
+    from PySide6.QtWidgets import QMessageBox
+    from comptesbudget.ui import avis
+
+    db = Database(str(tmp_path / "refus.db"))
+    db.insert_tx(_tx(id="a1"))
+    avis.noter_premiere_utilisation(db, date(2026, 9, 1))
+    # Boîte refermée sans cliquer « Donner mon avis… ».
+    monkeypatch.setattr(QMessageBox, "exec", lambda self: 0)
+    ouvertures = []
+    monkeypatch.setattr(avis.AvisDialog, "exec",
+                        lambda self: ouvertures.append(1))
+    avis.inviter(None, db, date(2026, 9, 15))
+    assert ouvertures == []
+    assert not avis.doit_inviter(db, date(2026, 9, 16))
+
+
+def test_invitation_ne_touche_pas_a_la_synchronisation(qapp, tmp_path):
+    """Les dates de l'invitation ne doivent pas rajeunir l'horodatage des
+    réglages : lors d'une fusion, le solde de départ de ce poste l'emporterait
+    à tort sur celui d'un autre."""
+    from comptesbudget.ui import avis
+
+    db = Database(str(tmp_path / "sync.db"))
+    avant = db.get_setting("_meta_settings_updated_at", "")
+    avis.noter_premiere_utilisation(db, date(2026, 9, 1))
+    db.set_setting(avis.CLE_INVITATION_FAITE, "2026-09-15")
+    assert db.get_setting("_meta_settings_updated_at", "") == avant
+
+
+def test_votre_avis_ouvre_le_questionnaire(qapp, monkeypatch):
+    """Le bouton ouvre le questionnaire dans le navigateur et copie la
+    version de Pécule, à coller dans la question prévue."""
+    from PySide6.QtGui import QDesktopServices, QGuiApplication
+    from comptesbudget.constants import APP_VERSION, FORMULAIRE_AVIS_URL
+    from comptesbudget.ui.avis import AvisDialog
+
+    adresses = []
+    monkeypatch.setattr(QDesktopServices, "openUrl", staticmethod(
+        lambda url: adresses.append(url.toString()) or True))
+    fenetre = AvisDialog()
+    fenetre.btn_ouvrir.click()
+    assert adresses == [FORMULAIRE_AVIS_URL]
+    assert APP_VERSION in QGuiApplication.clipboard().text()
+    assert fenetre.confirmation.isVisibleTo(fenetre)
+
+
+def test_bouton_votre_avis_dans_le_menu(qapp, tmp_path):
+    from PySide6.QtWidgets import QPushButton
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "menu.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    textes = [b.text() for b in fenetre.findChildren(QPushButton)]
+    assert "💬 Votre avis" in textes

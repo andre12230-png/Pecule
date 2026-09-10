@@ -556,11 +556,13 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
   <tr><td>💾 Exporter (JSON)</td><td>Export complet : opérations, règles, budgets, récurrences et réglages</td></tr>
   <tr><td>♻️ Restaurer (JSON)</td><td>Réimporte un export JSON en le fusionnant (la version la plus récente gagne)</td></tr>
+  <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer ou supprimer un compte bancaire</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b></td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
+  <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
 </table>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>

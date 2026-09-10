@@ -3,6 +3,7 @@
 import os
 import shutil
 import sqlite3
+from datetime import date
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import (
@@ -41,6 +42,7 @@ from .views.subcategories import SubcategoriesView
 from .views.previsionnel import PrevisionnelView
 from .views.rules_view import RulesView
 from .views.notice import NoticeView
+from .avis import AvisDialog, noter_premiere_utilisation, doit_inviter, inviter
 
 class MainWindow(QMainWindow):
     def __init__(self, db: Database):
@@ -171,6 +173,9 @@ class MainWindow(QMainWindow):
         add_section("Aide")
         add_btn("📖 Notice", self.action_notice,
                 "Mode d'emploi et glossaire")
+        add_btn("💬 Votre avis", self.action_avis,
+                "Signaler un problème ou proposer une idée "
+                "(questionnaire en ligne, dans votre navigateur)")
         mv.addStretch()
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
@@ -246,6 +251,9 @@ class MainWindow(QMainWindow):
 
         # Premier chargement
         self.refresh_all()
+
+        # Départ du compte à rebours de l'invitation « Votre avis ».
+        noter_premiere_utilisation(self.db, date.today())
 
         # Premier lancement : inviter à renseigner le solde de départ
         QTimer.singleShot(0, self._premier_lancement)
@@ -598,7 +606,12 @@ class MainWindow(QMainWindow):
         un fichier repris apporte le sien."""
         if self._maybe_prompt_reprise_donnees():
             return
-        self._maybe_prompt_initial_setup()
+        if self._maybe_prompt_initial_setup():
+            return
+        # Une seule boîte par ouverture : l'invitation à donner son avis
+        # attend un lancement où rien d'autre n'a été demandé.
+        if doit_inviter(self.db, date.today()):
+            inviter(self, self.db, date.today())
 
     def _maybe_prompt_reprise_donnees(self) -> bool:
         """Base vide : dire où elle est, et proposer d'y reprendre un fichier.
@@ -701,9 +714,10 @@ class MainWindow(QMainWindow):
     def _maybe_prompt_initial_setup(self):
         """Premier lancement : le solde de départ n'est pas encore renseigné.
         On invite l'utilisateur à le configurer (il reste libre de l'ignorer ;
-        l'invite réapparaîtra au prochain lancement tant qu'il est vide)."""
+        l'invite réapparaîtra au prochain lancement tant qu'il est vide).
+        Renvoie True si l'invite a été montrée."""
         if self.db.get_setting("initial_balance"):
-            return
+            return False
         QMessageBox.information(
             self, "Bienvenue dans Pécule",
             "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
@@ -711,6 +725,7 @@ class MainWindow(QMainWindow):
             "Vous pourrez le modifier à tout moment via le bouton "
             "« Paramètres » du menu de gauche.")
         self.action_settings()
+        return True
 
     def action_harmonize(self):
         """Propose des recatégorisations d'après les libellés (HARMONIZE_RULES)."""
@@ -884,3 +899,7 @@ class MainWindow(QMainWindow):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(NoticeView())
         dlg.exec()
+
+    def action_avis(self):
+        """Ouvre la fenêtre « Votre avis » (questionnaire en ligne)."""
+        AvisDialog(self).exec()
