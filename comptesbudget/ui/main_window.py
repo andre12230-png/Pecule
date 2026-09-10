@@ -43,6 +43,7 @@ from .views.previsionnel import PrevisionnelView
 from .views.rules_view import RulesView
 from .views.notice import NoticeView
 from .avis import AvisDialog, noter_premiere_utilisation, doit_inviter, inviter
+from .mise_a_jour import MiseAJourDialog
 
 class MainWindow(QMainWindow):
     def __init__(self, db: Database):
@@ -176,6 +177,11 @@ class MainWindow(QMainWindow):
         add_btn("💬 Votre avis", self.action_avis,
                 "Signaler un problème ou proposer une idée "
                 "(questionnaire en ligne, dans votre navigateur)")
+        # Libellé court : le menu de gauche fixe la largeur minimale de la
+        # fenêtre, qui doit tenir en moitié d'écran.
+        add_btn("🔄 Mise à jour", self.action_mise_a_jour,
+                "Voir s'il existe une version plus récente "
+                "(dans votre navigateur ; Pécule ne se connecte à rien)")
         mv.addStretch()
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
@@ -903,3 +909,8 @@ class MainWindow(QMainWindow):
     def action_avis(self):
         """Ouvre la fenêtre « Votre avis » (questionnaire en ligne)."""
         AvisDialog(self).exec()
+
+    def action_mise_a_jour(self):
+        """Ouvre la fenêtre « Mise à jour » : la version installée, et la
+        page de la dernière version dans le navigateur, à la demande."""
+        MiseAJourDialog(self).exec()

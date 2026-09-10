@@ -565,6 +565,7 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b></td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
+  <tr><td>🔄 Mise à jour</td><td>Affiche votre version et ouvre, dans votre navigateur, la page de la dernière version ou son installeur (§&nbsp;9). Pécule ne se connecte à rien : c'est vous qui comparez les numéros</td></tr>
 </table>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
@@ -631,6 +632,11 @@ fermer.</p>
 la dernière version de l'installeur</b></a> — lien direct, toujours vers la
 version la plus récente :<br>
 <code>https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe</code></p>
+<p><b>Y a-t-il une nouvelle version ?</b> Pécule ne se connecte jamais à
+Internet et ne peut donc pas vous l'annoncer tout seul. Cliquez sur
+<code>🔄 Mise à jour</code>, dans la rubrique Aide du menu de gauche : il
+affiche votre version et ouvre la page de la dernière dans votre navigateur.
+Si son numéro est plus grand que le vôtre, une mise à jour vous attend.</p>
 
 <p><b>Avec l'archive .zip, la bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
 votre dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne

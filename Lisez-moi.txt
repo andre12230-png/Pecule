@@ -134,6 +134,10 @@ FONCTIONS
 - Un probleme, une idee ? Le bouton << Votre avis >> du menu de gauche
   ouvre un court questionnaire dans votre navigateur (deux minutes, sans
   compte a creer). N'y indiquez ni numero de compte ni montant.
+- Une nouvelle version ? Le bouton << Mise a jour >> du menu de gauche
+  affiche votre version et ouvre la page de la derniere dans votre
+  navigateur. Pecule ne se connecte jamais a Internet lui-meme : c'est
+  vous qui comparez les numeros.
 
 -------------------------------------------------------------------
 INFOS

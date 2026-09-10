@@ -811,6 +811,13 @@ APP_VERSION = "1.35.1"
 # à la demande : le logiciel lui-même ne contacte toujours aucun serveur.
 FORMULAIRE_AVIS_URL = "https://forms.cloud.microsoft/r/gBQcGGD33d"
 TICKETS_GITHUB_URL = "https://github.com/andre12230-png/Pecule/issues"
+# Page de la dernière version, et lien direct vers son installeur. Le bouton
+# « Mise à jour » les ouvre dans le navigateur, à la demande seulement :
+# Pécule ne peut pas savoir seul qu'une version plus récente existe, puisqu'il
+# ne se connecte à rien.
+PAGE_VERSIONS_URL = "https://github.com/andre12230-png/Pecule/releases/latest"
+INSTALLEUR_URL = ("https://github.com/andre12230-png/Pecule/releases/latest/"
+                  "download/Pecule-Setup.exe")
 # Jours d'utilisation avant l'unique invitation à donner son avis.
 DELAI_INVITATION_AVIS = 14
 
