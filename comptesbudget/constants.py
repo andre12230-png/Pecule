@@ -800,7 +800,11 @@ SYNC_VERSION = 3
 #            a tort les achats carte debites apres cette date (typiquement ceux
 #            de decembre, apres un archivage au 31/12), et son conseil --
 #            reculer la date de depart -- les aurait comptes deux fois.
-APP_VERSION = "1.35.0"
+# 1.35.1 : retour du logo precedent (sac d'argent et jeton euro), celui que
+#          l'auteur prefere. Budget.ico et docs/media/logo.png reprennent leur
+#          etat du commit b01cf1a : l'exe, l'installeur, les raccourcis et le
+#          site portent de nouveau ce dessin. Rien d'autre ne change.
+APP_VERSION = "1.35.1"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

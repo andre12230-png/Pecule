@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.35.0** — un **installeur Windows** (`Pecule-Setup-1.35.0.exe`) en plus de l'archive `.zip`, et un bandeau du Bilan qui ne signale plus à tort les achats par carte débités après la date de départ.
+> Version publiée : **1.35.1** — retour du logo précédent (sac d'argent et jeton €). La 1.35.0 avait apporté un **installeur Windows** (`Pecule-Setup-X.Y.Z.exe`) en plus de l'archive `.zip`.
 
 ---
 
