@@ -13,6 +13,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Version 1.35.0 publiée, avec l'installeur
+
+**Fait.** Release `v1.35.0` sur GitHub avec deux fichiers :
+`Pecule-Setup-1.35.0.exe` et `Pecule-1.35.0-win64.zip`. Porteurs de version
+remontés (`APP_VERSION` + historique, `Lisez-moi.txt`, README, JSON-LD du
+site, manifeste Scoop avec url et empreinte). Site, README, `Lisez-moi.txt`
+et notice (§ 9) décrivent maintenant les deux façons d'installer et de mettre
+à jour, et le passage du `.zip` à l'installeur (« Reprendre mes données »).
+Contrôles : 308 tests ; exe et installeur en 1.35.0 installés, lancés et
+désinstallés en dossier d'essai ; les deux fichiers retéléchargés depuis
+GitHub identiques au bit près, archive `v1.23.0` (Winget) intacte ; release
+marquée « Latest ». Installation d'André mise à jour en 1.35.0, ancien
+programme gardé en `Pecule.exe.avant-1.35.0`, `comptes.db` inchangée.
+**Pourquoi.** André a demandé de publier la nouvelle version avec
+l'installeur. Numéro 1.35.0 : une nouveauté (l'installeur) plus la
+correction du bandeau.
+**Reste.** Manifestes Winget toujours en 1.23.0 (PR #416272 pendante). Le
+lien du site mène à la page de la release : l'utilisateur y choisit le
+Setup.exe dans « Assets » — un lien direct serait possible en publiant
+l'installeur sous un nom sans numéro. SmartScreen inchangé.
+
 ## 2026-09-10 — Un installeur Windows (Inno Setup)
 
 **Fait.** Inno Setup 6.7.3 installé sur le PC (winget, pour l'utilisateur).
