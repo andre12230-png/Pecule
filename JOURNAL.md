@@ -28,9 +28,13 @@ de décembre 2022, débités le 04/01/2023. L'archivage (date de valeur) les
 avait laissés visibles à juste titre, le solde (date de valeur) les comptait
 bien, seul le bandeau (date d'achat) les croyait hors solde. Son conseil,
 reculer la date de départ, les aurait comptés deux fois.
-**Reste.** La correction n'est que dans le code source : l'exe du quotidien
-(`F:\budget-app\Pecule`) affichera le bandeau jusqu'à la prochaine
-construction. Rien de poussé ni de publié.
+Notice mise à jour dans la foulée (c'est la date de débit qui compte). Exe
+reconstruit (étapes 2-3 du `.bat` rejouées à la main), contrôlé sur une copie
+de la base (« Pécule — v1.34.0 », fermeture propre), puis installé dans
+`F:\budget-app\Pecule` : `comptes.db` inchangée.
+**Reste.** L'exe installé porte toujours « v1.34.0 » mais contient cette
+correction, non versionnée. Rien de poussé ni de publié : elle sortira avec
+la prochaine version.
 
 ## 2026-09-10 — Un bouton « 💬 Votre avis » et un questionnaire en ligne
 
