@@ -786,7 +786,21 @@ SYNC_VERSION = 3
 #            synchronises.
 #          - Notice : le tableau des boutons liste enfin << Reprendre un
 #            fichier >> et << Votre avis >>.
-APP_VERSION = "1.34.0"
+# 1.35.0 : un installeur Windows, en plus du .zip.
+#          - Pecule-Setup-1.35.0.exe (Inno Setup, outils/pecule.iss) :
+#            installation sans droits administrateur dans
+#            %LOCALAPPDATA%\Programs\Pecule, raccourci dans le menu Demarrer,
+#            desinstallation depuis les Parametres de Windows. Il ne livre que
+#            le programme : les donnees restent dans %LOCALAPPDATA%\Pecule,
+#            que ni la mise a jour ni la desinstallation ne touchent. Si Pecule
+#            est ouvert, il demande de le fermer au lieu de le fermer de force.
+#            Le .zip reste publie : Scoop et Winget le telechargent.
+#          - Bilan : le bandeau << operations anterieures a la date de depart >>
+#            compare la date de valeur, comme le calcul du solde. Il signalait
+#            a tort les achats carte debites apres cette date (typiquement ceux
+#            de decembre, apres un archivage au 31/12), et son conseil --
+#            reculer la date de depart -- les aurait comptes deux fois.
+APP_VERSION = "1.35.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

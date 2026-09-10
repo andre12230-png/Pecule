@@ -6,7 +6,7 @@
 [![Dernière version](https://badgen.net/github/tag/andre12230-png/Pecule?label=version)](https://github.com/andre12230-png/Pecule/releases/latest)
 [![Licence](https://badgen.net/github/license/andre12230-png/Pecule)](LICENSE)
 
-> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [dernière version (.zip)](https://github.com/andre12230-png/Pecule/releases/latest)
+> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [dernière version](https://github.com/andre12230-png/Pecule/releases/latest) : installeur `Pecule-Setup-X.Y.Z.exe`, ou archive portable `.zip`
 
 > 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
 >
@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.34.0** — bouton « 💬 Votre avis » : un questionnaire en ligne, sans compte à créer, pour signaler un problème ou proposer une idée.
+> Version publiée : **1.35.0** — un **installeur Windows** (`Pecule-Setup-1.35.0.exe`) en plus de l'archive `.zip`, et un bandeau du Bilan qui ne signale plus à tort les achats par carte débités après la date de départ.
 
 ---
 
@@ -63,9 +63,10 @@ pip install PySide6
 python pecule.py
 ```
 
-Windows users can instead download the standalone `.exe`
-([latest release](https://github.com/andre12230-png/Pecule/releases/latest))
-or install via [Scoop](https://scoop.sh):
+Windows users can instead download, from the
+[latest release](https://github.com/andre12230-png/Pecule/releases/latest),
+either the installer (`Pecule-Setup-X.Y.Z.exe`, no admin rights needed) or the
+portable `.zip`, or install via [Scoop](https://scoop.sh):
 
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
@@ -147,9 +148,17 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 
 ### Mettre à jour
 
-Décompressez la nouvelle archive **par-dessus** votre dossier Pécule :
+**Avec l'installeur** : fermez Pécule et lancez le nouveau
+`Pecule-Setup-X.Y.Z.exe`. Il remplace le programme sans toucher à vos données,
+rangées à part dans `%LOCALAPPDATA%\Pecule` ; s'il trouve Pécule ouvert, il
+demande de le fermer.
+
+**Avec l'archive `.zip`** : décompressez-la **par-dessus** votre dossier Pécule :
 elle ne contient ni `comptes.db` ni le dossier `sauvegardes`, vos opérations ne
 peuvent donc pas être écrasées. Avec Scoop, `scoop update pecule` suffit.
+
+Vous passez du `.zip` à l'installeur ? Au premier lancement, Pécule s'ouvre
+vide et propose de **reprendre** le `comptes.db` de votre ancien dossier.
 
 Si vous lancez le nouvel exécutable **depuis un autre dossier** (celui des
 téléchargements, par exemple), il ne trouve pas votre fichier de données et en
