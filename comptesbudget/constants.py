@@ -804,7 +804,18 @@ SYNC_VERSION = 3
 #          l'auteur prefere. Budget.ico et docs/media/logo.png reprennent leur
 #          etat du commit b01cf1a : l'exe, l'installeur, les raccourcis et le
 #          site portent de nouveau ce dessin. Rien d'autre ne change.
-APP_VERSION = "1.35.1"
+# 1.36.0 : bouton << Mise a jour >> (rubrique Aide), sans aucun acces reseau.
+#          - Pecule ne se connecte a rien : il ne peut donc pas decouvrir seul
+#            qu'une nouvelle version existe. Le bouton affiche la version
+#            installee et ouvre dans le navigateur, a la demande, la page de la
+#            derniere version ou son installeur. C'est l'utilisateur qui
+#            compare les numeros.
+#          - Test garde-fou : aucun module ne doit importer de bibliotheque de
+#            communication reseau (promesse de la page de confidentialite).
+#          - Notice (rubrique 9) et Lisez-moi : lien direct vers l'installeur,
+#            .../releases/latest/download/Pecule-Setup.exe, qui mene toujours a
+#            la derniere version. L'installeur porte desormais ce nom fixe.
+APP_VERSION = "1.36.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
