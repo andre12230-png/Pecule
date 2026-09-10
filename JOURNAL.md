@@ -13,6 +13,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Version 1.35.1 : retour de l'ancien logo
+
+**Fait.** `Budget.ico` et `docs/media/logo.png` remis dans leur état du commit
+`b01cf1a` (sac d'argent + jeton €) ; release `v1.35.1` avec installeur et
+`.zip`. Contrôles : 308 tests ; icône intégrée à l'exe et à l'installeur
+vérifiée visuellement ; installation, lancement et désinstallation en dossier
+d'essai ; les deux fichiers retéléchargés identiques au bit près, `v1.23.0`
+(Winget) intacte ; release « Latest ». Installation d'André en 1.35.1, ancien
+exe gardé en `Pecule.exe.avant-1.35.1`, `comptes.db` inchangée.
+**Pourquoi.** André voulait que l'installeur crée la même icône que son
+raccourci du Bureau. Celui-ci pointait vers un vieux `Budget.ico` resté dans
+`F:\budget-app\Pecule` (les mises à jour ne remplacent pas ce fichier) : le
+dessin d'avant la refonte du 11/08. Averti que ce dessin vient d'une banque
+d'icônes à la licence inconnue — raison de la refonte —, il a choisi
+« ancien logo partout ».
+**Reste.** Les badges affichaient encore 1.35.0 juste après la publication
+(cache de badgen). Si l'origine de l'icône est un jour contestée, le dessin
+« euro évidé » reste disponible au commit `28f5d58`.
+
 ## 2026-09-10 — Version 1.35.0 publiée, avec l'installeur
 
 **Fait.** Release `v1.35.0` sur GitHub avec deux fichiers :
