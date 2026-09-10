@@ -12,6 +12,8 @@
 >
 > ⏳ Un paquet **Winget** est [soumis et en attente de revue](https://github.com/microsoft/winget-pkgs/pull/416272) : `winget install` ne le connaît pas encore.
 
+> 💬 **Un problème, une idée ?** Dites-le dans le [questionnaire en ligne](https://forms.cloud.microsoft/r/gBQcGGD33d) — deux minutes, sans compte à créer, toutes les questions facultatives (n'y indiquez ni numéro de compte ni montant). Avec un compte GitHub, vous pouvez aussi [ouvrir un ticket](https://github.com/andre12230-png/Pecule/issues).
+
 Application de bureau pour la **gestion de comptes et de budget personnels** :
 suivi des opérations, catégorisation automatique, budgets mensuels, prévisionnel
 des opérations récurrentes, rapports et rapprochement bancaire.
@@ -81,6 +83,10 @@ and runs on Linux and macOS.
 > README are in **French**. The CSV importer is tuned for French bank exports.
 > Contributions towards internationalisation are welcome — see
 > [Issues](https://github.com/andre12230-png/Pecule/issues).
+>
+> 💬 **Feedback and problem reports** are welcome through a short
+> [online questionnaire](https://forms.cloud.microsoft/r/gBQcGGD33d) (in French,
+> no account needed) or in the [Issues](https://github.com/andre12230-png/Pecule/issues).
 
 ---
 
