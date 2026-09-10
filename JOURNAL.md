@@ -13,6 +13,23 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Bouton « 🔄 Mise à jour », sans Internet
+
+**Fait.** Nouveau bouton « 🔄 Mise à jour » (rubrique Aide) et fenêtre
+`ui/mise_a_jour.py` : la version installée, « Voir les nouveautés » (page de
+la dernière release) et « Télécharger l'installeur » (lien direct), tous deux
+ouverts dans le navigateur. Adresses dans `constants.py` (`PAGE_VERSIONS_URL`,
+`INSTALLEUR_URL`). Notice (tableau des boutons, § 9) et `Lisez-moi.txt`
+complétés. Trois tests, dont un garde-fou : aucun module de `comptesbudget`
+n'importe de bibliothèque réseau.
+**Pourquoi.** André voulait que Pécule annonce les nouvelles versions au
+lancement. Cela exigeait une connexion à GitHub, contraire à la promesse
+« aucun accès réseau » (confidentialité, site, revue Winget). Trois voies
+présentées ; il a choisi « sans Internet » : pas d'annonce automatique, un
+bouton qui confie la vérification au navigateur.
+**Reste.** Non publié. Libellé court exprès (largeur du menu, cf. moitié
+d'écran).
+
 ## 2026-09-10 — Lien direct vers l'installeur
 
 **Fait.** L'installeur s'appelle désormais `Pecule-Setup.exe`, sans numéro

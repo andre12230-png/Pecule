@@ -1908,3 +1908,51 @@ def test_bouton_votre_avis_dans_le_menu(qapp, tmp_path):
     fenetre = MainWindow(db)
     textes = [b.text() for b in fenetre.findChildren(QPushButton)]
     assert "💬 Votre avis" in textes
+
+
+def test_mise_a_jour_ouvre_le_navigateur(qapp, monkeypatch):
+    """Pécule ne se connecte à rien : le bouton affiche la version installée
+    et confie au navigateur la page des nouveautés ou l'installeur."""
+    from PySide6.QtGui import QDesktopServices
+    from comptesbudget.constants import (
+        APP_VERSION, INSTALLEUR_URL, PAGE_VERSIONS_URL)
+    from comptesbudget.ui.mise_a_jour import MiseAJourDialog
+
+    adresses = []
+    monkeypatch.setattr(QDesktopServices, "openUrl", staticmethod(
+        lambda url: adresses.append(url.toString()) or True))
+    fenetre = MiseAJourDialog()
+    assert APP_VERSION in fenetre.version.text()
+    fenetre.btn_nouveautes.click()
+    fenetre.btn_installeur.click()
+    assert adresses == [PAGE_VERSIONS_URL, INSTALLEUR_URL]
+    assert INSTALLEUR_URL.endswith("/releases/latest/download/Pecule-Setup.exe")
+    assert fenetre.confirmation.isVisibleTo(fenetre)
+
+
+def test_bouton_mise_a_jour_dans_le_menu(qapp, tmp_path):
+    from PySide6.QtWidgets import QPushButton
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "menu-maj.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    textes = [b.text() for b in fenetre.findChildren(QPushButton)]
+    assert "🔄 Mise à jour" in textes
+
+
+def test_aucun_acces_reseau_dans_le_code():
+    """Garde-fou d'une promesse publique : « Pécule n'effectue aucun accès
+    réseau » (page de confidentialité, site, revue Winget). Aucun module ne
+    doit importer de bibliothèque de communication réseau."""
+    import pathlib
+    import re
+    import comptesbudget
+
+    interdit = re.compile(
+        r"^\s*(import|from)\s+(urllib|http|socket|ssl|requests|ftplib|"
+        r"smtplib)\b|QtNetwork", re.MULTILINE)
+    racine = pathlib.Path(comptesbudget.__file__).parent
+    fautifs = [str(p.relative_to(racine)) for p in racine.rglob("*.py")
+               if interdit.search(p.read_text(encoding="utf-8"))]
+    assert fautifs == []
