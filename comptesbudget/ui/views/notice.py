@@ -46,7 +46,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       le grand chiffre du solde n'y additionne alors que vos opérations.
       <br><b>Les opérations antérieures à cette date</b> restent visibles dans les listes et les
       graphiques, mais <b>n'entrent pas</b> dans le solde : leur total est censé être déjà compris
-      dans le solde de départ. Si vous importez un historique plus ancien, reculez la date de
+      dans le solde de départ. C'est la date de <b>débit</b> qui compte : un achat par carte
+      de décembre débité en janvier entre bien dans un solde qui part du 1<sup>er</sup> janvier.
+      Si vous importez un historique plus ancien, reculez la date de
       départ — un second bandeau vous prévient quand le cas se présente.
       <br><b>Chaque compte a le sien</b> : si vous en suivez plusieurs, le réglage
       s'applique au compte affiché, dont le nom est rappelé dans le titre de la
