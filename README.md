@@ -43,6 +43,8 @@ for tracking personal bank accounts and budgets. It is built with **PySide6 (Qt)
 everything in a **local SQLite** file: no account to create, no cloud, no
 telemetry — your financial data never leaves your computer.
 
+> 📥 **Download for Windows 10/11** — [installer `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [portable `.zip`](https://github.com/andre12230-png/Pecule/releases/latest) · the interface is in French only
+
 **What it does**
 
 - **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear or delete a whole batch at once (space bar or right-click)
@@ -58,18 +60,26 @@ telemetry — your financial data never leaves your computer.
 
 **Install**
 
-```bash
-pip install PySide6
-python pecule.py
-```
+On Windows, the simplest way is the installer:
+**[download `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe)**
+(always the latest version), run it and follow the wizard. No admin rights
+are needed, and uninstalling never deletes your data. Windows may show a
+SmartScreen warning because the program is not code-signed: click
+*More info*, then *Run anyway*.
 
-Windows users can instead download, from the
+Prefer a portable copy? Take the `.zip` from the
 [latest release](https://github.com/andre12230-png/Pecule/releases/latest),
-either the installer ([`Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe),
-no admin rights needed) or the portable `.zip`, or install via [Scoop](https://scoop.sh):
+unzip it anywhere and run `Pecule.exe`. Or install via [Scoop](https://scoop.sh):
 
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
+```
+
+From source (any OS):
+
+```bash
+pip install PySide6
+python pecule.py
 ```
 
 A **Winget** package has been
