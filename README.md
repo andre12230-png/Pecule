@@ -369,6 +369,8 @@ outils/
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
 ├── faire_archive.py        Fabrique le .zip de la release et son empreinte
+├── faire_installeur.py     Fabrique l'installeur Pecule-Setup-X.Y.Z.exe
+├── pecule.iss              Recette de l'installeur (Inno Setup 6)
 └── version_exe.py          Écrit les informations de version de l'exécutable
 
 tests/                     Suite pytest : couche métier et smoke tests de l'UI
@@ -411,6 +413,23 @@ le moment venu, dans les manifestes Winget de [`winget/`](winget/README.md).
 y voit un fichier vide en conflit avec le dossier du même nom et refuse
 l'archive, alors que Windows l'extrait sans rien signaler. Le script n'écrit
 que des fichiers, et vérifie l'archive produite avant de rendre la main.
+
+Un **installeur** Windows se fabrique de la même façon, avec
+[Inno Setup 6](https://jrsoftware.org/isinfo.php) (gratuit :
+`winget install JRSoftware.InnoSetup`) :
+
+```bash
+python outils/faire_installeur.py
+```
+
+Il produit `dist\Pecule-Setup-X.Y.Z.exe` d'après la recette
+[`outils/pecule.iss`](outils/pecule.iss) : installation pour l'utilisateur seul
+(sans droits administrateur) dans `%LOCALAPPDATA%\Programs\Pecule`, raccourci
+dans le menu Démarrer, désinstallation depuis les Paramètres de Windows. Il ne
+livre que le programme : les données restent dans `%LOCALAPPDATA%\Pecule`, que
+ni la mise à jour ni la désinstallation ne touchent. Si Pécule est ouvert, il
+demande de le fermer au lieu de le fermer de force. L'installeur s'ajoute au
+`.zip`, il ne le remplace pas : Scoop et Winget téléchargent le `.zip`.
 
 ### Couches
 
