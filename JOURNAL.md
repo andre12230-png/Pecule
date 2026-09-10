@@ -22,7 +22,10 @@ perdu : il n'en avait aucun) et ses notes mises à jour. Le bouton du site, son
 étape 1 d'installation, le JSON-LD (`downloadUrl`, `installUrl`) et le README
 pointent vers `…/releases/latest/download/Pecule-Setup.exe` ; le `.zip` garde
 un lien vers la page de la release. Lisez-moi et notice citent le nouveau nom
-(ils n'arriveront chez les utilisateurs qu'à la prochaine version).
+(ils n'arriveront chez les utilisateurs qu'à la prochaine version). Partie
+anglaise du README : ligne « 📥 Download » en tête de section, et rubrique
+« Install » réordonnée (installeur d'abord, avec la marche à suivre
+SmartScreen ; puis `.zip` et Scoop ; `pip` en dernier).
 **Pourquoi.** André voulait un lien direct vers l'installeur. Le lien
 `latest/download` de GitHub exige un nom de fichier identique d'une version à
 l'autre ; un lien vers le nom numéroté aurait fini par servir une vieille
