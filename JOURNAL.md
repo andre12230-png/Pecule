@@ -13,6 +13,30 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Un installeur Windows (Inno Setup)
+
+**Fait.** Inno Setup 6.7.3 installé sur le PC (winget, pour l'utilisateur).
+Nouvelle recette `outils/pecule.iss` et script `outils/faire_installeur.py`,
+qui reprend les contrôles de `faire_archive.py` puis produit
+`dist\Pecule-Setup-X.Y.Z.exe` (38 Mo). Installation sans droits administrateur
+dans `%LOCALAPPDATA%\Programs\Pecule`, raccourci menu Démarrer (Bureau en
+option), inscription dans « Applications ». Mise à jour : `_internal` vidé
+puis remplacé, rien d'autre. Si Pécule est ouvert, l'installeur (et le
+désinstalleur) demande de le fermer ; il ne le ferme jamais de force. README
+complété. Essais complets en dossier d'essai, sur une copie de la base :
+installation, lancement, mise à jour (reste d'ancienne version nettoyé),
+refus propre avec Pécule ouvert, désinstallation — empreinte de la base
+identique à chaque étape, aucun `comptes.db` livré ni créé à côté de l'exe.
+**Pourquoi.** André voulait proposer aux utilisateurs un exécutable
+d'installation plutôt qu'un `.zip` à décompresser soi-même. `_data_dir()`
+prévoyait déjà ce cas depuis la 1.22.0 : aucune ligne de l'appli n'a changé.
+Inno Setup retenu : gratuit, standard, recette lisible.
+**Reste.** Rien de publié. À la prochaine release : joindre le Setup.exe à
+côté du `.zip` (qui reste, pour Scoop et Winget — `v1.23.0` intouchable), et
+adapter le bouton et les instructions du site, le README et `Lisez-moi.txt`.
+L'avertissement SmartScreen demeure (exe non signé) : chantier à part.
+Garder l'`AppId` de `pecule.iss` à jamais, et son encodage UTF-8 avec BOM.
+
 ## 2026-09-10 — Fausse alerte « opérations antérieures à la date de départ »
 
 **Fait.** Le bandeau orange du Bilan (« N opération(s) antérieure(s) au … »)
