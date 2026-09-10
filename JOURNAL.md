@@ -28,6 +28,11 @@ anglaise du README : ligne « 📥 Download » en tête de section, et rubrique
 SmartScreen ; puis `.zip` et Scoop ; `pip` en dernier). `Lisez-moi.txt` :
 lien direct dans « Mise à jour » et dans « Infos » — il ne sortira qu'avec
 la prochaine version, le fichier voyageant dans le `.zip` et l'installeur.
+Notice intégrée, rubrique 9 : lien cliquable « Télécharger la dernière
+version de l'installeur » (le `QTextBrowser` ouvre les liens dans le
+navigateur), adresse écrite en clair à côté. Même réserve : il n'arrive chez
+les utilisateurs qu'à la prochaine version ; l'exe d'André a été reconstruit
+pour qu'il le voie dès maintenant (il affiche toujours v1.35.1).
 **Pourquoi.** André voulait un lien direct vers l'installeur. Le lien
 `latest/download` de GitHub exige un nom de fichier identique d'une version à
 l'autre ; un lien vers le nom numéroté aurait fini par servir une vieille

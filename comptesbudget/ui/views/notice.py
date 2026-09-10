@@ -627,6 +627,10 @@ préférez la copie du fichier <code>comptes.db</code>.</div>
 puis lancez le nouvel installeur. Il remplace le programme et ne touche pas à
 vos données, rangées à part. S'il trouve Pécule ouvert, il vous demande de le
 fermer.</p>
+<p>👉 <a href="https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe"><b>Télécharger
+la dernière version de l'installeur</b></a> — lien direct, toujours vers la
+version la plus récente :<br>
+<code>https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe</code></p>
 
 <p><b>Avec l'archive .zip, la bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
 votre dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne
