@@ -40,6 +40,8 @@ MISE A JOUR depuis une version precedente
 Avec l'INSTALLEUR : fermez Pecule, puis lancez le nouveau
 << Pecule-Setup >>. Il remplace le programme sans toucher a vos donnees.
 S'il trouve Pecule ouvert, il vous demande de le fermer.
+Lien direct, toujours vers la derniere version :
+https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe
 
 Vous utilisiez l'archive .zip et passez a l'installeur ? Au premier
 lancement, Pecule s'ouvre vide et propose << Reprendre mes donnees >> :
@@ -139,6 +141,7 @@ INFOS
 - Vos donnees restent sur VOTRE ordinateur, rien n'est envoye en ligne.
 - Pour sauvegarder : copiez le fichier << comptes.db >> ailleurs.
 - Presentation : https://andre12230-png.github.io/Pecule/
+- Installeur    : https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe
 - Code source   : https://github.com/andre12230-png/Pecule
 - Votre avis    : https://forms.cloud.microsoft/r/gBQcGGD33d
 
