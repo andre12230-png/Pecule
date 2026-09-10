@@ -1136,11 +1136,15 @@ class BilanView(QWidget):
         Le solde bancaire ne compte que ce qui suit cette date : le total
         d'avant est réputé compris dans le solde de départ. Qui importe son
         historique complet sans reculer la date voit donc un solde faux, sans
-        rien pour le lui dire."""
+        rien pour le lui dire.
+
+        On compare la DATE DE VALEUR, celle qu'utilise le calcul du solde :
+        un achat par carte de décembre débité le 4 janvier compte bien dans
+        un solde qui part du 1er janvier, il ne faut pas le signaler."""
         depart = self.db.get_setting("initial_date", "")
         avant = [t for t in txs
                  if t.get("categorie") != "Transaction exclue"
-                 and (t.get("date") or "") < depart]
+                 and self._date_banque(t) < depart]
         if not avant:
             self.hors_solde_alert.setVisible(False)
             return

@@ -13,6 +13,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-10 — Fausse alerte « opérations antérieures à la date de départ »
+
+**Fait.** Le bandeau orange du Bilan (« N opération(s) antérieure(s) au … »)
+compare désormais la **date de valeur**, comme le calcul du solde, et non plus
+la date d'opération (`_refresh_hors_solde_alert`, `ui/views/bilan.py`). Test
+`test_bilan_ne_signale_pas_un_achat_carte_debite_apres_le_depart` écrit
+d'abord (il échouait), puis la correction ; suite complète : 308 réussis.
+Contrôlé sur une copie de la vraie base : le bandeau a disparu sur les deux
+comptes.
+**Pourquoi.** Après l'archivage au 31/12/2022, le compte courant affichait
+« 20 opérations antérieures au 01/01/2023 » : les achats carte
+de décembre 2022, débités le 04/01/2023. L'archivage (date de valeur) les
+avait laissés visibles à juste titre, le solde (date de valeur) les comptait
+bien, seul le bandeau (date d'achat) les croyait hors solde. Son conseil,
+reculer la date de départ, les aurait comptés deux fois.
+**Reste.** La correction n'est que dans le code source : l'exe du quotidien
+(`F:\budget-app\Pecule`) affichera le bandeau jusqu'à la prochaine
+construction. Rien de poussé ni de publié.
+
 ## 2026-09-10 — Un bouton « 💬 Votre avis » et un questionnaire en ligne
 
 **Fait.** Questionnaire Microsoft Forms « Pécule — votre avis » créé

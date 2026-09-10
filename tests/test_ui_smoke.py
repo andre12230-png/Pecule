@@ -1680,6 +1680,25 @@ def test_bilan_previent_si_des_operations_precedent_la_date_de_depart(qapp, tmp_
     assert not vue.hors_solde_alert.isVisibleTo(vue)
 
 
+def test_bilan_ne_signale_pas_un_achat_carte_debite_apres_le_depart(qapp, tmp_path):
+    """Un achat par carte de décembre débité le 4 janvier appartient au solde
+    de janvier : le calcul du solde le compte (date de valeur), le bandeau ne
+    doit donc pas le dire « hors solde ». Cas réel : après un archivage au
+    31/12, les achats carte de décembre restent visibles et le bandeau
+    conseillait à tort de reculer la date de départ — ce qui les aurait
+    comptés deux fois."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    db = Database(str(tmp_path / "carte.db"))
+    db.set_setting("initial_date", "2026-01-01")
+    db.set_setting("initial_balance", "1000")
+    db.insert_tx(_tx(id="carte-dec", date="2025-12-20", date_valeur="2026-01-04",
+                     libelle="LIDL", montant=-80.0, pointee=1))
+    vue = BilanView(db)
+    vue.refresh()
+    assert not vue.hors_solde_alert.isVisibleTo(vue)
+
+
 def test_operations_pointage_en_masse(qapp, tmp_path):
     """Pointer ligne à ligne était le seul moyen : un an d'historique
     demandait plusieurs centaines de clics."""
