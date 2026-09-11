@@ -502,12 +502,18 @@ class Database:
 
     def total_archivees(self, compte_id: str = None) -> float:
         """Somme des opérations archivées qui comptent dans le solde.
-        Le filtre est celui du Bilan : pointées, hors « Transaction exclue »."""
+        Le filtre est celui du Bilan : pointées, hors « Transaction exclue »,
+        et datées (date de valeur) à partir de la date de départ du compte.
+        Sans cette dernière condition, archiver une opération antérieure au
+        départ la faisait entrer dans le solde (corrigé le 11/09/2026)."""
+        cid = compte_id or self.compte_id
         r = self.conn.execute(
             "SELECT COALESCE(SUM(montant), 0) FROM transactions "
             "WHERE compte_id = ? AND archivee = 1 AND pointee = 1 "
-            "AND categorie <> 'Transaction exclue'",
-            (compte_id or self.compte_id,)).fetchone()
+            "AND categorie <> 'Transaction exclue' "
+            "AND COALESCE(NULLIF(date_valeur, ''), date) >= "
+            "    (SELECT date_initiale FROM comptes WHERE id = ?)",
+            (cid, cid)).fetchone()
         return round(float(r[0]), 2)
 
     def a_archiver(self, jusqua: str, compte_id: str = None) -> int:
@@ -771,7 +777,10 @@ class Database:
                     total = round(base + self.total_archivees(), 2)
                     return str(int(total)) if total == int(total) else str(total)
                 if key == "initial_date":
-                    return _lendemain(coupure)
+                    # Jamais avant la vraie date de départ : une coupure plus
+                    # ancienne ferait compter des opérations d'avant le départ
+                    # restées visibles (corrigé le 11/09/2026).
+                    return max(_lendemain(coupure), r["date_initiale"] or "")
             v = r[self.COMPTE_SETTINGS[key]] if r else None
             if v is None or v == "":
                 return default

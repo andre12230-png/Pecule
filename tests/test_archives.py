@@ -54,6 +54,33 @@ def test_archiver_ne_change_pas_le_solde(tmp_path):
     assert _solde(db) == avant
 
 
+def test_archiver_une_operation_anterieure_au_depart(tmp_path):
+    """Une opération datée AVANT la date de départ ne compte pas dans le
+    solde. L'archiver ne doit pas l'y faire entrer (anomalie constatée le
+    11/09/2026 : le total des archives ignorait la date de départ)."""
+    db = _base(tmp_path)
+    db.insert_tx(_tx("ancienne", "2019-12-20", -300.0))
+    avant = _solde(db)
+    assert avant == 860.0          # l'opération de 2019 ne compte pas
+
+    db.archiver("2022-12-31")
+    assert _solde(db) == avant
+
+
+def test_coupure_anterieure_au_depart(tmp_path):
+    """Archiver jusqu'à une date ANTÉRIEURE au départ ne doit pas faire
+    remonter le départ : les opérations d'avant, restées visibles, se
+    seraient mises à compter."""
+    db = _base(tmp_path)
+    db.insert_tx(_tx("tres-ancienne", "2019-10-05", -40.0))
+    db.insert_tx(_tx("ancienne", "2019-12-20", -300.0))
+    avant = _solde(db)
+
+    db.archiver("2019-10-31")      # n'archive que celle d'octobre 2019
+    assert db.get_setting("initial_date") == "2020-01-01"
+    assert _solde(db) == avant
+
+
 def test_archiver_masque_sans_supprimer(tmp_path):
     db = _base(tmp_path)
     assert db.archiver("2022-12-31") == 3
