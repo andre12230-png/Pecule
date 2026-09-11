@@ -69,22 +69,15 @@ def test_soldes_ne_changent_pas_le_compte_affiche(db):
     assert db.compte_id == avant
 
 
-def test_archiver_ne_change_pas_le_solde(tmp_path):
-    # Base à part : sans opération antérieure à la date de départ, dont
-    # l'archivage déplace le solde — dans le Bilan comme ici (voir JOURNAL,
-    # 11/09/2026).
-    d = Database(str(tmp_path / "archives.db"))
-    d.set_solde_initial(1000.0, "2026-01-01")
-    d.insert_tx(_tx("a", -200.0, "2026-02-10"))
-    d.insert_tx(_tx("b", 1500.0, "2026-03-01"))
-    d.insert_tx(_tx("c", -80.0, "2026-02-15", pointee=0))
-    avant = d.soldes_compte(d.compte_id, "2026-09-11")
-    d.archiver("2026-02-28", d.compte_id)
-    apres = d.soldes_compte(d.compte_id, "2026-09-11")
+def test_archiver_ne_change_pas_le_solde(db):
+    # La fixture contient une opération antérieure à la date de départ
+    # (« c5 ») : l'archiver la faisait entrer dans le solde avant la
+    # correction du 11/09/2026.
+    avant = db.soldes_compte(db._ids["courant"], "2026-09-11")
+    db.archiver("2026-02-28", db._ids["courant"])
+    apres = db.soldes_compte(db._ids["courant"], "2026-09-11")
     assert apres["banque"] == avant["banque"] == 2300.0
-    # Une non pointée archivée sort du solde comptable, comme du Bilan :
-    # l'archive ne garde que ce que la banque a vraiment passé.
-    assert apres["comptable"] == 2300.0
+    assert apres["comptable"] == avant["comptable"] == 2220.0
 
 
 def test_recap_egal_au_bilan_de_chaque_compte(qapp, tmp_path):
