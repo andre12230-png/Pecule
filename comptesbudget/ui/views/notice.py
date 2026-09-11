@@ -131,6 +131,12 @@ Tant que vous n'en avez qu'un, rien ne change à l'écran.</p>
       <b>tout l'écran</b> : bilan, opérations, budget, prévisionnel, rapport
       mensuel et recherche. Le nom du compte est rappelé dans le titre de la
       fenêtre, pour ne jamais s'y tromper.</li>
+  <li><b>Voir tous les comptes d'un coup</b> : bouton
+      <code>📊 Tous les comptes</code>, juste sous la liste. Il donne, pour
+      chaque compte, le solde <b>en banque</b> (opérations pointées, comme le
+      Bilan), ce qui n'est <b>pas encore pointé</b>, et le <b>solde
+      comptable</b> qui réunit les deux — puis le <b>total</b> de tous les
+      comptes. Un double-clic sur un compte l'affiche.</li>
   <li><b>Ce qui est propre à chaque compte</b> : les opérations, les budgets,
       le prévisionnel et le solde de départ.</li>
   <li><b>Ce qui est commun à tous les comptes</b> : les règles automatiques,
