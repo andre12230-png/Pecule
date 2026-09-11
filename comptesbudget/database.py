@@ -414,6 +414,58 @@ class Database:
         self.update_compte(self.compte_id, {"solde_initial": float(solde),
                                             "date_initiale": date_iso})
 
+    def soldes_compte(self, compte_id: str, aujourdhui: str) -> dict:
+        """Soldes d'un compte à la date `aujourdhui` (AAAA-MM-JJ), pour le
+        récapitulatif de tous les comptes. Les chiffres sont ceux du Bilan
+        de ce compte :
+          • banque    : solde de départ + opérations POINTÉES dont la date
+                        de valeur est passée (le « Solde bancaire réel ») ;
+          • attente   : opérations saisies mais pas encore pointées, dont la
+                        date est passée ;
+          • comptable : banque + attente (le « engagé » du Bilan).
+        Les « Transaction exclue » et les opérations datées dans le futur ne
+        comptent pas, comme dans le Bilan."""
+        # Le compte devient un instant le compte de travail : on obtient
+        # ainsi son solde et sa date de départ, et ses opérations, par le
+        # même chemin que le Bilan — archives comprises — sans recopier ici
+        # ces règles au risque de les voir diverger un jour.
+        avant = self.compte_id
+        self.compte_id = compte_id
+        try:
+            try:
+                depart = float(self.get_setting("initial_balance", "0"))
+            except ValueError:
+                depart = 0.0
+            date_depart = self.get_setting("initial_date", "2025-01-01")
+            operations = self.list_tx()
+        finally:
+            self.compte_id = avant
+
+        banque = depart
+        attente = 0.0
+        nb_attente = 0
+        derniere_pointee = ""
+        for t in operations:
+            if t["categorie"] == "Transaction exclue":
+                continue
+            # Date de valeur : celle où la banque débite vraiment le compte.
+            jour = t["date_valeur"] or t["date"]
+            if not (date_depart <= jour <= aujourdhui):
+                continue
+            if t["pointee"]:
+                banque += t["montant"]
+                derniere_pointee = max(derniere_pointee, jour)
+            else:
+                attente += t["montant"]
+                nb_attente += 1
+        return {
+            "banque": round(banque, 2),
+            "attente": round(attente, 2),
+            "nb_attente": nb_attente,
+            "comptable": round(banque + attente, 2),
+            "derniere_pointee": derniere_pointee,
+        }
+
     # ── Archives ────────────────────────────────────────────────────
     # Archiver, c'est mettre de côté les opérations anciennes sans rien
     # perdre : elles restent dans la base, simplement écartées des listes,

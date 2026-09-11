@@ -43,6 +43,7 @@ from .views.previsionnel import PrevisionnelView
 from .views.rules_view import RulesView
 from .views.notice import NoticeView
 from .avis import AvisDialog, noter_premiere_utilisation, doit_inviter, inviter
+from .recapitulatif import RecapComptesDialog
 from .mise_a_jour import MiseAJourDialog
 
 class MainWindow(QMainWindow):
@@ -124,6 +125,11 @@ class MainWindow(QMainWindow):
             "opérations, budgets et prévisionnel.")
         self.compte_combo.currentIndexChanged.connect(self.on_compte_changed)
         mv.addWidget(self.compte_combo)
+        # Les soldes de tous les comptes et leur total : caché lui aussi
+        # quand il n'y a qu'un compte.
+        self.btn_recap = add_btn(
+            "📊 Tous les comptes", self.action_recap_comptes,
+            "Soldes de tous vos comptes côte à côte, et leur total")
 
         add_section("Saisie")
         add_btn("➕ Nouvelle opération", self.action_new_tx)
@@ -311,7 +317,8 @@ class MainWindow(QMainWindow):
         Le sélecteur reste caché tant qu'il n'y a qu'un seul compte."""
         comptes = self.db.list_comptes()
         visible = len(comptes) > 1
-        for w in (self.compte_espace, self.compte_label, self.compte_combo):
+        for w in (self.compte_espace, self.compte_label, self.compte_combo,
+                  self.btn_recap):
             w.setVisible(visible)
 
         self.compte_combo.blockSignals(True)
@@ -354,6 +361,15 @@ class MainWindow(QMainWindow):
         ArchivesDialog(self.db, self).exec()
         self.period_bar.reset_selection()
         self.refresh_all()
+
+    def action_recap_comptes(self):
+        """Récapitulatif de tous les comptes. Un double-clic sur un compte
+        l'affiche : la liste déroulante fait le reste (on_compte_changed)."""
+        dlg = RecapComptesDialog(self.db, self)
+        if dlg.exec() and dlg.compte_choisi:
+            idx = self.compte_combo.findData(dlg.compte_choisi)
+            if idx >= 0:
+                self.compte_combo.setCurrentIndex(idx)
 
     def action_comptes(self):
         avant = self.db.compte_id
