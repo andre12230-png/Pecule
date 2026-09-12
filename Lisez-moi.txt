@@ -1,4 +1,4 @@
-PECULE - version 1.36.0
+PECULE - version 1.37.0
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
@@ -104,9 +104,15 @@ FONCTIONS
 - Vos propres categories : le champ Categorie s'ecrit librement. Tapez
   "Animaux" ou "Vacances" et la categorie est creee, avec sa couleur et
   son budget possible.
+- Premier lancement : le bouton << Importer mon premier releve >> lit
+  votre releve, puis demande le solde du compte au jour de sa derniere
+  operation. Pecule regle seul la date et le solde de depart.
 - Le Bilan previent quand le solde de depart n'est pas renseigne, et
   quand des operations sont anterieures a la date de depart (leur total
   n'entre pas dans le solde : il est cense etre deja compris dedans).
+  Il propose alors de reculer la date sans changer le solde du jour.
+- Plusieurs comptes : le bouton << Tous les comptes >> donne le solde de
+  chacun, puis le total.
 - Une seule fenetre a la fois sur les memes donnees : deux fenetres
   ouvertes en meme temps se contrediraient.
 - Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour

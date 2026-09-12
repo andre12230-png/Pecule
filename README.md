@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.36.0** — bouton « 🔄 Mise à jour » : il affiche votre version et ouvre la page de la dernière dans votre navigateur. Pécule, lui, ne se connecte toujours à rien. Depuis la 1.35.0, un **installeur Windows** (`Pecule-Setup.exe`) s'ajoute à l'archive `.zip`.
+> Version publiée : **1.37.0** — premier lancement repensé : importez d'abord votre relevé, Pécule vous demande ensuite le solde et règle seul la date de départ. Et un **récapitulatif de tous vos comptes**. Depuis la 1.35.0, un **installeur Windows** (`Pecule-Setup.exe`) s'ajoute à l'archive `.zip`.
 
 ---
 
@@ -141,10 +141,14 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
   par des virgules, colonnes portant d'autres noms, ou dates hors du format
   JJ/MM/AAAA — avec la manœuvre à faire dans le tableur. Un tableur, un PDF ou
   un export JSON déposé sur la fenêtre reçoit lui aussi son explication.
-- La **date de départ** proposée est le 1<sup>er</sup> janvier de l'année en
-  cours, et le Bilan prévient tant que le **solde de départ** n'est pas
+- **Premier lancement** : le bouton « Importer mon premier relevé… » lit votre
+  relevé, puis demande le solde du compte au jour de sa dernière opération ;
+  Pécule en déduit seul la date et le solde de départ.
+- Sinon, la **date de départ** proposée est le 1<sup>er</sup> janvier de l'année
+  en cours, et le Bilan prévient tant que le **solde de départ** n'est pas
   renseigné — ou quand des opérations plus anciennes que cette date restent
-  hors du calcul du solde.
+  hors du calcul du solde. Il propose alors de reculer la date, en calculant
+  le solde de départ qui laisse le solde du jour inchangé.
 
 ### Au quotidien
 
@@ -188,7 +192,9 @@ Depuis la 1.24.0, Pécule suit **plusieurs comptes bancaires** dans un même
 fichier. Une liste **Compte affiché** apparaît en haut du menu de gauche dès
 qu'il existe au moins deux comptes ; le compte choisi commande tout l'écran
 (bilan, opérations, budget, prévisionnel, rapport, recherche). Le bouton
-**🏦 Mes comptes** permet d'en ajouter, d'en renommer et d'en supprimer.
+**🏦 Mes comptes** permet d'en ajouter, d'en renommer et d'en supprimer. Le
+bouton **📊 Tous les comptes** donne, compte par compte, le solde en banque, le
+non pointé, le solde comptable et la date du dernier pointage, puis le total.
 
 | | Propre à chaque compte | Commun à tous les comptes |
 |---|---|---|
