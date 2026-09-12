@@ -466,6 +466,82 @@ class Database:
             "derniere_pointee": derniere_pointee,
         }
 
+    # ── Reculer la date de départ ───────────────────────────────────
+    # Le piège du nouvel utilisateur (constaté le 12/09/2026) : Pécule demande
+    # le solde de départ AVANT le premier import. On y met le solde du jour,
+    # daté du jour, puis on importe un an d'historique… qui tombe tout entier
+    # avant la date de départ et sort du calcul du solde.
+    def proposition_recul_depart(self):
+        """Ce qu'il faudrait régler pour que les opérations antérieures à la
+        date de départ comptent, SANS changer le solde d'aujourd'hui :
+          • date  : celle (date de valeur) de la plus ancienne opération ;
+          • solde : l'ancien solde de départ moins les opérations pointées
+                    ainsi réintégrées — le solde bancaire reste identique.
+        Renvoie None s'il n'y a rien à proposer : aucune opération avant le
+        départ, solde de départ jamais saisi (pas de solde du jour à
+        préserver), ou archives en place (le départ effectif en dépend)."""
+        r = self.get_compte()
+        if not r or r["solde_initial"] is None or (r["archive_jusqua"] or ""):
+            return None
+        depart = r["date_initiale"] or ""
+        # Même filtre que le bandeau du Bilan : date de valeur, hors
+        # « Transaction exclue ».
+        avant = [t for t in self.list_tx()
+                 if t["categorie"] != "Transaction exclue"
+                 and (t["date_valeur"] or t["date"]) < depart]
+        if not avant:
+            return None
+        ancien = float(r["solde_initial"])
+        # Seules les opérations pointées entrent dans le solde bancaire : ce
+        # sont elles qu'il faut retrancher du solde de départ.
+        pointees = sum(t["montant"] for t in avant if t["pointee"])
+        return {
+            "nb": len(avant),
+            "nb_non_pointees": sum(1 for t in avant if not t["pointee"]),
+            "date": min((t["date_valeur"] or t["date"]) for t in avant),
+            "solde": round(ancien - pointees, 2),
+            "ancienne_date": depart,
+            "ancien_solde": ancien,
+        }
+
+    def reculer_depart(self, proposition: dict):
+        """Applique une proposition de proposition_recul_depart()."""
+        self.set_solde_initial(proposition["solde"], proposition["date"])
+
+    # ── Premier relevé ──────────────────────────────────────────────
+    # Au premier lancement, on importe d'abord, et l'on donne le solde
+    # ensuite : Pécule en déduit la date et le solde de départ.
+    def bornes_operations(self):
+        """(première date, dernière date, nombre) des opérations du compte de
+        travail, hors « Transaction exclue ». Ce sont les dates d'opération,
+        celles qu'on lit sur le relevé. None si le compte est vide."""
+        txs = [t for t in self.list_tx()
+               if t["categorie"] != "Transaction exclue"]
+        if not txs:
+            return None
+        dates = [t["date"] for t in txs]
+        return (min(dates), max(dates), len(txs))
+
+    def depart_depuis_solde(self, solde: float, date_solde: str):
+        """Règle la date et le solde de départ d'après le solde du compte au
+        jour `date_solde` (la dernière opération du relevé) :
+          • date  : la plus ancienne opération (date de valeur, celle du
+                    calcul du solde) ;
+          • solde : `solde` moins les opérations pointées déjà passées en
+                    banque ce jour-là. Le Bilan affiche alors `solde` à cette
+                    date ; un achat carte débité plus tard (débit différé)
+                    viendra s'en retrancher le jour de son débit.
+        Renvoie (date de départ, solde de départ)."""
+        txs = [t for t in self.list_tx()
+               if t["categorie"] != "Transaction exclue"]
+        depart = min((t["date_valeur"] or t["date"]) for t in txs)
+        passees = sum(t["montant"] for t in txs
+                      if t["pointee"]
+                      and (t["date_valeur"] or t["date"]) <= date_solde)
+        initial = round(solde - passees, 2)
+        self.set_solde_initial(initial, depart)
+        return depart, initial
+
     # ── Archives ────────────────────────────────────────────────────
     # Archiver, c'est mettre de côté les opérations anciennes sans rien
     # perdre : elles restent dans la base, simplement écartées des listes,
