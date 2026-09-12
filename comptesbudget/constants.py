@@ -815,7 +815,26 @@ SYNC_VERSION = 3
 #          - Notice (rubrique 9) et Lisez-moi : lien direct vers l'installeur,
 #            .../releases/latest/download/Pecule-Setup.exe, qui mene toujours a
 #            la derniere version. L'installeur porte desormais ce nom fixe.
-APP_VERSION = "1.36.0"
+# 1.37.0 : premier lancement repense, et recapitulatif de tous les comptes.
+#          - Accueil d'une base vide : bouton << Importer mon premier releve >>.
+#            Apres l'import, une seule question -- le solde du compte au jour
+#            de la derniere operation du releve -- et Pecule regle seul la date
+#            et le solde de depart. Demander ce solde AVANT l'import poussait a
+#            y mettre le solde du jour : tout l'historique importe ensuite
+#            tombait avant la date de depart et sortait du solde.
+#          - Operations anterieures a la date de depart : apres un import, et
+#            par le lien du bandeau du Bilan, Pecule propose de reculer la
+#            date en calculant le solde de depart qui laisse le solde du jour
+#            inchange.
+#          - Bouton << Tous les comptes >> (sous la liste des comptes, des
+#            qu'il y en a deux) : solde en banque, non pointe, solde comptable
+#            et date du dernier pointage de chaque compte, puis le total.
+#          - Archivage : archiver une operation pointee datee avant la date de
+#            depart la faisait entrer dans le solde, et une coupure anterieure
+#            au depart faisait << reprendre >> le compte trop tot. Corrige.
+#          - Barre de periode : apres le premier import, elle se place sur le
+#            mois en cours au lieu de << Toutes periodes >>.
+APP_VERSION = "1.37.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

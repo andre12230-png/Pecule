@@ -13,6 +13,28 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-12 — Préparation de la 1.37.0
+
+**Fait.** Les cinq porteurs de version remontés ensemble : `APP_VERSION` et
+l'entrée d'historique de `constants.py`, l'en-tête de `Lisez-moi.txt`, la ligne
+de version du README, le `softwareVersion` de `docs/index.html`, le manifeste
+Scoop (version, url, empreinte `eb1f6ae9…99ab`). README, Lisez-moi et page de
+présentation décrivent le nouveau premier lancement et le récapitulatif « Tous
+les comptes ». Exe construit sans le `.bat` (étapes 2-3 à la main), archive
+(182 fichiers) et `Pecule-Setup.exe` fabriqués. Contrôles : 336 tests ; exe
+lancé sur une base d'essai, titre « Pécule — v1.37.0 », fermeture propre ;
+installeur joué en silencieux dans un dossier temporaire — installation,
+lancement, désinstallation sans reste (inscription, menu Démarrer), base
+d'essai inchangée. Manifestes Winget non touchés.
+**Pourquoi.** La 1.37.0 réunit le récapitulatif « Tous les comptes », la
+correction de l'archivage, le nouveau premier lancement, la proposition de
+reculer la date de départ et la correction de la barre de période. Nouveautés
+visibles : numéro mineur plutôt que 1.36.1.
+**Reste.** Rien n'est poussé ni publié : push, `gh release create v1.37.0`
+avec le `.zip` et `Pecule-Setup.exe`, puis contrôle des empreintes
+retéléchargées et des badges — sur accord d'André. Installation d'André dans
+`F:\budget-app\Pecule` pas encore mise à jour.
+
 ## 2026-09-12 — Premier lancement : importer d'abord, le solde ensuite
 
 **Fait.** L'accueil d'une base vide offre « Importer mon premier relevé… » (à
