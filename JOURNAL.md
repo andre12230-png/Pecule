@@ -30,10 +30,14 @@ d'essai inchangée. Manifestes Winget non touchés.
 correction de l'archivage, le nouveau premier lancement, la proposition de
 reculer la date de départ et la correction de la barre de période. Nouveautés
 visibles : numéro mineur plutôt que 1.36.1.
-**Reste.** Rien n'est poussé ni publié : push, `gh release create v1.37.0`
-avec le `.zip` et `Pecule-Setup.exe`, puis contrôle des empreintes
-retéléchargées et des badges — sur accord d'André. Installation d'André dans
-`F:\budget-app\Pecule` pas encore mise à jour.
+**Publiée le soir même**, sur accord d'André : push, puis release `v1.37.0`
+avec le `.zip` et `Pecule-Setup.exe`. Contrôles : les deux fichiers
+retéléchargés depuis leurs adresses publiques sont identiques aux originaux,
+l'archive concorde avec le manifeste Scoop ; v1.37.0 est la « latest »,
+`v1.23.0` intacte ; les deux badges à 1.37.0 ; page de présentation servie
+en 1.37.0. Installation d'André dans `F:\budget-app\Pecule` mise à jour
+(ancien exe en `Pecule.exe.avant-1.37.0`, `comptes.db` inchangée à l'octet).
+**Reste.** Rien.
 
 ## 2026-09-12 — Premier lancement : importer d'abord, le solde ensuite
 
