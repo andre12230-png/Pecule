@@ -21,7 +21,8 @@ seule question : le solde du compte au jour de la dernière opération du relev�
 Pécule règle alors la date de départ (plus ancienne opération) et le solde de
 départ (solde donné − opérations pointées passées en banque ce jour-là).
 `Database.bornes_operations()` / `depart_depuis_solde()`,
-`MainWindow.action_premier_releve()`, notice à jour. 7 tests
+`MainWindow.action_premier_releve()`, notice à jour (rubrique 1 réordonnée : l'import d'abord, le réglage à la
+main ensuite). 7 tests
 (`tests/test_premier_releve.py`, avec un vrai CSV au format Crédit Agricole),
 vus en échec avant ; 336 passent. Parcours joué par capture sur une base
 d'essai : le Bilan affiche le solde donné, aucun bandeau.

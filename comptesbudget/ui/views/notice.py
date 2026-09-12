@@ -36,15 +36,20 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
 
 <h2>1. Premier démarrage</h2>
 <ol>
-  <li><b>Configurer le solde de départ</b> : au tout premier lancement, l'application vous y invite
-      automatiquement ; vous pouvez aussi y revenir à tout moment via <code>⚙️ Paramètres</code>
-      dans le menu de gauche. Indiquez la date à laquelle vous commencez votre suivi — le
+  <li><b>Commencer par importer un relevé</b> — le plus simple. Au tout premier lancement, la
+      fenêtre d'accueil propose le bouton « Importer mon premier relevé… ». Pécule lit le
+      relevé, puis vous pose une seule question : le solde de votre compte au jour de la
+      <b>dernière opération</b> du relevé — le site de votre banque l'affiche à côté de chaque
+      opération, et votre relevé mensuel le donne aussi. Il règle alors seul la date et le solde
+      de départ : le Bilan affiche aussitôt votre solde, historique compris.
+      <br>Pourquoi ce jour-là, et pas aujourd'hui ? Si le relevé s'arrête quelques jours plus
+      tôt, les opérations d'entre-deux seraient comptées deux fois au prochain import.</li>
+  <li><b>Ou configurer le solde de départ vous-même</b>, via <code>⚙️ Paramètres</code> dans le
+      menu de gauche — à tout moment, et d'office si vous choisissez « Démarrer à neuf » à
+      l'accueil. Indiquez la date à laquelle vous commencez votre suivi — le
       1<sup>er</sup> janvier de l'année en cours vous est proposé — et le solde que vous aviez
       en banque à cette date. Cette valeur sert de base pour calculer votre solde réel à toute
       date ultérieure.
-      <br><b>Au tout premier lancement</b>, le plus simple est le bouton « Importer mon premier
-      relevé… » : Pécule lit le relevé, vous demande le solde du compte au jour de sa dernière
-      opération, et règle seul la date et le solde de départ.
       <br><b>Tant qu'il n'est pas renseigné</b>, un bandeau orange le rappelle en tête du Bilan :
       le grand chiffre du solde n'y additionne alors que vos opérations.
       <br><b>Les opérations antérieures à cette date</b> restent visibles dans les listes et les
