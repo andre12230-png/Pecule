@@ -42,14 +42,20 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       1<sup>er</sup> janvier de l'année en cours vous est proposé — et le solde que vous aviez
       en banque à cette date. Cette valeur sert de base pour calculer votre solde réel à toute
       date ultérieure.
+      <br><b>Au tout premier lancement</b>, le plus simple est le bouton « Importer mon premier
+      relevé… » : Pécule lit le relevé, vous demande le solde du compte au jour de sa dernière
+      opération, et règle seul la date et le solde de départ.
       <br><b>Tant qu'il n'est pas renseigné</b>, un bandeau orange le rappelle en tête du Bilan :
       le grand chiffre du solde n'y additionne alors que vos opérations.
       <br><b>Les opérations antérieures à cette date</b> restent visibles dans les listes et les
       graphiques, mais <b>n'entrent pas</b> dans le solde : leur total est censé être déjà compris
       dans le solde de départ. C'est la date de <b>débit</b> qui compte : un achat par carte
       de décembre débité en janvier entre bien dans un solde qui part du 1<sup>er</sup> janvier.
-      Si vous importez un historique plus ancien, reculez la date de
-      départ — un second bandeau vous prévient quand le cas se présente.
+      Si vous importez un historique plus ancien que votre date de départ, Pécule
+      propose de <b>reculer la date</b> à la plus ancienne opération, avec un solde de
+      départ qu'il calcule pour que <b>le solde d'aujourd'hui ne change pas</b> — c'est
+      le cas classique où l'on a saisi le solde du jour avant d'importer son relevé.
+      Tant que ce n'est pas fait, un second bandeau le rappelle, avec le même lien.
       <br><b>Chaque compte a le sien</b> : si vous en suivez plusieurs, le réglage
       s'applique au compte affiché, dont le nom est rappelé dans le titre de la
       fenêtre des paramètres.</li>

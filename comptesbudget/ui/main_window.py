@@ -29,7 +29,7 @@ from ..ofx_import import import_ofx
 from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
-from .widgets import PeriodBar
+from .widgets import PeriodBar, demander_montant
 from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
 from .report import MonthlyReportDialog
@@ -252,6 +252,8 @@ class MainWindow(QMainWindow):
             lambda: self.tabs.setCurrentWidget(self.budget_view))
         # Le bandeau « solde de départ non renseigné » ouvre les Paramètres.
         self.bilan_view.goto_parametres.connect(self.action_settings)
+        self.bilan_view.goto_recul_depart.connect(
+            lambda: self.proposer_recul_depart(repli_parametres=True))
         self.tabs.currentChanged.connect(self.refresh_current)
         self.period_bar.period_changed.connect(self.on_period_changed)
         self.period_bar.date_mode_changed.connect(self.on_date_mode_changed)
@@ -390,12 +392,14 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentWidget(self.ops_view)
         self.ops_view.add_tx()
 
+    # Filtre de la boîte « ouvrir un fichier » pour les relevés bancaires.
+    FILTRE_RELEVES = ("Relevés (*.csv *.txt *.ofx *.qfx *.qif);;"
+                      "Fichiers CSV (*.csv *.txt);;Fichiers OFX (*.ofx *.qfx);;"
+                      "Fichiers QIF (*.qif);;Tous (*.*)")
+
     def action_import(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Importer un relevé", "",
-            "Relevés (*.csv *.txt *.ofx *.qfx *.qif);;"
-            "Fichiers CSV (*.csv *.txt);;Fichiers OFX (*.ofx *.qfx);;"
-            "Fichiers QIF (*.qif);;Tous (*.*)")
+            self, "Importer un relevé", "", self.FILTRE_RELEVES)
         if not path:
             return
         self._import_files([path])
@@ -472,6 +476,10 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.information(self, "Import", msg)
         self.refresh_all()
+        # Un historique importé après avoir saisi le solde du jour tombe
+        # entièrement avant la date de départ : on propose de la reculer.
+        if total_imp:
+            self.proposer_recul_depart()
 
     # ── Glisser-déposer de fichiers ─────────────────────────────────
     def _accepted_drop_paths(self, event) -> list[str]:
@@ -622,6 +630,66 @@ class MainWindow(QMainWindow):
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
 
+    def proposer_recul_depart(self, repli_parametres: bool = False) -> bool:
+        """Des opérations précèdent la date de départ : proposer de reculer
+        la date à la plus ancienne, avec un solde de départ calculé pour que
+        le solde d'aujourd'hui ne bouge pas. Appelé après un import, et par
+        le lien du bandeau orange du Bilan (`repli_parametres` : s'il n'y a
+        rien à proposer — cas des archives —, ouvrir les Paramètres comme
+        avant). Renvoie True si la date a été reculée."""
+        prop = self.db.proposition_recul_depart()
+        if prop is None:
+            if repli_parametres:
+                self.action_settings()
+            return False
+        choix = self._demander_recul_depart(prop)
+        if choix == "parametres":
+            self.action_settings()
+            return False
+        if choix != "reculer":
+            return False
+        self.db.reculer_depart(prop)
+        self.refresh_all()
+        return True
+
+    def _demander_recul_depart(self, prop: dict) -> str:
+        """La question posée. Renvoie « reculer », « parametres » ou « rien »."""
+        texte = (
+            f"<b>{prop['nb']} opération(s)</b> sont antérieures au "
+            f"{fmt_date_fr(prop['ancienne_date'])}, la date de départ du "
+            "compte : elles <b>n'entrent pas</b> dans le solde.<br><br>"
+            "Pécule peut reculer la date de départ au "
+            f"<b>{fmt_date_fr(prop['date'])}</b> (la plus ancienne), avec un "
+            f"solde de départ de <b>{fmt_euro(prop['solde'])}</b> : ce montant "
+            "est calculé pour que <b>le solde d'aujourd'hui reste le "
+            "même</b>. Ces opérations compteront alors dans le solde de "
+            "chaque mois passé.")
+        if prop["nb_non_pointees"]:
+            texte += (
+                f"<br><br>{prop['nb_non_pointees']} d'entre elles ne sont pas "
+                "pointées : elles resteront « en attente » tant que vous ne "
+                "les aurez pas pointées.")
+        texte += (
+            "<br><br>Répondez oui si le solde de départ actuel "
+            f"({fmt_euro(prop['ancien_solde'])} au "
+            f"{fmt_date_fr(prop['ancienne_date'])}) est bien celui de votre "
+            "banque.")
+        boite = QMessageBox(self)
+        boite.setWindowTitle("Date de départ du compte")
+        boite.setIcon(QMessageBox.Question)
+        boite.setTextFormat(Qt.RichText)
+        boite.setText(texte)
+        reculer = boite.addButton("Reculer la date", QMessageBox.AcceptRole)
+        parametres = boite.addButton("Régler moi-même…", QMessageBox.ActionRole)
+        boite.addButton("Laisser tel quel", QMessageBox.RejectRole)
+        boite.setDefaultButton(reculer)
+        boite.exec()
+        if boite.clickedButton() is reculer:
+            return "reculer"
+        if boite.clickedButton() is parametres:
+            return "parametres"
+        return "rien"
+
     def _premier_lancement(self):
         """Ce qui se joue à l'ouverture, dans l'ordre : d'abord retrouver des
         données existantes, ensuite seulement demander le solde de départ —
@@ -660,14 +728,71 @@ class MainWindow(QMainWindow):
             "<b>Si vous utilisiez déjà Pécule</b> — vous venez de le mettre à "
             "jour, ou de changer d'ordinateur — vos données sont dans le "
             "fichier <code>comptes.db</code> de votre ancienne installation. "
-            "Reprenez-le : il sera copié ici, et rien ne sera perdu.")
+            "Reprenez-le : il sera copié ici, et rien ne sera perdu.<br><br>"
+            "<b>Si vous découvrez Pécule</b>, commencez par importer un relevé "
+            "de votre banque (CSV, OFX ou QIF) : Pécule vous demandera "
+            "ensuite le solde de votre compte, et réglera seul la date de "
+            "départ.")
+        bouton_importer = boite.addButton("Importer mon premier relevé…",
+                                          QMessageBox.ActionRole)
         bouton_reprendre = boite.addButton("Reprendre mes données…",
                                            QMessageBox.AcceptRole)
         boite.addButton("Démarrer à neuf", QMessageBox.RejectRole)
+        boite.setDefaultButton(bouton_importer)
         boite.exec()
+        if boite.clickedButton() is bouton_importer:
+            return self.action_premier_releve()
         if boite.clickedButton() is not bouton_reprendre:
             return False
         return self.action_reprendre_donnees()
+
+    def action_premier_releve(self) -> bool:
+        """Premier lancement : importer d'abord, donner le solde ensuite.
+
+        Demander le solde de départ AVANT l'import poussait à y mettre le
+        solde du jour, daté du jour : tout l'historique importé ensuite
+        tombait avant la date de départ et sortait du solde (cas vécu le
+        12/09/2026). Ici, une fois le relevé lu, on demande le solde au jour
+        de sa dernière opération, et Pécule règle le reste.
+
+        Renvoie True si des opérations ont été importées (l'invite du solde
+        de départ n'a alors plus lieu d'être)."""
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Importer mon premier relevé", "", self.FILTRE_RELEVES)
+        if not path:
+            return False
+        self._import_files([path])
+        bornes = self.db.bornes_operations()
+        if bornes is None:
+            return False     # rien de lu : l'invite habituelle prend le relais
+        premiere, derniere, nb = bornes
+        solde = self._demander_solde_releve(premiere, derniere, nb)
+        if solde is None:
+            return True      # le bandeau « solde non renseigné » le rappellera
+        depart, initial = self.db.depart_depuis_solde(solde, derniere)
+        self.refresh_all()
+        QMessageBox.information(
+            self, "Solde de départ",
+            f"C'est réglé : le compte part du {fmt_date_fr(depart)} avec "
+            f"{fmt_euro(initial)}, si bien que le Bilan affiche "
+            f"{fmt_euro(solde)} au {fmt_date_fr(derniere)}.\n\n"
+            "Vous pourrez le modifier à tout moment via « Paramètres ».")
+        return True
+
+    def _demander_solde_releve(self, premiere: str, derniere: str, nb: int):
+        """La question posée après le premier import. Renvoie le montant, ou
+        None si l'utilisateur referme la boîte sans répondre."""
+        montant, ok = demander_montant(
+            self, "Solde de votre compte",
+            f"{nb} opération(s) importée(s), du {fmt_date_fr(premiere)} "
+            f"au {fmt_date_fr(derniere)}.\n\n"
+            f"Quel était le solde de votre compte le {fmt_date_fr(derniere)},\n"
+            "jour de la dernière opération du relevé ?\n\n"
+            "Le site de votre banque l'affiche à côté de chaque opération ;\n"
+            "votre relevé mensuel le donne aussi. Pécule en déduira seul\n"
+            "la date et le solde de départ.",
+            mini=-1_000_000.0)
+        return montant if ok else None
 
     def action_reprendre_donnees(self) -> bool:
         """Copie un comptes.db choisi par l'utilisateur à la place de la base

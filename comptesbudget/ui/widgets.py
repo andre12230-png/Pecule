@@ -173,7 +173,11 @@ class PeriodBar(QWidget):
             courant = date.today().strftime("%Y-%m")
             reels = _mois_des_transactions(self._transactions, mode)
             self._current = courant if courant in reels else "all"
-            self._first_fill = False
+            # Tant que le compte est vide, ce premier placement n'a pas
+            # vraiment eu lieu : on l'attend pour les premières opérations.
+            # Sinon, après le premier import, la barre restait sur « Toutes
+            # périodes » (constaté le 12/09/2026).
+            self._first_fill = not self._transactions
         elif not self._periode_valide(self._current, mode):
             # Changer de mode peut faire disparaître la période choisie
             # (juillet devient août pour un achat carte).

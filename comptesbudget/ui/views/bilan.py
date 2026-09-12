@@ -134,6 +134,7 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
 class BilanView(QWidget):
     goto_budget = Signal()   # clic sur l'alerte budget → ouvrir l'onglet Budget
     goto_parametres = Signal()   # clic sur le bandeau du solde de départ
+    goto_recul_depart = Signal()   # clic sur le bandeau des opérations antérieures
 
     def __init__(self, db: Database, parent=None):
         super().__init__(parent)
@@ -359,7 +360,7 @@ class BilanView(QWidget):
             "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
             "color:#7E5109; border-radius:4px; padding:8px 14px; }")
         self.hors_solde_alert.linkActivated.connect(
-            lambda _l: self.goto_parametres.emit())
+            lambda _l: self.goto_recul_depart.emit())
         main.addWidget(self.hors_solde_alert)
 
         # ── Ligne 2 : 2 graphiques ────────────────────────────────────
@@ -1154,8 +1155,8 @@ class BilanView(QWidget):
             + fmt_date_fr(depart) + "</b>, la date de départ du compte : leur "
             "total (" + fmt_euro(total) + ") <b>n'entre pas</b> dans le solde "
             "ci-dessus — il est censé être déjà compris dans le solde de "
-            "départ. Pour les compter, reculez la date de départ dans les "
-            "<a href='#'>Paramètres</a>.")
+            "départ. Pour les compter sans changer le solde d'aujourd'hui : "
+            "<a href='#'>reculer la date de départ</a>.")
         self.hors_solde_alert.setVisible(True)
 
     def refresh(self):
