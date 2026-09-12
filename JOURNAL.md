@@ -13,6 +13,104 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-12 — Premier lancement : importer d'abord, le solde ensuite
+
+**Fait.** L'accueil d'une base vide offre « Importer mon premier relevé… » (à
+côté de « Reprendre mes données… » et « Démarrer à neuf »). Après l'import, une
+seule question : le solde du compte au jour de la dernière opération du relevé.
+Pécule règle alors la date de départ (plus ancienne opération) et le solde de
+départ (solde donné − opérations pointées passées en banque ce jour-là).
+`Database.bornes_operations()` / `depart_depuis_solde()`,
+`MainWindow.action_premier_releve()`, notice à jour. 7 tests
+(`tests/test_premier_releve.py`, avec un vrai CSV au format Crédit Agricole),
+vus en échec avant ; 336 passent. Parcours joué par capture sur une base
+d'essai : le Bilan affiche le solde donné, aucun bandeau.
+**Pourquoi.** Demande d'André, après le cas d'un nouvel utilisateur (entrée
+ci-dessous) : c'est demander le solde AVANT l'import qui fabrique le piège. On demande le solde à la date de la
+dernière opération, pas celui du jour : sinon les opérations d'entre-deux
+seraient comptées deux fois au prochain import. Lecture automatique du solde
+dans le fichier écartée : formats CSV disparates, et le solde annoncé est daté
+du téléchargement (piège du 01/09/2026).
+**Reste.** Pas de numéro de version (1.37.0 à venir). Vu en passant et corrigé :
+la barre de période restait sur « Toutes périodes » après le premier import
+(`PeriodBar` consommait son placement initial sur une base encore vide ; test
+ajouté). Fausse alerte : le « Cancel » d'une capture venait du script, qui ne
+chargeait pas la traduction Qt (`installer_traduction_qt`). Plus tard peut-être :
+pré-remplir le solde depuis l'OFX (`LEDGERBAL` + `DTASOF`).
+
+## 2026-09-12 — Reculer la date de départ sans changer le solde du jour
+
+**Fait.** Quand des opérations précèdent la date de départ, Pécule propose de
+reculer la date à la plus ancienne, avec un solde de départ calculé pour que le
+solde d'aujourd'hui reste identique (ancien solde − opérations pointées
+réintégrées). La question vient après chaque import qui a ajouté des lignes, et
+par le lien du bandeau orange du Bilan (qui ouvrait les Paramètres). Trois
+réponses : « Reculer la date », « Régler moi-même… », « Laisser tel quel ».
+Calcul dans `Database.proposition_recul_depart()` / `reculer_depart()`,
+boîte dans `MainWindow.proposer_recul_depart()`, notice (rubrique 1) à jour.
+9 tests (`tests/test_recul_depart.py`), écrits avant et vus en échec ;
+329 tests passent. Contrôlé par capture sur une base d'essai : même solde
+avant et après, bandeau disparu.
+**Pourquoi.** Cas d'un nouvel utilisateur (capture du 12/09/2026, 1.33.x) : il
+a saisi son solde du jour, puis importé un an de relevé CSV — 350 opérations
+hors du solde. Le bandeau disait « reculez la date » sans dire
+quel solde mettre en face : un calcul que personne ne fait seul. Le piège
+guette tout nouvel utilisateur, puisque le solde est demandé avant l'import.
+Pas de proposition si le solde de départ n'a jamais été saisi (rien à
+préserver) ni s'il y a des archives (le départ effectif en dépend) : le lien
+retombe alors sur les Paramètres. Les deux comptes d'André n'ont aucune
+opération avant leur départ : la question ne lui sera jamais posée.
+**Reste.** Pas de numéro de version. À la prochaine publication (1.37.0),
+ajouter l'entrée au journal de version de `constants.py`. D'ici là, la
+manœuvre à la main : Paramètres, date = plus ancienne opération, solde =
+solde actuel − total annoncé par le bandeau ; le Bilan doit garder le même solde.
+
+## 2026-09-11 — Récapitulatif « Tous les comptes »
+
+**Fait.** Bouton « 📊 Tous les comptes » sous la liste des comptes (caché tant
+qu'il n'y en a qu'un) : une fenêtre (`ui/recapitulatif.py`) donne, par compte,
+le solde en banque, le non pointé, le solde comptable et la date du dernier
+pointage, puis le total ; un double-clic affiche le compte. Calcul dans
+`Database.soldes_compte()`, notice (rubrique 2) complétée, 7 tests
+(`tests/test_recapitulatif.py`). Contrôlé sur une copie de la vraie base :
+soldes identiques au Bilan de chaque compte.
+**Pourquoi.** Premier vrai retour d'un utilisateur via le questionnaire
+« Votre avis » : « un récapitulatif de l'ensemble des comptes serait très utile ».
+La vue consolidée avait été écartée en 1.24.0 ; André l'a demandée ce jour.
+Pour qu'un compte n'affiche jamais deux soldes différents, `soldes_compte`
+passe par le même chemin que le Bilan au lieu d'en recopier les règles.
+Installé le soir même dans `F:\budget-app\Pecule` à la demande d'André
+(exe contrôlé d'abord sur une copie de la base ; ancien exe gardé en
+`Pecule.exe.avant-recapitulatif` ; `comptes.db` inchangée).
+**Reste.** Pas de numéro de version ni de publication : André ne veut pas
+publier tout de suite. À la prochaine publication, ce sera la 1.37.0.
+Anomalie repérée en chemin, **corrigée le soir même** à la demande d'André :
+archiver une opération pointée datée AVANT la date de départ la faisait
+entrer dans le solde (`total_archivees` ignorait la date de départ) ; et une
+coupure antérieure au départ faisait « reprendre » le compte trop tôt. Deux
+tests dans `tests/test_archives.py`, écrits avant la correction et vus en
+échec. Soldes réels inchangés. Correction pas encore
+installée dans `F:\budget-app\Pecule` (sans effet sur ses données).
+
+## 2026-09-11 — Fiche Gratilog : demande de passage en 1.36.0
+
+**Fait.** Demande de modification envoyée sur `modfile.php?lid=3695` : titre et
+version 1.36.0, lien vers `Pecule-1.36.0-win64.zip` (testé : 54 019 353
+octets servis), taille 54 019 353, et trois retouches de la description —
+phrase sur le bouton « Mise à jour », mention de l'installeur (proposé sur la
+page d'accueil) à côté de l'archive portable, bloc « Changements » vers la
+release v1.36.0. Drapeau et loupe conservés.
+**Pourquoi.** La fiche affichait encore la 1.33.1 ; un membre (jasonliu777)
+avait signalé la 1.36.0 en commentaire. Le lien reste le .zip (habitude de la
+fiche, public attaché au portable).
+**Reste.** Validation par Sylvie Pierrard, puis relire la fiche champ par champ
+(la taille surtout).
+
+Message posté dans le fil du forum (sujet 21527, `post_id` 228327) : installeur,
+bouton « Mise à jour », bouton « Votre avis », correction du Bilan. La 1.35.1
+(retour du logo) volontairement passée sous silence. Réponse de remerciement
+à jasonliu777 sous la fiche (commentaire 10861, en réponse au 10859).
+
 ## 2026-09-10 — Version 1.36.0 publiée (bouton « Mise à jour »)
 
 **Fait.** Release `v1.36.0` avec `Pecule-Setup.exe` (premier installeur publié
