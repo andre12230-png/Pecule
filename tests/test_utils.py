@@ -5,9 +5,27 @@ from datetime import date
 from comptesbudget.utils import (
     MOIS_TOUS, annee_de_periode, annees_disponibles, canonical_cat, cat_color,
     date_debit_differe, deaccent, fmt_date_fr, fmt_euro, in_period,
-    list_periods, mois_disponibles, nom_mois_fr, period_label, periode_voisine,
-    suggest_category,
+    list_periods, mois_disponibles, nom_mois_fr, numero_cheque, period_label,
+    periode_voisine, suggest_category,
 )
+
+
+def test_numero_cheque():
+    # Saisi dans le formulaire (ou venu d'un QIF) : la référence fait foi
+    assert numero_cheque({"type": "Cheque", "reference": "1234567",
+                          "libelle_op": "CHEQUE N° ...0132"}) == "1234567"
+    # Importé : la banque l'écrit dans son libellé, parfois tronqué — et avec
+    # un « ° » abîmé par l'encodage, comme dans les vraies données
+    assert numero_cheque({"type": "Cheque", "reference": "",
+                          "libelle_op": "CHEQUE N� ...0132"}) == "...0132"
+    assert numero_cheque({"type": "Cheque",
+                          "libelle_op": "CHQ 0001234"}) == "0001234"
+    # Chèque saisi sans numéro
+    assert numero_cheque({"type": "Cheque", "libelle_op": "XAV SERVICE"}) == ""
+    # Pas un chèque : la référence est un identifiant de la banque
+    assert numero_cheque({"type": "Prelevement",
+                          "reference": "2624684G11282383"}) == ""
+    assert numero_cheque({"type": "", "libelle_op": "REM CHEQUE 123456"}) == ""
 
 
 def test_fmt_euro_francais():

@@ -15,6 +15,7 @@ from ..constants import (
 )
 from ..utils import (
     fmt_euro, fmt_date_fr, date_debit_differe, JOUR_DEBIT_DIFFERE,
+    numero_cheque,
 )
 from ..labels import build_libelle_profiles
 from .widgets import MontantSpinBox, demander_montant
@@ -139,6 +140,15 @@ class TxDialog(QDialog):
         self.note.setMaxLength(200)
         layout.addRow("Note :", self.note)
 
+        # N° de chèque : n'apparaît que pour le type « Cheque ». Il est rangé
+        # dans la colonne « reference » de l'opération — celle où l'import QIF
+        # met déjà le numéro —, donc sans rien changer à la base.
+        self.cheque_lbl = QLabel("N° de chèque :")
+        self.num_cheque = QLineEdit()
+        self.num_cheque.setMaxLength(20)
+        self.num_cheque.setPlaceholderText("ex. 1234567")
+        layout.addRow(self.cheque_lbl, self.num_cheque)
+
         self.pointee = QCheckBox("Pointée — vérifiée sur le relevé bancaire")
         layout.addRow("", self.pointee)
 
@@ -257,6 +267,7 @@ class TxDialog(QDialog):
             self.cat.setCurrentText(tx.get("categorie", ""))
             self.sous_cat.setCurrentText(tx.get("sous_cat", ""))
             self.note.setText(tx.get("info", ""))
+            self.num_cheque.setText(numero_cheque(tx))
             self.pointee.setChecked(bool(tx.get("pointee")))
             self.prevue.setChecked(bool(tx.get("prevue"))
                                    and not tx.get("pointee"))
@@ -278,8 +289,24 @@ class TxDialog(QDialog):
         self.rb_debit.toggled.connect(lambda _c: self._on_nature_changed())
         self._sync_date_valeur()
 
+        # Le champ « N° de chèque » suit le type choisi.
+        self.type_combo.currentTextChanged.connect(
+            lambda _t: self._maj_champ_cheque())
+        self._maj_champ_cheque()
+
         # Initialisation du motif par défaut = libellé
         self.rule_pattern.setText(self.libelle.text())
+
+    def _est_un_cheque(self) -> bool:
+        return self.type_combo.currentText() == "Cheque"
+
+    def _maj_champ_cheque(self):
+        """Montre le champ « N° de chèque » pour un chèque, le cache sinon."""
+        visible = self._est_un_cheque()
+        if visible != self.num_cheque.isVisibleTo(self):
+            self.cheque_lbl.setVisible(visible)
+            self.num_cheque.setVisible(visible)
+            self.adjustSize()
 
     def _on_date_val_changed(self, _d):
         """L'utilisateur a saisi lui-même une date de valeur : on arrête de
@@ -489,7 +516,7 @@ class TxDialog(QDialog):
         # Champs récurrent
         rec_end = self.rec_end.date()
         rec_end_str = rec_end.toString("yyyy-MM-dd") if rec_end > QDate(1900, 1, 1) else None
-        return {
+        valeurs = {
             "date":        d,
             "date_valeur": dv,
             "libelle":     self.libelle.text().strip(),
@@ -518,6 +545,13 @@ class TxDialog(QDialog):
                 "actif":        1,
             },
         }
+        # La référence n'est renvoyée QUE pour un chèque : pour un prélèvement
+        # ou un virement importé, elle contient l'identifiant interne de la
+        # banque, qui sert à reconnaître les doublons à l'import — la
+        # modification d'une telle opération ne doit pas l'effacer.
+        if self._est_un_cheque():
+            valeurs["reference"] = self.num_cheque.text().strip()
+        return valeurs
 
 
 # ─────────────────────────────────────────────────────────────────────────────

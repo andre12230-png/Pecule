@@ -118,11 +118,13 @@ class OperationsView(QWidget):
         self.table.clicked.connect(self.handle_click)
 
         # Largeurs de colonnes : P, Date opér., Date valeur, Libellé, Catégorie,
-        # Sous-cat, Type, Débit, Crédit
+        # Sous-cat, Type, Débit, Crédit. Type à 150 pour « Cheque n° 1234567 »
+        # (124 px de texte) ; les 30 px sont pris au Libellé, pour que le total
+        # — et donc la tenue en moitié d'écran — ne change pas.
         h = self.table.horizontalHeader()
         h.setSectionResizeMode(QHeaderView.Interactive)
         h.setStretchLastSection(False)
-        for i, w in enumerate([32, 90, 95, 260, 160, 140, 120, 100, 100]):
+        for i, w in enumerate([32, 90, 95, 230, 160, 140, 150, 100, 100]):
             self.table.setColumnWidth(i, w)
 
         # Tri par clic sur les en-têtes. Départ sur la date qui correspond au
@@ -468,7 +470,9 @@ class OperationsView(QWidget):
         v_db = {k: v[k] for k in v if not k.startswith("_")}
         v_db["id"] = str(uuid.uuid4())
         v_db["libelle_op"] = v_db["libelle"]
-        v_db["reference"] = ""
+        # Une saisie manuelle n'a pas de référence bancaire, sauf le numéro
+        # d'un chèque, que le formulaire renvoie dans « reference ».
+        v_db.setdefault("reference", "")
         self.db.insert_tx(v_db)
         # Création éventuelle de règle
         self._maybe_create_rule({"_create_rule": rule_request, "_rule": rule_info,

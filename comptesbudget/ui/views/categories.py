@@ -84,7 +84,11 @@ class CategoriesView(QWidget):
         self.tx_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tx_table.verticalHeader().setVisible(False)
         self.tx_table.doubleClicked.connect(self._edit_tx)
-        for i, w in enumerate([32, 90, 280, 160, 140, 120, 100, 100]):
+        # Mêmes largeurs que la vue Opérations (P, Date opér., Date valeur,
+        # Libellé, Catégorie, Sous-cat, Type, Débit, Crédit). L'ancienne liste
+        # ignorait la colonne « Date valeur » : chaque largeur tombait sur la
+        # colonne voisine.
+        for i, w in enumerate([32, 90, 95, 230, 160, 140, 150, 100, 100]):
             self.tx_table.setColumnWidth(i, w)
         self.tx_table.setSortingEnabled(True)
         self.tx_table.horizontalHeader().setSortIndicatorShown(True)

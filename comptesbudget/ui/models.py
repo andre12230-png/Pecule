@@ -7,7 +7,7 @@ from PySide6.QtGui import (
 )
 
 from ..utils import (
-    cat_color, deaccent, fmt_euro, fmt_date_fr,
+    cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
 )
 
 # Rôle sous lequel chaque cellule range sa valeur de TRI, distincte du texte
@@ -61,6 +61,11 @@ class TxTableModel(QStandardItemModel):
         date_op = tx.get("date", "")
         date_val = tx.get("date_valeur") or date_op
         is_deferred = date_val and date_val != date_op
+        # Le numéro d'un chèque s'affiche dans la colonne Type (« Cheque
+        # n° 1234567 ») plutôt que dans une colonne à lui : une colonne de plus
+        # élargirait la fenêtre, qui doit tenir en moitié d'écran.
+        num = numero_cheque(tx)
+        texte_type = tx.get("type", "") + (f" n° {num}" if num else "")
         items = [
             QStandardItem("✔" if pointee else ("⏳" if prevue else "○")),
             QStandardItem(fmt_date_fr(date_op)),
@@ -68,7 +73,7 @@ class TxTableModel(QStandardItemModel):
             QStandardItem(tx.get("libelle", "")),
             QStandardItem(tx.get("categorie", "")),
             QStandardItem(tx.get("sous_cat", "")),
-            QStandardItem(tx.get("type", "")),
+            QStandardItem(texte_type),
             QStandardItem(fmt_euro(tx["montant"]) if tx.get("montant", 0) < 0 else ""),
             QStandardItem(fmt_euro(tx["montant"]) if tx.get("montant", 0) > 0 else ""),
         ]
@@ -118,6 +123,11 @@ class TxTableModel(QStandardItemModel):
             # Même remarque : #999 sur blanc rendait la date de valeur
             # presque illisible, alors qu'elle sert au rapprochement.
             items[2].setForeground(QBrush(QColor("#5A5A5A")))
+
+        # Numéro de chèque en bulle d'aide : la colonne Type est étroite et
+        # peut couper un long numéro.
+        if num:
+            items[6].setToolTip(f"Chèque n° {num}")
 
         # Pastille de catégorie : couleur de catégorie
         items[4].setForeground(QBrush(QColor(cat_color(tx.get("categorie", "")))))

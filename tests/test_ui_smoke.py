@@ -350,6 +350,43 @@ def test_txdialog_date_valeur_carte_differee(qapp, db):
     assert edit.values()["date_valeur"] == existante["date_valeur"]
 
 
+def test_txdialog_numero_de_cheque(qapp):
+    """Le champ « N° de chèque » n'existe que pour un chèque, et modifier une
+    autre opération ne touche pas à sa référence bancaire (qui sert à
+    reconnaître les doublons à l'import)."""
+    from comptesbudget.ui.dialogs import TxDialog
+    from comptesbudget.ui.models import TxTableModel
+
+    dlg = TxDialog(None, None, categories=CATEGORIES_DEFAUT, all_transactions=[])
+    assert not dlg.num_cheque.isVisibleTo(dlg)
+    assert "reference" not in dlg.values()
+    dlg.type_combo.setCurrentText("Cheque")
+    assert dlg.num_cheque.isVisibleTo(dlg)
+    dlg.num_cheque.setText(" 1234567 ")
+    assert dlg.values()["reference"] == "1234567"
+
+    # Prélèvement importé : son identifiant bancaire n'est ni montré ni renvoyé
+    prlv = _tx(id="p", type="Prelevement", reference="2624684G11282383")
+    edit = TxDialog(None, prlv, categories=CATEGORIES_DEFAUT,
+                    all_transactions=[prlv])
+    assert not edit.num_cheque.isVisibleTo(edit)
+    assert "reference" not in edit.values()
+
+    # Chèque existant : son numéro est pré-rempli
+    chq = _tx(id="c", type="Cheque", reference="0000132")
+    edit = TxDialog(None, chq, categories=CATEGORIES_DEFAUT,
+                    all_transactions=[chq])
+    assert edit.num_cheque.text() == "0000132"
+
+    # Le tableau l'affiche dans la colonne Type, et seulement pour le chèque
+    model = TxTableModel()
+    model.load([chq, prlv])
+    col = TxTableModel.HEADERS.index("Type")
+    assert model.item(0, col).text() == "Cheque n° 0000132"
+    assert model.item(0, col).toolTip() == "Chèque n° 0000132"
+    assert model.item(1, col).text() == "Prelevement"
+
+
 def test_rapport_et_recherche(qapp, db):
     from comptesbudget.ui.report import (
         MonthlyReportDialog, build_monthly_report_html,

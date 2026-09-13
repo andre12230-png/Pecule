@@ -282,6 +282,31 @@ def est_paiement_carte(type_op: str) -> bool:
     return "carte" in (type_op or "").lower()
 
 
+# Numéro de chèque tel que la banque l'écrit dans son libellé : « CHEQUE N°
+# ...0132 », « CHQ 1234567 ». Les points de suspension disent que la banque a
+# tronqué le numéro : on les garde, pour ne pas faire passer 0132 pour le
+# numéro entier.
+_RE_NUM_CHEQUE = re.compile(r"\b(?:ch[eéè]que|chq)\b[^0-9.]*(\.*\d{3,})",
+                            re.IGNORECASE)
+
+
+def numero_cheque(tx: dict) -> str:
+    """Numéro du chèque d'une opération, ou "" si ce n'est pas un chèque.
+
+    Il vient de la colonne « reference » quand elle est remplie (saisi dans
+    le formulaire, ou importé d'un fichier QIF), sinon du libellé d'origine de
+    la banque. Pour les autres types, « reference » contient un identifiant
+    interne de la banque, qui n'a rien d'un numéro de chèque : on ne le montre
+    pas."""
+    if (tx.get("type") or "").strip() != "Cheque":
+        return ""
+    ref = (tx.get("reference") or "").strip()
+    if ref:
+        return ref
+    m = _RE_NUM_CHEQUE.search(tx.get("libelle_op") or "")
+    return m.group(1) if m else ""
+
+
 def carte_a_debit_differe(operations: list[dict]) -> bool:
     """La carte de ce compte est-elle à débit différé ?
 

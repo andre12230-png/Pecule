@@ -201,6 +201,11 @@ de recherche qui accepte le libellé, la note, mais aussi un <b>montant</b> (45,
 (<code>○</code> non pointée / <code>✔</code> pointée et vérifiée sur le relevé).
 Les colonnes <b>Date opér.</b> et <b>Date valeur</b> sont affichées séparément, avec
 indication ⏱ orange si elles diffèrent (débit différé).</p>
+<p><b>Numéro de chèque</b> : choisissez le type <b>Cheque</b> dans le formulaire,
+un champ <b>N° de chèque</b> apparaît. Le numéro s'affiche ensuite dans la
+colonne <b>Type</b> (« Cheque n° 1234567 ») et se retrouve par la recherche.
+Pour un chèque importé, Pécule reprend le numéro que la banque a écrit dans son
+libellé — parfois tronqué (« ...0132 »), vous pouvez alors le compléter.</p>
 <ul>
   <li><b>Double-clic</b> sur une ligne → ouvre le formulaire de modification</li>
   <li><b>Touche <kbd>Entrée</kbd></b> → modifie l'opération sélectionnée</li>

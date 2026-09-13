@@ -48,7 +48,8 @@ class GlobalSearchDialog(QDialog):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.doubleClicked.connect(self._edit_tx)
-        for i, w in enumerate([32, 85, 95, 280, 150, 140, 110, 95, 95]):
+        # Type élargi pour « Cheque n° 1234567 », pris au Libellé (total inchangé)
+        for i, w in enumerate([32, 85, 95, 240, 150, 140, 150, 95, 95]):
             self.table.setColumnWidth(i, w)
         # Tri par clic sur les en-têtes, du plus récent au plus ancien au départ
         self.table.setSortingEnabled(True)
