@@ -13,6 +13,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-13 — Gratilog : fiche et fil passent à la 1.37.0
+
+**Fait.** Demande de modification envoyée sur `modfile.php?lid=3695` : titre et
+version 1.37.0, lien vers `v1.37.0/Pecule-Setup.exe` (testé : 38 510 669 octets
+servis), taille 38 510 669, les quatre liens de la description (installeur, zip
+`Pecule-1.37.0-win64.zip` testé à 54 174 420 octets, page de release) et la ligne
+« v 1.37.0 » sous Changements. Deux phrases ajoutées : le récapitulatif « Tous les
+comptes » et le premier lancement (import d'abord, solde ensuite). Drapeau et loupe
+contrôlés, plus aucune trace de « 1.36 ». Message #12 posté dans le fil
+(`topic_id=21527`) par la réponse rapide, en un seul exemplaire, signature présente.
+**Pourquoi.** La demande 1.36.0 avait été validée, mais l'administratrice a changé
+le lien principal pour l'installeur en gardant la taille du zip (51,52 Mo affichés).
+Ce choix est conservé ; la taille déclarée est donc désormais celle de l'installeur.
+Dans le fil, un membre regrettait de devoir télécharger le CSV sur le site de sa
+banque : le message explique que c'est le prix de « aucune donnée ne quitte votre
+ordinateur » (ni identifiants bancaires, ni agrégateur).
+**Reste.** Validation par l'administratrice, puis relire la fiche champ par champ
+(la taille surtout, et le `<title>` avec un paramètre anti-cache).
+
 ## 2026-09-12 — Préparation de la 1.37.0
 
 **Fait.** Les cinq porteurs de version remontés ensemble : `APP_VERSION` et
