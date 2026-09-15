@@ -155,6 +155,11 @@ class MainWindow(QMainWindow):
         add_btn("🔍 Doublons", self.action_find_duplicates)
 
         add_section("Mes données")
+        # Les sauvegardes automatiques restent sur le même disque que la
+        # base : celle-ci part sur une clé ou un disque externe.
+        add_btn("💽 Sauvegarde externe", self.action_sauvegarde_externe,
+                "Copie vos données sur une clé USB ou un disque externe, "
+                "dans un dossier daté, et vérifie la copie")
         add_btn("📦 Archiver", self.action_archives,
                 "Met de côté les opérations anciennes : elles sortent des "
                 "listes sans être supprimées")
@@ -1055,3 +1060,43 @@ class MainWindow(QMainWindow):
         """Ouvre la fenêtre « Mise à jour » : la version installée, et la
         page de la dernière version dans le navigateur, à la demande."""
         MiseAJourDialog(self).exec()
+
+    def action_sauvegarde_externe(self):
+        """Copie la base sur une clé USB ou un disque choisi par l'utilisateur.
+
+        D'abord une copie cohérente de la base ouverte (API de sauvegarde de
+        SQLite, dans un dossier temporaire), puis sa copie vérifiée sur la
+        clé : voir sauvegarde_externe.py. Le dossier choisi est retenu tant
+        que Pécule reste ouvert.
+        """
+        import sqlite3
+        import tempfile
+        from pathlib import Path
+
+        from .. import constants
+        from ..sauvegarde_externe import (
+            SauvegardeImpossible, instantane_sqlite, sauvegarder,
+        )
+
+        depart = getattr(self, "_destination_sauvegarde", "")
+        choisi = QFileDialog.getExistingDirectory(
+            self, "Choisissez la clé USB ou le disque où sauvegarder", depart)
+        if not choisi:
+            return                      # l'utilisateur a renoncé
+        base = Path(self.db.path).resolve()
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                instant = instantane_sqlite(self.db.conn, Path(tmp) / base.name)
+                cible, copies = sauvegarder(
+                    [instant], Path(choisi), base.parent, "Pécule",
+                    constants.APP_VERSION)
+        except (SauvegardeImpossible, sqlite3.Error) as e:
+            QMessageBox.warning(self, "Sauvegarde impossible", str(e))
+            return
+        self._destination_sauvegarde = choisi
+        liste = "\n".join(f"  • {nom}" for nom in copies)
+        QMessageBox.information(
+            self, "Sauvegarde terminée",
+            f"Vos données ont été copiées et vérifiées dans :\n{cible}\n\n"
+            f"{liste}\n\nPour la remettre en service un jour, suivez le "
+            "fichier LISEZMOI.txt placé à côté.")

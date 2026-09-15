@@ -637,10 +637,16 @@ s'agit du dossier de l'application elle-même, c'est une installation dite
 copier tel quel. Sinon, vos données sont rangées dans votre dossier personnel,
 séparément du programme — c'est plus sûr, car une mise à jour du logiciel ne
 peut alors pas les toucher.</p>
-<p>Pour une sauvegarde externe : copiez <code>comptes.db</code> ailleurs
-(clé USB, OneDrive…) — pour restaurer, remettez-le à sa place. Vous pouvez
-aussi utiliser <code>💾 Exporter (JSON)</code> (export complet) puis
-<code>♻️ Restaurer (JSON)</code> pour le réimporter plus tard.</p>
+<p><b>Sauvegarde externe.</b> Ces copies automatiques restent sur le même
+disque que vos données : si ce disque lâche, elles partent avec lui. Le bouton
+<code>💽 Sauvegarde externe</code> (menu de gauche, « Mes données ») copie votre
+base sur la clé USB ou le disque de votre choix, dans un dossier daté, et
+vérifie la copie. Un fichier <code>LISEZMOI.txt</code>, déposé à côté, explique
+comment la remettre en service : fermer Pécule, recopier
+<code>comptes.db</code> à sa place, relancer. Faites-le de temps en temps, par
+exemple après chaque import de relevé.</p>
+<p>Vous pouvez aussi utiliser <code>💾 Exporter (JSON)</code> (export complet)
+puis <code>♻️ Restaurer (JSON)</code> pour le réimporter plus tard.</p>
 <div class="warn">⚠️ La restauration JSON <b>fusionne</b> : pour chaque opération,
 la version la plus récente gagne. Pour revenir exactement à un état antérieur,
 préférez la copie du fichier <code>comptes.db</code>.</div>
