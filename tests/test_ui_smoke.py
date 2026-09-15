@@ -1816,9 +1816,51 @@ def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):
 
     assert "tableur" in fenetre._conseil_depot(_Evenement("C:/releve.xlsx"))
     assert "PDF" in fenetre._conseil_depot(_Evenement("C:/releve.pdf"))
-    assert "Restaurer (JSON)" in fenetre._conseil_depot(_Evenement("C:/sauve.json"))
+    conseil_json = fenetre._conseil_depot(_Evenement("C:/sauve.json"))
+    assert "Restaurer (JSON)" in conseil_json
+    assert "Paramètres" in conseil_json      # il n'est plus dans le menu
     # Un vrai relevé n'a pas besoin de conseil : il s'importe.
     assert fenetre._conseil_depot(_Evenement("C:/releve.csv")) == ""
+
+
+def test_export_json_hors_du_menu_de_gauche(tmp_path):
+    """15/09/2026 : Exporter / Restaurer (JSON) quittent le menu de gauche
+    (utiles pour transférer deux installations, pas au quotidien), et
+    « Sauvegarde externe » reprend l'emoji 💾."""
+    from PySide6.QtWidgets import QPushButton
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "menu.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    textes = [b.text() for b in fenetre.findChildren(QPushButton)]
+    assert "💾 Sauvegarde externe" in textes
+    assert not any("(JSON)" in t for t in textes)
+
+
+def test_parametres_avance_ferme_puis_agit():
+    """Les boutons « Avancé » ferment la fenêtre Paramètres et disent
+    laquelle des deux actions lancer : la fenêtre ne doit pas rester ouverte
+    pendant une restauration, qui change le solde de départ."""
+    import shiboken6
+    from comptesbudget.ui.dialogs import SettingsDialog
+
+    # Chaque fenêtre est détruite explicitement à la fin : laissées à
+    # l'arrêt de Python, ces fenêtres fermées par un clic faisaient planter
+    # la sortie de la suite de tests (tous les tests passaient pourtant).
+    for bouton, attendu in (("btn_exporter_json", "exporter"),
+                            ("btn_restaurer_json", "restaurer")):
+        dlg = SettingsDialog(None, "2026-01-01", 0.0, "Compte", avance=True)
+        getattr(dlg, bouton).click()
+        assert dlg.action_avancee == attendu
+        assert dlg.result() == 0          # fermée sans valider
+        shiboken6.delete(dlg)
+
+    # Sans la partie « Avancé » (premier lancement), rien de tout cela.
+    simple = SettingsDialog(None, "2026-01-01", 0.0, "Compte")
+    assert not hasattr(simple, "btn_exporter_json")
+    assert simple.action_avancee is None
+    shiboken6.delete(simple)
 
 
 def test_reprendre_un_ancien_fichier_de_donnees(qapp, tmp_path, monkeypatch):

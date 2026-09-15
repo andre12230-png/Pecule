@@ -560,8 +560,13 @@ class TxDialog(QDialog):
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, initial_date: str = "2025-01-01",
-                 initial_balance: float = 0.0, nom_compte: str = ""):
+                 initial_balance: float = 0.0, nom_compte: str = "",
+                 avance: bool = False):
         super().__init__(parent)
+        # Action demandée par un bouton de la partie « Avancé » (« exporter »
+        # ou « restaurer »), lancée par la fenêtre principale une fois
+        # celle-ci refermée. None : aucune.
+        self.action_avancee: Optional[str] = None
         self.setWindowTitle(f"Paramètres — {nom_compte}" if nom_compte
                             else "Paramètres")
         self.setMinimumWidth(440)
@@ -594,6 +599,42 @@ class SettingsDialog(QDialog):
         self.initial_balance.setValue(initial_balance)
         layout.addRow("Solde de départ :", self.initial_balance)
 
+        if avance:
+            # Export et restauration JSON : sortis du menu de gauche le
+            # 15/09/2026. Ils servent à transférer ou fusionner deux
+            # installations de Pécule, pas à l'usage de tous les jours.
+            filet = QFrame()
+            filet.setFrameShape(QFrame.HLine)
+            filet.setStyleSheet("color:#CCC")
+            layout.addRow(filet)
+            titre = QLabel("<b>Avancé</b>")
+            layout.addRow(titre)
+            explication = QLabel(
+                "Pour transférer toutes vos données vers une autre "
+                "installation de Pécule, ou fusionner deux installations. "
+                "Pour une simple sauvegarde, préférez « 💾 Sauvegarde "
+                "externe » dans le menu de gauche.")
+            explication.setWordWrap(True)
+            explication.setStyleSheet("color:#555")
+            layout.addRow(explication)
+            ligne = QHBoxLayout()
+            self.btn_exporter_json = QPushButton("💾 Exporter (JSON)…")
+            self.btn_exporter_json.setToolTip(
+                "Export complet : opérations, règles, budgets, récurrences "
+                "et réglages")
+            self.btn_exporter_json.clicked.connect(
+                lambda: self._choisir_avance("exporter"))
+            ligne.addWidget(self.btn_exporter_json)
+            self.btn_restaurer_json = QPushButton("♻️ Restaurer (JSON)…")
+            self.btn_restaurer_json.setToolTip(
+                "Réimporte un export JSON en le fusionnant : pour chaque "
+                "enregistrement, la version la plus récente est conservée")
+            self.btn_restaurer_json.clicked.connect(
+                lambda: self._choisir_avance("restaurer"))
+            ligne.addWidget(self.btn_restaurer_json)
+            ligne.addStretch()
+            layout.addRow(ligne)
+
         self.btns = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.btns.accepted.connect(self.accept)
@@ -603,6 +644,13 @@ class SettingsDialog(QDialog):
     def values(self) -> tuple[str, float]:
         return (self.initial_date.date().toString("yyyy-MM-dd"),
                 self.initial_balance.value())
+
+    def _choisir_avance(self, action: str) -> None:
+        """Retient l'action et ferme SANS valider : les réglages saisis ne
+        sont pas enregistrés, et la restauration pourra changer le solde
+        de départ sans que cette fenêtre le réécrive ensuite."""
+        self.action_avancee = action
+        self.reject()
 
 
 # ─────────────────────────────────────────────────────────────────────────────

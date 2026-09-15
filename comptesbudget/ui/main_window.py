@@ -157,18 +157,16 @@ class MainWindow(QMainWindow):
         add_section("Mes données")
         # Les sauvegardes automatiques restent sur le même disque que la
         # base : celle-ci part sur une clé ou un disque externe.
-        add_btn("💽 Sauvegarde externe", self.action_sauvegarde_externe,
+        add_btn("💾 Sauvegarde externe", self.action_sauvegarde_externe,
                 "Copie vos données sur une clé USB ou un disque externe, "
                 "dans un dossier daté, et vérifie la copie")
         add_btn("📦 Archiver", self.action_archives,
                 "Met de côté les opérations anciennes : elles sortent des "
                 "listes sans être supprimées")
-        add_btn("💾 Exporter (JSON)", self.action_export,
-                "Export complet : opérations, règles, budgets, récurrences "
-                "et réglages (solde/date de départ)")
-        add_btn("♻️ Restaurer (JSON)", self.action_import_json,
-                "Réimporte un export JSON en le fusionnant : pour chaque "
-                "enregistrement, la version la plus récente est conservée")
+        # Exporter / Restaurer (JSON) ont quitté ce menu le 15/09/2026 pour
+        # « ⚙️ Paramètres », partie « Avancé » : ils servent à transférer ou
+        # fusionner deux installations, pas au quotidien. Pour se protéger,
+        # l'utilisateur a désormais « Sauvegarde externe ».
         # Porte de secours après une mise à jour : sans elle, l'invite du
         # premier lancement est la seule occasion de retrouver son fichier.
         self.btn_reprendre = add_btn(
@@ -515,9 +513,9 @@ class MainWindow(QMainWindow):
             "banque, cherchez « exporter » ou « télécharger » vos opérations "
             "au format CSV ou OFX.",
         (".json",):
-            "Pour réimporter un export JSON de Pécule, passez par le bouton "
-            "« Restaurer (JSON) » du menu de gauche : il fusionne vos "
-            "données au lieu de les remplacer.",
+            "Pour réimporter un export JSON de Pécule, ouvrez « ⚙️ "
+            "Paramètres », partie « Avancé », bouton « Restaurer (JSON) » : "
+            "il fusionne vos données au lieu de les remplacer.",
     }
 
     def _conseil_depot(self, event) -> str:
@@ -605,8 +603,15 @@ class MainWindow(QMainWindow):
         # saisi (cf. le bandeau du Bilan).
         compte = self.db.get_compte()
         jamais_renseigne = compte is None or compte["solde_initial"] is None
-        dlg = SettingsDialog(self, d, b, self.db.nom_compte())
+        dlg = SettingsDialog(self, d, b, self.db.nom_compte(), avance=True)
         if dlg.exec() != QDialog.Accepted:
+            # Les boutons de la partie « Avancé » ferment la fenêtre AVANT
+            # d'agir : une restauration JSON change le solde de départ, que
+            # la fenêtre, restée ouverte, réécrirait avec l'ancienne valeur.
+            if dlg.action_avancee == "exporter":
+                self.action_export()
+            elif dlg.action_avancee == "restaurer":
+                self.action_import_json()
             return
         nd, nb = dlg.values()
         # Valider le formulaire sans y toucher enregistrait 0,00 € — et
@@ -823,7 +828,8 @@ class MainWindow(QMainWindow):
                 "Cette installation contient déjà des opérations : elles "
                 "seraient perdues.\n\nPour fusionner deux fichiers, passez "
                 "par « Exporter (JSON) » depuis l'autre installation, puis "
-                "« Restaurer (JSON) » ici.")
+                "« Restaurer (JSON) » ici : tous deux sont dans « ⚙️ "
+                "Paramètres », partie « Avancé ».")
             return False
         try:
             self.db.conn.close()          # Windows refuse d'écraser un fichier ouvert
@@ -1004,7 +1010,8 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Export",
             f"Données exportées : {path}\n\n"
             "L'export contient opérations, règles, budgets, récurrences et "
-            "réglages. Il peut être réimporté via « ♻️ Restaurer (JSON) ».")
+            "réglages. Il peut être réimporté via « ♻️ Restaurer (JSON) » "
+            "(⚙️ Paramètres, partie « Avancé »).")
 
     def action_import_json(self):
         """Restaure/fusionne un export JSON : pour chaque enregistrement, la

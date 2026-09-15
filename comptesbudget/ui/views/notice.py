@@ -578,13 +578,12 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
   <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
   <tr><td>🔍 Doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
-  <tr><td>💾 Exporter (JSON)</td><td>Export complet : opérations, règles, budgets, récurrences et réglages</td></tr>
-  <tr><td>♻️ Restaurer (JSON)</td><td>Réimporte un export JSON en le fusionnant (la version la plus récente gagne)</td></tr>
+  <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer ou supprimer un compte bancaire</td></tr>
-  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b></td></tr>
+  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter (JSON)</b> et <b>Restaurer (JSON)</b>, pour transférer ou fusionner deux installations</td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
   <tr><td>🔄 Mise à jour</td><td>Affiche votre version et ouvre, dans votre navigateur, la page de la dernière version ou son installeur (§&nbsp;9). Pécule ne se connecte à rien : c'est vous qui comparez les numéros</td></tr>
@@ -639,14 +638,17 @@ séparément du programme — c'est plus sûr, car une mise à jour du logiciel 
 peut alors pas les toucher.</p>
 <p><b>Sauvegarde externe.</b> Ces copies automatiques restent sur le même
 disque que vos données : si ce disque lâche, elles partent avec lui. Le bouton
-<code>💽 Sauvegarde externe</code> (menu de gauche, « Mes données ») copie votre
+<code>💾 Sauvegarde externe</code> (menu de gauche, « Mes données ») copie votre
 base sur la clé USB ou le disque de votre choix, dans un dossier daté, et
 vérifie la copie. Un fichier <code>LISEZMOI.txt</code>, déposé à côté, explique
 comment la remettre en service : fermer Pécule, recopier
 <code>comptes.db</code> à sa place, relancer. Faites-le de temps en temps, par
 exemple après chaque import de relevé.</p>
-<p>Vous pouvez aussi utiliser <code>💾 Exporter (JSON)</code> (export complet)
-puis <code>♻️ Restaurer (JSON)</code> pour le réimporter plus tard.</p>
+<p><b>Transférer ou fusionner deux installations.</b> Dans
+<code>⚙️ Paramètres</code>, partie « Avancé » : <code>Exporter (JSON)</code>
+écrit un export complet, <code>Restaurer (JSON)</code> le réimporte dans une
+autre installation de Pécule. Pour une simple sauvegarde, préférez la
+sauvegarde externe ci-dessus.</p>
 <div class="warn">⚠️ La restauration JSON <b>fusionne</b> : pour chaque opération,
 la version la plus récente gagne. Pour revenir exactement à un état antérieur,
 préférez la copie du fichier <code>comptes.db</code>.</div>
@@ -830,7 +832,8 @@ et accessible depuis l'onglet Règles auto.</dd>
 <dd>Réimporte un export JSON en le <i>fusionnant</i> avec les données :
 pour chaque opération, règle ou récurrence, la version la plus récente
 est conservée — rien de plus récent que le fichier n'est écrasé. Les
-suppressions plus récentes sont propagées.</dd>
+suppressions plus récentes sont propagées. Se trouve dans ⚙️ Paramètres,
+partie « Avancé ».</dd>
 
 <dt>Solde bancaire réel (pointé)</dt>
 <dd>Montant réellement disponible sur le compte, tel qu'affiché en premier
