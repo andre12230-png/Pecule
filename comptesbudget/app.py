@@ -79,9 +79,68 @@ def verrouiller_instance(dossier: str):
     return verrou
 
 
+# ──────────────── Thème clair, quel que soit le réglage de Windows ─────────
+# Pécule s'affiche TOUJOURS en thème clair : c'est un choix, pas un oubli.
+# Attention au piège corrigé le 16/09/2026 : la palette était construite à
+# partir de celle du système (`app.palette()`), et l'on n'y remplaçait que les
+# FONDS. Sur un poste réglé en « mode sombre », Qt fournit une palette dont les
+# TEXTES sont blancs : ceux-ci se retrouvaient sur le fond crème imposé ici,
+# donc invisibles — la boîte « Bienvenue dans Pécule » apparaissait vide.
+# La palette est désormais construite entièrement, textes compris, sans rien
+# emprunter au système.
+
+# Couleurs de l'application. Chaque texte a été vérifié contre son fond :
+# au moins 4,5 pour 1 de contraste (cf. tests/test_theme_clair.py).
+_CREME       = "#ECE9D8"   # fond des fenêtres
+_BLANC       = "#FFFFFF"   # fond des champs et des listes
+_LIGNE_PAIRE = "#F5F5F0"   # une ligne sur deux dans les tableaux
+_ENCRE       = "#000000"   # tous les textes
+_SELECTION   = "#316AC5"   # fond de la ligne sélectionnée
+_BULLE       = "#FFFFDC"   # fond des info-bulles
+_GRIS_PALE   = "#6B6B6B"   # texte d'invite et libellés désactivés
+_LIEN        = "#0B5AA8"
+_LIEN_VU     = "#6A3FA0"
+
+
+def palette_claire() -> QPalette:
+    """La palette de Pécule, construite de zéro — fonds ET textes.
+
+    Ne prend rien à la palette du système : c'est ce qui garantit la même
+    apparence sur un poste réglé en clair et sur un poste réglé en sombre."""
+    pal = QPalette()
+    pal.setColor(QPalette.Window,          QColor(_CREME))
+    pal.setColor(QPalette.WindowText,      QColor(_ENCRE))
+    pal.setColor(QPalette.Base,            QColor(_BLANC))
+    pal.setColor(QPalette.Text,            QColor(_ENCRE))
+    pal.setColor(QPalette.AlternateBase,   QColor(_LIGNE_PAIRE))
+    pal.setColor(QPalette.Button,          QColor(_CREME))
+    pal.setColor(QPalette.ButtonText,      QColor(_ENCRE))
+    pal.setColor(QPalette.ToolTipBase,     QColor(_BULLE))
+    pal.setColor(QPalette.ToolTipText,     QColor(_ENCRE))
+    pal.setColor(QPalette.Highlight,       QColor(_SELECTION))
+    pal.setColor(QPalette.HighlightedText, QColor(_BLANC))
+    pal.setColor(QPalette.PlaceholderText, QColor(_GRIS_PALE))
+    pal.setColor(QPalette.BrightText,      QColor(_BLANC))
+    pal.setColor(QPalette.Link,            QColor(_LIEN))
+    pal.setColor(QPalette.LinkVisited,     QColor(_LIEN_VU))
+    # Ce qui est désactivé s'efface, sans disparaître pour autant.
+    for role in (QPalette.WindowText, QPalette.Text, QPalette.ButtonText):
+        pal.setColor(QPalette.Disabled, role, QColor(_GRIS_PALE))
+    return pal
+
+
+def appliquer_theme_clair(app: QApplication) -> None:
+    """Impose à l'application son apparence claire.
+
+    Le style « Fusion » est indispensable : les styles natifs de Windows
+    peignent certains textes eux-mêmes, sans consulter la palette."""
+    app.setStyle("Fusion")
+    app.setPalette(palette_claire())
+
+
 def main():
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    appliquer_theme_clair(app)
     installer_traduction_qt(app)
 
     # Icône d'application (visible dans la barre des tâches Windows)
@@ -96,15 +155,6 @@ def main():
                 "andre.Pecule.1.0")
         except Exception:
             pass
-
-    # Palette légèrement Windows-like
-    pal = app.palette()
-    pal.setColor(QPalette.Window,       QColor("#ECE9D8"))
-    pal.setColor(QPalette.Base,         QColor("#FFFFFF"))
-    pal.setColor(QPalette.AlternateBase, QColor("#F5F5F0"))
-    pal.setColor(QPalette.Highlight,    QColor("#316AC5"))
-    pal.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
-    app.setPalette(pal)
 
     # Une seule fenêtre à la fois sur une même base (cf. verrouiller_instance).
     verrou = verrouiller_instance(_data_dir())

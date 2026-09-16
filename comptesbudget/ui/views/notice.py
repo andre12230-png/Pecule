@@ -133,6 +133,11 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
   </li>
 </ol>
 
+<p><b>Pécule s'affiche toujours en clair</b>, même si Windows est réglé en mode sombre :
+c'est voulu, et il n'y a pas de réglage à chercher. Sur les versions antérieures à
+celle-ci, un poste en mode sombre rendait certains textes blancs sur fond clair, donc
+illisibles — notamment la fenêtre d'accueil ci-dessus.</p>
+
 <h2>2. Plusieurs comptes</h2>
 <p>Pécule peut suivre <b>plusieurs comptes bancaires</b> : un compte courant et
 un livret, deux comptes d'un même foyer, un compte dédié à une maison…
