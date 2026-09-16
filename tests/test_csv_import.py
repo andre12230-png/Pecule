@@ -521,3 +521,63 @@ def test_entete_introuvable_explique_quoi_faire(tmp_path):
     with pytest.raises(ValueError) as err:
         import_csv(p, db)
     assert "Date;Libelle;Montant" in str(err.value)
+
+
+# ── Relevé Crédit Agricole : libellés multilignes et bloc « débit différé » ──
+#
+# L'export CSV du Crédit Agricole a deux particularités que les autres banques
+# n'ont pas (constatées sur un vrai relevé le 16/09/2026) :
+#   - le libellé tient sur PLUSIEURS LIGNES entre guillemets (nature de
+#     l'opération, tiers, puis références SEPA) ;
+#   - le fichier se termine par le DÉTAIL des achats carte du mois, alors que
+#     le compte porte déjà la ligne « DEPENSES CARTE » qui les totalise.
+
+_CA_CARTE = (
+    'Date;Libelle;Debit euros;Credit euros;\n'
+    '31/08/2026;"Prelevement carte\n'
+    'DEPENSES CARTE X1234 AU 20/08/26\n'
+    '\n'
+    '";912,40;;\n'
+    '25/08/2026;"Prelevement\n'
+    'SFR - SFR - SFR Prlvt SEPA 12-345AB-01 000111222333\n'
+    '\n'
+    '++GP20260101000000001\n'
+    'FR00ZZZ123456\n'
+    '000111222333 12-345AB-01";24,99;;\n'
+)
+
+
+def test_import_ca_ecarte_le_prelevement_carte_global(tmp_path):
+    # « DEPENSES CARTE X1234 AU 20/08/26 » totalise les achats détaillés plus
+    # bas dans le même fichier : l'importer les compterait deux fois.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv", _CA_CARTE)
+    # 1 importée (SFR), 1 récapitulatif écarté
+    assert import_csv(p, db) == (1, 0, 0, 0, 1, 0)
+
+
+def test_import_ca_libelle_multiligne_reste_lisible(tmp_path):
+    # Les morceaux du libellé doivent être séparés par des espaces, et les
+    # références SEPA rangées dans « info » plutôt que collées au libellé.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv", _CA_CARTE)
+    import_csv(p, db)
+    tx = [dict(r) for r in db.list_tx()][0]
+    assert tx["libelle"] == (
+        "Prelevement SFR - SFR - SFR Prlvt SEPA 12-345AB-01 000111222333")
+    assert "FR00ZZZ123456" in tx["info"]
+    assert "\n" not in tx["libelle"]
+
+
+def test_import_ca_garde_la_cotisation_de_carte(tmp_path):
+    # Faux positif : le libellé de la cotisation annuelle contient « à débit
+    # différé » — c'est un vrai frais bancaire, pas un récapitulatif.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "cotis.csv",
+               'Date;Libelle;Debit euros;Credit euros;\n'
+               '13/05/2026;"Prelevement\n'
+               "Cotisation carte 497000XXXXX1234 - Fourniture d'une carte de debit\n"
+               'International a debit differe\n'
+               '";50,00;;\n')
+    assert import_csv(p, db) == (1, 0, 0, 0, 0, 0)
+    assert [dict(r)["montant"] for r in db.list_tx()] == [-50.00]

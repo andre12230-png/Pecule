@@ -118,8 +118,13 @@ FONCTIONS
 - Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour
   du prelevement groupe. Un bandeau reprend les chiffres de votre espace
   bancaire (prochain prelevement, operations en cours, achats a debiter).
-  La ligne recapitulative du releve (<< DEBIT DIFFERE... >>) n'est jamais
-  importee : elle ferait doublon avec les achats deja detailles.
+  La ligne recapitulative du releve (<< DEBIT DIFFERE... >>, ou
+  << DEPENSES CARTE... >> au Credit Agricole) n'est jamais importee : elle
+  ferait doublon avec les achats deja detailles. Ce sont ces achats-la qui
+  sont gardes, a leur date d'achat ; votre solde peut donc differer de
+  quelques jours de celui de la banque, qui les debite en bloc le mois
+  suivant. La cotisation de la carte reste, elle, une depense comme une
+  autre.
 - Projection du compte a 15 jours : ce qui va sortir, ce qui va rentrer,
   et le solde prevu, d'apres vos operations recurrentes.
 - Echeances du mois : le bouton << Generer les echeances du mois >> de

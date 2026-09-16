@@ -1,5 +1,6 @@
 """Import des relevés bancaires au format CSV (BPCE / CM / CA)."""
 import csv
+import io
 import re
 from collections import Counter
 from datetime import date
@@ -129,7 +130,15 @@ def trouver_echeance_prevue(prevues: list[dict], d_iso: str, montant: float,
 # DIFFERES ») — alors que ces mêmes achats y figurent déjà un par un. L'importer
 # ferait compter deux fois les mêmes dépenses : ces lignes sont écartées dès la
 # lecture du fichier (demande de l'utilisateur du 05/08/2026).
-MOTIFS_RECAP_DEBIT_DIFFERE = ("debit differe", "debits differes")
+MOTIFS_RECAP_DEBIT_DIFFERE = ("debit differe", "debits differes",
+                              "depenses carte")
+
+# Ces mots-là désignent un FRAIS de la banque, jamais un récapitulatif. La
+# cotisation annuelle de la carte s'intitule « Fourniture d'une carte de débit
+# International à débit différé » : elle contient donc, par accident, un motif
+# de la liste ci-dessus. Sans cette exception, ce vrai débit disparaissait du
+# relevé (la cotisation perdue sur un relevé Crédit Agricole, le 16/09/2026).
+MOTIFS_JAMAIS_RECAP = ("cotisation", "fourniture")
 
 
 def est_recap_debit_differe(libelle: str) -> bool:
@@ -137,7 +146,36 @@ def est_recap_debit_differe(libelle: str) -> bool:
     (cf. le commentaire ci-dessus). Comparaison sans accents ni majuscules,
     pour reconnaître aussi bien « DEBIT DIFFERE » que « Débit différé »."""
     lb = deaccent(libelle or "")
+    if any(m in lb for m in MOTIFS_JAMAIS_RECAP):
+        return False
     return any(m in lb for m in MOTIFS_RECAP_DEBIT_DIFFERE)
+
+
+def _aplatir(cellule: str) -> str:
+    """Ramène une cellule sur UNE seule ligne : retours à la ligne et suites
+    d'espaces deviennent un espace simple."""
+    return re.sub(r"\s+", " ", cellule or "").strip()
+
+
+# Combien des lignes d'un libellé multiligne portent le SENS de l'opération.
+# Le Crédit Agricole écrit d'abord la nature (« Prélèvement »), puis le tiers
+# (« SFR - SFR - SFR Prlvt SEPA… ») ; les lignes suivantes ne sont que des
+# références SEPA (identifiant du créancier, numéro de mandat) — à conserver,
+# mais illisibles au milieu d'une liste d'opérations.
+LIGNES_UTILES_LIBELLE = 2
+
+
+def _decouper_libelle(brut: str) -> tuple[str, str]:
+    """Sépare un libellé de relevé en (libellé lisible, références).
+
+    La plupart des banques tiennent sur une seule ligne : le libellé revient
+    tel quel et les références sont vides. Le Crédit Agricole, lui, écrit son
+    libellé sur plusieurs lignes entre guillemets."""
+    morceaux = [m for m in (brut or "").splitlines() if m.strip()]
+    if not morceaux:
+        return "", ""
+    libelle = _aplatir(" ".join(morceaux[:LIGNES_UTILES_LIBELLE]))
+    return libelle, _aplatir(" ".join(morceaux[LIGNES_UTILES_LIBELLE:]))
 
 
 def _decode_csv(raw: bytes) -> str:
@@ -262,9 +300,14 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         raise ValueError(diagnostiquer_releve(text)
                          or ("En-tête introuvable." + "\n\n" + AIDE_ENTETE))
 
-    reader = csv.reader(lines[header_idx:], delimiter=";")
+    # Le lecteur reçoit un TEXTE, et non la liste des lignes : ainsi un libellé
+    # écrit sur plusieurs lignes entre guillemets — le cas du Crédit Agricole —
+    # garde ses retours à la ligne, au lieu d'être recollé bout à bout en un
+    # seul mot (« PrelevementSFR - SFR - SFR Prlvt… »).
+    reader = csv.reader(io.StringIO("\n".join(lines[header_idx:])),
+                        delimiter=";")
     rows = list(reader)
-    headers = [deaccent(h) for h in rows[0]]
+    headers = [deaccent(_aplatir(h)) for h in rows[0]]
 
     def find_col(keywords: list[str]) -> int:
         for i, h in enumerate(headers):
@@ -325,8 +368,8 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         return d_iso, montant, lisible
 
     def _libelle(cols) -> str:
-        """Libellé d'une ligne du relevé (colonne « Libelle simplifie »)."""
-        return cols[iLib].strip() if 0 <= iLib < len(cols) else ""
+        """Libellé lisible d'une ligne du relevé, sans ses références."""
+        return _decouper_libelle(cols[iLib] if 0 <= iLib < len(cols) else "")[0]
 
     # Combien de lignes du RELEVÉ portent chaque couple date+montant ? Sert à
     # désamorcer le filet « saisie manuelle » plus bas quand il y a ambiguïté.
@@ -415,12 +458,18 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         if not d_iso:
             continue
         dv_iso = parse_french_date(cols[iDateVal]) if iDateVal >= 0 and iDateVal < len(cols) else None
-        libelle = cols[iLib].strip() if iLib >= 0 and iLib < len(cols) else ""
-        ref = cols[iRef].strip() if iRef >= 0 and iRef < len(cols) else ""
-        info = cols[iInfo].strip() if iInfo >= 0 and iInfo < len(cols) else ""
-        tp = cols[iType].strip() if iType >= 0 and iType < len(cols) else ""
-        cat = cols[iCat].strip() if iCat >= 0 and iCat < len(cols) else ""
-        sub = cols[iSub].strip() if iSub >= 0 and iSub < len(cols) else ""
+        libelle, refs_libelle = _decouper_libelle(
+            cols[iLib] if 0 <= iLib < len(cols) else "")
+        ref = _aplatir(cols[iRef]) if 0 <= iRef < len(cols) else ""
+        info = _aplatir(cols[iInfo]) if 0 <= iInfo < len(cols) else ""
+        # Références SEPA que le Crédit Agricole range dans le libellé : elles
+        # rejoignent « info », à côté de celles que d'autres banques donnent
+        # dans une colonne à part.
+        if refs_libelle:
+            info = f"{info} {refs_libelle}".strip()
+        tp = _aplatir(cols[iType]) if 0 <= iType < len(cols) else ""
+        cat = _aplatir(cols[iCat]) if 0 <= iCat < len(cols) else ""
+        sub = _aplatir(cols[iSub]) if 0 <= iSub < len(cols) else ""
         # « x » dans la colonne Pointage = la banque confirme le passage.
         # Faute de colonne, toute ligne du relevé est réputée passée.
         est_passee = (releve_sans_colonne_pointage

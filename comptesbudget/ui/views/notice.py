@@ -83,8 +83,12 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       décidé passe d'abord — catégorie fournie par la banque, vos règles, vos habitudes — et
       ce classement automatique ne comble que ce qui resterait « Non classé ».
       La ligne récapitulative du <b>débit différé</b> de la carte
-      (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES ») n'est <b>jamais importée</b> : elle
-      totalise des achats qui figurent déjà un par un dans le relevé.
+      (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES », « DEPENSES CARTE… » au
+      <b>Crédit&nbsp;Agricole</b>) n'est <b>jamais importée</b> : elle
+      totalise des achats qui figurent déjà un par un dans le relevé. Ce sont bien ces
+      achats-là que Pécule garde, à leur date d'achat — votre solde peut donc différer
+      quelques jours de celui de la banque, qui ne les débite qu'en bloc le mois suivant.
+      La <b>cotisation</b> de la carte, elle, reste une dépense comme une autre.
   </li>
   <li><b>Télécharger le relevé au format OFX</b> quand votre banque ne propose plus le
       CSV — ou que vous le préférez. Même bouton, même glisser-déposer : Pécule reconnaît le
