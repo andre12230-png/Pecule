@@ -148,7 +148,10 @@
       par la vraie ligne du relevé, sans doublon. Le CSV du Crédit Agricole ne
       contient pas de colonne de pointage&nbsp;: ses lignes étant toutes des
       opérations déjà passées en banque, elles arrivent <strong>pointées</strong>
-      et votre solde est juste dès la fin de l'import.</li>
+      — rien à cocher une à une. Si votre carte est à <strong>débit
+      différé</strong>, lisez le §&nbsp;4&nbsp;: vos achats sont enregistrés à leur
+      date d'achat, ce qui décale un peu votre solde par rapport à celui de la
+      banque.</li>
   </ol>
 
   <p>Vous pouvez réimporter un nouveau fichier chaque mois : les lignes déjà
@@ -184,6 +187,51 @@
       (<code>-42,50</code>), avec espaces facultatifs pour les milliers.</li>
     <li><strong>Dates&nbsp;:</strong> format <code>JJ/MM/AAAA</code>.</li>
   </ul>
+
+  <h3>Un libellé écrit sur plusieurs lignes</h3>
+  <p>Le Crédit Agricole ne tient pas son libellé sur une seule ligne&nbsp;: dans
+  une même cellule, entre guillemets, il empile la nature de l'opération
+  («&nbsp;Prélèvement&nbsp;», «&nbsp;Virement émis&nbsp;», «&nbsp;Retrait au
+  distributeur&nbsp;»), le nom du tiers, puis les références du mandat SEPA.
+  Beaucoup de logiciels recollent ces morceaux bout à bout et produisent un
+  libellé de deux cents caractères, illisible et impossible à classer.</p>
+
+  <p>Pécule le remet à plat&nbsp;: la nature et le tiers forment le
+  <strong>libellé</strong>, les références partent dans la colonne
+  <strong>Informations</strong> — conservées, mais sans encombrer la liste de vos
+  opérations.</p>
+
+  <h3>Le détail des dépenses carte, en fin de fichier</h3>
+  <p>C'est la particularité qui surprend le plus, et la seule qui puisse fausser
+  vos chiffres. Un même fichier contient <strong>deux listes</strong>&nbsp;:</p>
+  <ul>
+    <li>les <strong>opérations du compte</strong>, parmi lesquelles une ligne
+      mensuelle «&nbsp;Prélèvement carte — DEPENSES CARTE…&nbsp;» qui totalise en
+      une seule fois tous les achats du mois&nbsp;;</li>
+    <li>puis, après les mentions «&nbsp;Encours débité le…&nbsp;», le
+      <strong>détail de ces mêmes achats</strong>, un par un, avec le commerçant
+      et la date.</li>
+  </ul>
+
+  <p>Importer les deux listes compterait chaque dépense <strong>deux fois</strong>
+  et doublerait le budget, sans le moindre message d'erreur. Pécule garde le
+  <strong>détail</strong> — c'est lui qui vous dit où part l'argent — et écarte la
+  ligne qui le totalise&nbsp;; le compte rendu d'import vous indique combien de
+  récapitulatifs ont ainsi été écartés. La <strong>cotisation de la carte</strong>,
+  en revanche, reste une dépense comme une autre, malgré son libellé qui parle
+  lui aussi de «&nbsp;débit différé&nbsp;».</p>
+
+  <div class="warn">
+    <strong>Votre solde peut différer de quelques jours de celui de votre
+    banque</strong>, et c'est normal&nbsp;: vos achats sont enregistrés à leur
+    <strong>date d'achat</strong>, alors que la banque ne les débite qu'en bloc à
+    la fin du mois suivant. Pécule compte donc la dépense plus tôt que votre
+    relevé. Dans l'autre sens, les achats du mois en cours ne figurent pas encore
+    dans le fichier exporté&nbsp;: la banque ne les détaille qu'au moment de les
+    débiter. Au fil des mois, ces deux décalages se compensent&nbsp;; c'est à la
+    fin d'un mois, juste après un prélèvement, que les deux chiffres se
+    rejoignent le mieux.
+  </div>
 
   <div class="warn">
     Les formats proposés (CSV, et parfois Excel, OFX ou QIF) <strong>dépendent de
