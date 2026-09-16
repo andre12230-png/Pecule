@@ -500,7 +500,15 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         seen[ident] += 1
         seen_lbl[k_lbl] += 1
         seen_dm[k_dm] += 1
-        tx_id = f"{ident}#{occ}"
+        # Le compte fait partie de l'identifiant : sans lui, le même relevé
+        # importé dans deux comptes différents fabriquait deux fois le même ID
+        # et l'import échouait en bloc sur « UNIQUE constraint failed »
+        # (incident du 16/09/2026 : un relevé importé dans le mauvais compte,
+        # puis dans le bon). Deux comptes d'une même banque suffisaient à le
+        # déclencher. Les opérations déjà en base gardent leur ancien ID : rien
+        # n'est à migrer, la détection des doublons ne s'appuyant jamais sur
+        # l'ID mais sur les clés recalculées depuis les champs stockés.
+        tx_id = f"{db.compte_id}|{ident}#{occ}"
         # Le filet « saisie manuelle » (même date + même montant) ne s'applique
         # que s'il n'y a AUCUNE ambiguïté : autant de lignes du relevé à cette
         # date et ce montant que de saisies manuelles à rapprocher. Sinon, on

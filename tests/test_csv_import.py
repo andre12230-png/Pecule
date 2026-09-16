@@ -581,3 +581,46 @@ def test_import_ca_garde_la_cotisation_de_carte(tmp_path):
                '";50,00;;\n')
     assert import_csv(p, db) == (1, 0, 0, 0, 0, 0)
     assert [dict(r)["montant"] for r in db.list_tx()] == [-50.00]
+
+
+# ── Le même relevé dans deux comptes différents (bug du 16/09/2026) ──
+#
+# L'identifiant d'une opération importée se fabriquait à partir de sa date,
+# de son montant et de sa référence bancaire — SANS le compte. Deux comptes
+# de la même banque, ou un relevé importé par erreur dans le mauvais compte
+# puis dans le bon, produisaient donc deux fois le même identifiant : l'import
+# échouait en bloc sur « UNIQUE constraint failed: transactions.id », sans rien
+# importer et sans message compréhensible.
+
+def test_meme_releve_dans_deux_comptes(tmp_path):
+    """Le même relevé doit pouvoir être importé dans deux comptes distincts."""
+    db = Database(str(tmp_path / "t.db"))
+    csv_path = _write_csv(tmp_path)
+
+    premier = db.compte_id
+    assert import_csv(csv_path, db)[:3] == (2, 0, 0)
+
+    second = db.add_compte("Deuxième compte", solde_initial=0.0)
+    db.set_compte_courant(second)
+    assert import_csv(csv_path, db)[:3] == (2, 0, 0)
+
+    # Chaque compte a ses deux opérations, et aucune n'a changé de camp.
+    assert db.nb_operations(premier) == 2
+    assert db.nb_operations(second) == 2
+
+
+def test_releve_importe_dans_le_mauvais_compte_puis_dans_le_bon(tmp_path):
+    """Cas vécu : le relevé part dans le mauvais compte, on l'y laisse, et
+    l'import dans le bon compte doit malgré tout aboutir."""
+    db = Database(str(tmp_path / "t.db"))
+    csv_path = _write_csv(tmp_path)
+
+    mauvais = db.compte_id
+    import_csv(csv_path, db)
+
+    bon = db.add_compte("Le bon compte", solde_initial=0.0)
+    db.set_compte_courant(bon)
+    importees, doublons, mauvaises = import_csv(csv_path, db)[:3]
+    assert (importees, doublons, mauvaises) == (2, 0, 0)
+    assert db.nb_operations(mauvais) == 2
+    assert db.nb_operations(bon) == 2
