@@ -1,12 +1,15 @@
 """Import des relevés bancaires au format CSV (BPCE / CM / CA)."""
 import csv
 import io
+import json
 import re
+from calendar import monthrange
 from collections import Counter
-from datetime import date
+from datetime import date, timedelta
 from typing import NamedTuple, Optional
 
-from .utils import canonical_cat, deaccent, suggest_category
+from .utils import (canonical_cat, deaccent, est_paiement_carte,
+                    suggest_category)
 from .labels import build_libelle_profiles, clean_libelle
 from .recurring import _meme_operation, _recurring_norm_label
 from .rules import apply_rules_to_tx
@@ -176,6 +179,88 @@ def _decouper_libelle(brut: str) -> tuple[str, str]:
         return "", ""
     libelle = _aplatir(" ".join(morceaux[:LIGNES_UTILES_LIBELLE]))
     return libelle, _aplatir(" ".join(morceaux[LIGNES_UTILES_LIBELLE:]))
+
+
+# ── Crédit Agricole : les achats carte et le lot annoncé ──────────────────
+#
+# Le bas du relevé détaille les achats carte, lot par lot, chaque lot sous une
+# ligne « Encours débité le 31 août 2026 ». Ces achats n'ont pas de colonne
+# Type : sans ce repère, rien ne dit que ce sont des paiements par carte, ni
+# quand la banque les a prélevés. Le haut du relevé annonce le lot suivant
+# (« Encours sur 1 carte(s) débité(s) en septembre; 764,10 € »), sans en
+# donner le détail.
+
+TYPE_CARTE = "Carte bancaire"
+
+MOIS_FR = {"janvier": 1, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5,
+           "juin": 6, "juillet": 7, "aout": 8, "septembre": 9,
+           "octobre": 10, "novembre": 11, "decembre": 12}
+
+_RE_LOT_DEBITE = re.compile(r"encours debite le (\d{1,2}) (\w+) (\d{4})")
+_RE_LOT_ANNONCE = re.compile(
+    r"encours sur \d+ carte\(s\) debite\(s\) en (\w+)\s*;\s*([-\d\s.,]+)")
+_RE_DATE_RELEVE = re.compile(r"(?:solde au|telechargement du) (\d{2}/\d{2}/\d{4})")
+
+
+def _date_lot_debite(cellule: str) -> Optional[str]:
+    """« Encours débité le 31 août 2026 » → « 2026-08-31 », sinon None."""
+    m = _RE_LOT_DEBITE.search(deaccent(_aplatir(cellule)))
+    if not m or m.group(2) not in MOIS_FR:
+        return None
+    try:
+        return date(int(m.group(3)), MOIS_FR[m.group(2)],
+                    int(m.group(1))).isoformat()
+    except ValueError:
+        return None
+
+
+def _dernier_jour_ouvre(an: int, mois: int) -> date:
+    """Dernier jour du mois qui ne tombe ni un samedi ni un dimanche : c'est
+    le jour où le Crédit Agricole prélève le lot (vu sur huit mois de relevé :
+    le 27/02/2026 et le 29/05/2026 étaient des vendredis)."""
+    j = date(an, mois, monthrange(an, mois)[1])
+    while j.weekday() >= 5:
+        j -= timedelta(days=1)
+    return j
+
+
+def lire_lot_annonce(texte: str) -> Optional[dict]:
+    """Lot carte annoncé en tête d'un relevé Crédit Agricole, ou None.
+
+    Retourne {"montant": -764.10, "debit": "2026-09-30",
+    "releve": "2026-09-15"} : le montant en négatif (c'est une dépense), le
+    jour probable du prélèvement, et la date du relevé."""
+    plat = deaccent(texte or "")
+    m = _RE_LOT_ANNONCE.search(plat)
+    d = _RE_DATE_RELEVE.search(plat)
+    if not m or not d or m.group(1) not in MOIS_FR:
+        return None
+    montant, lisible = _parse_amount_checked(m.group(2))
+    releve = parse_french_date(d.group(1))
+    if not lisible or not releve:
+        return None
+    an, mois_releve = int(releve[:4]), int(releve[5:7])
+    mois = MOIS_FR[m.group(1)]
+    if mois < mois_releve:          # « débité en janvier » sur un relevé de décembre
+        an += 1
+    return {"montant": -abs(round(montant, 2)),
+            "debit": _dernier_jour_ouvre(an, mois).isoformat(),
+            "releve": releve}
+
+
+def _cle_lot_annonce(db: Database) -> str:
+    # Le lot appartient à un compte : un réglage par compte.
+    return f"encours_carte_annonce|{db.compte_id}"
+
+
+def encours_carte_annonce(db: Database) -> Optional[dict]:
+    """Lot carte annoncé par la banque au dernier import de ce compte, ou None."""
+    brut = db.get_setting(_cle_lot_annonce(db), "")
+    try:
+        lot = json.loads(brut) if brut else None
+    except ValueError:
+        return None
+    return lot if isinstance(lot, dict) and "montant" in lot else None
 
 
 def _decode_csv(raw: bytes) -> str:
@@ -448,7 +533,15 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
     pointees = 0     # opérations existantes pointées d'après le relevé
     recaps = 0       # récapitulatifs de débit différé écartés
     rapprochees = 0  # échéances prévues rattachées à leur ligne du relevé
+    # Date du prélèvement du lot carte en cours de lecture (Crédit Agricole),
+    # ou "" tant qu'on est dans les opérations du compte.
+    lot_debite = ""
     for cols in rows[1:]:
+        # « Encours débité le 31 août 2026 » : les lignes qui suivent sont les
+        # achats carte de ce lot, prélevés ce jour-là.
+        if cols and _date_lot_debite(cols[0]):
+            lot_debite = _date_lot_debite(cols[0])
+            continue
         # Récapitulatif du débit différé : jamais importé, il ferait doublon
         # avec les achats carte détaillés (cf. MOTIFS_RECAP_DEBIT_DIFFERE).
         if est_recap_debit_differe(_libelle(cols)):
@@ -468,6 +561,11 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         if refs_libelle:
             info = f"{info} {refs_libelle}".strip()
         tp = _aplatir(cols[iType]) if 0 <= iType < len(cols) else ""
+        if lot_debite:
+            # Achat du détail d'un lot : payé par carte, et sorti du compte le
+            # jour du prélèvement — c'est sa date de valeur.
+            tp = tp or TYPE_CARTE
+            dv_iso = dv_iso or lot_debite
         cat = _aplatir(cols[iCat]) if 0 <= iCat < len(cols) else ""
         sub = _aplatir(cols[iSub]) if 0 <= iSub < len(cols) else ""
         # « x » dans la colonne Pointage = la banque confirme le passage.
@@ -536,12 +634,23 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
                 row = _premiere_non_pointee(rows_by_lbl.get(k_lbl))
             if row is None:
                 row = _premiere_non_pointee(rows_by_dm.get(k_dm))
+            if row is None and lot_debite:
+                # Un achat carte déjà pointé peut encore avoir besoin d'être
+                # réparé (voir plus bas) : on le cherche aussi parmi ceux-là.
+                row = next((r for r in (rows_by_ref.get(ident, [])
+                                        + rows_by_lbl.get(k_lbl, []))
+                            if not est_paiement_carte(r.get("type"))), None)
             if row is not None:
                 champs = {}
-                if est_passee:
+                if est_passee and not row.get("pointee"):
                     champs["pointee"] = 1
                 if row.get("prevue"):
                     champs["prevue"] = 0
+                # Achat carte importé avant que Pécule sache lire les lots du
+                # Crédit Agricole : on lui rend son type et sa date de débit.
+                if lot_debite and not est_paiement_carte(row.get("type")):
+                    champs["type"] = tp
+                    champs["date_valeur"] = dv_iso
                 if champs:
                     db.update_tx(row["id"], champs)
                     row.update(champs)   # ne pas retraiter la même ligne
@@ -627,6 +736,13 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
 
         db.insert_tx(tx)
         imported += 1
+
+    # Lot carte annoncé en tête du relevé, sans détail : retenu pour le Bilan.
+    # Un relevé qui ne l'annonce pas ne touche pas au dernier connu — un
+    # simple export d'une autre banque ne doit pas l'effacer.
+    lot = lire_lot_annonce(text)
+    if lot:
+        db.set_setting(_cle_lot_annonce(db), json.dumps(lot))
 
     return ResultatImport(imported, skipped, illisibles, pointees, recaps,
                           rapprochees)

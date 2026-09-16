@@ -624,3 +624,89 @@ def test_releve_importe_dans_le_mauvais_compte_puis_dans_le_bon(tmp_path):
     assert (importees, doublons, mauvaises) == (2, 0, 0)
     assert db.nb_operations(mauvais) == 2
     assert db.nb_operations(bon) == 2
+
+
+# ── Relevé Crédit Agricole : le détail des achats carte (16/09/2026) ──
+#
+# Le bas du fichier détaille les achats carte, lot par lot, sous « Encours
+# débité le … ». Ces lignes n'ont pas de colonne Type : importées telles
+# quelles, elles n'étaient pas reconnues comme des paiements par carte, et
+# leur date de valeur restait celle de l'achat. Le bandeau « Encours carte »
+# du Bilan, qui repère le débit différé à cet écart de dates, restait caché.
+# Le haut du fichier annonce en plus le montant du lot suivant, dont le
+# détail n'est pas fourni (« Encours sur 1 carte(s) débité(s) en septembre »).
+
+_CA_COMPLET = (
+    'Telechargement du 15/09/2026;\n'
+    '\n'
+    'Solde au 15/09/2026 1 523,40 €\n'
+    '\n'
+    ';Encours sur 1 carte(s) débité(s) en septembre; 764,10 €\n'
+    '\n'
+    'Date;Libellé;Débit euros;Crédit euros;\n'
+    + _CA_CARTE.split('\n', 1)[1]
+    + '\n'
+    'M.       DUPONT JEAN - Titulaire;\n'
+    '\n'
+    'Encours débité le 31 août 2026;-912.40 €\n'
+    '\n'
+    'Date;Libellé;Débit euros;Crédit euros;\n'
+    '20/07/2026;MP*CARREFOUR CENTRE VILLE ;87,50;;\n'
+    '15/08/2026;LIBRAIRIE DE LA GARE ;6,20;;\n'
+)
+
+
+def test_import_ca_detail_carte_reconnu_et_date_du_debit(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv", _CA_COMPLET)
+    import_csv(p, db)
+    txs = {dict(r)["libelle"]: dict(r) for r in db.list_tx()}
+    achat = txs["MP*CARREFOUR CENTRE VILLE"]
+    assert achat["date"] == "2026-07-20"
+    assert achat["type"] == "Carte bancaire"
+    assert achat["date_valeur"] == "2026-08-31"   # le jour du prélèvement
+    # Les opérations du haut du fichier ne changent pas
+    sfr = [t for t in txs.values() if "SFR" in t["libelle"]][0]
+    assert sfr["type"] == ""
+    assert sfr["date_valeur"] == sfr["date"]
+
+
+def test_import_ca_reimport_repare_les_achats_deja_importes(tmp_path):
+    # Une base importée avant la correction : les achats sont là, sans type
+    # ni date de débit. Réimporter le même fichier doit les réparer, sans
+    # rien ajouter.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv", _CA_COMPLET)
+    import_csv(p, db)
+    for r in db.list_tx():
+        db.update_tx(r["id"], {"type": "", "date_valeur": r["date"]})
+
+    importees = import_csv(p, db)[0]
+    assert importees == 0
+    achat = [dict(r) for r in db.list_tx()
+             if dict(r)["libelle"].startswith("MP*CARREFOUR")][0]
+    assert achat["type"] == "Carte bancaire"
+    assert achat["date_valeur"] == "2026-08-31"
+
+
+def test_import_ca_retient_l_encours_annonce(tmp_path):
+    from comptesbudget.csv_import import encours_carte_annonce
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "ca.csv", _CA_COMPLET)
+    import_csv(p, db)
+    annonce = encours_carte_annonce(db)
+    assert annonce["montant"] == -764.10
+    # Septembre 2026 : le 30 est un mercredi, dernier jour ouvré du mois
+    assert annonce["debit"] == "2026-09-30"
+    assert annonce["releve"] == "2026-09-15"
+    # Propre au compte : un autre compte n'en hérite pas
+    autre = db.add_compte("Autre", solde_initial=0.0)
+    db.set_compte_courant(autre)
+    assert encours_carte_annonce(db) is None
+
+
+def test_releve_ordinaire_n_annonce_aucun_encours(tmp_path):
+    from comptesbudget.csv_import import encours_carte_annonce
+    db = Database(str(tmp_path / "t.db"))
+    import_csv(_write_csv(tmp_path), db)
+    assert encours_carte_annonce(db) is None

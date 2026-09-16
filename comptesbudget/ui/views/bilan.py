@@ -21,6 +21,7 @@ from ...utils import (
     carte_a_debit_differe, cat_color, date_debit_differe, est_paiement_carte,
     fmt_euro, fmt_date_fr, in_period, period_label,
 )
+from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
 from ...labels import clean_libelle
 from ...recurring import echeances_du_mois
@@ -553,7 +554,49 @@ class BilanView(QWidget):
         prélève : le lot d'août part le 4 septembre, il reste l'encours
         d'août."""
         return [t for t in cartes
-                if t.get("date", "").startswith(mois) and t["montant"] < 0]
+                if t.get("date", "").startswith(mois) and t["montant"] < 0
+                and not t.get("_annonce")]
+
+    @staticmethod
+    def _debites_apres_le_mois(achats: list[dict], mois: str) -> float:
+        """Part des achats du mois que la banque prélèvera APRÈS sa fin.
+
+        C'est elle, et elle seule, qu'il faut retrancher du solde de fin de
+        mois : un achat prélevé avant la fin y est déjà compté. Chez André
+        (lot le 4 du mois suivant), c'est la totalité des achats du mois ; au
+        Crédit Agricole (lot le dernier jour ouvré, achats du 20 au 19), les
+        achats de la fin du mois seulement."""
+        an, m = int(mois[:4]), int(mois[5:7])
+        fin_iso = date(an, m, monthrange(an, m)[1]).isoformat()
+        return sum(t["montant"] for t in achats
+                   if (t.get("date_valeur") or t.get("date", "")) > fin_iso)
+
+    def _lot_annonce(self, txs: list[dict]) -> list[dict]:
+        """Le lot carte annoncé par la banque, sous forme d'opération à venir.
+
+        Le relevé du Crédit Agricole donne le montant du prochain prélèvement
+        carte sans en détailler les achats. Pour que le Bilan le compte — dans
+        l'encours, le solde de fin de mois et le prochain découvert —, on le
+        présente comme une opération carte confirmée, datée du jour du
+        prélèvement. Elle n'est jamais enregistrée.
+
+        Rien si le lot est déjà prélevé, ou si son détail a été importé depuis
+        (des achats carte portent alors sa date de débit)."""
+        lot = encours_carte_annonce(self.db)
+        if not lot or lot.get("debit", "") < date.today().isoformat():
+            return []
+        if any(est_paiement_carte(t.get("type"))
+               and t.get("date_valeur") == lot["debit"] for t in txs):
+            return []
+        return [{
+            "id": "lot-carte-annonce", "date": lot.get("releve", ""),
+            "date_valeur": lot["debit"],
+            "libelle": "Achats carte annoncés par la banque",
+            "libelle_op": "", "reference": "", "type": TYPE_CARTE,
+            "categorie": "Non classé", "sous_cat": "", "info": "",
+            "montant": float(lot["montant"]), "pointee": 1, "prevue": 0,
+            "_annonce": True,
+        }]
 
     def _prochain_decouvert(self, txs: list[dict], solde_compte: float,
                             jours: int = HORIZON_DECOUVERT) -> dict:
@@ -775,8 +818,15 @@ class BilanView(QWidget):
         mois, consultation = self._mois_du_bandeau()
         achats_mois = self._achats_du_mois(cartes, mois)
         encours_mois = sum(t["montant"] for t in achats_mois)
-        # Date à laquelle la banque prélèvera ce lot : le 4 du mois suivant.
-        debit_du_mois = date_debit_differe(f"{mois}-01")
+        engage_mois = self._debites_apres_le_mois(achats_mois, mois)
+        # Date(s) où la banque prélève les achats du mois : celles que portent
+        # les achats eux-mêmes. Au Crédit Agricole, les achats du 20 au 19
+        # partent le dernier jour ouvré : un mois se prélève donc en deux fois.
+        # À défaut, la règle habituelle : le 4 du mois suivant.
+        debits = sorted({t.get("date_valeur", "") for t in achats_mois
+                         if t.get("date_valeur", "") > t.get("date", "")})
+        if not debits:
+            debits = [date_debit_differe(f"{mois}-01")]
 
         self.cb_total.setStyleSheet(
             "color:#5A2D00; font-size:12pt; font-weight:bold")
@@ -786,16 +836,18 @@ class BilanView(QWidget):
         # plus de bloc à lui : il sert aux phrases du détail (« il MANQUE »,
         # « il reste ») et au verdict du mois précédent.
         solde_ref = solde_compte if solde_compte is not None else 0.0
-        disponible = self._reste_du_mois(txs, mois, solde_ref, encours_mois)
+        disponible = self._reste_du_mois(txs, mois, solde_ref, engage_mois)
 
         # ── Verdict du mois précédent ─────────────────────────────────
         # Le reste descend au fil du mois, mais rien ne disait ensuite si le
         # mois était passé, ni de combien il avait débordé : il fallait aller
         # le chercher en changeant de période.
         precedent = self._mois_precedent(mois)
-        depense_prec = abs(sum(t["montant"]
-                               for t in self._achats_du_mois(cartes, precedent)))
-        reste_prec = self._reste_du_mois(txs, precedent, solde_ref, depense_prec)
+        achats_prec = self._achats_du_mois(cartes, precedent)
+        depense_prec = abs(sum(t["montant"] for t in achats_prec))
+        reste_prec = self._reste_du_mois(
+            txs, precedent, solde_ref,
+            self._debites_apres_le_mois(achats_prec, precedent))
         verdict = (f"\nMois précédent — {period_label(precedent).lower()} : "
                    f"{fmt_euro(depense_prec)} dépensés à la carte, "
                    + (f"il a MANQUÉ {fmt_euro(-reste_prec)}" if reste_prec < 0
@@ -815,7 +867,8 @@ class BilanView(QWidget):
                 "color:#5A2D00; font-size:12pt; font-weight:bold")
             self.cb_title.setText(
                 f"💳 ENCOURS CARTE — {period_label(mois).upper()} "
-                f"(prélevé le {fmt_date_fr(debit_du_mois)})")
+                "(prélevé le "
+                + " et le ".join(fmt_date_fr(d) for d in debits) + ")")
             detail = (f"{len(achats_mois)} achat(s) par carte sur le mois — "
                       + (f"il a MANQUÉ {fmt_euro(-disponible)}" if disponible < 0
                          else f"il restait {fmt_euro(disponible)}")
@@ -840,7 +893,7 @@ class BilanView(QWidget):
         # une fois tout passé, moins ce qui est déjà engagé sur la carte.
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_ref)
         detail += (f"\nSolde prévu fin de mois {fmt_euro(solde_fin)} moins "
-                   f"{fmt_euro(abs(encours_mois))} déjà passés à la carte — "
+                   f"{fmt_euro(abs(engage_mois))} déjà passés à la carte — "
                    + (f"il MANQUE {fmt_euro(-disponible)}" if disponible < 0
                       else f"il reste {fmt_euro(disponible)}"))
         # Tendance : à ce rythme, où finira le mois ? Annoncée seulement à
@@ -855,6 +908,12 @@ class BilanView(QWidget):
                        + (f"il manquerait {fmt_euro(-reste_fin)}"
                           if reste_fin < 0
                           else f"il resterait {fmt_euro(reste_fin)}"))
+        annonces = [t for t in lot if t.get("_annonce")]
+        if annonces:
+            detail += (f"\nDont {fmt_euro(annonces[0]['montant'])} annoncés par "
+                       f"la banque sur le relevé du "
+                       f"{fmt_date_fr(annonces[0]['date'])}, sans le détail "
+                       "des achats")
         detail += verdict
         if plus_tard:
             detail += (f"  •  {len(plus_tard)} opération(s) au-delà "
@@ -1202,9 +1261,12 @@ class BilanView(QWidget):
 
         # ── Bandeaux (indépendants de la période) ────────────────────
         # Après le calcul du solde : tous deux s'en servent pour projeter.
-        self._refresh_verdict_banner(txs, solde_compte)
-        self._refresh_cb_banner(txs, solde_compte)
-        self._refresh_mois_banner(txs, solde_compte)
+        # Le lot carte annoncé par la banque (Crédit Agricole) n'entre que
+        # dans ces prévisions, jamais dans les dépenses ni les graphiques.
+        txs_prevus = txs + self._lot_annonce(txs)
+        self._refresh_verdict_banner(txs_prevus, solde_compte)
+        self._refresh_cb_banner(txs_prevus, solde_compte)
+        self._refresh_mois_banner(txs_prevus, solde_compte)
 
         n_rev = sum(1 for t in active if t["montant"] > 0)
         n_dep = sum(1 for t in active if t["montant"] < 0)

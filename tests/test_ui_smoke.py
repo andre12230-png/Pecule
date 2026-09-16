@@ -2035,3 +2035,37 @@ def test_aucun_acces_reseau_dans_le_code():
     fautifs = [str(p.relative_to(racine)) for p in racine.rglob("*.py")
                if interdit.search(p.read_text(encoding="utf-8"))]
     assert fautifs == []
+
+
+def test_bandeau_carte_releve_credit_agricole(qapp, tmp_path, monkeypatch):
+    """Relevé du Crédit Agricole (16/09/2026) : les achats détaillés et le
+    lot annoncé par la banque font apparaître le bandeau Encours carte, avec
+    le montant que la banque prélèvera à la fin du mois."""
+    from tests.test_csv_import import _CA_COMPLET
+    from comptesbudget.csv_import import import_csv
+    from comptesbudget.ui.views.bilan import BilanView
+
+    _fige_aujourdhui(monkeypatch, date(2026, 9, 16))
+    d = Database(str(tmp_path / "ca.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2026-01-01")
+    p = tmp_path / "ca.csv"
+    p.write_text(_CA_COMPLET, encoding="utf-8")
+    import_csv(str(p), d)
+
+    vue = BilanView(d)
+    vue.refresh()
+    assert not vue.cb_banner.isHidden()
+    assert _euros(vue.cb_total.text()) == -764.10
+    assert "30/09/2026" in vue.cb_title.text()
+    # Le lot part le 30 : il pèse sur le solde de fin de mois, une seule fois.
+    detail = vue.cb_detail.text()
+    assert "764,10" in detail
+    assert "déjà passés à la carte" in detail
+
+    # En consultant juillet, le titre donne le vrai jour du prélèvement du
+    # Crédit Agricole (l'achat du 20/07 est parti le 31/08), pas le 4 août.
+    vue.period = "2026-07"
+    vue.refresh()
+    assert "31/08/2026" in vue.cb_title.text()
+    assert "04/08/2026" not in vue.cb_title.text()
