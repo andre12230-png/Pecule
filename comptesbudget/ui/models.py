@@ -16,6 +16,14 @@ from ..utils import (
 # alphabétique, donc n'importe comment.
 SORT_ROLE = Qt.UserRole + 1
 
+# Bulle d'aide de la colonne P : un utilisateur a demandé « un raccourci pour
+# pointer » alors que la barre d'espace existe depuis la 1.33.0 — on la montre
+# là où l'on pointe.
+AIDE_POINTAGE = (
+    "Cliquer pour pointer ou dépointer.\n"
+    "Raccourci : barre d'espace, sur une ou plusieurs lignes\n"
+    "sélectionnées (Ctrl+clic ou Maj+clic).")
+
 
 def charger_en_conservant_le_tri(table, model, transactions: list[dict]):
     """Recharge le tableau sans perdre la colonne de tri choisie.
@@ -43,6 +51,7 @@ class TxTableModel(QStandardItemModel):
     def __init__(self, parent=None):
         super().__init__(0, len(self.HEADERS), parent)
         self.setHorizontalHeaderLabels(self.HEADERS)
+        self.horizontalHeaderItem(0).setToolTip(AIDE_POINTAGE)
         self.setSortRole(SORT_ROLE)
         self.tx_data = []  # liste des dicts en parallèle
 
@@ -110,9 +119,12 @@ class TxTableModel(QStandardItemModel):
             items[0].setForeground(QBrush(QColor("#C77B00")))
             items[0].setToolTip(
                 "Échéance prévue : pas encore passée en banque.\n"
-                "Elle sera complétée automatiquement à l'import du relevé.")
+                "Elle sera complétée automatiquement à l'import du relevé.\n\n"
+                + AIDE_POINTAGE)
         else:
             items[0].setForeground(QBrush(QColor("#CCC")))
+        if not prevue:
+            items[0].setToolTip(AIDE_POINTAGE)
         items[0].setTextAlignment(Qt.AlignCenter)
 
         # Date valeur en orange si différée (débit différé)

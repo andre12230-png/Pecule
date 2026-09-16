@@ -387,6 +387,19 @@ def test_txdialog_numero_de_cheque(qapp):
     assert model.item(1, col).text() == "Prelevement"
 
 
+def test_bulle_aide_pointage(qapp):
+    """La colonne P rappelle le raccourci barre d'espace — sur l'en-tête et
+    sur chaque case, y compris celle d'une échéance prévue."""
+    from comptesbudget.ui.models import TxTableModel
+
+    model = TxTableModel()
+    model.load([_tx(id="a"), _tx(id="b", pointee=1), _tx(id="c", prevue=1)])
+    assert "barre d'espace" in model.horizontalHeaderItem(0).toolTip()
+    for ligne in range(3):
+        assert "barre d'espace" in model.item(ligne, 0).toolTip()
+    assert "Échéance prévue" in model.item(2, 0).toolTip()
+
+
 def test_rapport_et_recherche(qapp, db):
     from comptesbudget.ui.report import (
         MonthlyReportDialog, build_monthly_report_html,
