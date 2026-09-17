@@ -162,6 +162,12 @@ Tant que vous n'en avez qu'un, rien ne change à l'écran.</p>
   <li><b>Ce qui est commun à tous les comptes</b> : les règles automatiques,
       les catégories, les sous-catégories et les libellés harmonisés. Une règle
       écrite une fois sert donc partout.</li>
+  <li><b>Au lancement, Pécule ouvre toujours le premier compte de la liste</b>,
+      et non le dernier consulté : retrouver l'application sur un compte
+      secondaire ferait saisir ou importer au mauvais endroit. Mettez donc en
+      tête celui que vous utilisez le plus : dans <code>🏦 Mes comptes</code>,
+      les boutons <b>⬆ Monter</b> et <b>⬇ Descendre</b> rangent la liste, et le
+      compte du haut est marqué « ouvert au lancement ».</li>
   <li><b>Importer un relevé</b> alimente le compte affiché : vérifiez-le avant
       d'importer.</li>
   <li><b>Supprimer un compte</b> efface aussi ses opérations, ses budgets et ses
@@ -597,7 +603,7 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
-  <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer ou supprimer un compte bancaire</td></tr>
+  <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer, supprimer un compte bancaire, et <b>ranger la liste</b> — le compte du haut est celui qui s'ouvre au lancement</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter (JSON)</b> et <b>Restaurer (JSON)</b>, pour transférer ou fusionner deux installations</td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>

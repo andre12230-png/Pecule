@@ -324,12 +324,23 @@ class Database:
 
     def _select_compte_initial(self, compte_id: str = None):
         """Choisit le compte de travail au démarrage : celui demandé, sinon
-        le dernier utilisé, sinon le premier de la liste."""
+        le PREMIER de la liste.
+
+        On ne rouvre volontairement PAS sur le dernier compte consulté
+        (demande d'André du 17/09/2026) : retrouver l'application sur un compte
+        secondaire fait saisir ou importer au mauvais endroit — c'est arrivé le
+        16/09/2026 avec un relevé entier importé dans le mauvais compte. Le
+        compte du haut de la liste est le compte principal (« Compte courant »
+        chez la plupart des utilisateurs), et l'ordre se change dans
+        « 🏦 Mes comptes ». Même esprit que l'ouverture sur le mois en cours.
+
+        Le réglage `compte_courant` continue d'être écrit : il sert pendant la
+        séance et aux outils qui ouvrent la base sur un compte précis.
+        """
         connus = [r["id"] for r in self.list_comptes()]
-        for candidat in (compte_id, self.get_setting("compte_courant", "")):
-            if candidat and candidat in connus:
-                self.compte_id = candidat
-                return
+        if compte_id and compte_id in connus:
+            self.compte_id = compte_id
+            return
         self.compte_id = connus[0] if connus else None
 
     def list_comptes(self) -> list[sqlite3.Row]:
@@ -369,6 +380,29 @@ class Database:
              date_initiale, ordre, _now_iso()))
         self._commit()
         return cid
+
+    def deplacer_compte(self, compte_id: str, sens: int):
+        """Monte (sens = -1) ou descend (sens = +1) un compte dans la liste.
+
+        L'ordre compte vraiment : le compte du haut est celui que Pécule ouvre
+        au lancement (voir `_select_compte_initial`). Sans ce réglage, il
+        resterait figé à l'ordre de création.
+
+        Aux extrémités, la demande est simplement sans effet. Les numéros
+        d'ordre sont renumérotés au passage (0, 1, 2…) : les bases anciennes
+        les ont tous à 0, auquel cas seul le nom les départageait.
+        """
+        ids = [r["id"] for r in self.list_comptes()]
+        if compte_id not in ids:
+            return
+        i = ids.index(compte_id)
+        j = i + (1 if sens > 0 else -1)
+        if not 0 <= j < len(ids):
+            return
+        ids[i], ids[j] = ids[j], ids[i]
+        with self.batch():
+            for rang, cid in enumerate(ids):
+                self.update_compte(cid, {"ordre": rang})
 
     def update_compte(self, compte_id: str, fields: dict):
         fields = {**fields, "updated_at": _now_iso()}

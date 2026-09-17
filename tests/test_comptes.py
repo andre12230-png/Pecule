@@ -174,16 +174,32 @@ def test_solde_de_depart_par_compte(tmp_path):
     assert db.solde_initial() == 1000.0
 
 
-def test_compte_courant_memorise(tmp_path):
+def test_ouvre_toujours_sur_le_premier_compte(tmp_path):
+    """Au lancement, Pécule ouvre le compte du HAUT de la liste, jamais le
+    dernier consulté (demande d'André du 17/09/2026).
+
+    Rouvrir sur un compte secondaire fait saisir au mauvais endroit : c'est
+    arrivé le 16/09/2026 avec un relevé importé dans le mauvais compte. Même
+    esprit que l'ouverture sur le mois en cours.
+    """
     chemin = str(tmp_path / "t.db")
     db = Database(chemin)
+    premier = db.compte_id
     c2 = db.add_compte("Second")
+    # En séance, changer de compte marche toujours
     db.set_compte_courant(c2)
+    assert db.compte_id == c2
     db.conn.close()
 
+    # Au lancement suivant, on revient sur le premier compte
     db2 = Database(chemin)
-    assert db2.compte_id == c2
-    assert db2.nom_compte() == "Second"
+    assert db2.compte_id == premier
+    assert db2.nom_compte() == "Compte courant"
+    db2.conn.close()
+
+    # Un compte explicitement demandé reste prioritaire (import, outils)
+    db3 = Database(chemin, compte_id=c2)
+    assert db3.compte_id == c2
 
 
 # ── Suppression ─────────────────────────────────────────────────────
@@ -271,3 +287,59 @@ def test_restauration_fichier_ancien_rejoint_le_compte_affiche(tmp_path):
     merge_remote_into_db(db, ancien)
     assert [r["id"] for r in db.list_tx()] == ["vieux"]
     assert db.list_budgets() == {"Loisirs": 40.0}
+
+
+def test_deplacer_un_compte_change_celui_qui_ouvre(tmp_path):
+    """L'ordre des comptes se règle, sinon « le premier de la liste » serait
+    figé à l'ordre de création (demande du 17/09/2026)."""
+    chemin = str(tmp_path / "t.db")
+    db = Database(chemin)
+    premier = db.compte_id                    # « Compte courant », créé d'office
+    livret = db.add_compte("Livret A")
+
+    # Monter le livret : il passe devant
+    db.deplacer_compte(livret, -1)
+    assert [r["id"] for r in db.list_comptes()] == [livret, premier]
+    # Et c'est lui qui s'ouvrira au prochain lancement
+    db.conn.close()
+    db2 = Database(chemin)
+    assert db2.nom_compte() == "Livret A"
+
+    # Le redescendre remet tout comme avant
+    db2.deplacer_compte(livret, 1)
+    assert [r["id"] for r in db2.list_comptes()] == [premier, livret]
+    # Aux extrémités, la demande ne fait rien et ne casse rien
+    db2.deplacer_compte(premier, -1)
+    db2.deplacer_compte(livret, 1)
+    assert [r["id"] for r in db2.list_comptes()] == [premier, livret]
+
+
+def test_fenetre_mes_comptes_deplace_et_garde_la_selection(qapp, tmp_path):
+    """Les deux boutons de la fenêtre « Mes comptes » déplacent bien le compte
+    choisi, et la sélection le suit (sinon un second clic déplacerait le
+    voisin). Le compte du haut est annoncé comme celui du lancement."""
+    from PySide6.QtCore import Qt
+    from comptesbudget.ui.dialogs import ComptesDialog
+
+    db = Database(str(tmp_path / "t.db"))
+    premier = db.compte_id
+    livret = db.add_compte("Livret A")
+
+    dlg = ComptesDialog(db)
+    assert "ouvert au lancement" in dlg.liste.item(0).text()
+
+    # Sélectionner le livret, puis le monter deux fois de suite
+    for i in range(dlg.liste.count()):
+        if dlg.liste.item(i).data(Qt.UserRole) == livret:
+            dlg.liste.setCurrentRow(i)
+    dlg.monter()
+    assert dlg.liste.item(0).data(Qt.UserRole) == livret
+    assert dlg.liste.currentItem().data(Qt.UserRole) == livret
+    dlg.monter()   # déjà en haut : sans effet
+    assert [dlg.liste.item(i).data(Qt.UserRole) for i in range(2)] == \
+           [livret, premier]
+    assert "ouvert au lancement" in dlg.liste.item(0).text()
+
+    dlg.descendre()
+    assert [dlg.liste.item(i).data(Qt.UserRole) for i in range(2)] == \
+           [premier, livret]

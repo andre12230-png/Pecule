@@ -182,8 +182,9 @@ def _ajouter_second_compte(db):
                 continue
             db.insert_tx(_tx(f"e{mois}", d, "Virement Epargne", "Épargne",
                              "", 150.00, "Virement"))
-    # Les captures montrent le compte courant : on y revient, et c'est lui que
-    # l'application rouvrira (`set_compte_courant` mémorise le choix).
+    # Les captures montrent le compte courant : on y revient. L'application,
+    # elle, rouvre de toute façon sur le premier compte de la liste — c'est
+    # celui-là (voir `_select_compte_initial`).
     db.set_compte_courant(courant)
 
 

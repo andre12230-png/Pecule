@@ -706,7 +706,9 @@ class ComptesDialog(QDialog):
         barre = QHBoxLayout()
         for texte, slot in (("➕ Ajouter", self.ajouter),
                             ("✏️ Renommer", self.renommer),
-                            ("🗑 Supprimer", self.supprimer)):
+                            ("🗑 Supprimer", self.supprimer),
+                            ("⬆ Monter", self.monter),
+                            ("⬇ Descendre", self.descendre)):
             b = QPushButton(texte)
             b.clicked.connect(slot)
             barre.addWidget(b)
@@ -721,14 +723,38 @@ class ComptesDialog(QDialog):
 
     def remplir(self):
         self.liste.clear()
-        for r in self.db.list_comptes():
+        for rang, r in enumerate(self.db.list_comptes()):
             n = self.db.nb_operations(r["id"])
             actuel = " (affiché)" if r["id"] == self.db.compte_id else ""
-            item = QListWidgetItem(f"{r['nom']} — {n} opération(s){actuel}")
+            # Le compte du haut est celui que Pécule ouvre au lancement : le
+            # dire ici, sinon « Monter / Descendre » n'aurait l'air que d'un
+            # rangement cosmétique.
+            depart = " — ouvert au lancement" if rang == 0 else ""
+            item = QListWidgetItem(
+                f"{r['nom']} — {n} opération(s){actuel}{depart}")
             item.setData(Qt.UserRole, r["id"])
             self.liste.addItem(item)
             if r["id"] == self.db.compte_id:
                 self.liste.setCurrentItem(item)
+
+    def monter(self):
+        self._deplacer(-1)
+
+    def descendre(self):
+        self._deplacer(1)
+
+    def _deplacer(self, sens: int):
+        cid = self._compte_choisi()
+        if not cid:
+            return
+        self.db.deplacer_compte(cid, sens)
+        self.remplir()
+        # Garder la sélection sur le compte déplacé : sans cela, le suivant
+        # se retrouve sélectionné et un second clic déplacerait le mauvais.
+        for i in range(self.liste.count()):
+            if self.liste.item(i).data(Qt.UserRole) == cid:
+                self.liste.setCurrentRow(i)
+                break
 
     def _compte_choisi(self) -> str:
         item = self.liste.currentItem()
