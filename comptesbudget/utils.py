@@ -349,3 +349,38 @@ def fmt_date_fr(iso: str) -> str:
         return iso or ""
     y, m, d = iso[:4], iso[5:7], iso[8:10]
     return f"{d}/{m}/{y}"
+
+
+# Types d'opération qui ne peuvent être qu'une rentrée d'argent. Les types
+# ambigus (« Virement », « Pret », « Autre », ou vide) n'y sont pas : un
+# virement peut être émis comme reçu.
+TYPES_RECETTE = ("Virement recu", "Depot d'especes")
+
+
+def alerte_sens_saisie(type_op: str, categorie: str,
+                       montant: float) -> Optional[str]:
+    """Avertissement à montrer quand une recette est saisie en dépense.
+
+    Rend le texte de la question à poser, ou None si la saisie est cohérente.
+
+    Incident du 17/09/2026 : un virement reçu de 80 € saisi en dépense. Le
+    solde était faux de DEUX fois le montant (80 € en moins au lieu de 80 € en
+    plus), et rien ne le signalait. Une recette enregistrée à l'envers est
+    toujours une erreur ; on ne contrôle donc QUE ce sens-là. L'inverse — un
+    type de dépense avec un montant positif — est courant et légitime
+    (remboursement sur la carte, prélèvement rejeté) : avertir là ferait
+    crier au loup.
+    """
+    if not montant or montant >= 0:
+        return None
+    cat = (categorie or "").strip()
+    # Une opération sortie du calcul du solde n'a pas de sens à respecter.
+    if cat == "Transaction exclue":
+        return None
+    est_recette = (type_op or "").strip() in TYPES_RECETTE or cat == "Revenus"
+    if not est_recette:
+        return None
+    quoi = f"« {type_op} »" if (type_op or "").strip() else f"la catégorie « {cat} »"
+    return (f"Cette opération ressemble à une recette ({quoi}), mais elle est "
+            f"enregistrée en dépense de {fmt_euro(abs(montant))}.\n\n"
+            f"Voulez-vous vraiment l'enregistrer en dépense ?")

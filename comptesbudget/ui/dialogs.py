@@ -15,7 +15,7 @@ from ..constants import (
 )
 from ..utils import (
     fmt_euro, fmt_date_fr, date_debit_differe, JOUR_DEBIT_DIFFERE,
-    numero_cheque,
+    numero_cheque, alerte_sens_saisie,
 )
 from ..labels import build_libelle_profiles
 from .widgets import MontantSpinBox, demander_montant
@@ -394,6 +394,24 @@ class TxDialog(QDialog):
             QMessageBox.warning(self, "Saisie",
                                 "Le montant doit être supérieur à zéro.")
             return
+        # Recette enregistrée en dépense : on demande confirmation au lieu de
+        # refuser, car l'utilisateur peut avoir une raison (une régularisation).
+        # Le bouton par défaut est « Non » : une entrée sur laquelle on valide
+        # sans lire ne passe pas en force.
+        alerte = alerte_sens_saisie(self.type_combo.currentText(),
+                                    self.cat.currentText().strip(),
+                                    -self.montant.value()
+                                    if self.rb_debit.isChecked()
+                                    else self.montant.value())
+        if alerte:
+            rep = QMessageBox.question(
+                self, "Sens de l'opération", alerte,
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if rep != QMessageBox.Yes:
+                # On ramène l'utilisateur sur le choix du sens : c'est là que
+                # se corrige l'erreur en un clic.
+                self.rb_credit.setFocus()
+                return
         self.accept()
 
     def _update_subcat_list(self, categorie: str):

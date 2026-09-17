@@ -215,6 +215,12 @@ un champ <b>N° de chèque</b> apparaît. Le numéro s'affiche ensuite dans la
 colonne <b>Type</b> (« Cheque n° 1234567 ») et se retrouve par la recherche.
 Pour un chèque importé, Pécule reprend le numéro que la banque a écrit dans son
 libellé — parfois tronqué (« ...0132 »), vous pouvez alors le compléter.</p>
+<p><b>Sens de l'opération</b> : si vous enregistrez en <b>dépense</b> quelque
+chose qui ressemble à une rentrée d'argent — type <b>Virement recu</b> ou
+<b>Depot d'especes</b>, ou catégorie <b>Revenus</b> — Pécule vous le signale et
+vous demande de confirmer. Une recette saisie du mauvais côté fausse le solde de
+<b>deux fois</b> son montant : c'est l'erreur la plus difficile à retrouver
+ensuite. Vous restez libre de répondre oui.</p>
 <ul>
   <li><b>Double-clic</b> sur une ligne → ouvre le formulaire de modification</li>
   <li><b>Touche <kbd>Entrée</kbd></b> → modifie l'opération sélectionnée</li>
