@@ -93,6 +93,20 @@
   </div>
 
   <div class="cas">
+    <h3>« Aucune colonne de ce relevé ne donne le montant »</h3>
+    <p class="quoi">L'import s'arrête sur ce message, et n'enregistre rien. (Jusqu'à
+    la 1.37, Pécule importait alors toutes les opérations à 0,00 €, sans prévenir.)</p>
+    <p>Pécule a bien trouvé les colonnes de date et de libellé, mais aucune qui
+    s'appelle <strong>Montant</strong>, <strong>Débit</strong> ou
+    <strong>Crédit</strong> — la vôtre porte un autre nom, « Somme » par exemple.
+    Le message cite les colonnes trouvées.</p>
+    <div class="sol"><strong>La solution :</strong> renommez cette colonne
+    « Montant » dans votre tableur (ou, si votre banque sépare les sorties et les
+    entrées, nommez les deux colonnes « Débit » et « Crédit »), puis réenregistrez
+    le fichier en CSV.</div>
+  </div>
+
+  <div class="cas">
     <h3>Le fichier est un Excel, pas un CSV</h3>
     <p class="quoi">Le fichier s'appelle <code>.xls</code> ou <code>.xlsx</code>, et
     Pécule répond qu'un fichier tableur n'est pas un relevé texte.</p>

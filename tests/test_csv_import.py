@@ -523,6 +523,30 @@ def test_entete_introuvable_explique_quoi_faire(tmp_path):
     assert "Date;Libelle;Montant" in str(err.value)
 
 
+def test_colonne_montant_introuvable_refuse_l_import(tmp_path):
+    """En-tête reconnue (date, libellé) mais aucune colonne de montant : tout
+    entrait à 0,00 €, sans un mot (audit du 23/09/2026). L'import est refusé,
+    rien n'est enregistré, et le message cite les colonnes trouvées."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "somme.csv",
+               "Date;Libellé;Somme\n05/09/2026;LOYER;-650,00\n"
+               "06/09/2026;SALAIRE;2100,00\n")
+    with pytest.raises(ValueError) as err:
+        import_csv(p, db)
+    assert "Montant" in str(err.value)
+    assert "Somme" in str(err.value)
+    assert db.list_tx() == []
+
+
+def test_colonne_debit_seule_suffit(tmp_path):
+    """Une colonne « Débit » sans « Crédit » reste un relevé valable."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "debit.csv",
+               "Date;Libelle;Debit\n05/09/2026;LOYER;650,00\n")
+    import_csv(p, db)
+    assert [t["montant"] for t in db.list_tx()] == [-650.0]
+
+
 # ── Relevé Crédit Agricole : libellés multilignes et bloc « débit différé » ──
 #
 # L'export CSV du Crédit Agricole a deux particularités que les autres banques

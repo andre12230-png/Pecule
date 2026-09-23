@@ -410,6 +410,19 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
     iMontant = find_col(["montant"])
     iDebit = find_col(["debit"])
     iCredit = find_col(["credit"])
+    if iMontant < 0 and iDebit < 0 and iCredit < 0:
+        # Sans colonne de montant, chaque ligne entrait à 0,00 € sans un mot
+        # et le solde était faux (audit du 23/09/2026). On refuse l'import,
+        # comme pour un en-tête introuvable, en citant les colonnes lues.
+        trouvees = ", ".join(f"« {_aplatir(h).strip()} »"
+                             for h in rows[0] if h.strip())
+        raise ValueError(
+            "Aucune colonne de ce relevé ne donne le montant des opérations "
+            f"(colonnes trouvées : {trouvees}). Aucune opération n'a été "
+            "importée.\n\n"
+            "Pécule cherche une colonne nommée « Montant », ou deux colonnes "
+            "« Débit » et « Crédit ». Renommez-la dans votre tableur, puis "
+            "réenregistrez le fichier en CSV (séparateur : point-virgule).")
     iCat = find_col(["categorie"])
     iSub = find_col(["sous"])
     iRef = find_col(["reference"])
