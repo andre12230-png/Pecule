@@ -44,3 +44,15 @@ def test_verrou_repris_si_le_fichier_est_ancien_et_orphelin(tmp_path):
     assert not concurrent.tryLock(100), (
         "le verrou d'un processus vivant a été volé à cause de son âge")
     tenu.unlock()
+
+
+def test_dossier_inutilisable_n_est_pas_une_autre_fenetre(tmp_path):
+    """Dossier des données introuvable ou protégé en écriture : Pécule
+    disait « déjà ouvert » et renvoyait vers une fenêtre qui n'existait pas
+    (audit du 23/09/2026). C'est une autre erreur, qui nomme le dossier."""
+    import pytest
+    from comptesbudget.app import DossierDonneesInutilisable
+    absent = str(tmp_path / "absent")
+    with pytest.raises(DossierDonneesInutilisable) as err:
+        verrouiller_instance(absent)
+    assert absent in str(err.value)

@@ -53,9 +53,17 @@ def installer_traduction_qt(app) -> bool:
     return False
 
 
+class DossierDonneesInutilisable(OSError):
+    """Le verrou n'a pas pu être posé parce que le dossier des données est
+    introuvable ou protégé en écriture — et non parce qu'une autre fenêtre
+    le tient."""
+
+
 def verrouiller_instance(dossier: str):
     """Réserve la base pour cette fenêtre. Retourne le verrou, ou None si une
-    autre fenêtre l'a déjà.
+    autre fenêtre l'a déjà. Lève DossierDonneesInutilisable si le dossier ne
+    permet pas de poser le verrou : on annonçait alors « déjà ouvert », et
+    l'on renvoyait vers une fenêtre qui n'existait pas (audit du 23/09/2026).
 
     Deux fenêtres ouvertes sur le même fichier se marchent dessus sans rien
     dire : chacune garde en mémoire ce qu'elle a lu, la dernière écriture
@@ -75,7 +83,9 @@ def verrouiller_instance(dossier: str):
     # Sans lui, un tel fichier interdirait le démarrage pour toujours.
     verrou.setStaleLockTime(30_000)      # 30 s
     if not verrou.tryLock(200):
-        return None
+        if verrou.error() == QLockFile.LockFailedError:
+            return None                  # une autre fenêtre le tient
+        raise DossierDonneesInutilisable(dossier)
     return verrou
 
 
@@ -157,7 +167,18 @@ def main():
             pass
 
     # Une seule fenêtre à la fois sur une même base (cf. verrouiller_instance).
-    verrou = verrouiller_instance(_data_dir())
+    try:
+        verrou = verrouiller_instance(_data_dir())
+    except DossierDonneesInutilisable:
+        QMessageBox.critical(
+            None, "Pécule ne peut pas démarrer",
+            "Pécule ne peut pas écrire dans le dossier de ses données :\n"
+            f"{_data_dir()}\n\n"
+            "Vérifiez que ce dossier existe et n'est pas en lecture seule "
+            "(clé USB protégée, par exemple). Si la Sécurité Windows protège "
+            "vos dossiers contre les rançongiciels (« Accès contrôlé aux "
+            "dossiers »), autorisez-y Pecule.exe.")
+        return
     if verrou is None:
         QMessageBox.warning(
             None, "Pécule est déjà ouvert",
