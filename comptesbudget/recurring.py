@@ -288,22 +288,65 @@ def _recurring_aligned_start(freq: str, day_of_month: int, today: date) -> date:
     return today
 
 
+# Au-delà de ce délai sans passage (en jours, compté depuis la dernière
+# opération de l'historique), une opération est réputée arrêtée : contrat
+# résilié, crédit remboursé, abonnement stoppé. Un peu plus d'une période,
+# pour tolérer un passage en retard ou un relevé pas encore importé.
+_FRAICHEUR_MAX = {"weekly": 30, "biweekly": 45, "monthly": 62,
+                  "quarterly": 135, "yearly": 400}
+
+# Écart normal entre deux passages, en jours, pour chaque fréquence : une
+# opération n'est pré-cochée que si ses derniers passages le respectent tous.
+_ECART_REGULIER = {"weekly": (5, 10), "biweekly": (11, 20),
+                   "monthly": (20, 45), "quarterly": (70, 110),
+                   "yearly": (330, 400)}
+
+# Nombre de passages récents qui servent à estimer le montant et le jour.
+# Les plus anciens décrivent souvent un état révolu (pension revalorisée,
+# échéance déplacée) : la médiane sur des années garderait l'ancien chiffre.
+_PASSAGES_RECENTS = 3
+
+
+def _frequence(ecarts: list[int]) -> str:
+    """Fréquence déduite de l'écart médian entre deux passages."""
+    mg = median(ecarts) if ecarts else 30
+    if mg <= 10:
+        return "weekly"
+    if mg <= 20:
+        return "biweekly"
+    if mg <= 45:
+        return "monthly"
+    if mg <= 135:
+        return "quarterly"
+    return "yearly"
+
+
 def detect_recurring_candidates(txs: list[dict], min_months: int = 4) -> list[dict]:
     """Analyse les opérations passées et propose des opérations récurrentes.
 
     Regroupe par libellé normalisé, ne retient que les groupes présents sur
     au moins `min_months` mois distincts et de signe cohérent, puis déduit
-    fréquence, jour du mois, montant médian, catégorie et type.
+    fréquence, jour du mois, montant, catégorie et type.
+
+    Seules comptent les opérations qui passent ENCORE : un groupe dont le
+    dernier passage est trop ancien (cf. _FRAICHEUR_MAX) est écarté. Le délai
+    se mesure depuis la dernière opération de l'historique, pas depuis
+    aujourd'hui, pour ne rien perdre chez qui n'a pas importé depuis
+    longtemps. Montant, jour et fréquence viennent des derniers passages.
+    Les échéances générées d'avance (prevue=1) ne sont pas des passages.
 
     Chaque candidat porte des métadonnées (préfixées « _ ») pour l'aperçu :
     nombre de mois, fourchette de montants, stabilité et pré-sélection.
     """
+    txs = [t for t in txs if t.get("date") and not t.get("prevue")]
+    if not txs:
+        return []
+    reference = max(date.fromisoformat(t["date"][:10]) for t in txs)
+
     groups: dict[str, list[dict]] = defaultdict(list)
     for t in txs:
         key = _recurring_norm_label(t.get("libelle", ""))
         if not key:
-            continue
-        if not t.get("date"):
             continue
         groups[key].append(t)
 
@@ -328,31 +371,37 @@ def detect_recurring_candidates(txs: list[dict], min_months: int = 4) -> list[di
         if len(months) < min_months:
             continue
 
-        amounts = [float(t.get("montant", 0)) for t in items]
-        med = round(median(amounts), 2)
-        dates = sorted(date.fromisoformat(t["date"]) for t in items)
+        # Du plus ancien au plus récent
+        items = sorted(items, key=lambda t: t["date"])
+        dates = [date.fromisoformat(t["date"][:10]) for t in items]
         gaps = [(dates[i + 1] - dates[i]).days
                 for i in range(len(dates) - 1)
                 if (dates[i + 1] - dates[i]).days > 0]
-        mg = median(gaps) if gaps else 30
-        if mg <= 10:
-            freq = "weekly"
-        elif mg <= 20:
-            freq = "biweekly"
-        elif mg <= 45:
-            freq = "monthly"
-        elif mg <= 135:
-            freq = "quarterly"
-        else:
-            freq = "yearly"
-        dom = int(median([d.day for d in dates]))
+        # Fréquence d'après les derniers écarts, pas d'après des années
+        freq = _frequence(gaps[-6:])
+
+        # Plus de passage depuis trop longtemps : l'opération est arrêtée
+        if (reference - dates[-1]).days > _FRAICHEUR_MAX[freq]:
+            continue
+
+        recents = items[-_PASSAGES_RECENTS:]
+        med = round(median(float(t.get("montant", 0)) for t in recents), 2)
+        dom = int(median(d.day for d in dates[-_PASSAGES_RECENTS:]))
 
         cat = Counter(t.get("categorie", "") for t in items).most_common(1)[0][0]
         sub = Counter((t.get("sous_cat") or "") for t in items).most_common(1)[0][0]
         typ = Counter((t.get("type") or "") for t in items).most_common(1)[0][0]
 
+        # Stabilité et fourchette jugées sur les six derniers passages
+        amounts = [float(t.get("montant", 0)) for t in items[-6:]]
         spread = max(amounts) - min(amounts)
         stable = abs(spread) <= max(2.0, 0.15 * abs(med)) if med else False
+
+        # Régularité : les trois derniers écarts tombent tous dans la plage
+        # normale de la fréquence. Une dépense occasionnelle au même montant
+        # (un jeu, un achat ponctuel) reste montrée, mais n'est pas pré-cochée.
+        lo, hi = _ECART_REGULIER[freq]
+        regulier = len(gaps) >= 3 and all(lo <= g <= hi for g in gaps[-3:])
 
         cands.append({
             "libelle":      key.title(),
@@ -367,9 +416,42 @@ def detect_recurring_candidates(txs: list[dict], min_months: int = 4) -> list[di
             "_min":         round(min(amounts), 2),
             "_max":         round(max(amounts), 2),
             "_stable":      stable,
-            "_default":     stable and (cat not in SKIP_DEFAULT_CATS)
+            "_default":     stable and regulier
+                            and (cat not in SKIP_DEFAULT_CATS)
                             and freq in ("monthly", "quarterly", "yearly"),
         })
 
     cands.sort(key=lambda c: (-c["_months"], -abs(c["montant"])))
     return cands
+
+
+def candidats_non_couverts(cands: list[dict], recs: list) -> list[dict]:
+    """Retire des candidats ce qu'une récurrence existante couvre déjà.
+
+    Une récurrence (active ou non : la désactiver est un choix) couvre un
+    candidat quand :
+      * leurs libellés désignent la même opération (_meme_operation : l'un est
+        le début de l'autre — « Caisse » et « Caisse Retraite ») ;
+      * ou, sous des noms différents, même sens, même montant à quelques
+        centimes près et même jour à trois jours près : c'est l'ancien nom
+        d'une récurrence dont la banque a changé le libellé.
+    """
+    existantes = [(_recurring_norm_label(r["libelle"]), float(r["montant"]),
+                   r["day_of_month"]) for r in recs]
+    garde = []
+    for c in cands:
+        cle = _recurring_norm_label(c["libelle"])
+        m = float(c["montant"])
+        couvert = False
+        for cle_r, m_r, jour_r in existantes:
+            meme_nom = _meme_operation(cle, cle_r)
+            meme_sens = (m > 0) == (m_r > 0)
+            meme_montant = abs(abs(m) - abs(m_r)) <= max(0.5, 0.02 * abs(m_r))
+            meme_jour = (jour_r is not None
+                         and abs(int(jour_r) - int(c["day_of_month"])) <= 3)
+            if meme_nom or (meme_sens and meme_montant and meme_jour):
+                couvert = True
+                break
+        if not couvert:
+            garde.append(c)
+    return garde

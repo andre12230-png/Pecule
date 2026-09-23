@@ -25,7 +25,7 @@ from ...utils import (
 from ...database import Database
 from ...recurring import (
     generate_occurrences, detect_recurring_candidates, echeances_du_mois,
-    _recurring_norm_label, _recurring_aligned_start,
+    candidats_non_couverts, _recurring_aligned_start,
 )
 
 from ..models import SORT_ROLE
@@ -328,11 +328,10 @@ class PrevisionnelView(QWidget):
 
         candidates = detect_recurring_candidates(txs)
 
-        # Évite de re-proposer ce qui existe déjà (même libellé normalisé)
-        existing = {_recurring_norm_label(r["libelle"])
-                    for r in self.db.list_recurring()}
-        candidates = [c for c in candidates
-                      if _recurring_norm_label(c["libelle"]) not in existing]
+        # Évite de re-proposer ce qui existe déjà, y compris sous un ancien
+        # nom (même montant, même jour) : cf. incident du 23/09/2026.
+        candidates = candidats_non_couverts(
+            candidates, [dict(r) for r in self.db.list_recurring()])
 
         if not candidates:
             QMessageBox.information(

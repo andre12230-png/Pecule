@@ -248,10 +248,11 @@ class PrefillRecurringDialog(QDialog):
 
         v = QVBoxLayout(self)
         info = QLabel(
-            "💡 Opérations récurrentes détectées dans vos opérations passées. "
-            "Les lignes au montant régulier sont pré-cochées. Décochez celles "
-            "à ignorer, puis cliquez « Ajouter au prévisionnel ». "
-            "Le montant affiché est la médiane observée."
+            "💡 Opérations qui reviennent dans vos opérations passées et "
+            "passent encore aujourd'hui. Celles qui reviennent à date et à "
+            "montant réguliers sont pré-cochées. Décochez celles à ignorer, "
+            "puis cliquez « Ajouter au prévisionnel ». Le montant et le jour "
+            "sont ceux des derniers passages."
         )
         info.setWordWrap(True)
         info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
@@ -259,7 +260,7 @@ class PrefillRecurringDialog(QDialog):
 
         self.model = QStandardItemModel(0, 8, self)
         self.model.setHorizontalHeaderLabels(
-            ["✓", "Libellé", "Catégorie", "Montant médian",
+            ["✓", "Libellé", "Catégorie", "Montant",
              "Fréquence", "Jour", "Nb mois", "Fourchette"])
         self.table = QTableView()
         self.table.setModel(self.model)
