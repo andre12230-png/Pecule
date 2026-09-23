@@ -321,3 +321,43 @@ def test_echeances_du_mois_hors_carte_garde_la_date_de_valeur():
              date="2026-07-31", date_valeur="2026-08-03")
     ech = echeances_du_mois([rec], [op], 2026, 8, aujourdhui=date(2026, 8, 1))
     assert ech[0]["_deja"] is True
+
+
+# ── Un débit ne paie qu'une échéance, d'un mois à l'autre (audit 23/09/2026) ─
+#
+# Chaque mois était rapproché pour lui seul. Une échéance du 31/10 (un samedi)
+# débitée le lundi 02/11 était payée pour octobre (2 jours d'écart)… et pour
+# le 30/11, puisque le débit tombe dans le même mois. Le Bilan de novembre
+# n'attendait plus rien, et annonçait 190 € en fin de mois au lieu de −60 €.
+
+def _credit_du_31(*dates_debit):
+    rec = _rec(libelle="PRLV CREDIT AUTO", montant=-250.0, day_of_month=31,
+               start_date="2026-08-31")
+    ops = [_op(id=f"t{i}", libelle="PRLV CREDIT AUTO", montant=-250.0,
+               date=d, date_valeur=d) for i, d in enumerate(dates_debit)]
+    return [rec], ops
+
+
+def test_echeances_un_debit_reporte_ne_paie_pas_le_mois_suivant():
+    recs, ops = _credit_du_31("2026-08-31", "2026-09-30", "2026-11-02")
+    le_5_nov = date(2026, 11, 5)
+    octobre = echeances_du_mois(recs, ops, 2026, 10, aujourdhui=le_5_nov)
+    novembre = echeances_du_mois(recs, ops, 2026, 11, aujourdhui=le_5_nov)
+    assert [(e["date"], e["_deja"]) for e in octobre] == [("2026-10-31", True)]
+    assert [(e["date"], e["_deja"]) for e in novembre] == [("2026-11-30", False)]
+
+
+def test_echeances_chaque_debit_ne_compte_qu_une_fois():
+    """Sur plusieurs mois, autant d'échéances couvertes que de débits : ni
+    débit compté deux fois, ni débit oublié."""
+    debits = ("2026-08-31", "2026-09-30", "2026-11-02", "2026-11-30",
+              "2027-01-04")
+    recs, ops = _credit_du_31(*debits)
+    couvertes = [e["date"]
+                 for annee, mois in [(2026, 8), (2026, 9), (2026, 10),
+                                     (2026, 11), (2026, 12), (2027, 1)]
+                 for e in echeances_du_mois(recs, ops, annee, mois,
+                                            aujourdhui=date(2027, 1, 10))
+                 if e["_deja"]]
+    assert couvertes == ["2026-08-31", "2026-09-30", "2026-10-31",
+                         "2026-11-30", "2026-12-31"]

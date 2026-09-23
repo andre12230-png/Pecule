@@ -186,6 +186,12 @@ def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
     # connaître toutes pour attribuer chaque opération à la bonne (cf. les
     # trois passes ci-dessous). Les récurrences sont prises de la plus précise
     # à la plus vague — « ALPHATEL MOBILE » doit se servir avant « ALPHATEL ».
+    #
+    # On y ajoute les occurrences VOISINES, celles des mois d'à côté qui
+    # tombent dans la marge de tolérance : elles se servent en premier (ordre
+    # des dates) sans être rendues. Sans elles, chaque mois rapproché pour
+    # lui seul prenait le même débit que son voisin : une échéance du 31/10
+    # débitée le 02/11 payait aussi celle du 30/11 (audit du 23/09/2026).
     occurrences: list[dict] = []
     for r in sorted(recs, key=lambda r: -len(
             _recurring_norm_label(r.get("libelle", "")).split())):
@@ -193,11 +199,12 @@ def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
             continue
         montant = float(r.get("montant", 0) or 0)
         cle_rec = _recurring_norm_label(r.get("libelle", ""))
-        for d in generate_occurrences(r, dernier):
-            if d >= premier:
+        for d in generate_occurrences(r, date.fromisoformat(fin)):
+            if d.isoformat() >= debut:
                 occurrences.append({"rec": r, "date": d, "montant": montant,
                                     "cle": cle_rec, "couverte": False,
-                                    "sous_cat": r.get("sous_cat", "") or ""})
+                                    "sous_cat": r.get("sous_cat", "") or "",
+                                    "voisine": not premier <= d <= dernier})
 
     # Rapprochement en trois passes, de la plus sûre à la plus tolérante. La
     # première évite qu'une échéance prenne l'opération d'une autre du même
@@ -231,6 +238,8 @@ def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
 
     out: list[dict] = []
     for occ in occurrences:
+        if occ["voisine"]:
+            continue              # appartient au mois d'à côté
         r, d, couverte = occ["rec"], occ["date"], occ["couverte"]
         out.append({
             "date":      d.isoformat(),
