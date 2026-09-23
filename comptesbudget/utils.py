@@ -107,6 +107,26 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
         raise SauvegardeImpossible(e.strerror or str(e)) from e
 
 
+def depense_nette_par_categorie(txs: list[dict]) -> dict[str, float]:
+    """Ce que chaque catégorie a coûté sur les opérations données : achats
+    MOINS remboursements, en positif. Une catégorie qui a reçu autant ou plus
+    qu'elle n'a dépensé n'apparaît pas (elle compte pour 0, jamais moins).
+
+    C'est le « dépensé » de tout ce qui se compare à un budget : l'onglet
+    Budget, les budgets du rapport mensuel, le bandeau « Budget dépassé ».
+    Les remboursements se classent dans la catégorie de l'achat ; ils
+    étaient ignorés, et un achat de 60 € remboursé 30 € faisait dépasser un
+    budget de 50 € (choix d'André après l'audit du 23/09/2026). Les
+    opérations en « Transaction exclue » ne comptent pas."""
+    net: dict[str, float] = {}
+    for t in txs:
+        c = t.get("categorie") or "Non classé"
+        if c == "Transaction exclue":
+            continue
+        net[c] = net.get(c, 0.0) + (t.get("montant") or 0.0)
+    return {c: round(-v, 2) for c, v in net.items() if v < -0.005}
+
+
 def suggest_category(libelle: str, sous_cat: str = "") -> Optional[str]:
     """Retourne la catégorie suggérée d'après libellé/sous-cat, ou None."""
     blob = deaccent(f"{libelle} {sous_cat}")

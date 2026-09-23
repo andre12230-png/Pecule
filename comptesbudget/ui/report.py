@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..utils import (
-    cat_color, fmt_euro, fmt_date_fr,
+    cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
 )
 from ..database import Database
 
@@ -26,10 +26,16 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     act = [t for t in txs if t.get("categorie") != "Transaction exclue"
            and (t.get("date") or "").startswith(month)]
 
-    revenus = sum(t["montant"] for t in act if t["montant"] > 0)
-    depenses = sum(t["montant"] for t in act if t["montant"] < 0)
-    net = revenus + depenses
-    taux = (net / revenus * 100) if revenus > 0 else 0.0
+    # « Épargne » (virement vers le livret…) n'est ni un revenu ni une
+    # dépense : c'est de l'argent mis de côté, montré à part. Il faisait
+    # BAISSER le taux d'épargne (choix d'André après l'audit du 23/09/2026).
+    analyse = [t for t in act if t.get("categorie") != "Épargne"]
+    mis_de_cote = sum(t["montant"] for t in act
+                      if t.get("categorie") == "Épargne")
+    revenus = sum(t["montant"] for t in analyse if t["montant"] > 0)
+    depenses = sum(t["montant"] for t in analyse if t["montant"] < 0)
+    net = revenus + depenses + mis_de_cote     # tout ce qui a bougé
+    taux = ((revenus + depenses) / revenus * 100) if revenus > 0 else 0.0
 
     # Solde bancaire réel (pointé) à la fin du mois
     initial_date = db.get_setting("initial_date", "2025-01-01")
@@ -51,8 +57,11 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
 
     # Dépenses par catégorie + comparaison budget
     budgets = db.list_budgets()
+    # Budgets : achats moins remboursements, comme l'onglet Budget.
+    spent_budget = depense_nette_par_categorie(act)
+    # Dépenses par catégorie : les achats du mois, hors épargne.
     spent: dict[str, float] = {}
-    for t in act:
+    for t in analyse:
         if t["montant"] < 0:
             c = t.get("categorie", "Non classé")
             spent[c] = spent.get(c, 0) + abs(t["montant"])
@@ -77,6 +86,10 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     kpis = [
         ("Revenus", euro(revenus), "#229954"),
         ("Dépenses", euro(depenses), "#C0392B"),
+    ]
+    if mis_de_cote:
+        kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#16A085"))
+    kpis += [
         ("Mouvement net", euro(net), "#229954" if net >= 0 else "#C0392B"),
         # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
         ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
@@ -98,10 +111,10 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
                  '<td align="right"><b>Dépensé</b></td>'
                  '<td align="right"><b>%</b></td>'
                  '<td align="right"><b>Reste</b></td></tr>')
-        rows = sorted(((spent.get(c, 0) / b * 100 if b > 0 else 0), c, b)
+        rows = sorted(((spent_budget.get(c, 0) / b * 100 if b > 0 else 0), c, b)
                       for c, b in budgets.items() if b > 0)
         for ratio, cat, b in reversed(rows):
-            dep = spent.get(cat, 0)
+            dep = spent_budget.get(cat, 0)
             reste = b - dep
             col = "#C0392B" if ratio >= 100 else ("#E67E22" if ratio >= 85 else "#229954")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
@@ -126,7 +139,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     H.append("</table>")
 
     # — Plus grosses dépenses —
-    top = sorted((t for t in act if t["montant"] < 0), key=lambda t: t["montant"])[:10]
+    top = sorted((t for t in analyse if t["montant"] < 0), key=lambda t: t["montant"])[:10]
     if top:
         H.append("<h2>Plus grosses dépenses</h2>")
         H.append('<table cellpadding="5" cellspacing="0" width="100%">'

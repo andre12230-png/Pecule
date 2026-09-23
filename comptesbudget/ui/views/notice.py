@@ -205,11 +205,17 @@ occupaient deux tuiles séparées (« Revenus » et « Dépenses ») jusqu'à la
 « Mouvement de l'année » sur une année, « Mouvement — toutes périodes » sur
 tout l'historique.</p>
 <p>Des quatre tuiles, <b>trois suivent la période</b> choisie en haut : le
-mouvement, le taux d'épargne qui en découle, et le pointé. Seul le
+mouvement, le taux d'épargne, et le pointé. Seul le
 <b>solde bancaire réel</b> n'en dépend pas : c'est le solde de votre compte
 <b>aujourd'hui</b>, celui que vous comparez à votre relevé — il porte d'ailleurs
 sa date sous le chiffre. Pour le solde d'un mois passé, lisez le bandeau vert,
 qui donne celui du dernier jour de ce mois-là.</p>
+<p><b>Mettre de côté n'est pas dépenser.</b> Un virement vers votre livret,
+classé dans la catégorie <code>Épargne</code>, n'est compté ni comme une
+dépense ni comme un revenu dans le <b>taux d'épargne</b>, les graphiques et
+la répartition des dépenses : il ferait sinon baisser votre taux d'épargne au
+moment même où vous épargnez. La tuile « Mouvement », qui dit ce qui a bougé
+sur le compte, le compte bien, elle.</p>
 
 <h3>📋 Opérations</h3>
 <p>Liste complète des transactions avec filtres (catégorie, type, sens, pointage) et un champ
@@ -248,6 +254,14 @@ sélecteur « Date » en haut de l'écran : un achat par carte reste dans le moi
 où vous l'avez fait, même si votre banque le débite le mois suivant. Un budget
 répond à « qu'ai-je dépensé&nbsp;? », pas à « qu'a prélevé la banque&nbsp;? ».
 Le bandeau d'alerte du Bilan suit la même règle.</p>
+<p><b>Les remboursements viennent en déduction.</b> Classez un remboursement
+dans la catégorie de l'achat : un achat de 60 € remboursé 30 € compte pour
+30 € dans le budget. Un mois où la catégorie a plus reçu que dépensé compte
+pour 0, jamais moins. Le rapport mensuel et le bandeau « Budget dépassé »
+suivent la même règle. Attention : un <b>virement</b> reçu d'un autre de vos
+comptes n'est pas un remboursement — classez-le en
+<code>Virements internes</code>, sinon il effacerait les dépenses de la
+catégorie.</p>
 <p>Ce bandeau — « Budget dépassé… » en haut du Bilan — <b>suit la période
 choisie</b> en haut de l'écran : sur « Août 2026 » il montre ce qui a été
 dépassé en août, et le dit (« Budget dépassé en août 2026 »). Sur une année ou
@@ -898,13 +912,20 @@ un mouvement — celui de la période, limité à ce que la banque a confirmé.<
 (Alimentation > Restauration rapide, Transports > Carburant…).</dd>
 
 <dt>Taux d'épargne</dt>
-<dd>Part des revenus non dépensée : <code>mouvement net / revenus × 100</code>.
-Indicateur de santé financière sur la période.</dd>
+<dd>Part des revenus non dépensée : <code>(revenus − dépenses) / revenus ×
+100</code>, sans la catégorie <code>Épargne</code> — l'argent mis de côté
+n'est pas une dépense. Indicateur de santé financière sur la période.</dd>
+
+<dt>Virements internes</dt>
+<dd>Catégorie des virements entre vos propres comptes (du compte courant vers
+le compte joint, par exemple). Ils restent dans le solde, comme à la banque.
+Pour un virement vers un livret, préférez <code>Épargne</code>.</dd>
 
 <dt>Transaction exclue</dt>
-<dd>Catégorie spéciale pour les opérations qui ne doivent pas compter dans
-les statistiques (ex : virements internes entre vos propres comptes,
-cumuls de débit différé).</dd>
+<dd>Catégorie spéciale : l'opération ne compte <b>nulle part</b>, pas même
+dans le solde (ex : ligne récapitulative d'un débit différé, déjà détaillée
+achat par achat). Ne l'utilisez pas pour un virement entre vos comptes : le
+solde deviendrait faux — prenez <code>Virements internes</code>.</dd>
 
 </dl>
 """

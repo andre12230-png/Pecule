@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils import (
-    cat_color, deaccent, fmt_euro, in_period,
+    cat_color, deaccent, depense_nette_par_categorie, fmt_euro, in_period,
 )
 from ...database import Database
 from ..widgets import demander_montant
@@ -93,15 +93,11 @@ class BudgetView(QWidget):
     def refresh(self):
         budgets = self.db.list_budgets()
         txs = [dict(r) for r in self.db.list_tx()]
-        active = [t for t in txs
-                  if t.get("categorie") != "Transaction exclue"
-                  and in_period(self._eff_date(t), self.period)
-                  and t.get("montant", 0) < 0]
-        # Dépensé par catégorie
-        spent = {}
-        for t in active:
-            c = t.get("categorie", "Non classé")
-            spent[c] = spent.get(c, 0) + abs(t["montant"])
+        # Dépensé par catégorie : achats moins remboursements (jamais sous
+        # zéro) — un achat de 60 € remboursé 30 € a coûté 30 € (choix
+        # d'André après l'audit du 23/09/2026).
+        spent = depense_nette_par_categorie(
+            [t for t in txs if in_period(self._eff_date(t), self.period)])
 
         cats = sorted(set(list(budgets.keys()) + list(spent.keys())))
         n_months = self._month_count(txs)

@@ -18,7 +18,8 @@ from PySide6.QtCharts import (
 )
 
 from ...utils import (
-    carte_a_debit_differe, cat_color, date_debit_differe, est_paiement_carte,
+    carte_a_debit_differe, cat_color, date_debit_differe,
+    depense_nette_par_categorie, est_paiement_carte,
     fmt_euro, fmt_date_fr, in_period, period_label,
 )
 from ...csv_import import TYPE_CARTE, encours_carte_annonce
@@ -1116,18 +1117,13 @@ class BilanView(QWidget):
             self.budget_alert.setVisible(False)
             return
         month, consultation = self._mois_du_bandeau()
-        spent: dict[str, float] = {}
-        for t in txs:
-            # Date d'ACHAT, comme l'onglet Budget vers lequel l'alerte renvoie
-            # (voir BudgetView._eff_date) : sinon les deux écrans annonceraient
-            # des dépenses différentes, et le lot de la carte à débit différé,
-            # parti le 4, ferait déborder les budgets du mois suivant.
-            if (t.get("categorie") == "Transaction exclue"
-                    or t.get("montant", 0) >= 0
-                    or not t.get("date", "").startswith(month)):
-                continue
-            c = t.get("categorie", "Non classé")
-            spent[c] = spent.get(c, 0) + abs(t["montant"])
+        # Date d'ACHAT, comme l'onglet Budget vers lequel l'alerte renvoie
+        # (voir BudgetView._eff_date) : sinon les deux écrans annonceraient
+        # des dépenses différentes, et le lot de la carte à débit différé,
+        # parti le 4, ferait déborder les budgets du mois suivant. Les
+        # remboursements viennent en déduction, comme dans l'onglet Budget.
+        spent = depense_nette_par_categorie(
+            [t for t in txs if t.get("date", "").startswith(month)])
 
         depasses, proches = [], []
         for cat, budget in budgets.items():
@@ -1251,7 +1247,15 @@ class BilanView(QWidget):
         net_periode = sum(t["montant"] for t in active)
         revenus = sum(t["montant"] for t in active if t["montant"] > 0)
         depenses = sum(t["montant"] for t in active if t["montant"] < 0)
-        tx_epargne = (net_periode / revenus * 100) if revenus > 0 else 0
+        # Analyses (taux d'épargne, graphiques, répartition) : sans la
+        # catégorie « Épargne ». Mettre de côté n'est pas dépenser : le
+        # virement vers le livret faisait BAISSER le taux d'épargne (choix
+        # d'André après l'audit du 23/09/2026). La tuile « Mouvement », qui
+        # dit ce qui a bougé sur le compte, garde tout.
+        analyse = [t for t in active if t.get("categorie") != "Épargne"]
+        rev_a = sum(t["montant"] for t in analyse if t["montant"] > 0)
+        dep_a = sum(t["montant"] for t in analyse if t["montant"] < 0)
+        tx_epargne = ((rev_a + dep_a) / rev_a * 100) if rev_a > 0 else 0
         solde_p_periode = sum(t["montant"] for t in active if t.get("pointee"))
 
         # ── Solde bancaire réel = SEULES les opérations pointées ─────
@@ -1326,11 +1330,12 @@ class BilanView(QWidget):
         # ── Graphique en barres : douze mois ──────────────────────────
         # Il reçoit TOUTES les opérations, pas celles de la période : sur un
         # mois affiché, il ne dessinait qu'une seule barre.
-        self._refresh_bar_chart(all_active)
+        self._refresh_bar_chart([t for t in all_active
+                                 if t.get("categorie") != "Épargne"])
 
         # ── Camembert dépenses ────────────────────────────────────────
         by_cat: dict[str, float] = {}
-        for t in active:
+        for t in analyse:
             if t["montant"] >= 0:
                 continue
             c = t.get("categorie", "Non classé")
@@ -1354,7 +1359,7 @@ class BilanView(QWidget):
         self.pie_chart.setTitle("")
 
         # ── Liste : dépenses par catégorie (top 8) ────────────────────
-        total_dep = abs(depenses) or 1
+        total_dep = abs(dep_a) or 1
         dep_items = []
         for c, amt in sorted(by_cat.items(), key=lambda x: x[1], reverse=True)[:8]:
             pct = amt / total_dep * 100
@@ -1363,7 +1368,7 @@ class BilanView(QWidget):
 
         # ── Liste : sources de revenus ────────────────────────────────
         by_rev: dict[str, float] = {}
-        for t in active:
+        for t in analyse:
             if t["montant"] <= 0:
                 continue
             c = t.get("categorie", "Non classé")
@@ -1373,7 +1378,7 @@ class BilanView(QWidget):
         self.list_rev.set_items(rev_items)
 
         # ── Liste : plus grosses dépenses individuelles ───────────────
-        top = sorted([t for t in active if t["montant"] < 0],
+        top = sorted([t for t in analyse if t["montant"] < 0],
                      key=lambda t: t["montant"])[:8]
         top_items = []
         for t in top:
