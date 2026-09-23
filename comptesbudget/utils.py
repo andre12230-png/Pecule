@@ -27,13 +27,50 @@ def _now_iso() -> str:
 _EST_SAUVEGARDE_AUTO = re.compile(r"^comptes-\d{4}-\d{2}-\d{2}\.db$").match
 
 
+class SauvegardeImpossible(OSError):
+    """La copie de sécurité du jour n'a pas pu être faite (disque plein,
+    droits refusés…). Le message porte la cause, à montrer à l'utilisateur."""
+
+
+def sauvegardes_a_garder(noms: list[str], keep: int = 10,
+                         mois: int = 12) -> set[str]:
+    """Parmi les noms de sauvegardes automatiques (comptes-AAAA-MM-JJ.db),
+    celles que la rotation conserve : les `keep` plus récentes, plus la
+    PREMIÈRE copie de chacun des `mois` derniers mois (celui de la copie la
+    plus récente compris).
+
+    Dix copies quotidiennes ne couvraient que dix jours d'ouverture : une
+    erreur découverte trois semaines plus tard n'avait plus de copie saine
+    (audit du 23/09/2026). Une copie par mois donne un an de recul pour
+    quelques mégaoctets."""
+    tries = sorted(noms)
+    if not tries:
+        return set()
+    garder = set(tries[-keep:]) if keep > 0 else set()
+    # « comptes-AAAA-MM-JJ.db » : l'année et le mois sont aux positions 8-15.
+    an, mo = int(tries[-1][8:12]), int(tries[-1][13:15])
+    mois_gardes = set()
+    for _ in range(mois):
+        mois_gardes.add(f"{an:04d}-{mo:02d}")
+        an, mo = (an - 1, 12) if mo == 1 else (an, mo - 1)
+    vus = set()
+    for nom in tries:                    # du plus ancien au plus récent
+        cle = nom[8:15]
+        if cle in mois_gardes and cle not in vus:
+            vus.add(cle)
+            garder.add(nom)
+    return garder
+
+
 def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
     """Copie de sécurité QUOTIDIENNE de la base dans « sauvegardes/ ».
 
     Appelée au lancement, AVANT l'ouverture de la base : même une migration
     ratée ne peut donc pas abîmer la copie. Une seule copie par jour (les
-    relances du même jour ne réécrivent pas), rotation sur les `keep` plus
-    récentes. Retourne le chemin de la sauvegarde du jour, ou None."""
+    relances du même jour ne réécrivent pas), rotation selon
+    `sauvegardes_a_garder`. Retourne le chemin de la sauvegarde du jour, ou
+    None s'il n'y a pas encore de base ; lève SauvegardeImpossible si la copie
+    échoue — l'échec était muet (audit du 23/09/2026)."""
     if not os.path.exists(path):
         return None
     # Les sauvegardes suivent la base : même dossier qu'elle, jamais celui du
@@ -54,15 +91,20 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
         # supprimer, à chaque lancement, la sauvegarde du jour qui venait
         # d'être créée : plus aucune sauvegarde automatique, sans un mot.
         # Constaté le 08/09/2026 sur l'installation d'André.
-        baks = sorted(f for f in os.listdir(bdir) if _EST_SAUVEGARDE_AUTO(f))
-        for old in baks[:-keep]:
+        baks = [f for f in os.listdir(bdir) if _EST_SAUVEGARDE_AUTO(f)]
+        garder = sauvegardes_a_garder(baks, keep)
+        for old in baks:
+            if old in garder:
+                continue
             try:
                 os.remove(os.path.join(bdir, old))
             except OSError:
                 pass
         return dest
-    except OSError:
-        return None   # disque plein / droits : ne jamais bloquer le lancement
+    except OSError as e:
+        # Disque plein, droits… : on le dit, sans bloquer le lancement (c'est
+        # l'appelant qui prévient l'utilisateur, puis continue).
+        raise SauvegardeImpossible(e.strerror or str(e)) from e
 
 
 def suggest_category(libelle: str, sous_cat: str = "") -> Optional[str]:

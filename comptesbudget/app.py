@@ -6,7 +6,7 @@ from PySide6.QtCore import QLibraryInfo, QLockFile, QTranslator
 from PySide6.QtGui import QColor, QIcon, QPalette
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from .utils import _app_dir, _data_dir, backup_db
+from .utils import _app_dir, _data_dir, backup_db, SauvegardeImpossible
 from .database import Database
 from .labels import charger_alias
 from .ui.main_window import MainWindow
@@ -189,8 +189,20 @@ def main():
         return
     app._verrou_instance = verrou    # à garder vivant tant que l'appli tourne
 
-    # Sauvegarde quotidienne AVANT d'ouvrir la base
-    bak = backup_db()
+    # Sauvegarde quotidienne AVANT d'ouvrir la base. Un échec ne bloque pas
+    # l'ouverture, mais il se dit : il passait inaperçu, et l'on croyait
+    # avoir une copie de la veille (audit du 23/09/2026).
+    try:
+        bak = backup_db()
+    except SauvegardeImpossible as e:
+        bak = None
+        QMessageBox.warning(
+            None, "Sauvegarde automatique",
+            "La copie de sécurité du jour n'a pas pu être faite :\n"
+            f"{e}\n\n"
+            "Pécule s'ouvre quand même, mais vos données ne sont pas "
+            "sauvegardées aujourd'hui. Vérifiez la place libre sur le disque, "
+            "ou faites une « 💾 Sauvegarde externe » depuis le menu de gauche.")
 
     db = Database()
     # Correspondances de libellés propres à cette base (« raison sociale du

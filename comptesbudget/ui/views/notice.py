@@ -655,8 +655,11 @@ de côté les opérations les plus anciennes.</p>
 nommé <code>comptes.db</code>. Sur cette installation, il se trouve ici :</p>
 <p><code>DOSSIER_DONNEES</code></p>
 <p>Une <b>sauvegarde automatique</b> est créée à chaque lancement dans le
-sous-dossier <code>sauvegardes\\</code> de ce même dossier (une par jour, les
-10 dernières sont conservées).</p>
+sous-dossier <code>sauvegardes\\</code> de ce même dossier (une par jour). Sont
+conservées les 10 dernières, plus la première de chacun des 12 derniers mois :
+une erreur découverte des semaines plus tard a encore sa copie saine. Si la
+copie du jour échoue (disque plein, par exemple), Pécule le dit au
+lancement.</p>
 <p>En général, vos données sont rangées dans votre dossier personnel
 (<code>AppData\\Local\\Pecule</code>), séparément du programme, que vous ayez
 pris l'installeur ou l'archive .zip — c'est plus sûr, car une mise à jour du

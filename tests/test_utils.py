@@ -242,3 +242,46 @@ def test_rotation_ne_touche_pas_aux_sauvegardes_manuelles(tmp_path, monkeypatch)
     # ...et aucune copie manuelle n'a été emportée.
     for nom in manuelles:
         assert nom in restants
+
+
+# ── Sauvegardes : plus de recul, et un échec qui se voit (audit 23/09/2026) ──
+
+def test_rotation_garde_la_premiere_copie_de_chaque_mois():
+    """Dix copies quotidiennes ne couvraient que dix jours d'ouverture :
+    une erreur vue trois semaines plus tard n'avait plus de copie saine.
+    On garde en plus la première copie de chacun des 12 derniers mois."""
+    from comptesbudget.utils import sauvegardes_a_garder
+    noms = [f"comptes-{a}-{m:02d}-{j:02d}.db"
+            for a, m in [(2025, mm) for mm in range(6, 13)]
+                        + [(2026, mm) for mm in range(1, 10)]
+            for j in (3, 20)]
+    noms += [f"comptes-2026-09-{j:02d}.db" for j in range(21, 31)]
+    garder = sauvegardes_a_garder(noms, keep=10, mois=12)
+    # Les dix plus récentes…
+    assert set(sorted(noms)[-10:]) <= garder
+    # …et la première copie de chaque mois, d'octobre 2025 à septembre 2026.
+    for a, m in [(2025, 10), (2025, 11), (2025, 12)] + [(2026, mm) for mm in range(1, 10)]:
+        assert f"comptes-{a}-{m:02d}-03.db" in garder
+    # Rien de plus : ni les mois plus anciens, ni les copies du 20.
+    assert "comptes-2025-09-03.db" not in garder
+    assert "comptes-2026-05-20.db" not in garder
+    assert len(garder) == 10 + 12
+
+
+def test_echec_de_sauvegarde_n_est_plus_muet(tmp_path, monkeypatch):
+    """Disque plein, droits refusés : la sauvegarde du jour échouait sans un
+    mot. L'erreur remonte maintenant avec sa cause."""
+    import pytest
+    import comptesbudget.utils as u
+    monkeypatch.setattr(u, "_data_dir", lambda: str(tmp_path))
+    base = tmp_path / "comptes.db"
+    base.write_bytes(b"donnees")
+
+    def disque_plein(*a, **k):
+        raise OSError(28, "Il n'y a plus d'espace disponible sur le disque")
+    monkeypatch.setattr(u.shutil, "copy2", disque_plein)
+    with pytest.raises(u.SauvegardeImpossible) as err:
+        u.backup_db(str(base))
+    assert "espace" in str(err.value)
+    # Pas encore de base (premier lancement) : rien à sauvegarder, sans erreur.
+    assert u.backup_db(str(tmp_path / "absente.db")) is None

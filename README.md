@@ -500,7 +500,7 @@ le programme :
 | Fichier / dossier | Contenu | Versionné ? |
 |---|---|---|
 | `comptes.db` | Base SQLite (opérations, budgets, règles, récurrences, réglages) | non (données perso) |
-| `sauvegardes/` | Copies quotidiennes automatiques de la base (rotation sur 10 jours) | non |
+| `sauvegardes/` | Copies quotidiennes automatiques de la base (les 10 dernières, plus la première de chacun des 12 derniers mois) | non |
 | `Budget.ico` | Icône de l'application | oui |
 
 La sauvegarde quotidienne est effectuée **au lancement, avant l'ouverture de la
