@@ -1,5 +1,6 @@
 """Widgets partagés (sélecteur de période, champ de montant)."""
 
+import re
 from datetime import date
 
 from PySide6.QtCore import Signal
@@ -19,19 +20,41 @@ class MontantSpinBox(QDoubleSpinBox):
 
     En français, Qt n'attend que la virgule comme séparateur décimal : taper
     « 12.50 » — le point du pavé numérique — était refusé, le champ restait
-    bloqué sur « 12 ». Le point est ici traduit à la volée en séparateur
-    local, si bien que les deux touches donnent le même résultat."""
+    bloqué sur « 12 ». Le point est donc accepté, et c'est le texte complet
+    qui dit ce qu'il signifie :
+
+      - s'il y a aussi une virgule, le point sépare les milliers
+        (« 1.234,56 » → 1 234,56) ;
+      - s'il est suivi de plus de chiffres que de décimales permises, aussi
+        (« 1.234 » → 1 234) ;
+      - sinon c'est la virgule décimale (« 12.5 » → 12,50)."""
 
     def _normalise(self, texte: str) -> str:
+        """Le texte tapé, réécrit comme Qt l'attend en français."""
         sep = self.locale().decimalPoint()
+        # Une espace entre deux chiffres (« 1 234 ») sépare les milliers :
+        # on l'ôte. Qt, lui, n'accepte la sienne qu'à la bonne place, et
+        # refuserait « 1 2 » en cours de frappe.
+        t = re.sub(r"(?<=\d)\s(?=\d)", "", texte or "")
         if sep == ".":
-            return texte or ""
-        return (texte or "").replace(".", sep)
+            return t
+        if sep in t:
+            return t.replace(".", "")
+        if t.count(".") == 1:
+            chiffres = re.match(r"\d*", t.split(".", 1)[1]).group()
+            if len(chiffres) <= self.decimals():
+                return t.replace(".", sep)
+        return t.replace(".", "")
 
     def validate(self, texte, pos):
-        # Qt réécrit le champ avec le texte renvoyé : le point saisi devient
-        # donc une virgule sous les yeux de l'utilisateur.
-        return super().validate(self._normalise(texte), pos)
+        # On juge le texte réécrit, mais on laisse dans le champ le texte
+        # TEL QUE TAPÉ. Le point était auparavant changé en virgule dès la
+        # frappe : dans « 1.234,56 », il devenait la virgule décimale, le
+        # « 4 » dépassait les deux décimales et était refusé, et l'on
+        # enregistrait 1,23 € (audit du 23/09/2026). Le sens du point ne se
+        # décide qu'une fois le montant entier tapé.
+        etat = super().validate(self._normalise(texte), pos)[0]
+        return etat, texte, pos
 
     def valueFromText(self, texte):
         return super().valueFromText(self._normalise(texte))

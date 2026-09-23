@@ -31,7 +31,8 @@ from typing import NamedTuple, Optional
 
 # L'import CSV fournit le décodage de fichier (UTF-8 / Windows-1252) et le
 # moteur d'import proprement dit : le QIF s'appuie sur les deux.
-from .csv_import import ResultatImport, _decode_csv, import_csv_text
+from .csv_import import (ResultatImport, _decode_csv, import_csv_text,
+                         lire_montant)
 from .database import Database
 
 
@@ -64,49 +65,11 @@ class OperationQif(NamedTuple):
 # ── Lecture des montants ────────────────────────────────────────────────────
 
 def parse_montant_qif(s: str) -> Optional[float]:
-    """Lit un montant QIF, quel que soit le pays d'origine du fichier.
-
-    Le QIF ne dit nulle part quel séparateur décimal il emploie : un Money
-    américain écrit « -1,234.56 » et un Money français « -1.234,56 ». Trois
-    règles suffisent à trancher :
-
-      - si le texte contient les DEUX séparateurs, le dernier des deux est
-        le séparateur décimal (« 1.234,56 » → 1234,56) ;
-      - s'il n'en contient qu'un, suivi d'exactement trois chiffres, c'est
-        un séparateur de milliers (« 1,234 » → 1234) : aucun relevé
-        bancaire n'affiche trois décimales ;
-      - sinon c'est le séparateur décimal (« 45,30 » → 45,30).
-
-    Les montants entre parenthèses sont négatifs (convention comptable
-    qu'emploient certains exports). Retourne None si c'est illisible."""
-    if s is None:
-        return None
-    t = s.strip().replace(" ", "").replace("\xa0", "").replace("€", "")
-    if not t:
-        return None
-    negatif = t.startswith("-") or (t.startswith("(") and t.endswith(")"))
-    t = t.strip("()").lstrip("+-").strip()
-    if not t:
-        return None
-
-    dernier_point = t.rfind(".")
-    derniere_virgule = t.rfind(",")
-    sep = max(dernier_point, derniere_virgule)
-    if sep >= 0 and (dernier_point < 0 or derniere_virgule < 0):
-        # Un seul type de séparateur : trois chiffres derrière = milliers.
-        if len(t) - sep - 1 == 3:
-            sep = -1
-
-    if sep >= 0:
-        entier = re.sub(r"[.,]", "", t[:sep])
-        decimales = t[sep + 1:]
-    else:
-        entier = re.sub(r"[.,]", "", t)
-        decimales = ""
-    if (entier and not entier.isdigit()) or (decimales and not decimales.isdigit()):
-        return None
-    valeur = float(f"{entier or '0'}.{decimales or '0'}")
-    return -valeur if negatif else valeur
+    """Lit un montant QIF, quel que soit le pays d'origine du fichier : un
+    Money américain écrit « -1,234.56 » et un Money français « -1.234,56 ».
+    Les règles sont celles de `lire_montant`, communes à l'import CSV.
+    Retourne None si c'est illisible."""
+    return lire_montant(s)
 
 
 # ── Lecture des dates ───────────────────────────────────────────────────────

@@ -25,20 +25,68 @@ class ResultatImport(NamedTuple):
     recaps: int         # récapitulatifs de débit différé écartés
     rapprochees: int    # échéances prévues rattachées à leur ligne réelle
 
+def lire_montant(s: str) -> Optional[float]:
+    """Lit un montant, qu'il soit écrit à la française ou à l'anglaise.
+
+    Un relevé ne dit nulle part quel séparateur décimal il emploie : un
+    tableur français écrit « -1.234,56 », un logiciel américain
+    « -1,234.56 ». Trois règles suffisent à trancher :
+
+      - si le texte contient les DEUX séparateurs, le dernier des deux est
+        le séparateur décimal (« 1.234,56 » → 1234,56) ;
+      - s'il n'en contient qu'un, suivi d'exactement trois chiffres, c'est
+        un séparateur de milliers (« 1,234 » → 1234) : aucun relevé
+        bancaire n'affiche trois décimales ;
+      - sinon c'est le séparateur décimal (« 45,30 » → 45,30).
+
+    Les espaces (y compris insécables), le symbole € et le signe + sont
+    ignorés ; les montants entre parenthèses sont négatifs (convention
+    comptable de certains exports). Retourne None si c'est illisible.
+
+    Écrite d'abord pour le QIF ; l'import CSV s'en sert aussi depuis
+    l'audit du 23/09/2026, où « 1.234,56 » et « -650,00 € » y étaient
+    rejetés."""
+    if s is None:
+        return None
+    t = re.sub(r"[\s\xa0 €]", "", s)
+    if not t:
+        return None
+    negatif = t.startswith("-") or (t.startswith("(") and t.endswith(")"))
+    t = t.strip("()").lstrip("+-").strip()
+    if not t:
+        return None
+
+    dernier_point = t.rfind(".")
+    derniere_virgule = t.rfind(",")
+    sep = max(dernier_point, derniere_virgule)
+    if sep >= 0 and (dernier_point < 0 or derniere_virgule < 0):
+        # Un seul type de séparateur : trois chiffres derrière = milliers.
+        if len(t) - sep - 1 == 3:
+            sep = -1
+
+    if sep >= 0:
+        entier = re.sub(r"[.,]", "", t[:sep])
+        decimales = t[sep + 1:]
+    else:
+        entier = re.sub(r"[.,]", "", t)
+        decimales = ""
+    if (entier and not entier.isdigit()) or (decimales and not decimales.isdigit()):
+        return None
+    valeur = float(f"{entier or '0'}.{decimales or '0'}")
+    return -valeur if negatif else valeur
+
+
 def _parse_amount_checked(s: str) -> tuple[float, bool]:
-    """Analyse un montant « à la française ». Renvoie (montant, lisible) :
-    un champ vide est lisible (montant 0) ; un texte non vide impossible à
+    """Analyse un montant de relevé. Renvoie (montant, lisible) : un champ
+    vide est lisible (montant 0) ; un texte non vide impossible à
     interpréter renvoie (0.0, False), pour que l'appelant puisse le signaler
     au lieu d'enregistrer silencieusement 0 €."""
     if not s or not s.strip():
         return 0.0, True
-    t = s.strip().replace(" ", "").replace("\xa0", "").replace(",", ".")
-    if t.startswith("+"):
-        t = t[1:]
-    try:
-        return float(t), True
-    except ValueError:
+    montant = lire_montant(s)
+    if montant is None:
         return 0.0, False
+    return montant, True
 
 
 def parse_french_amount(s: str) -> float:

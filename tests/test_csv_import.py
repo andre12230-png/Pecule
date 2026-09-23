@@ -15,6 +15,30 @@ def test_parse_french_amount():
     assert parse_french_amount("abc") == 0.0
 
 
+def test_parse_french_amount_ecritures_de_tableur():
+    """Écritures refusées jusqu'à l'audit du 23/09/2026 : le point des
+    milliers, le symbole €, l'espace fine insécable d'Excel. Ce sont les
+    mêmes règles que pour un relevé QIF."""
+    assert parse_french_amount("1.234,56") == 1234.56
+    assert parse_french_amount("-1.234,56") == -1234.56
+    assert parse_french_amount("-650,00 €") == -650.0
+    assert parse_french_amount("1 234,56") == 1234.56
+    assert parse_french_amount("1,234.56") == 1234.56
+    assert parse_french_amount("-52.30") == -52.30
+
+
+def test_import_csv_montants_avec_point_des_milliers(tmp_path):
+    """Le loyer et le salaire, au-dessus de 1 000 €, étaient écartés comme
+    « illisibles » : seul le pain entrait."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "milliers.csv",
+               "Date;Libelle;Montant\n05/09/2026;LOYER;-1.234,56\n"
+               "06/09/2026;SALAIRE;2.100,00 €\n07/09/2026;PAIN;-1,20\n")
+    r = import_csv(p, db)
+    assert r.illisibles == 0
+    assert sorted(t["montant"] for t in db.list_tx()) == [-1234.56, -1.2, 2100.0]
+
+
 def test_parse_french_date():
     assert parse_french_date("23/06/2026") == "2026-06-23"
     assert parse_french_date("") is None
@@ -256,7 +280,7 @@ def test_import_csv_montant_illisible_signale(tmp_path):
     # écartée et comptée dans le 3e élément du résultat.
     db = Database(str(tmp_path / "t.db"))
     csv_path = _write(tmp_path, "bad.csv",
-                      "Date;Libelle;Montant\n05/01/2026;Loyer;-800,00\n06/01/2026;Bizarre;1.234,56\n")
+                      "Date;Libelle;Montant\n05/01/2026;Loyer;-800,00\n06/01/2026;Bizarre;douze euros\n")
     assert import_csv(csv_path, db) == (1, 0, 1, 0, 0, 0)
     assert len(list(db.list_tx())) == 1
 
