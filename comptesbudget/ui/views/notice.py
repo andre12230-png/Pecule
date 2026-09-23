@@ -238,7 +238,7 @@ ensuite. Vous restez libre de répondre oui.</p>
 
 <h3>🎯 Budget</h3>
 <p>Définissez un budget mensuel par catégorie. Les barres de progression
-deviennent vertes (< 80 %), oranges (< 100 %) ou rouges (dépassement)
+deviennent vertes (&lt; 80 %), oranges (&lt; 100 %) ou rouges (dépassement)
 selon votre consommation pour la période sélectionnée.</p>
 <p>Sur une année, le budget comparé est le budget mensuel multiplié par le
 nombre de mois <b>réellement couverts</b> par des opérations : en juillet,
@@ -653,12 +653,16 @@ nommé <code>comptes.db</code>. Sur cette installation, il se trouve ici :</p>
 <p>Une <b>sauvegarde automatique</b> est créée à chaque lancement dans le
 sous-dossier <code>sauvegardes\\</code> de ce même dossier (une par jour, les
 10 dernières sont conservées).</p>
-<p>Cet emplacement dépend de la façon dont le logiciel a été installé. S'il
-s'agit du dossier de l'application elle-même, c'est une installation dite
-« portable » : tout tient dans un seul dossier, que vous pouvez déplacer ou
-copier tel quel. Sinon, vos données sont rangées dans votre dossier personnel,
-séparément du programme — c'est plus sûr, car une mise à jour du logiciel ne
-peut alors pas les toucher.</p>
+<p>En général, vos données sont rangées dans votre dossier personnel
+(<code>AppData\\Local\\Pecule</code>), séparément du programme, que vous ayez
+pris l'installeur ou l'archive .zip — c'est plus sûr, car une mise à jour du
+logiciel ne peut pas les toucher. Exception, l'usage <b>portable</b> : s'il
+existe un <code>comptes.db</code> à côté de <code>Pecule.exe</code>, c'est
+celui-là qui sert, et tout tient dans un seul dossier, que vous pouvez
+déplacer ou emporter sur une clé USB. C'est le cas des installations
+commencées avant la version 1.22. Pour rendre la vôtre portable : fermez
+Pécule, puis copiez votre <code>comptes.db</code> à côté de
+<code>Pecule.exe</code>.</p>
 <p><b>Sauvegarde externe.</b> Ces copies automatiques restent sur le même
 disque que vos données : si ce disque lâche, elles partent avec lui. Le bouton
 <code>💾 Sauvegarde externe</code> (menu de gauche, « Mes données ») copie votre
@@ -691,28 +695,35 @@ Internet et ne peut donc pas vous l'annoncer tout seul. Cliquez sur
 affiche votre version et ouvre la page de la dernière dans votre navigateur.
 Si son numéro est plus grand que le vôtre, une mise à jour vous attend.</p>
 
-<p><b>Avec l'archive .zip, la bonne façon</b> : décompressez la nouvelle archive <b>par-dessus</b>
-votre dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne
-contient ni <code>comptes.db</code> ni le dossier <code>sauvegardes</code> :
-vos opérations ne peuvent pas être écrasées. Avec Scoop, il n'y a rien à
-faire — <code>scoop update pecule</code> conserve vos données.</p>
+<p><b>Avec l'archive .zip</b> : décompressez la nouvelle version où vous
+voulez (par-dessus l'ancienne, c'est le plus simple), puis lancez son
+<code>Pecule.exe</code>. Vos données, rangées à part dans votre dossier
+personnel, sont retrouvées toutes seules. L'installeur et l'archive partagent
+ce même dossier : vous pouvez passer de l'un à l'autre sans rien faire. Avec
+Scoop, il n'y a rien à faire non plus — <code>scoop update pecule</code>
+conserve vos données.</p>
 
-<p><b>Ce qu'il ne faut pas faire</b> : supprimer l'ancien dossier avant de
-coller le nouveau, ou mettre le nouveau dossier à la place de l'ancien. Là,
-c'est bien votre fichier de données qui disparaît. Dans le doute, copiez
-<code>comptes.db</code> ailleurs avant de commencer : c'est un seul fichier.</p>
+<p><b>En usage portable</b> (un <code>comptes.db</code> à côté de
+<code>Pecule.exe</code>, voir la rubrique 8), c'est différent : décompressez
+la nouvelle archive <b>par-dessus</b> votre dossier Pécule, en acceptant de
+remplacer les fichiers. L'archive ne contient ni <code>comptes.db</code> ni
+le dossier <code>sauvegardes</code> : vos opérations ne peuvent pas être
+écrasées. <b>Ce qu'il ne faut pas faire</b> : supprimer l'ancien dossier
+avant de coller le nouveau, ou mettre le nouveau dossier à la place de
+l'ancien. Là, c'est bien votre fichier de données qui disparaît. Dans le
+doute, copiez <code>comptes.db</code> ailleurs avant de commencer : c'est un
+seul fichier.</p>
 
 <div class="tip">💡 <b>« J'ai mis à jour et l'application est vide. »</b>
-C'est que le nouveau Pécule a été lancé depuis un autre dossier — celui des
-téléchargements, le plus souvent. Ne trouvant pas de <code>comptes.db</code>
-à côté de lui, il en a ouvert un neuf. <b>Rien n'est perdu</b> : vos données
-sont restées dans l'ancien dossier. Pécule le signale au lancement et propose
-de reprendre ce fichier ; vous pouvez aussi le faire à tout moment avec
+Cela n'arrive qu'en usage portable, quand le nouveau Pécule a été lancé
+depuis un autre dossier — celui des téléchargements, le plus souvent. Ne
+trouvant pas de <code>comptes.db</code> à côté de lui, il a ouvert celui de
+votre dossier personnel, vide. <b>Rien n'est perdu</b> : vos données sont
+restées dans l'ancien dossier. Pécule le signale au lancement et propose de
+reprendre ce fichier ; vous pouvez aussi le faire à tout moment avec
 <code>📂 Reprendre un fichier</code>, dans le menu de gauche, tant que
 l'installation est vide. Le fichier choisi est <b>copié</b> — l'original
-reste où il est. C'est aussi ce qui arrive la première fois que l'on passe
-de l'archive .zip à l'installeur : reprenez le <code>comptes.db</code> de
-l'ancien dossier.</div>
+reste où il est.</div>
 
 <p>Une version plus ancienne peut relire une base récente sans l'abîmer : ce
 qu'elle ne comprend pas, elle le laisse tranquille, et la version récente le

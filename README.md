@@ -6,7 +6,7 @@
 [![Dernière version](https://badgen.net/github/tag/andre12230-png/Pecule?label=version)](https://github.com/andre12230-png/Pecule/releases/latest)
 [![Licence](https://badgen.net/github/license/andre12230-png/Pecule)](LICENSE)
 
-> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [installeur `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [archive portable `.zip`](https://github.com/andre12230-png/Pecule/releases/latest)
+> 📥 **Télécharger pour Windows 10/11** — [page de présentation](https://andre12230-png.github.io/Pecule/) · [installeur `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [archive `.zip` sans installation](https://github.com/andre12230-png/Pecule/releases/latest)
 
 > 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
 >
@@ -43,7 +43,7 @@ for tracking personal bank accounts and budgets. It is built with **PySide6 (Qt)
 everything in a **local SQLite** file: no account to create, no cloud, no
 telemetry — your financial data never leaves your computer.
 
-> 📥 **Download for Windows 10/11** — [installer `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [portable `.zip`](https://github.com/andre12230-png/Pecule/releases/latest) · the interface is in French only
+> 📥 **Download for Windows 10/11** — [installer `Pecule-Setup.exe`](https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe) · [`.zip`, no install](https://github.com/andre12230-png/Pecule/releases/latest) · the interface is in French only
 
 **What it does**
 
@@ -67,9 +67,11 @@ are needed, and uninstalling never deletes your data. Windows may show a
 SmartScreen warning because the program is not code-signed: click
 *More info*, then *Run anyway*.
 
-Prefer a portable copy? Take the `.zip` from the
+Prefer not to install anything? Take the `.zip` from the
 [latest release](https://github.com/andre12230-png/Pecule/releases/latest),
-unzip it anywhere and run `Pecule.exe`. Or install via [Scoop](https://scoop.sh):
+unzip it anywhere and run `Pecule.exe`. Either way your data lives in
+`%LOCALAPPDATA%\Pecule`; for a truly portable copy (USB stick), close Pécule
+and copy your `comptes.db` next to `Pecule.exe`. Or install via [Scoop](https://scoop.sh):
 
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
@@ -167,18 +169,22 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 rangées à part dans `%LOCALAPPDATA%\Pecule` ; s'il trouve Pécule ouvert, il
 demande de le fermer.
 
-**Avec l'archive `.zip`** : décompressez-la **par-dessus** votre dossier Pécule :
-elle ne contient ni `comptes.db` ni le dossier `sauvegardes`, vos opérations ne
-peuvent donc pas être écrasées. Avec Scoop, `scoop update pecule` suffit.
+**Avec l'archive `.zip`** : décompressez la nouvelle version où vous voulez
+(par-dessus l'ancienne, c'est le plus simple) et lancez son `Pecule.exe` : vos
+données, rangées à part dans `%LOCALAPPDATA%\Pecule`, sont retrouvées toutes
+seules. L'installeur et l'archive partagent ce dossier : on passe de l'un à
+l'autre sans rien faire. Avec Scoop, `scoop update pecule` suffit.
 
-Vous passez du `.zip` à l'installeur ? Au premier lancement, Pécule s'ouvre
-vide et propose de **reprendre** le `comptes.db` de votre ancien dossier.
-
-Si vous lancez le nouvel exécutable **depuis un autre dossier** (celui des
-téléchargements, par exemple), il ne trouve pas votre fichier de données et en
-ouvre un neuf : l'application s'affiche vide. Rien n'est perdu — elle vous
-indique alors où elle range ses données et propose de **reprendre** le
-`comptes.db` de votre ancienne installation, qui est copié sans être touché.
+**En usage portable** (un `comptes.db` à côté de `Pecule.exe` : installations
+commencées avant la 1.22, ou rendues portables en y copiant sa base),
+décompressez la nouvelle version **par-dessus** votre dossier Pécule : l'archive
+ne contient ni `comptes.db` ni le dossier `sauvegardes`, vos opérations ne
+peuvent donc pas être écrasées. Si vous lancez le nouvel exécutable **depuis un
+autre dossier** (celui des téléchargements, par exemple), il ne trouve pas
+votre fichier de données et ouvre celui de `%LOCALAPPDATA%\Pecule`, vide.
+Rien n'est perdu — Pécule indique alors où il range ses données et propose de
+**reprendre** le `comptes.db` de votre ancienne installation, qui est copié
+sans être touché.
 La reprise reste accessible par le bouton **📂 Reprendre un fichier** tant que
 l'installation est vide.
 
@@ -237,15 +243,16 @@ reste à encaisser et **solde prévu au dernier jour du mois**.
 
 ### Exporter et restaurer vos données
 
-Deux boutons du menu de gauche mettent vos données à l'abri dans un fichier
-lisible, indépendamment de la sauvegarde quotidienne automatique :
+Deux boutons de **⚙️ Paramètres**, partie « Avancé », mettent vos données à
+l'abri dans un fichier lisible, indépendamment de la sauvegarde quotidienne automatique :
 
 - **💾 Exporter (JSON)** écrit dans le fichier de votre choix la **totalité**
   de ce que contient le compte : opérations, règles, budgets, récurrences et
   réglages (solde et date de départ compris).
 - **♻️ Restaurer (JSON)** relit un tel fichier et le **fusionne** avec vos
   données au lieu de les écraser : pour chaque opération, règle ou récurrence,
-  c'est la version la plus récente qui l'emporte. Rien de plus récent que le
+  c'est la version la plus récente qui l'emporte, de même pour les réglages
+  de chaque compte (solde de départ, archivage). Rien de plus récent que le
   fichier n'est perdu, et les suppressions sont propagées.
 
 C'est ce qui permet de transporter ses données vers un autre ordinateur, ou de
@@ -478,9 +485,11 @@ Depuis la **1.22.0**, les données ne vivent plus forcément à côté du progra
 
 - **S'il existe déjà un `comptes.db` à côté de l'application**, c'est celui-là
   qui sert et rien ne bouge : l'installation reste « portable », comme dans les
-  versions précédentes. C'est aussi ce qui se passe avec Scoop, dont le
+  versions précédentes, ou parce qu'on y a copié sa base pour un usage portable.
+  C'est aussi ce qui se passe avec Scoop, dont le
   mécanisme `persist` place justement le fichier à cet endroit.
-- **Sinon** — installation neuve, Winget — les données vont dans
+- **Sinon** — installation neuve, par l'installeur, l'archive `.zip` ou
+  Winget — les données vont dans
   `%LOCALAPPDATA%\Pecule`. C'est indispensable : un gestionnaire de paquets
   remplace le dossier du programme à chaque mise à jour, et emporterait la base
   avec lui.
@@ -497,7 +506,7 @@ le programme :
 La sauvegarde quotidienne est effectuée **au lancement, avant l'ouverture de la
 base** : même une migration ratée ne peut pas abîmer la copie du jour.
 
-Les fichiers écrits par **💾 Exporter (JSON)** ne vivent pas là : ils vont où
+Les fichiers écrits par **💾 Exporter (JSON)** (⚙️ Paramètres › Avancé) ne vivent pas là : ils vont où
 vous les enregistrez, sous le nom que vous choisissez.
 
 ---
@@ -508,8 +517,8 @@ vous les enregistrez, sous le nom que vous choisissez.
   (*last-write-wins*) a été écrit pour la synchronisation avec l'ancienne
   application HTML, retirée en v1.9.5. La synchronisation automatique, elle,
   n'existe plus — mais le moteur sert toujours : c'est lui qui porte les
-  boutons **💾 Exporter (JSON)** et **♻️ Restaurer (JSON)** du menu de gauche
-  (`ui/main_window.py`, méthodes `action_export` et `action_import_json`).
+  boutons **💾 Exporter (JSON)** et **♻️ Restaurer (JSON)** de ⚙️ Paramètres ›
+  Avancé (`ui/main_window.py`, méthodes `action_export` et `action_import_json`).
 - **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import`,
   `ofx_import`, `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
   tests unitaires (`tests/`) couvre le formatage, l'auto-catégorisation, les occurrences
