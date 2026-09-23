@@ -3,7 +3,8 @@
 import re
 from datetime import date
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
     QLabel, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton,
@@ -98,21 +99,32 @@ class PeriodBar(QWidget):
 
     La valeur manipulée n'a pas changé (« all », « 2026 », « 2026-09 ») :
     les vues filtrent exactement comme avant.
+
+    Le bouton « Ce mois-ci » ramène au mois en cours en un clic, et trois
+    raccourcis font la même chose au clavier : Ctrl+← (précédent), Ctrl+→
+    (suivant), Ctrl+Origine (mois en cours).
+
+    `mois_seulement=True` donne la version du rapport mensuel : un rapport
+    porte toujours sur UN mois, les menus n'y proposent donc ni « Toutes
+    périodes » ni « Toute l'année », et la barre n'a ni mode de date ni case
+    d'archives. Mêmes flèches, même bouton, mêmes raccourcis : les deux
+    sélecteurs se manient pareil.
     """
 
     period_changed = Signal(str)
     date_mode_changed = Signal(str)
     archives_toggled = Signal(bool)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, mois_seulement: bool = False):
         super().__init__(parent)
+        self.mois_seulement = mois_seulement
         h = QHBoxLayout(self); h.setContentsMargins(8, 4, 8, 4)
 
-        h.addWidget(QLabel("Période :"))
+        h.addWidget(QLabel("Mois :" if mois_seulement else "Période :"))
 
         # Les deux flèches font le geste le plus fréquent — « et le mois
         # d'avant ? » — en un clic, sans ouvrir de liste.
-        self.prev_btn = self._fleche("‹", "Période précédente", -1)
+        self.prev_btn = self._fleche("‹", "Période précédente (Ctrl+←)", -1)
         h.addWidget(self.prev_btn)
 
         self.annee_combo = QComboBox()
@@ -129,11 +141,33 @@ class PeriodBar(QWidget):
         self.mois_combo.currentIndexChanged.connect(self._on_mois)
         h.addWidget(self.mois_combo)
 
-        self.next_btn = self._fleche("›", "Période suivante", +1)
+        self.next_btn = self._fleche("›", "Période suivante (Ctrl+→)", +1)
         h.addWidget(self.next_btn)
 
+        # Retour au mois en cours en un clic, après être allé voir un mois
+        # passé. Grisé quand on y est déjà : il dit alors aussi qu'on regarde
+        # bien le mois en cours, et pas de vieux chiffres.
+        self.btn_ce_mois = QPushButton("Ce mois-ci")
+        self.btn_ce_mois.setToolTip("Revenir au mois en cours (Ctrl+Origine)")
+        self.btn_ce_mois.setAutoDefault(False)
+        self.btn_ce_mois.clicked.connect(self._aller_au_mois_en_cours)
+        h.addWidget(self.btn_ce_mois)
+
+        # Raccourcis clavier, actifs dans toute la fenêtre qui porte la barre.
+        # Une zone de saisie garde ses propres Ctrl+← / Ctrl+→ (sauter d'un
+        # mot) : Qt lui laisse la priorité quand elle a le curseur.
+        self.raccourcis = []
+        for touches, action in (("Ctrl+Left", lambda: self._decaler(-1)),
+                                ("Ctrl+Right", lambda: self._decaler(+1)),
+                                ("Ctrl+Home", self._aller_au_mois_en_cours)):
+            sc = QShortcut(QKeySequence(touches), self)
+            sc.setContext(Qt.WindowShortcut)
+            sc.activated.connect(action)
+            self.raccourcis.append(sc)
+
         h.addSpacing(20)
-        h.addWidget(QLabel("Date :"))
+        lbl_date = QLabel("Date :")
+        h.addWidget(lbl_date)
         self.date_mode_combo = QComboBox()
         self.date_mode_combo.addItem("Date d'opération (vision budget)", "operation")
         self.date_mode_combo.addItem("Date de valeur (solde banque réel)", "valeur")
@@ -156,10 +190,22 @@ class PeriodBar(QWidget):
         self.archives_check.toggled.connect(self.archives_toggled.emit)
         h.addWidget(self.archives_check)
 
+        if mois_seulement:
+            # Le rapport mensuel filtre sur la date d'opération et gère les
+            # archives lui-même : ces réglages n'ont rien à faire dans sa barre.
+            # Signaux coupés : la barre n'est pas encore prête à les recevoir.
+            self.date_mode_combo.blockSignals(True)
+            self.date_mode_combo.setCurrentIndex(0)
+            self.date_mode_combo.blockSignals(False)
+            for w in (lbl_date, self.date_mode_combo, self.archives_check):
+                w.hide()
+            self.archives_check.setEnabled(False)
+
         h.addStretch()
         self._transactions: list[dict] = []
-        self._current = "all"
-        self._current_mode = "valeur"
+        self._current = (date.today().strftime("%Y-%m") if mois_seulement
+                         else "all")
+        self._current_mode = self.current_date_mode()
         # Au tout premier remplissage, on se place sur le mois en cours
         # (s'il porte des opérations), au lieu de « Toutes périodes ».
         self._first_fill = True
@@ -171,6 +217,8 @@ class PeriodBar(QWidget):
         panne."""
         b = QPushButton(signe)
         b.setFixedWidth(26)
+        # Dans une fenêtre de dialogue, Entrée ne doit pas « cliquer » la flèche
+        b.setAutoDefault(False)
         # Le chevron est un caractère fin : sans mise en gras il se perd à
         # côté des deux menus.
         police = b.font()
@@ -195,7 +243,10 @@ class PeriodBar(QWidget):
             # qui donnerait un écran vide sans dire pourquoi.
             courant = date.today().strftime("%Y-%m")
             reels = _mois_des_transactions(self._transactions, mode)
-            self._current = courant if courant in reels else "all"
+            # (Version « mois seulement » : pas de « toutes périodes » où se
+            # replier ; le mois en cours, même vide, est une réponse.)
+            self._current = (courant if courant in reels or self.mois_seulement
+                             else "all")
             # Tant que le compte est vide, ce premier placement n'a pas
             # vraiment eu lieu : on l'attend pour les premières opérations.
             # Sinon, après le premier import, la barre restait sur « Toutes
@@ -204,7 +255,8 @@ class PeriodBar(QWidget):
         elif not self._periode_valide(self._current, mode):
             # Changer de mode peut faire disparaître la période choisie
             # (juillet devient août pour un achat carte).
-            self._current = "all"
+            self._current = (date.today().strftime("%Y-%m")
+                             if self.mois_seulement else "all")
 
         self._peupler()
 
@@ -230,6 +282,8 @@ class PeriodBar(QWidget):
 
         self.annee_combo.clear()
         for a in annees_disponibles(self._transactions, mode):
+            if self.mois_seulement and a == "all":
+                continue          # un rapport porte sur un mois, pas sur tout
             self.annee_combo.addItem(period_label(a) if a == "all" else a, a)
         annee = annee_de_periode(self._current)
         self.annee_combo.setCurrentIndex(
@@ -242,6 +296,8 @@ class PeriodBar(QWidget):
             self.mois_combo.addItem("Toute l'année", MOIS_TOUS)
         else:
             for m in mois_disponibles(self._transactions, annee, mode):
+                if self.mois_seulement and m == MOIS_TOUS:
+                    continue      # ni « Toute l'année » dans un rapport mensuel
                 self.mois_combo.addItem(
                     "Toute l'année" if m == MOIS_TOUS else nom_mois_fr(m), m)
             cible = self._current if len(self._current) == 7 else MOIS_TOUS
@@ -259,12 +315,15 @@ class PeriodBar(QWidget):
                      if combo.itemData(i) == valeur), 0)
 
     def _maj_etat(self):
-        """Active ou grise le menu des mois et les deux flèches."""
+        """Active ou grise le menu des mois, les deux flèches et le bouton
+        « Ce mois-ci »."""
         mode = self.current_date_mode()
         self.mois_combo.setEnabled(annee_de_periode(self._current) is not None)
         for bouton, sens in ((self.prev_btn, -1), (self.next_btn, +1)):
             bouton.setEnabled(periode_voisine(
                 self._transactions, self._current, sens, mode) is not None)
+        self.btn_ce_mois.setEnabled(
+            self._current != date.today().strftime("%Y-%m"))
 
     # ── Changements de période ──────────────────────────────────────
     def _appliquer(self, period: str):
@@ -283,12 +342,16 @@ class PeriodBar(QWidget):
             return
         # En changeant d'année on garde le mois affiché s'il existe là-bas :
         # c'est ce qu'on veut pour comparer un mois d'une année sur l'autre.
-        # Sinon on montre l'année entière plutôt qu'un écran vide.
+        # Sinon on montre l'année entière plutôt qu'un écran vide — ou, dans
+        # la version « mois seulement », le mois le plus récent de l'année.
         if valeur != "all" and len(self._current) == 7:
+            dispo = mois_disponibles(self._transactions, valeur,
+                                     self.current_date_mode())
             candidat = f"{valeur}-{self._current[5:7]}"
-            if candidat in mois_disponibles(self._transactions, valeur,
-                                            self.current_date_mode()):
+            if candidat in dispo:
                 valeur = candidat
+            elif self.mois_seulement:
+                valeur = next((m for m in dispo if m != MOIS_TOUS), valeur)
         self._appliquer(valeur)
 
     def _on_mois(self, idx: int):
@@ -307,6 +370,16 @@ class PeriodBar(QWidget):
         if voisine is not None:
             self._appliquer(voisine)
 
+    def _aller_au_mois_en_cours(self):
+        """Bouton « Ce mois-ci » et Ctrl+Origine. Le mois en cours figure
+        toujours dans les menus, même sans opération."""
+        self._appliquer(date.today().strftime("%Y-%m"))
+
+    def choisir_periode(self, period: str):
+        """Place la barre sur une période donnée de l'extérieur (le rapport
+        mensuel s'ouvre sur la période de la fenêtre principale)."""
+        self._appliquer(period)
+
     # ── Le reste de la barre ────────────────────────────────────────
     def _emit_date_mode(self):
         m = self.date_mode_combo.currentData() or "operation"
@@ -317,6 +390,8 @@ class PeriodBar(QWidget):
     def set_archives_disponibles(self, nb: int):
         """Montre la case « Voir les archives » seulement s'il y a quelque
         chose à voir, et rappelle combien."""
+        if self.mois_seulement:
+            return                # pas de case d'archives dans cette version
         self.archives_check.setVisible(bool(nb))
         if nb:
             self.archives_check.setText(f"Voir les archives ({nb})")

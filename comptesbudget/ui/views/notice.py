@@ -398,6 +398,12 @@ affichez une année. Elles <b>se grisent</b> quand il n'y a plus rien de ce côt
 et le menu des mois se grise sur « Toutes périodes », qui est à cheval sur
 toutes les années. En changeant d'année, le mois affiché est conservé s'il
 existe là-bas — pratique pour comparer un même mois d'une année sur l'autre.</p>
+<p>Le bouton <b>Ce mois-ci</b> ramène au mois en cours en un clic ; il est grisé
+quand vous y êtes déjà. Au clavier : <code>Ctrl+←</code> mois précédent,
+<code>Ctrl+→</code> mois suivant, <code>Ctrl+Origine</code> mois en cours (dans
+une zone de saisie, <code>Ctrl+←</code> et <code>Ctrl+→</code> gardent leur rôle
+habituel : sauter d'un mot). Le <b>Rapport mensuel</b> a le même sélecteur, sans
+« Toutes périodes » ni « Toute l'année » puisqu'il porte sur un seul mois.</p>
 <p>L'application <b>s'ouvre toujours sur le mois en cours</b> : elle ne se
 souvient pas de la période que vous consultiez la fois précédente, pour ne pas
 vous faire prendre de vieux chiffres pour ceux du mois courant. Si le mois en

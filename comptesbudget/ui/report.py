@@ -6,13 +6,14 @@ from html import escape as _esc   # « B&C » → « B&amp;C » : sinon le & cas
 
 from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QComboBox, QDialog, QMessageBox, QFileDialog, QTextBrowser,
+    QPushButton, QDialog, QMessageBox, QFileDialog, QTextBrowser,
 )
 
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
 )
 from ..database import Database
+from .widgets import PeriodBar
 
 MOIS_FR = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
            "Août", "Septembre", "Octobre", "Novembre", "Décembre"]
@@ -187,27 +188,25 @@ class MonthlyReportDialog(QDialog):
         self.resize(760, 640)
 
         v = QVBoxLayout(self)
-        top = QHBoxLayout()
-        top.addWidget(QLabel("Mois :"))
-        self.month_combo = QComboBox()
-        months = {(r["date"] or "")[:7] for r in db.list_tx() if r["date"]}
+        # Le même sélecteur que la barre du haut (‹ année mois › Ce mois-ci,
+        # Ctrl+← / Ctrl+→ / Ctrl+Origine), réduit aux mois : un rapport porte
+        # toujours sur un mois. Il filtre, comme le rapport, sur la date
+        # d'opération.
+        txs = [dict(r) for r in db.list_tx()]
+        months = {(t.get("date") or "")[:7] for t in txs if t.get("date")}
         cur = _mois_de_depart(periode, months, date.today())
-        # Le mois demandé figure dans la liste même sans opération : sinon le
-        # rapport s'ouvrirait, sans qu'on le voie, sur un autre mois.
+        # Le mois demandé figure dans les menus même sans opération : sinon le
+        # rapport s'ouvrirait, sans qu'on le voie, sur un autre mois. Le
+        # sélecteur ne lit que les dates : une date suffit à l'y faire entrer.
+        if cur and cur not in months:
+            txs.append({"date": f"{cur}-01"})
+        self.periode = PeriodBar(self, mois_seulement=True)
+        self.periode.layout().setContentsMargins(0, 0, 0, 0)
+        self.periode.update_periods(txs)
         if cur:
-            months.add(cur)
-        else:
-            cur = date.today().strftime("%Y-%m")
-        for mo in sorted(months, reverse=True):
-            y, m = int(mo[:4]), int(mo[5:7])
-            self.month_combo.addItem(f"{MOIS_FR[m]} {y}", mo)
-        idx = self.month_combo.findData(cur)
-        if idx >= 0:
-            self.month_combo.setCurrentIndex(idx)
-        self.month_combo.currentIndexChanged.connect(self._rebuild)
-        top.addWidget(self.month_combo)
-        top.addStretch()
-        v.addLayout(top)
+            self.periode.choisir_periode(cur)
+        self.periode.period_changed.connect(lambda _p: self._rebuild())
+        v.addWidget(self.periode)
 
         self.browser = QTextBrowser()
         self.browser.setStyleSheet("QTextBrowser { background:#FFF; padding:10px }")
@@ -232,7 +231,8 @@ class MonthlyReportDialog(QDialog):
         self._rebuild()
 
     def current_month(self) -> str:
-        return self.month_combo.currentData() or date.today().strftime("%Y-%m")
+        p = self.periode.current_period()
+        return p if len(p) == 7 else date.today().strftime("%Y-%m")
 
     def _rebuild(self):
         self.browser.setHtml(build_monthly_report_html(self.db, self.current_month()))
