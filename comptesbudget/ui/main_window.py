@@ -603,6 +603,14 @@ class MainWindow(QMainWindow):
         # saisi (cf. le bandeau du Bilan).
         compte = self.db.get_compte()
         jamais_renseigne = compte is None or compte["solde_initial"] is None
+        # Compte neuf, sans opération : on propose la date du JOUR, pas le
+        # 1er janvier. On y tape le solde lu aujourd'hui à la banque ; daté
+        # du 1er janvier, il additionnait ensuite le relevé importé, qu'il
+        # contenait déjà (3 800,00 € au lieu de 1 234,56 €, audit du
+        # 23/09/2026). Daté du jour, le relevé tombe avant la date de départ
+        # et « Reculer la date » calcule le bon solde de départ.
+        if jamais_renseigne and self.db.bornes_operations() is None:
+            d = date.today().isoformat()
         dlg = SettingsDialog(self, d, b, self.db.nom_compte(), avance=True)
         if dlg.exec() != QDialog.Accepted:
             # Les boutons de la partie « Avancé » ferment la fenêtre AVANT
@@ -876,11 +884,23 @@ class MainWindow(QMainWindow):
         Renvoie True si l'invite a été montrée."""
         if self.db.get_setting("initial_balance"):
             return False
+        if self.db.bornes_operations() is None:
+            # Compte encore vide : Paramètres proposera la date du jour.
+            texte = (
+                "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
+                "le solde de votre compte <b>aujourd'hui</b>, tel que votre "
+                "banque l'affiche.<br><br>"
+                "Si vous importez ensuite un relevé plus ancien, Pécule "
+                "reculera la date de départ et recalculera ce solde pour "
+                "vous.<br><br>")
+        else:
+            texte = (
+                "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
+                "le solde de votre compte à la date de début choisie."
+                "<br><br>")
         QMessageBox.information(
             self, "Bienvenue dans Pécule",
-            "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
-            "le solde de votre compte à la date de début choisie.<br><br>"
-            "Vous pourrez le modifier à tout moment via le bouton "
+            texte + "Vous pourrez le modifier à tout moment via le bouton "
             "« Paramètres » du menu de gauche.")
         self.action_settings()
         return True

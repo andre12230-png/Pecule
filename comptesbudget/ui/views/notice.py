@@ -46,10 +46,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       tôt, les opérations d'entre-deux seraient comptées deux fois au prochain import.</li>
   <li><b>Ou configurer le solde de départ vous-même</b>, via <code>⚙️ Paramètres</code> dans le
       menu de gauche — à tout moment, et d'office si vous choisissez « Démarrer à neuf » à
-      l'accueil. Indiquez la date à laquelle vous commencez votre suivi — le
-      1<sup>er</sup> janvier de l'année en cours vous est proposé — et le solde que vous aviez
-      en banque à cette date. Cette valeur sert de base pour calculer votre solde réel à toute
-      date ultérieure.
+      l'accueil. Indiquez la date à laquelle vous commencez votre suivi et le solde que vous
+      aviez en banque à cette date. Sur un compte encore vide, c'est la <b>date du jour</b>
+      qui vous est proposée : tapez simplement le solde que votre banque affiche aujourd'hui.
+      Cette valeur sert de base pour calculer votre solde réel à toute date ultérieure.
       <br><b>Tant qu'il n'est pas renseigné</b>, un bandeau orange le rappelle en tête du Bilan :
       le grand chiffre du solde n'y additionne alors que vos opérations.
       <br><b>Les opérations antérieures à cette date</b> restent visibles dans les listes et les
