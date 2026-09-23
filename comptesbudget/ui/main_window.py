@@ -253,8 +253,9 @@ class MainWindow(QMainWindow):
         self.prev_view.changed.connect(self.refresh_all)
         self.bilan_view.goto_budget.connect(
             lambda: self.tabs.setCurrentWidget(self.budget_view))
-        # Le bandeau « solde de départ non renseigné » ouvre les Paramètres.
-        self.bilan_view.goto_parametres.connect(self.action_settings)
+        # Le bandeau « solde de départ non renseigné » : Paramètres sur un
+        # compte vide, sinon la question du solde au jour du relevé.
+        self.bilan_view.goto_parametres.connect(self.regler_solde_depart)
         self.bilan_view.goto_recul_depart.connect(
             lambda: self.proposer_recul_depart(repli_parametres=True))
         self.tabs.currentChanged.connect(self.refresh_current)
@@ -479,10 +480,16 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.information(self, "Import", msg)
         self.refresh_all()
-        # Un historique importé après avoir saisi le solde du jour tombe
-        # entièrement avant la date de départ : on propose de la reculer.
         if total_imp:
-            self.proposer_recul_depart()
+            if self._solde_jamais_donne():
+                # Solde jamais donné : on pose la question du premier relevé
+                # (le solde au jour de la dernière opération), qui règle
+                # seule la date et le solde de départ.
+                self._regler_depart_depuis_releve()
+            else:
+                # Un historique importé après avoir saisi le solde du jour
+                # tombe avant la date de départ : on propose de la reculer.
+                self.proposer_recul_depart()
 
     # ── Glisser-déposer de fichiers ─────────────────────────────────
     def _accepted_drop_paths(self, event) -> list[str]:
@@ -626,15 +633,9 @@ class MainWindow(QMainWindow):
         # l'invite du premier lancement ne revenait plus jamais, laissant un
         # solde faux pour toujours. On demande confirmation, une seule fois.
         if jamais_renseigne and abs(nb) < 0.005:
-            reponse = QMessageBox.question(
-                self, "Solde de départ",
-                f"Vous enregistrez un solde de départ de <b>0,00 €</b> au "
-                f"{fmt_date_fr(nd)}.<br><br>"
-                "Ce n'est juste que si votre compte était vide à cette date. "
-                "Sinon, le solde affiché par Pécule sera faux de tout ce que "
-                "vous aviez en banque.<br><br>Enregistrer quand même ?",
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if reponse != QMessageBox.Yes:
+            if not self._confirmer_solde_nul(
+                    f"Vous enregistrez un solde de départ de <b>0,00 €</b> "
+                    f"au {fmt_date_fr(nd)}."):
                 return
         # Le plafond d'encours carte a été retiré le 07/09/2026 : le bandeau
         # du Bilan calcule maintenant ce qui reste d'après les mouvements
@@ -647,6 +648,64 @@ class MainWindow(QMainWindow):
             f"« {self.db.nom_compte()} » — solde de départ : "
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
+
+    def _confirmer_solde_nul(self, phrase: str) -> bool:
+        """Un solde de 0,00 € vient le plus souvent d'une validation par
+        réflexe, le champ n'ayant pas été rempli. On le fait confirmer :
+        True si l'utilisateur maintient ce zéro."""
+        reponse = QMessageBox.question(
+            self, "Solde de départ",
+            phrase + "<br><br>"
+            "Ce n'est juste que si votre compte était vide à cette date. "
+            "Sinon, le solde affiché par Pécule sera faux de tout ce que "
+            "vous aviez en banque.<br><br>Enregistrer quand même ?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        return reponse == QMessageBox.Yes
+
+    def _solde_jamais_donne(self) -> bool:
+        """Le solde de départ du compte n'a jamais été saisi (NULL), ce qui
+        n'est pas la même chose qu'un solde de zéro."""
+        compte = self.db.get_compte()
+        return compte is None or compte["solde_initial"] is None
+
+    def regler_solde_depart(self):
+        """Lien du bandeau « Solde de départ non renseigné ». Compte encore
+        vide : Paramètres, avec la date du jour. Opérations déjà là : la
+        question du premier relevé. Renvoyer vers Paramètres et le 1er
+        janvier faisait taper le solde du jour à une date où il ne valait
+        pas (audit du 23/09/2026)."""
+        if self.db.bornes_operations() is None:
+            self.action_settings()
+        else:
+            self._regler_depart_depuis_releve()
+
+    def _regler_depart_depuis_releve(self) -> bool:
+        """Demande le solde au jour de la dernière opération, et en déduit
+        la date et le solde de départ. Renvoie True si c'est réglé ; False
+        si la question a été refermée ou le zéro non confirmé — le bandeau
+        orange reste alors là pour le rappeler."""
+        bornes = self.db.bornes_operations()
+        if bornes is None:
+            return False
+        premiere, derniere, nb = bornes
+        solde = self._demander_solde_releve(premiere, derniere, nb)
+        if solde is None:
+            return False
+        # Le champ s'ouvre sur 0 : Entrée par réflexe l'enregistrait, et le
+        # bandeau orange disparaissait sur un solde faux.
+        if abs(solde) < 0.005 and not self._confirmer_solde_nul(
+                f"Vous indiquez un solde de <b>0,00 €</b> au "
+                f"{fmt_date_fr(derniere)}."):
+            return False
+        depart, initial = self.db.depart_depuis_solde(solde, derniere)
+        self.refresh_all()
+        QMessageBox.information(
+            self, "Solde de départ",
+            f"C'est réglé : le compte part du {fmt_date_fr(depart)} avec "
+            f"{fmt_euro(initial)}, si bien que le Bilan affiche "
+            f"{fmt_euro(solde)} au {fmt_date_fr(derniere)}.\n\n"
+            "Vous pourrez le modifier à tout moment via « Paramètres ».")
+        return True
 
     def proposer_recul_depart(self, repli_parametres: bool = False) -> bool:
         """Des opérations précèdent la date de départ : proposer de reculer
@@ -779,23 +838,11 @@ class MainWindow(QMainWindow):
             self, "Importer mon premier relevé", "", self.FILTRE_RELEVES)
         if not path:
             return False
+        # La question du solde est posée par l'import lui-même, puisque le
+        # solde de départ n'a pas encore été donné.
         self._import_files([path])
-        bornes = self.db.bornes_operations()
-        if bornes is None:
-            return False     # rien de lu : l'invite habituelle prend le relais
-        premiere, derniere, nb = bornes
-        solde = self._demander_solde_releve(premiere, derniere, nb)
-        if solde is None:
-            return True      # le bandeau « solde non renseigné » le rappellera
-        depart, initial = self.db.depart_depuis_solde(solde, derniere)
-        self.refresh_all()
-        QMessageBox.information(
-            self, "Solde de départ",
-            f"C'est réglé : le compte part du {fmt_date_fr(depart)} avec "
-            f"{fmt_euro(initial)}, si bien que le Bilan affiche "
-            f"{fmt_euro(solde)} au {fmt_date_fr(derniere)}.\n\n"
-            "Vous pourrez le modifier à tout moment via « Paramètres ».")
-        return True
+        # Rien de lu : l'invite habituelle prend le relais.
+        return self.db.bornes_operations() is not None
 
     def _demander_solde_releve(self, premiere: str, derniere: str, nb: int):
         """La question posée après le premier import. Renvoie le montant, ou
@@ -884,23 +931,21 @@ class MainWindow(QMainWindow):
         Renvoie True si l'invite a été montrée."""
         if self.db.get_setting("initial_balance"):
             return False
-        if self.db.bornes_operations() is None:
-            # Compte encore vide : Paramètres proposera la date du jour.
-            texte = (
-                "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
-                "le solde de votre compte <b>aujourd'hui</b>, tel que votre "
-                "banque l'affiche.<br><br>"
-                "Si vous importez ensuite un relevé plus ancien, Pécule "
-                "reculera la date de départ et recalculera ce solde pour "
-                "vous.<br><br>")
-        else:
-            texte = (
-                "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
-                "le solde de votre compte à la date de début choisie."
-                "<br><br>")
+        if self.db.bornes_operations() is not None:
+            # Un relevé est déjà là (question refermée au premier import) :
+            # on la repose, plutôt que d'ouvrir Paramètres sur le 1er
+            # janvier, où le solde du jour aurait été faux.
+            self._regler_depart_depuis_releve()
+            return True
+        # Compte encore vide : Paramètres proposera la date du jour.
         QMessageBox.information(
             self, "Bienvenue dans Pécule",
-            texte + "Vous pourrez le modifier à tout moment via le bouton "
+            "Pour bien démarrer, indiquez votre <b>solde de départ</b> : "
+            "le solde de votre compte <b>aujourd'hui</b>, tel que votre "
+            "banque l'affiche.<br><br>"
+            "Si vous importez ensuite un relevé plus ancien, Pécule reculera "
+            "la date de départ et recalculera ce solde pour vous.<br><br>"
+            "Vous pourrez le modifier à tout moment via le bouton "
             "« Paramètres » du menu de gauche.")
         self.action_settings()
         return True

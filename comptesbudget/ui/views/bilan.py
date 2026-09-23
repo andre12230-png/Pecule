@@ -1181,13 +1181,22 @@ class BilanView(QWidget):
         if renseigne:
             self.solde_depart_alert.setVisible(False)
             return
-        self.solde_depart_alert.setText(
-            "&#9888; <b>Solde de départ non renseigné.</b> Le solde affiché "
-            "ci-dessus n'additionne que vos opérations : il ne sera juste que "
-            "si votre compte était à zéro le "
-            + fmt_date_fr(self.db.date_initiale())
-            + ". Indiquez le solde de votre relevé à cette date — "
-            "<a href='#'>Paramètres</a>.")
+        debut = ("&#9888; <b>Solde de départ non renseigné.</b> Le solde "
+                 "affiché ci-dessus n'additionne que vos opérations. ")
+        bornes = self.db.bornes_operations()
+        if bornes is None:
+            texte = (debut + "Indiquez le solde de votre compte aujourd'hui "
+                     "— <a href='#'>Paramètres</a>.")
+        else:
+            # Conseiller le solde « au 1er janvier » faisait taper le solde
+            # du jour à une date où il ne valait pas (audit du 23/09/2026).
+            # Le bon repère est la dernière opération : c'est la question
+            # que pose le lien.
+            texte = (debut + "Indiquez le solde de votre compte le "
+                     + fmt_date_fr(bornes[1]) + ", jour de votre dernière "
+                     "opération : Pécule en déduira la date et le solde de "
+                     "départ — <a href='#'>Indiquer le solde</a>.")
+        self.solde_depart_alert.setText(texte)
         self.solde_depart_alert.setVisible(True)
 
     def _refresh_hors_solde_alert(self, txs: list[dict]):

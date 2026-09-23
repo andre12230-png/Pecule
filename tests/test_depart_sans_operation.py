@@ -108,8 +108,12 @@ def test_compte_deja_regle_garde_sa_date(qapp, tmp_path, monkeypatch):
 def test_compte_avec_operations_garde_sa_date(qapp, tmp_path, monkeypatch):
     """Des opérations déjà là (relevé importé, solde jamais donné) : ce
     n'est plus le cas du compte neuf, la date n'est pas remplacée ici."""
+    from comptesbudget.ui.main_window import MainWindow
     db, fenetre = _fenetre(tmp_path, monkeypatch)
     depart = db.get_setting("initial_date")
+    # L'import pose la question du solde : l'utilisateur la referme.
+    monkeypatch.setattr(MainWindow, "_demander_solde_releve",
+                        lambda self, *a: None)
     fenetre._import_files([_releve(tmp_path)])
     fenetre.action_settings()
     assert _FauxParametres.propositions == [depart]

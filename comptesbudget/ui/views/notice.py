@@ -41,7 +41,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       relevé, puis vous pose une seule question : le solde de votre compte au jour de la
       <b>dernière opération</b> du relevé — le site de votre banque l'affiche à côté de chaque
       opération, et votre relevé mensuel le donne aussi. Il règle alors seul la date et le solde
-      de départ : le Bilan affiche aussitôt votre solde, historique compris.
+      de départ : le Bilan affiche aussitôt votre solde, historique compris. Si vous
+      refermez cette question, le bandeau orange du Bilan la repose d'un clic
+      (« Indiquer le solde »), et elle revient à l'ouverture suivante.
       <br>Pourquoi ce jour-là, et pas aujourd'hui ? Si le relevé s'arrête quelques jours plus
       tôt, les opérations d'entre-deux seraient comptées deux fois au prochain import.</li>
   <li><b>Ou configurer le solde de départ vous-même</b>, via <code>⚙️ Paramètres</code> dans le
