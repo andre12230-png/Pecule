@@ -978,18 +978,35 @@ class BilanView(QWidget):
         S'appuie sur le rapprochement de « Générer les échéances du mois » :
         il reconnaît une pension déjà encaissée sous un libellé un peu
         différent, là où une comparaison stricte l'annoncerait une seconde
-        fois. Les deux écrans disent ainsi la même chose."""
+        fois. Les deux écrans disent ainsi la même chose.
+
+        Chaque échéance porte `_debit`, le jour où elle sort vraiment du
+        compte, et `_carte`. Une échéance payée par une carte à DÉBIT DIFFÉRÉ
+        ne sort pas le jour de l'achat mais avec le lot carte du mois suivant
+        (date_debit_differe) : c'est ce jour-là qui décide si elle tombe dans
+        la fenêtre. Incident du 23/09/2026 : un abonnement carte du 1er était
+        retranché le 01/10 alors qu'il partait avec le lot de novembre."""
         recs = [dict(r) for r in self.db.list_recurring()]
         debut_iso, fin_iso = depuis.isoformat(), jusqua.isoformat()
+        differe = carte_a_debit_differe(txs)
         out = []
         # Chaque mois de la fenêtre, du premier au dernier. Seuls ces deux-là
         # étaient consultés : passé le 17, les 45 jours du prochain découvert
         # couvrent trois mois, et les échéances du mois du milieu étaient
-        # ignorées (audit du 23/09/2026).
+        # ignorées (audit du 23/09/2026). Avec une carte à débit différé, on
+        # part du mois d'avant : ses achats carte sont débités dans la fenêtre.
         annee, mois = depuis.year, depuis.month
+        if differe:
+            annee, mois = (annee - 1, 12) if mois == 1 else (annee, mois - 1)
         while (annee, mois) <= (jusqua.year, jusqua.month):
-            out += [e for e in echeances_du_mois(recs, txs, annee, mois)
-                    if not e["_deja"] and debut_iso <= e["date"] <= fin_iso]
+            for e in echeances_du_mois(recs, txs, annee, mois):
+                if e["_deja"]:
+                    continue
+                e["_carte"] = differe and est_paiement_carte(e.get("type"))
+                e["_debit"] = (date_debit_differe(e["date"]) if e["_carte"]
+                               else e["date"])
+                if debut_iso <= e["_debit"] <= fin_iso:
+                    out.append(e)
             annee, mois = (annee + 1, 1) if mois == 12 else (annee, mois + 1)
         return out
 
@@ -1000,7 +1017,7 @@ class BilanView(QWidget):
         lignes, en_cours_carte, _deja = self._operations_a_venir(
             txs, depuis, jusqua)
         for e in self._echeances_non_couvertes(txs, depuis, jusqua):
-            lignes.append((e["date"], e["libelle"], e["montant"], False))
+            lignes.append((e["_debit"], e["libelle"], e["montant"], e["_carte"]))
         return lignes, en_cours_carte
 
     def _refresh_mois_banner(self, txs: list[dict], solde_compte: float):
