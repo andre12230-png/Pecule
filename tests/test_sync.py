@@ -83,3 +83,73 @@ def test_export_restaure_sur_base_vierge(tmp_path):
     assert dict(db2.list_tx()[0])["libelle"] == "LOYER"
     assert db2.list_budgets() == {"Logement - maison": 900.0}
     assert db2.get_setting("initial_balance") == "1500"
+
+
+# ── Les réglages des comptes suivent la même règle (audit du 23/09/2026) ─────
+#
+# Les opérations ne sont remplacées que par plus récent qu'elles ; les comptes
+# (solde et date de départ, date d'archivage, nom) l'étaient TOUJOURS. Restaurer
+# un export pour retrouver une opération supprimée défaisait ainsi un archivage
+# fait depuis : le solde passait de 1 800 € à 400 €.
+
+VIEUX = "2020-01-01T00:00:00Z"
+
+
+def _export_ancien(db):
+    """Export de la base, daté d'avant toutes les modifications locales."""
+    snap = db_snapshot(db)
+    snap["synced_at"] = VIEUX
+    snap["settings_updated_at"] = VIEUX
+    for c in snap["comptes"]:
+        c["updated_at"] = VIEUX
+    return snap
+
+
+def test_restaurer_ne_recule_pas_le_solde_de_depart(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    db.set_solde_initial(1000.0, "2026-01-01")
+    snap = _export_ancien(db)
+    db.set_solde_initial(1500.0, "2026-01-01")       # corrigé après l'export
+    merge_remote_into_db(db, snap)
+    assert db.get_compte()["solde_initial"] == 1500.0
+
+
+def test_restaurer_garde_l_archivage(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    db.set_solde_initial(1000.0, "2026-01-01")
+    db.insert_tx(_tx(id="a", date="2026-03-05", date_valeur="2026-03-05",
+                     montant=-600.0, pointee=1))
+    db.insert_tx(_tx(id="b", date="2026-08-05", date_valeur="2026-08-05",
+                     montant=-100.0, pointee=1))
+    snap = _export_ancien(db)
+    db.archiver("2026-06-30")
+    avant = db.soldes_compte(db.compte_id, "2026-09-01")["banque"]
+    merge_remote_into_db(db, snap)
+    assert db.archive_jusqua() == "2026-06-30"
+    assert db.soldes_compte(db.compte_id, "2026-09-01")["banque"] == avant == 300.0
+
+
+def test_restaurer_un_compte_plus_recent_dans_le_fichier(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    db.set_solde_initial(1000.0, "2026-01-01")
+    snap = db_snapshot(db)
+    for c in snap["comptes"]:
+        c["solde_initial"] = 2000.0
+        c["updated_at"] = "2099-01-01T00:00:00Z"
+    stats = merge_remote_into_db(db, snap)
+    assert db.get_compte()["solde_initial"] == 2000.0
+    assert stats["applied"] == 1
+
+
+def test_restaurer_ne_donne_pas_le_solde_d_un_compte_a_un_autre(tmp_path):
+    """Le fichier porte aussi, pour les versions d'avant le multicomptes, le
+    solde du compte affiché au moment de l'export. Il était recopié sur le
+    compte affiché à la restauration s'il n'avait pas de solde : un livret
+    neuf héritait du solde du compte courant."""
+    db = Database(str(tmp_path / "t.db"))
+    db.set_solde_initial(1000.0, "2026-01-01")
+    snap = db_snapshot(db)                       # exporté depuis le courant
+    livret = db.add_compte("Livret")
+    db.set_compte_courant(livret)
+    merge_remote_into_db(db, snap)
+    assert db.get_compte(livret)["solde_initial"] is None

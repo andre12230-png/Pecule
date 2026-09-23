@@ -76,9 +76,23 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     # 0) Les comptes d'abord : une opération ne peut être rattachée qu'à un
     #    compte qui existe. Un fichier écrit avant le multicomptes n'en
     #    contient aucun — ses opérations rejoindront le compte de travail.
+    #    Comme pour les opérations, le plus récent l'emporte : les comptes
+    #    étaient toujours remplacés, si bien qu'un vieil export défaisait un
+    #    archivage ou un solde corrigé depuis (audit du 23/09/2026). Seule
+    #    exception : un compte local dont le solde n'a jamais été donné (base
+    #    neuve, créée « maintenant ») n'a rien à perdre.
+    comptes_locaux = {r["id"]: dict(r) for r in db.list_comptes()}
     for c in remote.get("comptes", []) or []:
-        if c.get("id"):
-            db.upsert_compte(c)
+        if not c.get("id"):
+            continue
+        ts = _eff_ts(c, fallback)
+        cur = comptes_locaux.get(c["id"])
+        if (cur is None or cur.get("solde_initial") is None
+                or (cur.get("updated_at") or "") < ts):
+            if cur is not None and cur == {**cur, **c, "updated_at": ts}:
+                continue          # déjà identique : rien à appliquer
+            db.upsert_compte({**c, "updated_at": ts})
+            stats["applied"] += 1
 
     # La comparaison porte sur TOUS les comptes : une opération de l'autre
     # compte ne doit pas passer pour absente et être réécrite à tort.
@@ -142,9 +156,13 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     # 4) Réglages partagés (solde / date initiale) : le plus récent l'emporte.
     #    Même cas particulier : solde local jamais configuré + solde présent
     #    dans le fichier → on applique sans condition de date.
+    #    Seulement pour un fichier d'avant le multicomptes (sans « comptes ») :
+    #    depuis, chaque compte porte les siens (étape 0), et ces réglages-ci
+    #    — ceux du compte affiché lors de l'export — tombaient sur le compte
+    #    affiché à la restauration, fût-ce un autre (audit du 23/09/2026).
     r_set_ts = remote.get("settings_updated_at") or ""
     l_set_ts = db.get_setting("_meta_settings_updated_at", "")
-    rset = remote.get("settings") or {}
+    rset = ({} if remote.get("comptes") else remote.get("settings")) or {}
     l_unset = not db.get_setting("initial_balance")
     r_has = bool(rset.get("initial_balance"))
     if rset and ((l_unset and r_has) or (r_set_ts and r_set_ts > l_set_ts)):
