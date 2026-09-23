@@ -153,3 +153,51 @@ def test_restaurer_ne_donne_pas_le_solde_d_un_compte_a_un_autre(tmp_path):
     db.set_compte_courant(livret)
     merge_remote_into_db(db, snap)
     assert db.get_compte(livret)["solde_initial"] is None
+
+
+# ── Un compte supprimé revient avec son contenu (audit du 23/09/2026) ────────
+#
+# Supprimer un compte note la suppression de chacune de ses opérations. En
+# restaurant un export fait avant, ces notes l'emportaient : le compte
+# revenait, vide (400 € au lieu de 700 €).
+
+def _base_avec_livret(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx(_tx(id="courant-1", updated_at=VIEUX))
+    livret = db.add_compte("Livret", 400.0, "2026-01-01")
+    db.set_compte_courant(livret)
+    db.insert_tx(_tx(id="liv-1", montant=200.0, pointee=1))
+    db.insert_tx(_tx(id="liv-2", montant=100.0, pointee=1))
+    db.set_budget("Épargne", 50.0)
+    db.set_compte_courant(db.list_comptes()[0]["id"])
+    return db, livret
+
+
+def test_restaurer_un_compte_supprime_le_retablit_en_entier(tmp_path):
+    db, livret = _base_avec_livret(tmp_path)
+    snap = db_snapshot(db)
+    db.delete_compte(livret)
+    stats = merge_remote_into_db(db, snap)
+
+    assert db.nom_compte(livret) == "Livret"
+    assert sorted(t["id"] for t in db.list_tx_all()
+                  if t["compte_id"] == livret) == ["liv-1", "liv-2"]
+    assert db.list_budgets_all().get(livret) == {"Épargne": 50.0}
+    assert db.soldes_compte(livret, "2026-12-31")["banque"] == 700.0
+    assert stats["comptes_retablis"] == ["Livret"]
+    # Les notes de suppression sont effacées : elles ne ressortiront pas
+    # dans un prochain export pour supprimer ces opérations ailleurs.
+    assert not [d for d in db.list_deletions()
+                if d["id"] in ("liv-1", "liv-2")]
+    # Restaurer une seconde fois ne change plus rien.
+    assert merge_remote_into_db(db, snap)["applied"] == 0
+
+
+def test_restaurer_garde_une_operation_supprimee_a_part(tmp_path):
+    """Dans un compte qui existe toujours, une opération supprimée après
+    l'export reste supprimée : la plus récente des deux versions gagne."""
+    db, _ = _base_avec_livret(tmp_path)
+    snap = db_snapshot(db)
+    db.delete_tx("courant-1")
+    merge_remote_into_db(db, snap)
+    assert "courant-1" not in [t["id"] for t in db.list_tx_all()]

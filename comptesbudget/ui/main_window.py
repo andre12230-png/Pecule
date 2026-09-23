@@ -1099,9 +1099,16 @@ class MainWindow(QMainWindow):
                 "fichier ne sera écrasé.") != QMessageBox.Yes:
             return
         stats = merge_remote_into_db(self.db, data)
-        QMessageBox.information(self, "Restaurer",
-            f"Fusion terminée : {stats['applied']} enregistrement(s) "
-            f"appliqué(s), {stats['deleted']} suppression(s) propagée(s).")
+        msg = (f"Fusion terminée : {stats['applied']} enregistrement(s) "
+               f"appliqué(s), {stats['deleted']} suppression(s) propagée(s).")
+        if stats["comptes_retablis"]:
+            # Compte absent d'ici (supprimé, ou venu d'une autre
+            # installation) : il revient avec tout son contenu.
+            msg += ("\n\nCompte(s) rétabli(s) avec leurs opérations : "
+                    + ", ".join(f"« {n} »" for n in stats["comptes_retablis"])
+                    + ".")
+        QMessageBox.information(self, "Restaurer", msg)
+        self._fill_comptes()
         self.refresh_all()
 
     def action_monthly_report(self):

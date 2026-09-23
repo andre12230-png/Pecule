@@ -68,7 +68,7 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     """Fusionne un snapshot distant dans la base : pour chaque enregistrement,
     la version au updated_at le plus récent gagne ; les pierres tombales
     suppriment si elles sont plus récentes que la version locale."""
-    stats = {"applied": 0, "deleted": 0}
+    stats = {"applied": 0, "deleted": 0, "comptes_retablis": []}
     if not remote:
         return stats
     fallback = remote.get("synced_at") or ""
@@ -81,12 +81,21 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     #    archivage ou un solde corrigé depuis (audit du 23/09/2026). Seule
     #    exception : un compte local dont le solde n'a jamais été donné (base
     #    neuve, créée « maintenant ») n'a rien à perdre.
+    #
+    #    Un compte du fichier ABSENT d'ici est rétabli EN ENTIER. Supprimer
+    #    un compte note la suppression de chacune de ses opérations ; ces
+    #    notes l'emportaient, et le compte revenait vide (audit du
+    #    23/09/2026). Pour ce compte, on les ignore et on les efface.
     comptes_locaux = {r["id"]: dict(r) for r in db.list_comptes()}
+    retablis: set[str] = set()
     for c in remote.get("comptes", []) or []:
         if not c.get("id"):
             continue
         ts = _eff_ts(c, fallback)
         cur = comptes_locaux.get(c["id"])
+        if cur is None:
+            retablis.add(c["id"])
+            stats["comptes_retablis"].append(c.get("nom") or "Compte")
         if (cur is None or cur.get("solde_initial") is None
                 or (cur.get("updated_at") or "") < ts):
             if cur is not None and cur == {**cur, **c, "updated_at": ts}:
@@ -111,6 +120,9 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
                 continue
             ts = _eff_ts(rec, fallback)
             del_ts = del_map.get((entity, rid))
+            if rec.get("compte_id") in retablis and del_ts:
+                db._clear_deletion(entity, rid)      # cf. étape 0
+                del_ts = None
             if del_ts and del_ts >= ts:
                 continue  # suppression locale plus récente
             cur = local[entity].get(rid)
@@ -148,6 +160,10 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
             for cid, buds in par_compte.items():
                 db.set_budgets_compte(cid, buds)
             db.set_setting("_meta_budgets_updated_at", r_bud_ts or l_bud_ts)
+        else:
+            # Un compte rétabli retrouve ses budgets, quelle que soit la date.
+            for cid in retablis & set(par_compte):
+                db.set_budgets_compte(cid, par_compte[cid])
     elif r_buds and (not db.list_budgets() or plus_recent):
         # Fichier d'avant le multicomptes : ces budgets sont ceux du compte
         # de travail.
