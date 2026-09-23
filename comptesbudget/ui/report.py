@@ -155,10 +155,32 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     return "\n".join(H)
 
 
+def _mois_de_depart(periode: str, mois_dispo: set, aujourdhui: date) -> str:
+    """Mois sur lequel s'ouvre le rapport, d'après la période de la barre du
+    haut. Retourne « » quand rien n'est imposé (le mois en cours est pris).
+
+      • un mois (« 2026-01 ») : ce mois-là ;
+      • une année (« 2025 ») : son dernier mois qui a des opérations, sans
+        dépasser le mois en cours — décembre pour une année finie ;
+      • « Toutes périodes » ou rien : le mois en cours, comme avant."""
+    periode = periode or ""
+    if len(periode) == 7:
+        return periode
+    if len(periode) == 4 and periode.isdigit():
+        limite = aujourdhui.strftime("%Y-%m")
+        dans_l_annee = [m for m in mois_dispo
+                        if m.startswith(periode + "-") and m <= limite]
+        return max(dans_l_annee, default="")
+    return ""
+
+
 class MonthlyReportDialog(QDialog):
     """Aperçu du rapport mensuel, avec export PDF et impression."""
 
-    def __init__(self, parent, db: Database):
+    def __init__(self, parent, db: Database, periode: str = None):
+        """`periode` : la période choisie dans la barre du haut — « AAAA-MM »,
+        « AAAA » ou « all ». Le rapport s'ouvre sur ce mois-là (cf.
+        _mois_de_depart) ; sans elle, sur le mois en cours."""
         super().__init__(parent)
         self.db = db
         self.setWindowTitle("Rapport mensuel")
@@ -168,10 +190,15 @@ class MonthlyReportDialog(QDialog):
         top = QHBoxLayout()
         top.addWidget(QLabel("Mois :"))
         self.month_combo = QComboBox()
-        months = sorted({(r["date"] or "")[:7] for r in db.list_tx()
-                         if r["date"]}, reverse=True)
-        cur = date.today().strftime("%Y-%m")
-        for mo in months:
+        months = {(r["date"] or "")[:7] for r in db.list_tx() if r["date"]}
+        cur = _mois_de_depart(periode, months, date.today())
+        # Le mois demandé figure dans la liste même sans opération : sinon le
+        # rapport s'ouvrirait, sans qu'on le voie, sur un autre mois.
+        if cur:
+            months.add(cur)
+        else:
+            cur = date.today().strftime("%Y-%m")
+        for mo in sorted(months, reverse=True):
             y, m = int(mo[:4]), int(mo[5:7])
             self.month_combo.addItem(f"{MOIS_FR[m]} {y}", mo)
         idx = self.month_combo.findData(cur)

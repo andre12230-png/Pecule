@@ -638,7 +638,10 @@ tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 
 <h3>🖨 Rapport mensuel</h3>
 <p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
-top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.</p>
+top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.
+Il s'ouvre sur la période choisie en haut de la fenêtre : le mois affiché, ou,
+pour « Toute l'année », le dernier mois de cette année (le mois en cours pour
+l'année actuelle). La liste <b>Mois</b> du rapport permet d'en changer.</p>
 
 <h2>7. Archiver les opérations anciennes</h2>
 <p>Au bout de quelques années, les listes s'allongent et le choix des périodes

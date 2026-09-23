@@ -1112,7 +1112,9 @@ class MainWindow(QMainWindow):
         self.refresh_all()
 
     def action_monthly_report(self):
-        MonthlyReportDialog(self, self.db).exec()
+        # Le rapport s'ouvre sur la période choisie dans la barre du haut
+        MonthlyReportDialog(self, self.db,
+                            self.period_bar.current_period()).exec()
 
     def action_search(self):
         dlg = GlobalSearchDialog(self, self.db)
