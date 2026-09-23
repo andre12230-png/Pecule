@@ -78,7 +78,9 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         ("Revenus", euro(revenus), "#229954"),
         ("Dépenses", euro(depenses), "#C0392B"),
         ("Mouvement net", euro(net), "#229954" if net >= 0 else "#C0392B"),
-        ("Taux d'épargne", f"{taux:.1f}&nbsp;%", "#16A085" if taux >= 0 else "#C0392B"),
+        # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
+        ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
+         "#16A085" if taux >= 0 else "#C0392B"),
         (f"Solde bancaire réel au {fmt_date_fr(arret)}", euro(solde_fin),
          "#1F3A6B" if solde_fin >= 0 else "#C0392B"),
     ]

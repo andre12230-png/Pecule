@@ -35,3 +35,15 @@ def test_rapport_contient_les_indicateurs(tmp_path):
     assert "Rapport Mai 2026" in html
     assert "Revenus" in html
     assert "Plus grosses dépenses" in html
+
+
+def test_rapport_taux_d_epargne_a_la_francaise(tmp_path):
+    """Le Bilan écrit « 53,9 % » ; le rapport écrivait « 53.9 % » (audit du
+    23/09/2026)."""
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx(_tx(id="a", montant=-922.0))
+    db.insert_tx(_tx(id="b", libelle="SALAIRE", libelle_op="SALAIRE",
+                     categorie="Revenus", montant=2000.0))
+    html = build_monthly_report_html(db, "2026-05")
+    assert "53,9&nbsp;%" in html
+    assert "53.9" not in html

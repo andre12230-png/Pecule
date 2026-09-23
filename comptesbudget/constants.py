@@ -942,14 +942,18 @@ TYPES_OPERATION = [
 # première regex qui matche → catégorie canonique.
 HARMONIZE_RULES = [
     # Logement
-    # « totalenergies » AVANT la règle Transports : sans cela, la facture
-    # d'électricité TotalEnergies partait dans Transports (motif « total »
-    # des stations-service).
-    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl|mobile|totalenergies|total energies)\b", "Logement - maison"),
+    # TotalEnergies vend l'électricité ET l'essence. La facture se reconnaît
+    # au prélèvement ou à ses mots (électricité, gaz, clients, SA, Direct
+    # Énergie) ; tout autre TotalEnergies est une station et va dans
+    # Transports — un plein partait en Logement (audit du 23/09/2026). Règle
+    # placée AVANT Transports, dont le motif « total » l'attraperait.
+    (r"\b(total ?energies? (sa|electricite|gaz|clients)|total direct energie)\b", "Logement - maison"),
+    (r"\b(prlv|prelevement|prelvt)\b.*\btotal ?energies?\b", "Logement - maison"),
+    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl|mobile)\b", "Logement - maison"),
     (r"\b(brico|leroy[\s-]?merlin|castorama|ikea|conforama|but|maison|ameublement|mobilier|jardin)\b", "Logement - maison"),
     # Transports
     # « bp » (2 lettres) retiré : il attrapait aussi la Banque Populaire.
-    (r"\b(carburant|station|essence|total|shell|esso|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
+    (r"\b(carburant|station|essence|total|totalenergies|shell|esso|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
     # Santé
     (r"\b(pharmacie|medecin|docteur|dentist|opticien|hopital|clinique|cpam|mutuelle|harmonie|mgen|laboratoire|kine|kinesi|ostheo|psychologue)\b", "Santé"),
     # Alimentation

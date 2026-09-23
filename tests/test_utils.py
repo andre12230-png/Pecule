@@ -189,6 +189,16 @@ def test_suggest_category_motifs_ambigus():
     # Corrections des motifs qui se chevauchaient (audit du 31/07/2026)
     assert suggest_category("TOTALENERGIES SA") == "Logement - maison"
     assert suggest_category("TOTAL ACCESS") == "Transports"
+    # TotalEnergies vend l'électricité ET l'essence (audit du 23/09/2026) :
+    # la facture se reconnaît au prélèvement ou à ses mots, la station au
+    # reste — un plein partait en Logement.
+    assert suggest_category("PRLV SEPA TOTALENERGIES ELECTRICITE ET GAZ FRANCE") == "Logement - maison"
+    assert suggest_category("PRLV SEPA TotalEnergies Clients") == "Logement - maison"
+    assert suggest_category("PRELEVEMENT TOTALENERGIES") == "Logement - maison"
+    assert suggest_category("TOTAL DIRECT ENERGIE") == "Logement - maison"
+    assert suggest_category("CARTE X1234 01/09 TOTALENERGIES") == "Transports"
+    assert suggest_category("CB TOTALENERGIES 12/09") == "Transports"
+    assert suggest_category("RELAIS TOTAL ENERGIES A7") == "Transports"
     assert suggest_category("BOULANGERIE DUPONT") == "Alimentation"
     assert suggest_category("BOULANGER 4521") == "Shopping"   # l'enseigne
     # « remboursement » ne bascule plus en Revenus : la convention est de le

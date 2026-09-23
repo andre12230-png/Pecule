@@ -1502,7 +1502,10 @@ class BilanView(QWidget):
         ax_y = QValueAxis()
         max_val = max(max(rev_by_month.values(), default=0),
                       max(dep_by_month.values(), default=0))
-        ax_y.setRange(0, max_val * 1.1 if max_val > 0 else 1)
+        # Au moins 100 : les étiquettes sont des entiers (« %d » ci-dessous),
+        # et un axe de 0 à 1 — base vide — se lisait « 0, 0, 0, 0, 1 »
+        # (audit du 23/09/2026). 0-25-50-75-100 reste lisible.
+        ax_y.setRange(0, max(max_val * 1.1, 100))
         # Pas de « € » dans le format de l'axe : QtCharts le rend en « ? »
         # (le symbole € est mal géré par setLabelFormat). L'axe reste en
         # nombres simples — le contexte (revenus/dépenses) suffit.

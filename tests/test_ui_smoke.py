@@ -2082,3 +2082,16 @@ def test_bandeau_carte_releve_credit_agricole(qapp, tmp_path, monkeypatch):
     vue.refresh()
     assert "31/08/2026" in vue.cb_title.text()
     assert "04/08/2026" not in vue.cb_title.text()
+
+
+def test_graphique_vide_graduations_entieres(qapp, tmp_path):
+    """Base vide : l'axe allait de 0 à 1 avec des étiquettes entières, et
+    lisait « 0, 0, 0, 0, 1 » (audit du 23/09/2026). Chaque graduation doit
+    tomber sur un nombre entier."""
+    from PySide6.QtCore import Qt
+    from comptesbudget.ui.views.bilan import BilanView
+    v = BilanView(Database(str(tmp_path / "vide.db")))
+    v.refresh()
+    ax = v.bar_chart.axes(Qt.Vertical)[0]
+    pas = (ax.max() - ax.min()) / (ax.tickCount() - 1)
+    assert pas >= 1 and pas == int(pas)

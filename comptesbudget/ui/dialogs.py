@@ -1147,14 +1147,25 @@ class RecurringDialog(QDialog):
         layout.addRow("Fréquence :", self.frequency)
 
         self.day_of_month = QSpinBox()
-        self.day_of_month.setRange(1, 31); self.day_of_month.setValue(1)
-        self.day_of_month.setSuffix(" (pour mensuelle/trimestrielle)")
+        self.day_of_month.setRange(1, 31)
+        # Le jour sert aussi à l'annuelle (cf. recurring.next_occurrence).
+        self.day_of_month.setSuffix(" (sauf hebdomadaire)")
         layout.addRow("Jour du mois :", self.day_of_month)
 
         self.start_date = QDateEdit(); self.start_date.setCalendarPopup(True)
         self.start_date.setDisplayFormat("dd/MM/yyyy")
         self.start_date.setDate(QDate.currentDate())
         layout.addRow("Date de début :", self.start_date)
+
+        if rec is None:
+            # Nouvelle récurrence : mensuelle, au jour de la date de début, et
+            # ce jour suit la date choisie. La fenêtre proposait
+            # « Hebdomadaire » et le jour 1 : une taxe annuelle du 15/10
+            # tombait ensuite le 01/10 (audit du 23/09/2026).
+            self.frequency.setCurrentIndex(self.frequency.findData("monthly"))
+            self.day_of_month.setValue(QDate.currentDate().day())
+            self.start_date.dateChanged.connect(
+                lambda d: self.day_of_month.setValue(d.day()))
 
         self.end_date = QDateEdit(); self.end_date.setCalendarPopup(True)
         self.end_date.setDisplayFormat("dd/MM/yyyy")
