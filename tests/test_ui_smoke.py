@@ -2095,3 +2095,39 @@ def test_graphique_vide_graduations_entieres(qapp, tmp_path):
     ax = v.bar_chart.axes(Qt.Vertical)[0]
     pas = (ax.max() - ax.min()) / (ax.tickCount() - 1)
     assert pas >= 1 and pas == int(pas)
+
+
+def test_previsions_couvrent_douze_mois_pleins(qapp, tmp_path):
+    """« Prévisions des 12 prochains mois » s'arrêtaient à la fin du mois
+    précédent, l'an prochain (le 31/08/2027 un 23/09/2026) : il manquait
+    presque un mois. Elles vont jusqu'à la fin du mois en cours + 12 mois."""
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+    auj = date.today()
+    fin = date(auj.year + 1, auj.month, monthrange(auj.year + 1, auj.month)[1])
+    view = PrevisionnelView(Database(str(tmp_path / "t.db")))
+    view.refresh()
+    assert fmt_date_fr(fin.isoformat()) in view.summary.text()
+
+
+def test_budget_sans_ligne_choisie_demande_la_categorie(qapp, tmp_path,
+                                                        monkeypatch):
+    """Base neuve, ou catégorie sans budget ni dépense sur la période : le
+    bouton « Définir / modifier le budget » ne faisait rien (audit du
+    23/09/2026). Il propose maintenant de choisir la catégorie."""
+    from PySide6.QtWidgets import QInputDialog
+    from comptesbudget.ui.views import budget
+    db = Database(str(tmp_path / "t.db"))
+    vue = budget.BudgetView(db)
+    vue.refresh()
+    proposees = []
+    monkeypatch.setattr(
+        QInputDialog, "getItem",
+        staticmethod(lambda _p, _t, _q, items, *a, **k:
+                     proposees.extend(items) or ("Transports", True)))
+    monkeypatch.setattr(budget, "demander_montant",
+                        lambda *a, **k: (150.0, True))
+    vue._edit_budget()
+    assert db.list_budgets() == {"Transports": 150.0}
+    assert "Transports" in proposees
+    assert "Revenus" not in proposees
+    assert "Transaction exclue" not in proposees

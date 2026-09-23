@@ -253,7 +253,11 @@ choisie</b> en haut de l'écran : sur « Août 2026 » il montre ce qui a été
 dépassé en août, et le dit (« Budget dépassé en août 2026 »). Sur une année ou
 « Toutes périodes », il revient au <b>mois en cours</b> : un budget mensuel ne
 se juge qu'au mois.</p>
-<p>Double-cliquez sur une catégorie pour modifier son budget mensuel.</p>
+<p>Double-cliquez sur une catégorie pour modifier son budget mensuel. Le
+tableau ne montre que les catégories qui ont un budget ou des dépenses sur la
+période : pour budgéter une autre catégorie — ou la première, sur une base
+neuve —, cliquez sur <code>✏️ Définir / modifier le budget</code> sans choisir
+de ligne ; Pécule vous demande alors la catégorie.</p>
 
 <h3>🏷️ Catégories</h3>
 <p>Vue par catégorie avec drill-down : à gauche la liste des catégories

@@ -1,7 +1,8 @@
 """Vue Prévisionnel (opérations récurrentes)."""
 
 import uuid
-from datetime import date, timedelta
+from calendar import monthrange
+from datetime import date
 from typing import Optional
 
 from PySide6.QtCore import Qt, Signal
@@ -144,9 +145,12 @@ class PrevisionnelView(QWidget):
 
         self.table.setSortingEnabled(True)
 
-        # Forecast : 12 mois à venir
-        until = date.today().replace(day=1)
-        until = date(until.year + 1, until.month, until.day) - timedelta(days=1)
+        # Prévisions : la fin du mois en cours, puis 12 mois pleins. Le calcul
+        # s'arrêtait à la fin du mois PRÉCÉDENT l'an prochain (le 31/08/2027
+        # un 23/09/2026) : il manquait presque un mois (audit du 23/09/2026).
+        auj = date.today()
+        until = date(auj.year + 1, auj.month,
+                     monthrange(auj.year + 1, auj.month)[1])
         events: list[tuple[date, dict]] = []
         for r in recs:
             if not r["actif"]:

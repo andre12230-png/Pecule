@@ -8,7 +8,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTableView, QAbstractItemView,
-    QProgressBar,
+    QProgressBar, QInputDialog,
 )
 
 from ...utils import (
@@ -180,11 +180,17 @@ class BudgetView(QWidget):
 
     def _edit_budget(self):
         idx = self.table.currentIndex()
-        if not idx.isValid():
-            return
-        cat = self.model.item(idx.row(), 0).data(Qt.UserRole)
+        cat = self.model.item(idx.row(), 0).data(Qt.UserRole) \
+            if idx.isValid() else None
         if not cat:
-            return
+            # Aucune ligne choisie : on demande la catégorie. Le tableau ne
+            # montre que les catégories qui ont un budget ou des dépenses sur
+            # la période ; sans ce choix, une base neuve ne pouvait recevoir
+            # aucun budget, et le bouton ne faisait rien (audit du
+            # 23/09/2026).
+            cat = self._choisir_categorie()
+            if not cat:
+                return
         current = self.db.list_budgets().get(cat, 0)
         v, ok = demander_montant(
             self, "Budget mensuel",
@@ -194,3 +200,12 @@ class BudgetView(QWidget):
         self.db.set_budget(cat, v)
         self.refresh()
         self.budget_changed.emit()
+
+    def _choisir_categorie(self) -> str:
+        """Liste des catégories de dépense, pour en budgéter une qui n'est
+        pas encore dans le tableau. Renvoie '' si l'on annule."""
+        cats = [c for c in self.db.categories_proposees()
+                if c not in ("Revenus", "Transaction exclue")]
+        cat, ok = QInputDialog.getItem(
+            self, "Budget mensuel", "Pour quelle catégorie ?", cats, 0, False)
+        return cat if ok else ""
