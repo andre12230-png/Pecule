@@ -980,13 +980,16 @@ class BilanView(QWidget):
         fois. Les deux écrans disent ainsi la même chose."""
         recs = [dict(r) for r in self.db.list_recurring()]
         debut_iso, fin_iso = depuis.isoformat(), jusqua.isoformat()
-        out, vus = [], set()
-        for m in (depuis, jusqua):        # une fenêtre courte couvre 1 ou 2 mois
-            if (m.year, m.month) in vus:
-                continue
-            vus.add((m.year, m.month))
-            out += [e for e in echeances_du_mois(recs, txs, m.year, m.month)
+        out = []
+        # Chaque mois de la fenêtre, du premier au dernier. Seuls ces deux-là
+        # étaient consultés : passé le 17, les 45 jours du prochain découvert
+        # couvrent trois mois, et les échéances du mois du milieu étaient
+        # ignorées (audit du 23/09/2026).
+        annee, mois = depuis.year, depuis.month
+        while (annee, mois) <= (jusqua.year, jusqua.month):
+            out += [e for e in echeances_du_mois(recs, txs, annee, mois)
                     if not e["_deja"] and debut_iso <= e["date"] <= fin_iso]
+            annee, mois = (annee + 1, 1) if mois == 12 else (annee, mois + 1)
         return out
 
     def _lignes_a_venir(self, txs: list[dict], depuis: date,
