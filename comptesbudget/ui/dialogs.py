@@ -3,6 +3,7 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt, QDate
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
@@ -249,6 +250,24 @@ class TxDialog(QDialog):
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.btns.accepted.connect(self._validate_and_accept)
         self.btns.rejected.connect(self.reject)
+
+        # « Enregistrer et nouvelle » : enregistre, puis rouvre une fenêtre
+        # vide pour l'opération suivante. Seulement à la création — modifier
+        # une opération n'enchaîne rien. Demandé par un utilisateur qui saisit
+        # plusieurs opérations à la suite (questionnaire « Votre avis »,
+        # 24/09/2026). L'appelant lit `enchainer` après la fermeture.
+        self.enchainer = False
+        self.b_encore = None
+        if tx is None:
+            self.b_encore = self.btns.addButton(
+                "Enregistrer et nouvelle", QDialogButtonBox.ApplyRole)
+            self.b_encore.setToolTip(
+                "Enregistre cette opération et rouvre aussitôt une fenêtre "
+                "vide pour la suivante.\nRaccourci : Ctrl+Entrée.")
+            self.b_encore.clicked.connect(self._enregistrer_et_continuer)
+            QShortcut(QKeySequence("Ctrl+Return"), self,
+                      activated=self._enregistrer_et_continuer)
+
         layout.addRow(self.btns)
 
         # Pré-remplissage
@@ -413,6 +432,15 @@ class TxDialog(QDialog):
                 self.rb_credit.setFocus()
                 return
         self.accept()
+
+    def _enregistrer_et_continuer(self):
+        """« Enregistrer et nouvelle » : même validation que « OK », plus un
+        drapeau que l'appelant regarde pour rouvrir une fenêtre vide. Si la
+        saisie est refusée, la fenêtre reste ouverte et rien n'est enchaîné."""
+        self.enchainer = True
+        self._validate_and_accept()
+        if self.result() != QDialog.Accepted:
+            self.enchainer = False
 
     def _update_subcat_list(self, categorie: str):
         """Repeuple la liste des sous-catégories proposées en fonction

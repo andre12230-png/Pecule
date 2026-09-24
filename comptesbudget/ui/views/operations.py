@@ -453,17 +453,27 @@ class OperationsView(QWidget):
             f"{len(a_changer)} opération(s) recatégorisée(s) par la règle.")
 
     def add_tx(self):
+        """Saisie d'une opération. Le bouton « Enregistrer et nouvelle » de la
+        fenêtre relance le tour de boucle : on rouvre une fenêtre vide, avec
+        la liste des catégories reconstruite (celle qu'on vient de créer y
+        figure) et le tableau déjà rafraîchi."""
+        while True:
+            if not self._add_tx_une_fois():
+                return
+
+    def _add_tx_une_fois(self) -> bool:
+        """Un seul passage. Renvoie True s'il faut enchaîner une saisie."""
         cats = self.db.categories_proposees()
         dlg = TxDialog(self, None, cats, self.transactions)
         if dlg.exec() != QDialog.Accepted:
-            return
+            return False
         v = dlg.values()
         if not v["libelle"]:
             QMessageBox.warning(self, "Saisie", "Le libellé est obligatoire.")
-            return
+            return False
         if abs(v["montant"]) < 0.005:
             QMessageBox.warning(self, "Saisie", "Le montant doit être supérieur à zéro.")
-            return
+            return False
         # Préserver les champs règle pour _maybe_create_rule
         rule_request = v.get("_create_rule")
         rule_info = v.get("_rule")
@@ -485,6 +495,7 @@ class OperationsView(QWidget):
              "_recurring": v.get("_recurring")}, v_db)
         self.reload_from_db()
         self.tx_changed.emit()
+        return bool(getattr(dlg, "enchainer", False))
 
     def edit_selected(self):
         tx_id = self.selected_tx_id()

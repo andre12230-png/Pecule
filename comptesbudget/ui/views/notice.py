@@ -240,7 +240,15 @@ ensuite. Vous restez libre de répondre oui.</p>
   <li><b>Touche <kbd>Entrée</kbd></b> → modifie l'opération sélectionnée</li>
   <li><b>Touche <kbd>Suppr</kbd></b> → supprime l'opération sélectionnée</li>
   <li><b>Touche <kbd>Inser</kbd></b> → nouvelle opération</li>
+  <li><b>Barre d'espace</b> → pointe ou dépointe les lignes sélectionnées</li>
+  <li><b>Touche <kbd>Échap</kbd></b> → ferme le formulaire sans enregistrer</li>
+  <li><b>Ctrl+Entrée</b>, dans le formulaire d'une nouvelle opération →
+      enregistre et rouvre aussitôt une fenêtre vide</li>
 </ul>
+<p>Pour saisir plusieurs opérations à la suite (un relevé recopié à la main,
+par exemple), le formulaire d'une <b>nouvelle</b> opération propose un bouton
+<b>« Enregistrer et nouvelle »</b> : il enregistre, puis rouvre une fenêtre
+vide. La liste se met à jour au fur et à mesure.</p>
 
 <h3>🎯 Budget</h3>
 <p>Définissez un budget mensuel par catégorie. Les barres de progression

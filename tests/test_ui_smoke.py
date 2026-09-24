@@ -2131,3 +2131,53 @@ def test_budget_sans_ligne_choisie_demande_la_categorie(qapp, tmp_path,
     assert "Transports" in proposees
     assert "Revenus" not in proposees
     assert "Transaction exclue" not in proposees
+
+
+def test_enregistrer_et_nouvelle_enchaine_les_saisies(qapp, tmp_path,
+                                                      monkeypatch):
+    """Le bouton « Enregistrer et nouvelle » n'existe qu'à la création, et il
+    fait rouvrir une fenêtre vide : deux opérations sont saisies à la suite."""
+    from PySide6.QtWidgets import QDialog
+    from comptesbudget.ui.dialogs import TxDialog
+    from comptesbudget.ui.views import operations as ops_mod
+    from comptesbudget.ui.views.operations import OperationsView
+
+    # 1. Le bouton n'est là qu'à la création
+    creation = TxDialog(None, None, categories=CATEGORIES_DEFAUT,
+                        all_transactions=[])
+    assert creation.b_encore is not None
+    assert not creation.enchainer
+    modification = TxDialog(None, _tx(id="m"), categories=CATEGORIES_DEFAUT,
+                            all_transactions=[])
+    assert modification.b_encore is None
+
+    # 2. Cliquer dessus vaut « OK » et demande d'enchaîner
+    creation.libelle.setText("COURSES")
+    creation.montant.setValue(12.0)
+    creation.b_encore.click()
+    assert creation.result() == QDialog.Accepted
+    assert creation.enchainer
+
+    # 3. La vue Opérations rouvre alors une fenêtre : deux saisies, deux
+    #    opérations enregistrées. La fausse fenêtre enchaîne une seule fois.
+    db = Database(str(tmp_path / "enchaine.db"))
+    vue = OperationsView(db)
+    saisies = []
+
+    class FausseFenetre:
+        def __init__(self, parent, tx, cats, all_tx):
+            self.enchainer = len(saisies) == 0   # la 1re enchaîne, pas la 2e
+
+        def exec(self):
+            return QDialog.Accepted
+
+        def values(self):
+            saisies.append(1)
+            return {"date": "2026-09-24", "date_valeur": "2026-09-24",
+                    "libelle": f"OP{len(saisies)}", "montant": -7.5,
+                    "type": "", "categorie": "Divers", "sous_cat": "",
+                    "info": "", "pointee": 0}
+
+    monkeypatch.setattr(ops_mod, "TxDialog", FausseFenetre)
+    vue.add_tx()
+    assert len(db.list_tx()) == 2
