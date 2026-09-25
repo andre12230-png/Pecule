@@ -76,17 +76,17 @@ class MainWindow(QMainWindow):
         STYLE_BOUTON = (
             "QPushButton {"
             "  text-align:left; padding-left:8px;"
-            "  border:1px solid #DCDCDC; border-radius:4px;"
+            "  border:1px solid #808080; border-radius:4px;"
             "  background:#FCFCFC; color:#222 }"
             "QPushButton:hover {"
-            "  background:#EAF2FB; border-color:#9CC0E8 }"
+            "  background:#EAF2FB; border-color:#316AC5 }"
             "QPushButton:pressed { background:#D8E7F7 }")
 
         # Le trait de separation est porte par le titre lui-meme : un
         # QFrame d'un pixel de haut ne se peint pas de facon fiable, alors
         # qu'une bordure de QLabel s'affiche toujours.
         STYLE_TITRE = (
-            "color:#6E6E6E; font-size:8pt; font-weight:700;"
+            "color:#5A5A5A; font-size:8pt; font-weight:700;"
             "letter-spacing:1px; padding:0 0 3px 3px;"
             "border-bottom:1px solid #A9A9A9")
 

@@ -85,13 +85,13 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     H.append("<h2>Synthèse</h2>")
     H.append('<table cellpadding="6" cellspacing="0" width="100%">')
     kpis = [
-        ("Revenus", euro(revenus), "#229954"),
+        ("Revenus", euro(revenus), "#18733A"),
         ("Dépenses", euro(depenses), "#C0392B"),
     ]
     if mis_de_cote:
         kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#16A085"))
     kpis += [
-        ("Mouvement net", euro(net), "#229954" if net >= 0 else "#C0392B"),
+        ("Mouvement net", euro(net), "#18733A" if net >= 0 else "#C0392B"),
         # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
         ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
          "#16A085" if taux >= 0 else "#C0392B"),
@@ -117,13 +117,13 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         for ratio, cat, b in reversed(rows):
             dep = spent_budget.get(cat, 0)
             reste = b - dep
-            col = "#C0392B" if ratio >= 100 else ("#E67E22" if ratio >= 85 else "#229954")
+            col = "#C0392B" if ratio >= 100 else ("#E67E22" if ratio >= 85 else "#18733A")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
             H.append(f'<tr{bg}><td>{_esc(cat)}</td>'
                      f'<td align="right">{euro(b)}</td>'
                      f'<td align="right">{euro(dep)}</td>'
                      f'<td align="right"><font color="{col}"><b>{ratio:.0f}&nbsp;%</b></font></td>'
-                     f'<td align="right"><font color="{"#C0392B" if reste < 0 else "#229954"}">'
+                     f'<td align="right"><font color="{"#C0392B" if reste < 0 else "#18733A"}">'
                      f'{euro(reste)}</font></td></tr>')
         H.append("</table>")
 

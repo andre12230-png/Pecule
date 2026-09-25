@@ -113,7 +113,7 @@ class TxTableModel(QStandardItemModel):
 
         # Couleur P
         if pointee:
-            items[0].setForeground(QBrush(QColor("#1A7A3A")))
+            items[0].setForeground(QBrush(QColor("#18733A")))
             items[0].setBackground(QBrush(QColor("#D6F0DC")))
         elif prevue:
             items[0].setForeground(QBrush(QColor("#C77B00")))
@@ -148,6 +148,6 @@ class TxTableModel(QStandardItemModel):
         items[7].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         items[8].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         items[7].setForeground(QBrush(QColor("#C0392B")))
-        items[8].setForeground(QBrush(QColor("#229954")))
+        items[8].setForeground(QBrush(QColor("#18733A")))
 
         self.appendRow(items)

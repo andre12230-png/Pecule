@@ -97,7 +97,7 @@ class RulesView(QWidget):
             if sens == "debit":
                 it_sens.setForeground(QBrush(QColor("#C0392B")))
             elif sens == "credit":
-                it_sens.setForeground(QBrush(QColor("#229954")))
+                it_sens.setForeground(QBrush(QColor("#18733A")))
             items = [
                 QStandardItem(r["pattern"]),
                 QStandardItem(fmt_euro(r["amount"]) if r["amount"] is not None else "—"),

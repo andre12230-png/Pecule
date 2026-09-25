@@ -159,7 +159,7 @@ class CategoriesView(QWidget):
             it_n = QStandardItem(str(n)); it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_n.setData(n, SORT_ROLE)          # trier sur le nombre, pas « 10 » < « 9 »
             it_t = QStandardItem(fmt_euro(tot)); it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            it_t.setForeground(QBrush(QColor("#C0392B" if tot < 0 else "#229954")))
+            it_t.setForeground(QBrush(QColor("#C0392B" if tot < 0 else "#18733A")))
             it_t.setData(tot, SORT_ROLE)
             self.cats_model.appendRow([it_c, it_n, it_t])
         self.cats_table.setSortingEnabled(True)

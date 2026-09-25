@@ -181,7 +181,7 @@ class SubcategoriesView(QWidget):
 
             it_t = QStandardItem(fmt_euro(total))
             it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            it_t.setForeground(QBrush(QColor("#C0392B" if total < 0 else "#229954")))
+            it_t.setForeground(QBrush(QColor("#C0392B" if total < 0 else "#18733A")))
             it_t.setData(total, Qt.UserRole + 1)
 
             self.model.appendRow([it_sub, it_cat, it_n, it_t])

@@ -53,7 +53,7 @@ class HarmonizeDialog(QDialog):
             it_check = QStandardItem("✔")
             it_check.setData(True, Qt.UserRole + 1)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#1A7A3A")))
+            it_check.setForeground(QBrush(QColor("#18733A")))
             row = [
                 it_check,
                 QStandardItem(fmt_date_fr(tx["date"])),
@@ -161,7 +161,7 @@ class DuplicatesDialog(QDialog):
             it_montant = QStandardItem(fmt_euro(t.get("montant", 0)))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if t.get("montant", 0) < 0 else "#229954")))
+                QBrush(QColor("#C0392B" if t.get("montant", 0) < 0 else "#18733A")))
 
             it_cat = QStandardItem(t.get("categorie", ""))
             it_cat.setForeground(QBrush(QColor(cat_color(t.get("categorie", "")))))
@@ -278,12 +278,12 @@ class PrefillRecurringDialog(QDialog):
             it_check.setData(checked, Qt.UserRole + 1)
             it_check.setData(c, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#1A7A3A")))
+            it_check.setForeground(QBrush(QColor("#18733A")))
 
             it_montant = QStandardItem(fmt_euro(c["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if c["montant"] < 0 else "#229954")))
+                QBrush(QColor("#C0392B" if c["montant"] < 0 else "#18733A")))
 
             it_cat = QStandardItem(c["categorie"])
             it_cat.setForeground(QBrush(QColor(cat_color(c["categorie"]))))
@@ -459,12 +459,12 @@ class GenererEcheancesDialog(QDialog):
             it_check.setData(e, Qt.UserRole)
             it_check.setData(verrou, self.VERROU)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#1A7A3A")))
+            it_check.setForeground(QBrush(QColor("#18733A")))
 
             it_montant = QStandardItem(fmt_euro(e["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if e["montant"] < 0 else "#229954")))
+                QBrush(QColor("#C0392B" if e["montant"] < 0 else "#18733A")))
 
             it_cat = QStandardItem(e["categorie"])
             it_cat.setForeground(QBrush(QColor(cat_color(e["categorie"]))))
@@ -474,7 +474,7 @@ class GenererEcheancesDialog(QDialog):
             elif e["_passee"]:
                 etat, couleur = "⚠ date déjà passée", "#C77B00"
             else:
-                etat, couleur = "à créer", "#1A7A3A"
+                etat, couleur = "à créer", "#18733A"
             it_etat = QStandardItem(etat)
             it_etat.setForeground(QBrush(QColor(couleur)))
 
@@ -583,7 +583,7 @@ class HarmonizeLabelsDialog(QDialog):
             it_check.setData(True, Qt.UserRole + 1)
             it_check.setData(row, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#1A7A3A")))
+            it_check.setForeground(QBrush(QColor("#18733A")))
             it_check.setEditable(False)
 
             it_old = QStandardItem(row["old"])

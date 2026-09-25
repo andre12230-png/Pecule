@@ -151,7 +151,7 @@ class BudgetView(QWidget):
                 if reste < 0:
                     it_reste.setForeground(QBrush(QColor("#C0392B")))
                 else:
-                    it_reste.setForeground(QBrush(QColor("#229954")))
+                    it_reste.setForeground(QBrush(QColor("#18733A")))
 
             self.model.appendRow([it_cat, it_bud, it_dep, it_prog, it_reste])
 

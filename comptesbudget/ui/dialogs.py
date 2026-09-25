@@ -550,7 +550,7 @@ class TxDialog(QDialog):
             msg += f" ⚠️ Catégories existantes : {', '.join(f'« {c} »' for c in already_classed)}."
             self.rule_match_info.setStyleSheet("color:#C0392B; font-size:10pt; font-weight:600")
         else:
-            self.rule_match_info.setStyleSheet("color:#229954; font-size:10pt")
+            self.rule_match_info.setStyleSheet("color:#18733A; font-size:10pt")
         self.rule_match_info.setText(msg)
 
     def values(self) -> dict:

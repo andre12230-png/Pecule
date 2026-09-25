@@ -132,7 +132,7 @@ class PrevisionnelView(QWidget):
                 QStandardItem("✔" if r["actif"] else ""),
             ]
             row[1].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[1].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#229954")))
+            row[1].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
             row[2].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
             row[6].setTextAlignment(Qt.AlignCenter)
             tris = [r["libelle"].lower(), r["montant"], r["categorie"].lower(),
@@ -173,7 +173,7 @@ class PrevisionnelView(QWidget):
                 QStandardItem(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[2].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#229954")))
+            row[2].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
             row[3].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
             for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
                                      r["montant"], r["categorie"].lower()]):

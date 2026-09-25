@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from ..utils import fmt_date_fr, fmt_euro
 
 ROUGE = "#C0392B"
-VERT = "#229954"
+VERT = "#18733A"
 
 # Titres courts : « Dernière opération pointée » coupait la colonne.
 COLONNES = ["Compte", "En banque", "Non pointé", "Solde comptable",
