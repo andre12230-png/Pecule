@@ -115,7 +115,7 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
     f.setObjectName("carteBilan")
     f.setStyleSheet("""
         QFrame#carteBilan {
-            background: #FAF8F1; border: 1px solid #C8D0DC; border-radius: 4px;
+            background: #FAF8F1; border: 1px solid #BEC7D4; border-radius: 4px;
         }
     """)
     v = QVBoxLayout(f); v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
@@ -417,7 +417,7 @@ class BilanView(QWidget):
         f.setObjectName("tuileKpi")
         f.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: #FAF8F1; border: 1px solid #C8D0DC;
+                background: #FAF8F1; border: 1px solid #BEC7D4;
                 border-top: 3px solid {color}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
@@ -461,7 +461,7 @@ class BilanView(QWidget):
         carte = self.kpis[cle]
         carte.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: #FAF8F1; border: 1px solid #C8D0DC;
+                background: #FAF8F1; border: 1px solid #BEC7D4;
                 border-top: 3px solid {couleur}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
