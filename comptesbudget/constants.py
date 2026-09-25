@@ -834,7 +834,27 @@ SYNC_VERSION = 3
 #            au depart faisait << reprendre >> le compte trop tot. Corrige.
 #          - Barre de periode : apres le premier import, elle se place sur le
 #            mois en cours au lieu de << Toutes periodes >>.
-APP_VERSION = "1.37.0"
+# 1.38.0 : saisie plus sure, sauvegardes renforcees, couleurs harmonisees.
+#          - Saisie : numero de cheque ; bouton << Enregistrer et nouvelle >>
+#            (Ctrl+Entree) ; confirmation quand une recette part en depense ;
+#            montants << 1.234,56 >> compris partout.
+#          - Sauvegarde externe (cle USB, disque), verifiee ; sauvegardes
+#            automatiques sur un an ; Exporter / Restaurer (JSON) passent
+#            dans Parametres, partie Avance, et Restaurer n'ecrase plus des
+#            reglages plus recents.
+#          - Import : releve du Credit Agricole corrige ; un meme releve peut
+#            etre importe dans deux comptes ; un CSV sans colonne de montant
+#            est refuse avec un message clair.
+#          - Compte neuf : la date du jour proposee comme depart, et la
+#            question du solde reposee tant qu'il manque.
+#          - Epargne hors depenses ; remboursements deduits des budgets.
+#          - Previsionnel et echeances : un debit reporte ne paie plus deux
+#            echeances ; << Pre-remplir >> ne propose que ce qui passe encore.
+#          - Barre de periode : bouton << Ce mois-ci >> et raccourcis clavier.
+#          - Theme clair impose meme sous un Windows en mode sombre ; couleurs
+#            lisibles, identiques dans les trois applications de l'auteur ;
+#            fond du Bilan en creme, cartes en ivoire.
+APP_VERSION = "1.38.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
