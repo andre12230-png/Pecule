@@ -124,12 +124,13 @@ class RecapComptesDialog(QDialog):
             cellule_jour.setTextAlignment(Qt.AlignCenter)
             self.table.setItem(ligne, 4, cellule_jour)
 
-        # Ligne de total, en gras sur fond gris : on ne la confond pas avec
-        # un compte, et elle ne s'affiche pas au double-clic.
+        # Ligne de total, en gras sur fond creme (celui de la fenetre) : on ne
+        # la confond pas avec un compte, et elle ne s'affiche pas au
+        # double-clic.
         ligne = len(comptes)
         gras = QFont()
         gras.setBold(True)
-        fond = QBrush(QColor("#ECEEF2"))
+        fond = QBrush(QColor("#ECE9D8"))
         cellules = [
             QTableWidgetItem("Total"),
             self._montant(round(total_banque, 2)),

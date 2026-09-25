@@ -961,7 +961,7 @@ class NoticeView(QWidget):
         # Notice
         notice = QTextBrowser()
         notice.setOpenExternalLinks(True)
-        notice.setStyleSheet("QTextBrowser { background:#FFFFFF; padding:14px }")
+        notice.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
         # Le dossier des données varie selon le type d'installation : on affiche
         # le vrai chemin plutôt qu'une explication vague, pour que l'utilisateur
         # sache exactement quoi copier lors d'une sauvegarde manuelle.
@@ -971,7 +971,7 @@ class NoticeView(QWidget):
         # Glossaire
         gloss = QTextBrowser()
         gloss.setOpenExternalLinks(True)
-        gloss.setStyleSheet("QTextBrowser { background:#FFFFFF; padding:14px }")
+        gloss.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
         gloss.setHtml(GLOSSAIRE_HTML)
         sub_tabs.addTab(gloss, "📚 Glossaire")
 

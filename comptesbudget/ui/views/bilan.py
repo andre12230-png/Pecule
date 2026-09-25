@@ -115,7 +115,7 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
     f.setObjectName("carteBilan")
     f.setStyleSheet("""
         QFrame#carteBilan {
-            background: white; border: 1px solid #C8D0DC; border-radius: 4px;
+            background: #FAF8F1; border: 1px solid #C8D0DC; border-radius: 4px;
         }
     """)
     v = QVBoxLayout(f); v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
@@ -143,7 +143,11 @@ class BilanView(QWidget):
         self.db = db
         self.period = "all"
         self.date_mode = "valeur"
-        self.setStyleSheet("BilanView { background: #ECEEF2; }")
+        # Fond creme, celui de la fenetre, et cartes ivoire (#FAF8F1) : le
+        # gris-bleu et le blanc pur d'avant juraient avec le reste de
+        # l'application (demande de l'auteur, 25/09/2026 ; memes couleurs dans le
+        # Photovoltaique et Recharges VE).
+        self.setStyleSheet("BilanView { background: #ECE9D8; }")
 
         # ── Le Bilan défile ───────────────────────────────────────────
         # Sans cela, la hauteur minimale de la FENÊTRE est celle de tout ce
@@ -159,8 +163,8 @@ class BilanView(QWidget):
         self.scroll.setFrameShape(QFrame.NoFrame)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # Le fond du panneau déroulant est blanc par défaut : on lui redonne
-        # le gris de la vue, sinon une bande claire apparaît sous le contenu.
-        self.scroll.viewport().setStyleSheet("background: #ECEEF2;")
+        # le fond de la vue, sinon une bande claire apparaît sous le contenu.
+        self.scroll.viewport().setStyleSheet("background: #ECE9D8;")
         exterieur.addWidget(self.scroll)
         contenu = QWidget()
         self.scroll.setWidget(contenu)
@@ -413,7 +417,7 @@ class BilanView(QWidget):
         f.setObjectName("tuileKpi")
         f.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: white; border: 1px solid #C8D0DC;
+                background: #FAF8F1; border: 1px solid #C8D0DC;
                 border-top: 3px solid {color}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
@@ -457,7 +461,7 @@ class BilanView(QWidget):
         carte = self.kpis[cle]
         carte.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: white; border: 1px solid #C8D0DC;
+                background: #FAF8F1; border: 1px solid #C8D0DC;
                 border-top: 3px solid {couleur}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}

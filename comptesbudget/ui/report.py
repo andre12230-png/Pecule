@@ -209,7 +209,7 @@ class MonthlyReportDialog(QDialog):
         v.addWidget(self.periode)
 
         self.browser = QTextBrowser()
-        self.browser.setStyleSheet("QTextBrowser { background:#FFF; padding:10px }")
+        self.browser.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:10px }")
         v.addWidget(self.browser, 1)
 
         btns = QHBoxLayout()
