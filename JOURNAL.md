@@ -21,6 +21,19 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (2) — Un nom réel retiré d'un test, historique local réécrit
+
+**Fait.** Le nouveau contrôle avant livraison (hors dépôt) a trouvé le nom réel
+d'une entreprise dans un test de saisie (`tests/test_sens_saisie.py`), venu d'un
+commit local du 17/09 que le nettoyage du matin n'avait pas repéré. Remplacé par
+un nom inventé dans chaque commit non publié, avec l'accord de l'auteur et après
+une sauvegarde complète. Preuves : entre l'ancien et le nouveau sommet, une seule
+ligne diffère ; messages et dates des commits identiques ; la version publiée
+n'est pas touchée ; 461 tests verts.
+**Pourquoi.** Rien de réel ne doit partir avec la sortie de mi-octobre.
+**Reste.** Relancer le contrôle juste avant la sortie, sur ce qui aura été
+ajouté d'ici là.
+
 ## 2026-09-26 — Préparation de la sortie : historique à nettoyer, notes de version
 
 **Fait.** Contrôle de tout ce qui n'est pas encore publié, avant la sortie de
