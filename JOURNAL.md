@@ -24,12 +24,18 @@ La date la plus récente est en haut.
 ## 2026-09-26 (9) — Version 1.39.1 installée chez l'auteur
 
 **Fait.** Numéro 1.39.1 (constants.py avec son historique, Lisez-moi.txt) : les
-erreurs dites en français (entrée précédente). Exe reconstruit et installé
-(détail au fil du déploiement).
+erreurs dites en français (entrée précédente). 523/523, contrôle de livraison
+vert (notice, Lisez-moi et README relus : aucun ne décrit ces messages). Exe
+reconstruit sans le .bat : version de fichier 1.39.1, module des erreurs présent
+dans l'archive de l'exe ; lancé sur une copie de la base de démonstration (dossier
+de données redirigé) : titre « v1.39.1 », fermeture propre. Installé : ancien exe
+renommé `Pecule.exe.avant-1.39.1`, exe copié (identique à celui construit),
+`_internal` synchronisé ; base de l'auteur identique avant et après.
 **Pourquoi.** Demande de l'auteur : déployer les trois applications chez lui.
 Nouveau numéro à chaque exe déployé ; dernier chiffre seulement, ce sont des
 corrections.
-**Reste.** Sortie de mi-octobre.
+**Reste.** Sortie de mi-octobre. Deux anciens exe gardés (`avant-1.39.0`,
+`avant-1.39.1`) : le plus ancien à la Corbeille si l'auteur l'accepte.
 
 ## 2026-09-26 (8) — Erreurs techniques dites en français
 
