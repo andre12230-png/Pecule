@@ -20,7 +20,7 @@ class ResultatImport(NamedTuple):
     """Compte rendu d'un import, pour le message affiché à l'utilisateur."""
     importees: int      # nouvelles lignes enregistrées
     doublons: int       # lignes du relevé déjà présentes, ignorées
-    illisibles: int     # lignes écartées : montant impossible à lire
+    illisibles: int     # lignes écartées : date ou montant impossible à lire
     pointees: int       # opérations déjà en base pointées d'après le relevé
     recaps: int         # récapitulatifs de débit différé écartés
     rapprochees: int    # échéances prévues rattachées à leur ligne réelle
@@ -97,10 +97,20 @@ def parse_french_date(s: str) -> Optional[str]:
     if not s:
         return None
     s = s.strip()
-    m = re.match(r"^(\d{2})/(\d{2})/(\d{4})$", s)
-    if m:
-        return f"{m.group(3)}-{m.group(2)}-{m.group(1)}"
-    return None
+    # Jour et mois sur un ou deux chiffres, année sur quatre ou deux : un
+    # relevé réenregistré dans un tableur devient souvent « 5/9/2026 » ou
+    # « 05/09/26 ». Ces lignes étaient écartées sans un mot.
+    m = re.match(r"^(\d{1,2})/(\d{1,2})/(\d{4}|\d{2})$", s)
+    if not m:
+        return None
+    jour, mois, annee = int(m.group(1)), int(m.group(2)), int(m.group(3))
+    if annee < 100:
+        annee += 2000
+    try:
+        # Une date impossible (31/02) est illisible, pas enregistrée telle quelle.
+        return date(annee, mois, jour).isoformat()
+    except ValueError:
+        return None
 
 
 def _tx_identity(date_iso: str, montant, reference: str, libelle: str) -> str:
@@ -513,6 +523,15 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             lisible = ok_d and ok_c
         return d_iso, montant, lisible
 
+    def _date_illisible_avec_montant(cols) -> bool:
+        """Vraie opération perdue : une date écrite mais illisible, sur une
+        ligne qui porte un montant. Les lignes sans date (titres, lignes
+        vides) ne sont pas concernées."""
+        if not cols or not (0 <= iDate < len(cols)) or not cols[iDate].strip():
+            return False
+        return any(cols[i].strip() for i in (iMontant, iDebit, iCredit)
+                   if 0 <= i < len(cols))
+
     def _libelle(cols) -> str:
         """Libellé lisible d'une ligne du relevé, sans ses références."""
         return _decouper_libelle(cols[iLib] if 0 <= iLib < len(cols) else "")[0]
@@ -590,7 +609,7 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
     seen_dm: Counter = Counter()    # occurrences par clé date+montant (vs manuelles)
     imported = 0
     skipped = 0
-    illisibles = 0   # lignes écartées : montant présent mais impossible à lire
+    illisibles = 0   # lignes écartées : date ou montant impossible à lire
     pointees = 0     # opérations existantes pointées d'après le relevé
     recaps = 0       # récapitulatifs de débit différé écartés
     rapprochees = 0  # échéances prévues rattachées à leur ligne du relevé
@@ -610,6 +629,10 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             continue
         d_iso, montant, lisible = _date_et_montant(cols)
         if not d_iso:
+            # Comptée et signalée comme un montant illisible, au lieu d'être
+            # oubliée sans un mot.
+            if _date_illisible_avec_montant(cols):
+                illisibles += 1
             continue
         dv_iso = parse_french_date(cols[iDateVal]) if iDateVal >= 0 and iDateVal < len(cols) else None
         libelle, refs_libelle = _decouper_libelle(

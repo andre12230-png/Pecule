@@ -257,6 +257,12 @@ def qif_vers_csv(operations: list[OperationQif]) -> str:
     tampon = io.StringIO()
     ecrivain = csv.writer(tampon, delimiter=";", lineterminator="\n")
     ecrivain.writerow(EN_TETES)
+    # Beaucoup de banques n'écrivent jamais le champ « C » (pointage). Sans
+    # aucune marque dans tout le fichier, on applique la règle du CSV et de
+    # l'OFX : un relevé ne contient que des opérations passées en banque, tout
+    # est pointé. Sinon toutes arrivaient non pointées et le solde bancaire
+    # restait figé sur le solde de départ.
+    aucune_marque = not any(op.pointee for op in operations)
     for op in operations:
         ecrivain.writerow([
             op.date,
@@ -268,7 +274,7 @@ def qif_vers_csv(operations: list[OperationQif]) -> str:
             op.reference,
             op.memo,
             "",                            # le QIF n'a pas de type d'opération
-            "x" if op.pointee else "",
+            "x" if op.pointee or aucune_marque else "",
         ])
     return tampon.getvalue()
 

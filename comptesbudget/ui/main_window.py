@@ -456,7 +456,7 @@ class MainWindow(QMainWindow):
                     "ligne correspondante du relevé (date et montant réels "
                     "repris) — aucun doublon créé.")
         if total_bad:
-            msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : montant illisible.\n"
+            msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : date ou montant illisible.\n"
                     "Vérifiez le fichier, ou saisissez ces opérations à la main.")
         # Rien du tout n'a été lu : annoncer « 0 opération importée » sans un
         # mot laissait l'utilisateur devant une énigme. On cherche la cause

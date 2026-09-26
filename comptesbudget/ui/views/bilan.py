@@ -947,11 +947,18 @@ class BilanView(QWidget):
             return t.get("date_valeur") or t.get("date", "")
 
         actives = [t for t in txs if t.get("categorie") != "Transaction exclue"]
+        # Carte à débit IMMÉDIAT : un achat carte sort le jour même, comme
+        # n'importe quelle dépense. Seule une carte à débit différé met ses
+        # achats de côté pour un prélèvement groupé.
+        differe = carte_a_debit_differe(txs)
+
+        def carte_differee(t: dict) -> bool:
+            return differe and est_paiement_carte(t.get("type"))
 
         # 1) Opérations déjà enregistrées dont le débit tombe dans la fenêtre.
-        #    Les opérations CARTE non pointées sont écartées : la banque ne les
-        #    a pas encore rattachées au prochain prélèvement, elles partiront au
-        #    suivant. Les compter ici fausserait le montant du débit — un
+        #    Avec une carte à débit différé, les opérations CARTE non pointées
+        #    sont écartées : la banque ne les a pas encore rattachées au
+        #    prochain prélèvement, elles partiront au suivant. Les compter ici fausserait le montant du débit — un
         #    remboursement carte « en cours » ne réduit pas le prélèvement de ce
         #    mois-ci. Les opérations non-carte, elles, ne sont jamais pointées
         #    avant leur passage : on les garde toutes.
@@ -960,17 +967,16 @@ class BilanView(QWidget):
         #    ferait compter deux fois.
         reelles = [t for t in actives
                    if debut_iso <= dv(t) <= fin_iso
-                   and not (est_paiement_carte(t.get("type")) and not t.get("pointee"))
+                   and not (carte_differee(t) and not t.get("pointee"))
                    and not (t.get("pointee") and dv(t) <= today_iso)]
         en_cours_carte = [t for t in actives
-                          if est_paiement_carte(t.get("type")) and not t.get("pointee")
+                          if carte_differee(t) and not t.get("pointee")
                           and dv(t) > today_iso]
         # Libellés déjà couverts : leur récurrence ne doit pas être recomptée
         deja = {clean_libelle(t.get("libelle", "")) for t in reelles
-                if not est_paiement_carte(t.get("type"))}
+                if not carte_differee(t)}
 
-        lignes = [(dv(t), t.get("libelle", ""), t["montant"],
-                   est_paiement_carte(t.get("type")))
+        lignes = [(dv(t), t.get("libelle", ""), t["montant"], carte_differee(t))
                   for t in reelles]
         return lignes, en_cours_carte, deja
 

@@ -73,9 +73,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
         <li>Saisie manuelle via <code>➕ Nouvelle opération</code></li>
       </ul>
       L'app gère les CSV des banques françaises — les colonnes sont reconnues par leur nom :
-      séparateur point-virgule, dates JJ/MM/AAAA, encodage Windows-1252 <b>ou UTF-8</b> (détecté
+      séparateur point-virgule, dates JJ/MM/AAAA (« 5/9/2026 » et « 05/09/26 » sont aussi lues),
+      encodage Windows-1252 <b>ou UTF-8</b> (détecté
       automatiquement). Les doublons sont ignorés — même entre deux relevés qui se chevauchent,
-      et même face à une opération saisie à la main — et les lignes au montant illisible sont
+      et même face à une opération saisie à la main — et les lignes à la date ou au montant illisible sont
       écartées et signalées, jamais enregistrées à 0&nbsp;€. Si le relevé contient une colonne
       <b>Pointage</b> (« x » = passée en banque), les opérations concernées sont <b>pointées
       automatiquement</b> ; s'il n'en contient pas — le cas de la plupart des banques —

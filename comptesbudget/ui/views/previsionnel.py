@@ -19,8 +19,8 @@ from ...constants import (
     FREQUENCIES,
 )
 from ...utils import (
-    cat_color, est_paiement_carte, fmt_euro, fmt_date_fr,
-    date_debit_differe, period_label,
+    carte_a_debit_differe, cat_color, est_paiement_carte, fmt_euro,
+    fmt_date_fr, date_debit_differe, period_label,
 )
 from ...database import Database
 from ...recurring import (
@@ -258,11 +258,15 @@ class PrevisionnelView(QWidget):
         Le drapeau « prevue » les distingue d'une opération réellement passée
         en banque : il permet de les afficher à part (⏳) et, à l'import du
         relevé, de les compléter au lieu d'ajouter une seconde ligne."""
+        # Seule une carte à DÉBIT DIFFÉRÉ reporte l'échéance ; sur une carte à
+        # débit immédiat, elle sort le jour même (même règle que le Bilan).
+        differe = carte_a_debit_differe([dict(r) for r in self.db.list_tx()])
         with self.db.batch():
             for e in echeances:
-                # Une échéance payée par carte n'atteint le compte qu'au
-                # prélèvement groupé du mois suivant (cf. date_debit_differe).
-                est_carte = est_paiement_carte(e["type"])
+                # Une échéance payée par carte à débit différé n'atteint le
+                # compte qu'au prélèvement groupé du mois suivant
+                # (cf. date_debit_differe).
+                est_carte = differe and est_paiement_carte(e["type"])
                 self.db.insert_tx({
                     "id":          str(uuid.uuid4()),
                     "date":        e["date"],

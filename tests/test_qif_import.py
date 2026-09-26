@@ -232,3 +232,36 @@ def test_import_qif_americain(tmp_path):
     op = dict(next(iter(db.list_tx())))
     assert op["date"] == "2026-06-23"
     assert op["montant"] == -1234.56
+
+
+# ── Pointage (lot « autres utilisateurs », 26/09/2026) ──
+#
+# Beaucoup de banques n'écrivent pas le champ « C » : sans lui, toutes les
+# opérations arrivaient NON pointées et le solde bancaire restait figé sur le
+# solde de départ. Règle du CSV et de l'OFX : un relevé ne contient que des
+# opérations passées en banque, donc tout est pointé.
+
+_QIF_SANS_POINTAGE = """!Type:Bank
+D23/06/2026
+T-45,30
+PHYPERMARCHE MARKET
+^
+D22/06/2026
+T2000,00
+PSALAIRE JUIN
+^
+"""
+
+
+def test_import_qif_sans_aucune_marque_tout_pointe(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    import_qif_text(_QIF_SANS_POINTAGE, db)
+    assert [r["pointee"] for r in db.list_tx()] == [1, 1]
+
+
+def test_import_qif_avec_marques_garde_les_non_pointees(tmp_path):
+    # Quand le fichier pointe certaines lignes, les autres ne le sont pas.
+    db = Database(str(tmp_path / "t.db"))
+    import_qif_text(_QIF, db)
+    rows = {r["montant"]: r["pointee"] for r in db.list_tx()}
+    assert rows == {-45.30: 1, 2000.00: 0}

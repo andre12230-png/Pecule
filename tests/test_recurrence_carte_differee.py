@@ -95,3 +95,64 @@ def test_achat_deja_enregistre_pas_compte_deux_fois(qapp, tmp_path):
         "info": "", "montant": -20.0, "pointee": 1})
     assert _lignes_abonnement(db, m2, m2.replace(day=28)) == [
         (m2.replace(day=4).isoformat(), -20.0, True)]
+
+
+# ── Carte à débit IMMÉDIAT (lot « autres utilisateurs », 26/09/2026) ──
+
+def test_generer_echeances_carte_immediate_garde_la_date(qapp, tmp_path):
+    # « Générer les échéances » reportait au 4 du mois suivant tout paiement
+    # carte, même sur une carte à débit immédiat.
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+    db = _base(tmp_path, differe=False)
+    prev = PrevisionnelView(db)
+    mois = date.today().isoformat()[:7]
+    prev._creer_operations([e for e in prev._echeances(mois)
+                            if e["libelle"] == "ABONNEMENT"])
+    cree = next(dict(t) for t in db.list_tx() if t["prevue"])
+    assert cree["date_valeur"] == cree["date"]
+
+
+def test_generer_echeances_carte_differee_reportee(qapp, tmp_path):
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+    db = _base(tmp_path, differe=True)
+    prev = PrevisionnelView(db)
+    mois = date.today().isoformat()[:7]
+    prev._creer_operations([e for e in prev._echeances(mois)
+                            if e["libelle"] == "ABONNEMENT"])
+    cree = next(dict(t) for t in db.list_tx() if t["prevue"])
+    assert cree["date_valeur"] == _mois_suivant(date.today()).replace(day=4).isoformat()
+
+
+def _achat_carte_non_pointe(db):
+    db.insert_tx({
+        "id": "achat", "date": date.today().isoformat(),
+        "date_valeur": date.today().isoformat(),
+        "libelle": "LIBRAIRIE", "libelle_op": "", "reference": "",
+        "type": "Carte bancaire", "categorie": "Loisirs", "sous_cat": "",
+        "info": "", "montant": -30.0, "pointee": 0})
+
+
+def _lignes_librairie(db):
+    from comptesbudget.ui.views.bilan import BilanView
+    vue = BilanView(db)
+    txs = [dict(t) for t in db.list_tx()]
+    lignes, _ = vue._lignes_a_venir(txs, date.today(),
+                                    date.today() + timedelta(days=10))
+    return [(m, carte) for d, lib, m, carte in lignes if lib == "LIBRAIRIE"]
+
+
+def test_bilan_achat_carte_immediate_non_pointe_compte(qapp, tmp_path):
+    # Sur une carte à débit immédiat, un achat saisi à la main et pas encore
+    # pointé sort du compte comme n'importe quelle dépense : il n'était
+    # compté nulle part (ni dans le solde, ni dans ce qui reste à passer).
+    db = _base(tmp_path, differe=False)
+    _achat_carte_non_pointe(db)
+    assert _lignes_librairie(db) == [(-30.0, False)]
+
+
+def test_bilan_achat_carte_differee_non_pointe_au_lot_suivant(qapp, tmp_path):
+    # Carte à débit différé : comportement inchangé, l'achat non pointé part
+    # au prélèvement suivant.
+    db = _base(tmp_path, differe=True)
+    _achat_carte_non_pointe(db)
+    assert _lignes_librairie(db) == []

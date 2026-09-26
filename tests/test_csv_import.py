@@ -758,3 +758,35 @@ def test_releve_ordinaire_n_annonce_aucun_encours(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     import_csv(_write_csv(tmp_path), db)
     assert encours_carte_annonce(db) is None
+
+
+# ── Dates sans zéro (lot « autres utilisateurs », 26/09/2026) ──
+#
+# Un relevé réenregistré dans un tableur perd souvent les zéros de tête :
+# « 5/9/2026 ». Ces lignes étaient écartées sans le moindre message.
+
+def test_parse_french_date_sans_zero_et_annee_courte():
+    assert parse_french_date("5/9/2026") == "2026-09-05"
+    assert parse_french_date("05/09/26") == "2026-09-05"
+    assert parse_french_date("31/02/2026") is None     # date impossible
+
+
+def test_import_csv_dates_sans_zero(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant\n"
+               "5/9/2026;BOULANGERIE;-4,50\n"
+               "15/9/2026;LIBRAIRIE;-12,00\n")
+    assert import_csv(p, db).importees == 2
+
+
+def test_import_csv_date_illisible_signalee(tmp_path):
+    # Une ligne qui porte un montant mais dont la date ne se lit pas est une
+    # opération perdue : elle doit être comptée, pas oubliée.
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant\n"
+               "05/09/2026;BOULANGERIE;-4,50\n"
+               "le 6 sept;LIBRAIRIE;-12,00\n")
+    res = import_csv(p, db)
+    assert (res.importees, res.illisibles) == (1, 1)
