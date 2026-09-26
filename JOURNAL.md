@@ -34,8 +34,8 @@ renommé `Pecule.exe.avant-1.39.1`, exe copié (identique à celui construit),
 **Pourquoi.** Demande de l'auteur : déployer les trois applications chez lui.
 Nouveau numéro à chaque exe déployé ; dernier chiffre seulement, ce sont des
 corrections.
-**Reste.** Sortie de mi-octobre. Deux anciens exe gardés (`avant-1.39.0`,
-`avant-1.39.1`) : le plus ancien à la Corbeille si l'auteur l'accepte.
+**Reste.** Sortie de mi-octobre. `Pecule.exe.avant-1.39.0` mis à la Corbeille
+avec l'accord de l'auteur : seul filet, `Pecule.exe.avant-1.39.1`.
 
 ## 2026-09-26 (8) — Erreurs techniques dites en français
 
