@@ -21,6 +21,22 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (3) — Montants d'exemple remplacés par des montants ronds
+
+**Fait.** Un diagnostic « ce qui ne vaut que pour l'auteur » a relevé des
+montants au centime qui ressemblaient à de vrais chiffres : dans la notice
+intégrée (Catégories, verdict du Bilan, « Reste pour la carte »), l'aide de la
+recherche, le journal de version de `constants.py` et quelques commentaires. Tous
+remplacés par des montants inventés et ronds ; un test d'import Crédit Agricole
+passe d'une cotisation réelle à 50,00 €. Aucun calcul ne change.
+**Pourquoi.** Règle du dépôt public : exemples inventés et ronds dès la première
+écriture. Le script de contrôle ne sait pas juger si un montant est inventé.
+**Reste.** Deux messages de commit locaux citent encore deux de ces montants
+(décision de l'auteur attendue). Le reste du diagnostic : défauts qui touchent
+les autres utilisateurs (import QIF non pointé, dates « 5/9/2026 » écartées sans
+le dire, report au 4 appliqué aux cartes à débit immédiat, jour de prélèvement
+figé), notice, classement automatique.
+
 ## 2026-09-26 (2) — Un nom réel retiré d'un test, historique local réécrit
 
 **Fait.** Le nouveau contrôle avant livraison (hors dépôt) a trouvé le nom réel
