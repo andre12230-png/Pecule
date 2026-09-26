@@ -70,7 +70,6 @@ def db(tmp_path):
     today = date.today()
     first = today.replace(day=1).isoformat()
     todays = today.isoformat()
-    future = (today + timedelta(days=20)).isoformat()
 
     d.insert_tx(_tx(id="t-sal", date=first, date_valeur=first, libelle="SALAIRE",
                     libelle_op="SALAIRE", type="Virement", categorie="Revenus",
@@ -81,7 +80,10 @@ def db(tmp_path):
     d.insert_tx(_tx(id="t-big", date=todays, date_valeur=todays, libelle="COURSES",
                     libelle_op="COURSES", type="Carte bancaire",
                     categorie="Alimentation", montant=-380.0, pointee=1))  # budget dépassé
-    d.insert_tx(_tx(id="t-cb", date=todays, date_valeur=future, libelle="OMNISHOP",
+    # Débit différé réaliste : le 4 du mois suivant (lot du 26/09/2026 — le
+    # jour du débit est désormais appris des achats passés).
+    d.insert_tx(_tx(id="t-cb", date=todays, date_valeur=date_debit_differe(todays),
+                    libelle="OMNISHOP",
                     libelle_op="OMNISHOP", type="Carte bancaire",
                     categorie="Loisirs", montant=-60.0, pointee=0))        # encours CB
     d.set_budget("Alimentation", 400.0)

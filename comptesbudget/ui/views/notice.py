@@ -88,8 +88,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       La ligne récapitulative du <b>débit différé</b> de la carte
       (« DEBIT DIFFERE… », « CUMUL DES DEBITS DIFFERES », « DEPENSES CARTE… » au
       <b>Crédit&nbsp;Agricole</b>) n'est <b>jamais importée</b> : elle
-      totalise des achats qui figurent déjà un par un dans le relevé. Ce sont bien ces
-      achats-là que Pécule garde, à leur date d'achat — votre solde peut donc différer
+      totalise des achats qui se comptent un par un — dans le même relevé, ou dans le
+      <b>relevé de la carte</b>, que certaines banques donnent à part : importez-le
+      alors aussi. Ce sont bien ces achats-là que Pécule garde, à leur date d'achat — votre solde peut donc différer
       quelques jours de celui de la banque, qui ne les débite qu'en bloc le mois suivant.
       La <b>cotisation</b> de la carte, elle, reste une dépense comme une autre.
   </li>
@@ -439,10 +440,11 @@ du Bilan), toujours en <b>date d'achat</b> — sinon le prélèvement groupé du
 suivant ferait déborder ses budgets.</p>
 <p>Sur un compte dont la carte est à <b>débit différé</b> (Pécule le reconnaît
 à vos relevés), quand vous saisissez une opération de type <b>Carte bancaire</b>,
-la <b>date de valeur</b> est proposée au <b>4 du mois suivant</b> l'achat, jour
-habituel du prélèvement groupé. Sur une carte à débit immédiat, elle reste celle
-de l'achat. Vous pouvez la corriger — si votre banque prélève un autre jour, par
-exemple : dès que vous
+la <b>date de valeur</b> est proposée d'après vos <b>achats carte précédents</b> :
+le jour où votre banque prélève d'habitude, et le mois où partent d'habitude les
+achats faits ce jour-là du mois (à défaut d'historique, le <b>4 du mois
+suivant</b>). Sur une carte à débit
+immédiat, elle reste celle de l'achat. Vous pouvez la corriger : dès que vous
 la modifiez vous-même, l'app ne la recalcule plus — sauf si vous changez
 ensuite le <b>type</b> ou le <b>sens</b> de l'opération, car la règle de calcul
 n'est alors plus la même. Corriger un type saisi par erreur remet donc la date
@@ -821,7 +823,7 @@ Pour une carte à débit différé, elle peut être plusieurs semaines plus tard
 <dt>Débit différé</dt>
 <dd>Mode de fonctionnement de certaines cartes bancaires où tous les achats
 du mois sont regroupés et débités en une seule fois, au début du mois
-suivant, à une date fixée par la banque (Pécule propose le 4). Reconnu par l'icône ⏱ orange dans la colonne Date valeur.</dd>
+suivant, à une date fixée par la banque (Pécule la déduit de vos relevés). Reconnu par l'icône ⏱ orange dans la colonne Date valeur.</dd>
 
 <dt>Doublon</dt>
 <dd>Opération qui apparaît deux fois dans la base (même date, même montant,

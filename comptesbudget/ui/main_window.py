@@ -445,9 +445,13 @@ class MainWindow(QMainWindow):
             # ne fait pas partie de Segoe UI, la police des boîtes de dialogue,
             # et s'affichait comme un rectangle noir illisible. Les symboles
             # des lignes voisines (✔, ⏳, ⚠), eux, sont bien dans la police.
+            # Écarté parce que les achats sont détaillés ailleurs : dans ce
+            # relevé, ou dans le relevé de la CARTE, que certaines banques
+            # donnent à part. Rien ne permet de le vérifier ici : on le dit.
             msg += (f"\n{total_recap} récapitulatif(s) de débit différé "
-                    "écarté(s) : les achats carte du relevé sont déjà "
-                    "détaillés un par un.")
+                    "écarté(s) : ils totalisent des achats carte qui se "
+                    "comptent un par un. Si votre banque les donne dans un "
+                    "relevé de carte séparé, importez-le aussi.")
         if total_pt:
             msg += (f"\n✔ {total_pt} opération(s) déjà enregistrée(s) pointée(s) "
                     "automatiquement (confirmées par le relevé).")
@@ -957,7 +961,8 @@ class MainWindow(QMainWindow):
         for t in txs:
             if t.get("categorie") == "Transaction exclue":
                 continue
-            suggested = suggest_category(t.get("libelle", ""), t.get("sous_cat", ""))
+            suggested = suggest_category(t.get("libelle", ""), t.get("sous_cat", ""),
+                                         t.get("montant"))
             if suggested and suggested != t.get("categorie"):
                 suggestions.append((t, suggested))
         if not suggestions:

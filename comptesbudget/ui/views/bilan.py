@@ -18,9 +18,9 @@ from PySide6.QtCharts import (
 )
 
 from ...utils import (
-    carte_a_debit_differe, cat_color, date_debit_differe,
+    carte_a_debit_differe, cat_color,
     depense_nette_par_categorie, est_paiement_carte,
-    fmt_euro, fmt_date_fr, in_period, period_label,
+    fmt_euro, fmt_date_fr, in_period, period_label, regle_debit_differe,
 )
 from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
@@ -829,11 +829,11 @@ class BilanView(QWidget):
         # Date(s) où la banque prélève les achats du mois : celles que portent
         # les achats eux-mêmes. Au Crédit Agricole, les achats du 20 au 19
         # partent le dernier jour ouvré : un mois se prélève donc en deux fois.
-        # À défaut, la règle habituelle : le 4 du mois suivant.
+        # À défaut, le calendrier des achats carte passés du compte.
         debits = sorted({t.get("date_valeur", "") for t in achats_mois
                          if t.get("date_valeur", "") > t.get("date", "")})
         if not debits:
-            debits = [date_debit_differe(f"{mois}-01")]
+            debits = [regle_debit_differe(cartes)(f"{mois}-01")]
 
         self.cb_total.setStyleSheet(
             "color:#5A2D00; font-size:12pt; font-weight:bold")
@@ -995,12 +995,13 @@ class BilanView(QWidget):
         Chaque échéance porte `_debit`, le jour où elle sort vraiment du
         compte, et `_carte`. Une échéance payée par une carte à DÉBIT DIFFÉRÉ
         ne sort pas le jour de l'achat mais avec le lot carte du mois suivant
-        (date_debit_differe) : c'est ce jour-là qui décide si elle tombe dans
+        (regle_debit_differe) : c'est ce jour-là qui décide si elle tombe dans
         la fenêtre. Incident du 23/09/2026 : un abonnement carte du 1er était
         retranché le 01/10 alors qu'il partait avec le lot de novembre."""
         recs = [dict(r) for r in self.db.list_recurring()]
         debut_iso, fin_iso = depuis.isoformat(), jusqua.isoformat()
         differe = carte_a_debit_differe(txs)
+        dater_carte = regle_debit_differe(txs)
         out = []
         # Chaque mois de la fenêtre, du premier au dernier. Seuls ces deux-là
         # étaient consultés : passé le 17, les 45 jours du prochain découvert
@@ -1015,7 +1016,7 @@ class BilanView(QWidget):
                 if e["_deja"]:
                     continue
                 e["_carte"] = differe and est_paiement_carte(e.get("type"))
-                e["_debit"] = (date_debit_differe(e["date"]) if e["_carte"]
+                e["_debit"] = (dater_carte(e["date"]) if e["_carte"]
                                else e["date"])
                 if debut_iso <= e["_debit"] <= fin_iso:
                     out.append(e)

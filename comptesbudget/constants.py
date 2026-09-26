@@ -969,18 +969,22 @@ HARMONIZE_RULES = [
     # placée AVANT Transports, dont le motif « total » l'attraperait.
     (r"\b(total ?energies? (sa|electricite|gaz|clients)|total direct energie)\b", "Logement - maison"),
     (r"\b(prlv|prelevement|prelvt)\b.*\btotal ?energies?\b", "Logement - maison"),
-    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl|mobile)\b", "Logement - maison"),
-    (r"\b(brico|leroy[\s-]?merlin|castorama|ikea|conforama|but|maison|ameublement|mobilier|jardin)\b", "Logement - maison"),
+    (r"\b(loyer|edf|engie|enedis|gdf|veolia|suez|eau|gaz|electric|chauffage|copropriete|syndic|sfr|orange|free|bouygues|telephon|internet|fibre|adsl)\b", "Logement - maison"),
+    # « maison » et « jardin » seuls attrapaient la Maison de la presse ou un
+    # restaurant « Le Jardin » : on nomme les enseignes (lot du 26/09/2026).
+    (r"\b(brico|leroy[\s-]?merlin|castorama|ikea|conforama|but|maisons du monde|ameublement|mobilier|jardiland|truffaut|botanic)\b", "Logement - maison"),
     # Transports
     # « bp » (2 lettres) retiré : il attrapait aussi la Banque Populaire.
-    (r"\b(carburant|station|essence|total|totalenergies|shell|esso|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
+    # « total » et « station » seuls attrapaient « REMBOURSEMENT TOTAL » ou une
+    # station de ski : on garde les formes des stations-service.
+    (r"\b(carburant|station[\s-]?service|essence|total (access|marketing|relais|energies)|totalenergies|shell|esso|avia|intermarche carburant|gazole|sp95|sp98|peage|autoroute|sncf|ratp|tcl|tan|tisseo|stationnement|parking|garage|controle technique|garagiste|entretien vehicule|reparation auto|peugeot|renault|citroen|ford|fiat|vw|volkswagen|assurance auto)\b", "Transports"),
     # Santé
     (r"\b(pharmacie|medecin|docteur|dentist|opticien|hopital|clinique|cpam|mutuelle|harmonie|mgen|laboratoire|kine|kinesi|ostheo|psychologue)\b", "Santé"),
     # Alimentation
     # « boulangerie » et non « boulanger » : Boulanger est l'enseigne
     # d'électroménager (elle reste couverte par la règle Shopping).
     (r"\b(carrefour|leclerc|auchan|intermarche|lidl|aldi|casino|monoprix|super[\s-]?u|hyper[\s-]?u|coop|biocoop|naturalia|grand frais|picard|marche|boulangerie|patisser|boucher|primeur)\b", "Alimentation"),
-    (r"\b(mcdo|mc[\s-]?donald|kfc|burger|quick|subway|pizza|restaur|brasserie|bar|cafe|kebab|sushi|chez|brunch)\b", "Alimentation"),
+    (r"\b(mcdo|mc[\s-]?donald|kfc|burger|quick|subway|pizza|restaur|brasserie|bar|cafe|kebab|sushi|brunch)\b", "Alimentation"),
     # Loisirs
     (r"\b(cinema|cine|netflix|spotify|deezer|prime video|disney|amazon prime|canal|playstation|nintendo|xbox|steam|fnac|cultura|micromania|jeu|cinema|gaumont|ugc|pathe|theatre|concert|musee)\b", "Loisirs"),
     # Shopping — « fnac » n'y figure plus : il est déjà pris par Loisirs
@@ -988,14 +992,19 @@ HARMONIZE_RULES = [
     (r"\b(amazon|cdiscount|darty|boulanger|zalando|asos|kiabi|h&m|zara|uniqlo|decathlon|intersport|go sport)\b", "Shopping"),
     # Impôts
     (r"\b(dgfip|tresor public|impot|tva|taxe|cfe|tfh)\b", "Impôts et taxes"),
+    # Revenus AVANT la banque : un salaire viré dont le libellé cite la banque
+    # (« VIR SEPA SALAIRE ... BNP ») partait en « Banque et assurances ».
+    # « remboursement » volontairement ABSENT : la convention est de classer
+    # un remboursement dans la catégorie de la dépense d'origine (Samse →
+    # Logement, Cofidis → Banque et assurances…), pas en Revenus, où il
+    # gonflerait à tort les revenus et le taux d'épargne. « virement recu »
+    # aussi : ce peut être le remboursement d'un proche. Sans motif, ces
+    # opérations restent « Non classé » et c'est vous qui tranchez. Cette
+    # règle ne vaut que pour une RENTRÉE d'argent (cf. suggest_category) :
+    # une pension versée n'est pas un revenu.
+    (r"\b(salaire|paie|paye|caf|pole emploi|france travail|chomage|retraite|pension)\b", "Revenus"),
     # Banque / assurances
-    (r"\b(bpce|cic|credit agricole|banque postale|caisse epargne|societe generale|sg|bnp|hsbc|lcl|cotisation|frais|agios|commission|maaf|matmut|maif|axa|gmf|allianz|maif|assurance habitation|assurance accident)\b", "Banque et assurances"),
-    # Revenus — « remboursement » volontairement ABSENT : la convention est de
-    # classer un remboursement dans la catégorie de la dépense d'origine
-    # (Samse → Logement, Cofidis → Banque et assurances…), pas en Revenus, où
-    # il gonflerait à tort les revenus et le taux d'épargne. Sans motif, ces
-    # opérations restent « Non classé » et c'est vous qui tranchez.
-    (r"\b(salaire|paie|paye|caf|pole emploi|chomage|retraite|pension|virement recu)\b", "Revenus"),
+    (r"\b(bpce|cic|credit agricole|banque postale|caisse epargne|societe generale|bnp|hsbc|lcl|cotisation|frais|agios|commission|maaf|matmut|maif|axa|gmf|allianz|maif|assurance habitation|assurance accident)\b", "Banque et assurances"),
     # Épargne
     (r"\b(virement epargne|livret a|ldds|pel|cel|assurance vie|pea|opcvm)\b", "Épargne"),
 ]

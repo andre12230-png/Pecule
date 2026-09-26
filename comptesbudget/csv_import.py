@@ -814,7 +814,7 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         # utilisateur — sans règle ni historique — arrivait entièrement en
         # « Non classé », budgets et graphiques vides.
         if tx["categorie"] in ("", "Non classé"):
-            devinee = suggest_category(libelle, tx["sous_cat"])
+            devinee = suggest_category(libelle, tx["sous_cat"], tx["montant"])
             if devinee:
                 tx["categorie"] = devinee
 

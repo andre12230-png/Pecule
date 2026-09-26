@@ -20,7 +20,7 @@ from ...constants import (
 )
 from ...utils import (
     carte_a_debit_differe, cat_color, est_paiement_carte, fmt_euro,
-    fmt_date_fr, date_debit_differe, period_label,
+    fmt_date_fr, period_label, regle_debit_differe,
 )
 from ...database import Database
 from ...recurring import (
@@ -260,7 +260,9 @@ class PrevisionnelView(QWidget):
         relevé, de les compléter au lieu d'ajouter une seconde ligne."""
         # Seule une carte à DÉBIT DIFFÉRÉ reporte l'échéance ; sur une carte à
         # débit immédiat, elle sort le jour même (même règle que le Bilan).
-        differe = carte_a_debit_differe([dict(r) for r in self.db.list_tx()])
+        txs = [dict(r) for r in self.db.list_tx()]
+        differe = carte_a_debit_differe(txs)
+        dater_carte = regle_debit_differe(txs)
         with self.db.batch():
             for e in echeances:
                 # Une échéance payée par carte à débit différé n'atteint le
@@ -270,7 +272,7 @@ class PrevisionnelView(QWidget):
                 self.db.insert_tx({
                     "id":          str(uuid.uuid4()),
                     "date":        e["date"],
-                    "date_valeur": date_debit_differe(e["date"]) if est_carte
+                    "date_valeur": dater_carte(e["date"]) if est_carte
                                    else e["date"],
                     "libelle":     e["libelle"],
                     "libelle_op":  e["libelle"],

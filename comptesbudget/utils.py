@@ -4,6 +4,7 @@ import re
 import shutil
 import unicodedata
 from calendar import monthrange
+from collections import Counter
 from datetime import date, datetime, timezone
 from typing import Optional
 
@@ -127,10 +128,16 @@ def depense_nette_par_categorie(txs: list[dict]) -> dict[str, float]:
     return {c: round(-v, 2) for c, v in net.items() if v < -0.005}
 
 
-def suggest_category(libelle: str, sous_cat: str = "") -> Optional[str]:
-    """Retourne la catégorie suggérée d'après libellé/sous-cat, ou None."""
+def suggest_category(libelle: str, sous_cat: str = "",
+                     montant: Optional[float] = None) -> Optional[str]:
+    """Retourne la catégorie suggérée d'après libellé/sous-cat, ou None.
+
+    `montant`, quand il est connu, écarte « Revenus » pour une dépense : une
+    pension ou un salaire VERSÉS ne sont pas des revenus."""
     blob = deaccent(f"{libelle} {sous_cat}")
     for rx, cat in _HARMONIZE_COMPILED:
+        if cat == "Revenus" and montant is not None and montant < 0:
+            continue
         if rx.search(blob):
             return cat
     return None
@@ -369,21 +376,104 @@ def numero_cheque(tx: dict) -> str:
     return m.group(1) if m else ""
 
 
+# Au-delà de ce décalage entre l'achat et le débit, ce n'est plus un simple
+# week-end (vendredi → lundi) : c'est, le plus souvent, un prélèvement groupé.
+DELAI_REPORT_JOURS = 3
+# Nombre d'achats carte récents examinés : assez pour ne pas se fier à un cas
+# isolé, assez peu pour suivre un changement de carte.
+ACHATS_EXAMINES = 30
+
+
+def _ecart_jours(t: dict) -> Optional[int]:
+    """Jours entre la date d'achat et la date de valeur, ou None."""
+    try:
+        return (date.fromisoformat(t["date_valeur"][:10])
+                - date.fromisoformat(t["date"][:10])).days
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _achats_carte_reels(operations: list[dict]) -> list[dict]:
+    """Achats carte (débits) venus de la banque, du plus récent au plus
+    ancien. Les échéances générées par Pécule (« prevue ») sont écartées :
+    ce ne sont pas des traces laissées par la banque."""
+    achats = [t for t in operations
+              if est_paiement_carte(t.get("type"))
+              and (t.get("montant") or 0) < 0
+              and not t.get("prevue")
+              and _ecart_jours(t) is not None]
+    return sorted(achats, key=lambda t: t["date"], reverse=True)
+
+
 def carte_a_debit_differe(operations: list[dict]) -> bool:
     """La carte de ce compte est-elle à débit différé ?
 
-    Reconnu à la trace qu'il laisse dans les données : une opération carte dont
-    la date de valeur dépasse la date d'achat. Sur une carte à débit immédiat,
-    les deux dates sont toujours les mêmes.
+    Reconnu à la trace qu'il laisse dans les données, sans réglage à saisir :
+    parmi les derniers achats carte, au moins un sur trois est débité plus
+    de trois jours après l'achat. Sur une carte à débit immédiat, c'est
+    l'exception (un jour férié, une réservation) : moins d'un achat sur dix.
+    Un décalage d'un à trois jours (week-end) arrive aussi sur une carte à
+    débit immédiat, et suffisait auparavant à tout faire basculer en débit
+    différé ; il ne compte plus.
 
-    Aucun réglage à saisir : c'est la banque qui décide, et une seule opération
-    suffit à le dire. Un compte sans la moindre opération carte répond « non »,
-    ce qui efface les explications et les bandeaux qui n'auraient rien à
-    montrer chez lui."""
-    return any(est_paiement_carte(t.get("type"))
-               and t.get("date_valeur") and t.get("date")
-               and t["date_valeur"] > t["date"]
-               for t in operations)
+    Un compte sans la moindre opération carte répond « non », ce qui efface
+    les explications et les bandeaux qui n'auraient rien à montrer chez lui."""
+    achats = _achats_carte_reels(operations)[:ACHATS_EXAMINES]
+    if not achats:
+        return False
+    reportes = sum(1 for t in achats if _ecart_jours(t) > DELAI_REPORT_JOURS)
+    return reportes * 3 >= len(achats)
+
+
+def regle_debit_differe(operations: list[dict]):
+    """Rend une fonction qui date un achat carte à débit différé.
+
+    Chaque banque a son calendrier : le 4 du mois suivant pour l'une, le
+    dernier jour ouvré du mois pour une autre (au Crédit Agricole, un achat
+    du 10 part le 30 du MÊME mois, un achat du 25 le mois suivant). Plutôt
+    qu'un réglage, on le lit dans l'historique du compte :
+
+      - le JOUR du débit est le plus fréquent parmi les prélèvements groupés
+        passés (un par lot : un gros lot ne pèse pas plus qu'un petit). Un
+        lot repoussé au lundi par un week-end reste l'exception ; à partir du
+        28, c'est « la fin du mois », bornée à la longueur de chaque mois ;
+      - le DÉCALAGE en mois est le plus fréquent pour les achats faits ce
+        jour-là du mois (ou le jour connu le plus proche). Un achat décalé
+        d'un lot à la main reste, lui aussi, l'exception.
+
+    Sans historique, la règle habituelle : le 4 du mois suivant."""
+    reportes = [t for t in _achats_carte_reels(operations)
+                if _ecart_jours(t) > DELAI_REPORT_JOURS][:400]
+    if not reportes:
+        return date_debit_differe
+
+    lots = Counter(int(d[8:10]) for d in {t["date_valeur"][:10] for t in reportes})
+    # À égalité, le jour le plus tôt (min sur le couple -nombre, jour).
+    jour_debit = min(lots, key=lambda j: (-lots[j], j))
+    fin_de_mois = jour_debit >= 28
+
+    decalages: dict[int, Counter] = {}
+    for t in reportes:
+        achat = date.fromisoformat(t["date"][:10])
+        debit = date.fromisoformat(t["date_valeur"][:10])
+        k = (debit.year - achat.year) * 12 + debit.month - achat.month
+        decalages.setdefault(achat.day, Counter())[k] += 1
+
+    def dater(date_achat_iso: str) -> str:
+        try:
+            d = date.fromisoformat((date_achat_iso or "")[:10])
+        except (TypeError, ValueError):
+            return date_achat_iso or ""
+        proche = min(decalages, key=lambda j: (abs(j - d.day), j))
+        compte = decalages[proche]
+        # Le décalage le plus fréquent ; à égalité, le plus court.
+        k = min(compte, key=lambda x: (-compte[x], x))
+        rang = d.year * 12 + d.month - 1 + k
+        an, mois = rang // 12, rang % 12 + 1
+        dernier = monthrange(an, mois)[1]
+        jour = dernier if fin_de_mois else min(jour_debit, dernier)
+        return date(an, mois, jour).isoformat()
+    return dater
 
 
 def date_debit_differe(date_op_iso: str, jour: int = JOUR_DEBIT_DIFFERE) -> str:

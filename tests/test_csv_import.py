@@ -790,3 +790,22 @@ def test_import_csv_date_illisible_signalee(tmp_path):
                "le 6 sept;LIBRAIRIE;-12,00\n")
     res = import_csv(p, db)
     assert (res.importees, res.illisibles) == (1, 1)
+
+
+# ── Ligne récapitulative (lot « autres utilisateurs », 26/09/2026) ──
+#
+# Envisagé puis écarté : garder le récapitulatif quand le fichier ne
+# détaille pas les achats. Certaines banques donnent ces achats dans un
+# relevé de CARTE séparé : importé après le relevé du compte, il les
+# aurait fait compter deux fois. Le récapitulatif reste donc écarté, et
+# le message d'import invite à importer aussi le relevé de la carte.
+
+def test_recapitulatif_ecarte_si_les_achats_sont_detailles(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "r.csv",
+               "Date;Libelle;Montant\n"
+               "02/09/2026;CB LIBRAIRIE 28/08;-20,00\n"
+               "05/09/2026;DEBIT DIFFERE CARTE X1234;-20,00\n"
+               "06/09/2026;PRLV SEPA EDF;-50,00\n")
+    res = import_csv(p, db)
+    assert (res.importees, res.recaps) == (2, 1)

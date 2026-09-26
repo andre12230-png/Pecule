@@ -285,3 +285,28 @@ def test_echec_de_sauvegarde_n_est_plus_muet(tmp_path, monkeypatch):
     assert "espace" in str(err.value)
     # Pas encore de base (premier lancement) : rien à sauvegarder, sans erreur.
     assert u.backup_db(str(tmp_path / "absente.db")) is None
+
+
+# ── Lot « autres utilisateurs » (26/09/2026) : classement trop large ──
+
+def test_suggest_category_mots_trop_courants():
+    # Ces mots se rencontrent dans des libellés sans rapport avec la catégorie.
+    assert suggest_category("PAIEMENT MOBILE 12/09 LIBRAIRIE") is None
+    assert suggest_category("REMBOURSEMENT TOTAL COMMANDE 4521") is None
+    assert suggest_category("CHEZ LULU COIFFURE") is None
+    assert suggest_category("MAISON DE LA PRESSE") is None
+    # Les vrais cas restent reconnus.
+    assert suggest_category("FREE MOBILE") == "Logement - maison"
+    assert suggest_category("TOTAL ACCESS") == "Transports"
+    assert suggest_category("MAISONS DU MONDE") == "Logement - maison"
+
+
+def test_suggest_category_revenus_seulement_pour_une_rentree():
+    # Un salaire versé par virement dont le libellé cite la banque partait
+    # en « Banque et assurances » ; une pension VERSÉE partait en Revenus.
+    assert suggest_category("VIR SEPA SALAIRE SEPTEMBRE BNP",
+                            montant=1500.0) == "Revenus"
+    assert suggest_category("PENSION ALIMENTAIRE", montant=-300.0) is None
+    # Un virement reçu peut être un remboursement d'un proche : à trancher
+    # par l'utilisateur, pas un revenu d'office.
+    assert suggest_category("VIREMENT RECU DE M DUPONT", montant=50.0) is None

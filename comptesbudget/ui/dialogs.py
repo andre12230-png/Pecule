@@ -15,7 +15,7 @@ from ..constants import (
     CATEGORIES_DEFAUT, CATEGORIES_NON_MASQUABLES, TYPES_OPERATION, FREQUENCIES,
 )
 from ..utils import (
-    fmt_euro, fmt_date_fr, date_debit_differe, JOUR_DEBIT_DIFFERE,
+    fmt_euro, fmt_date_fr, carte_a_debit_differe, regle_debit_differe,
     numero_cheque, alerte_sens_saisie,
 )
 from ..labels import build_libelle_profiles
@@ -47,10 +47,10 @@ class TxDialog(QDialog):
 
         # Rappel affiché seulement pour les achats par carte (débit différé)
         self.dv_hint = QLabel(
-            f"💳 Carte à débit différé : date de valeur proposée au "
-            f"{JOUR_DEBIT_DIFFERE:02d} du mois suivant l'achat — corrigez-la "
-            "si votre banque prélève un autre jour. L'opération ne comptera "
-            "dans le solde qu'à cette date.")
+            "💳 Carte à débit différé : date de valeur proposée d'après vos "
+            "achats carte précédents (à défaut, le 4 du mois suivant) — "
+            "corrigez-la si besoin. L'opération ne comptera dans le solde "
+            "qu'à cette date.")
         self.dv_hint.setWordWrap(True)
         self.dv_hint.setStyleSheet("color:#7E5A18; font-size:9pt")
         self.dv_hint.setVisible(False)
@@ -352,8 +352,8 @@ class TxDialog(QDialog):
         Beaucoup de cartes sont à débit IMMÉDIAT : l'achat sort du compte le
         jour même. Reporter d'office la date de valeur au 4 du mois suivant
         fausserait leur solde à chaque saisie. On se fie donc à ce que les
-        données montrent — une opération carte dont la date de valeur dépasse
-        la date d'achat —, plutôt qu'à un réglage de plus à comprendre.
+        données montrent (voir carte_a_debit_differe), plutôt qu'à un réglage
+        de plus à comprendre.
 
         L'opération en cours de modification compte elle aussi : corriger le
         type d'un achat déjà daté du 4 du mois suivant doit pouvoir revenir à
@@ -367,7 +367,7 @@ class TxDialog(QDialog):
                         and t["date_valeur"] > t["date"]
                         and "carte" in (t.get("type") or "").lower())
 
-        return differee(self.tx or {}) or any(differee(t) for t in self.all_tx)
+        return differee(self.tx or {}) or carte_a_debit_differe(self.all_tx)
 
     def _sync_date_valeur(self):
         """Aligne la date de valeur sur le type d'opération choisi.
@@ -395,7 +395,8 @@ class TxDialog(QDialog):
             return
         d_op = self.date_edit.date()
         if est_carte:
-            iso = date_debit_differe(d_op.toString("yyyy-MM-dd"))
+            # Même calendrier que les achats carte déjà passés sur ce compte.
+            iso = regle_debit_differe(self.all_tx)(d_op.toString("yyyy-MM-dd"))
             nouvelle = QDate.fromString(iso, "yyyy-MM-dd")
         else:
             nouvelle = d_op
