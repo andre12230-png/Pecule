@@ -21,6 +21,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (4) — Quatre défauts qui touchaient les autres utilisateurs
+
+**Fait.** Chacun reproduit d'abord par un test (9 nouveaux, 470 au total) :
+- import QIF sans aucune marque de pointage : tout est pointé, comme pour le CSV
+  et l'OFX (le solde bancaire restait figé sur le solde de départ) ;
+- import CSV : dates « 5/9/2026 » et « 05/09/26 » lues ; une date illisible sur
+  une ligne qui porte un montant est comptée et signalée ; une date impossible
+  (31/02) n'est plus enregistrée ;
+- « Générer les échéances » : le report au 4 du mois suivant ne vaut que pour
+  une carte à débit différé ;
+- Bilan : avec une carte à débit immédiat, un achat carte saisi et pas encore
+  pointé compte dans ce qui reste à passer.
+**Pourquoi.** Diagnostic « ce qui ne vaut que pour l'auteur » : ces cas ne se
+voient pas sur un compte à débit différé importé en CSV, mais faussent le solde
+ailleurs.
+**Reste.** Jour du prélèvement différé figé au 4, détection du débit différé trop
+facile, ligne récapitulative écartée sans vérification, classement automatique
+trop large, textes de la notice qui généralisent le cas de l'auteur.
+
 ## 2026-09-26 (3) — Montants d'exemple remplacés par des montants ronds
 
 **Fait.** Un diagnostic « ce qui ne vaut que pour l'auteur » a relevé des
