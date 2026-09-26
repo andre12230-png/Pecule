@@ -866,7 +866,10 @@ SYNC_VERSION = 3
 #            rentrees d'argent.
 #          - Notice : plus de cas particulier presente comme une regle ;
 #            montants d'exemple arrondis.
-APP_VERSION = "1.39.0"
+# 1.39.1 : Messages d'erreur dits en francais (fichier ouvert dans un autre
+#          programme, disque plein, base occupee...) au lieu du texte technique
+#          en anglais.
+APP_VERSION = "1.39.1"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

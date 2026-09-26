@@ -21,6 +21,16 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (9) — Version 1.39.1 installée chez l'auteur
+
+**Fait.** Numéro 1.39.1 (constants.py avec son historique, Lisez-moi.txt) : les
+erreurs dites en français (entrée précédente). Exe reconstruit et installé
+(détail au fil du déploiement).
+**Pourquoi.** Demande de l'auteur : déployer les trois applications chez lui.
+Nouveau numéro à chaque exe déployé ; dernier chiffre seulement, ce sont des
+corrections.
+**Reste.** Sortie de mi-octobre.
+
 ## 2026-09-26 (8) — Erreurs techniques dites en français
 
 **Fait.** Nouveau module `comptesbudget/erreurs.py`, commun aux trois
