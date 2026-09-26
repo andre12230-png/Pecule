@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (6) — Débit différé et classement lus dans le compte
+
+**Fait.** (`80cc328`, 487 tests)
+- Détection du débit différé : au moins un achat carte sur trois, parmi les 30
+  derniers, débité plus de trois jours après l'achat. Avant, un seul décalage
+  suffisait, et une carte immédiate valorisée un lundi passait pour différée.
+- Date proposée pour un achat carte (saisie, échéances générées, projections
+  du Bilan) : jour habituel du prélèvement groupé et décalage en mois le plus
+  fréquent pour ce jour d'achat, lus dans l'historique ; à défaut, le 4 du mois
+  suivant. Essayé sur une vraie base : le jour reste le 4 (un lot repoussé au
+  lundi ne compte pas), et les achats des derniers jours du mois partent bien
+  au lot du mois d'après, ce que la règle fixe manquait.
+- Classement automatique resserré (mots trop courants, Revenus réservé aux
+  rentrées d'argent et placé avant la banque).
+**Pourquoi.** Lot 4 du diagnostic « autres utilisateurs ».
+**Reste.** Envisagé puis écarté : garder la ligne récapitulative du débit différé
+quand le fichier ne détaille pas les achats — certaines banques les donnent
+dans un relevé de carte séparé, ils auraient compté deux fois. Le message
+d'import invite désormais à importer ce relevé. Le relevé OFX de la carte garde
+le 4 du mois qui suit sa fin.
+
 ## 2026-09-26 (5) — Notice : plus de cas particulier présenté comme une règle
 
 **Fait.** Le 4 du mois suivant est présenté pour ce qu'il est : la proposition de
