@@ -29,16 +29,23 @@ journal, des **données réelles dans un test** : les données d'essai du relev�
 Crédit Agricole (`tests/test_csv_import.py`) avaient été recopiées d'un vrai
 relevé d'utilisateur (titulaire, fragment de numéro de carte, références de
 prélèvement, soldes, commerçants). Remplacement par des données inventées
-préparé et essayé : les 49 tests de l'import restent verts. Réécriture des commits
-locaux préparée (hors dépôt), avec une sauvegarde complète de l'historique ; elle
-n'est **pas encore faite**. Brouillon des notes de version 1.38 rédigé (hors
+fait. Les commits locaux ont ensuite été **réécrits** avec l'accord de l'auteur,
+après une sauvegarde complète : données inventées dans chaque commit (le même
+encours était aussi repris par un test d'affichage et deux commentaires de
+l'import), ce journal ramené à sa version publiée dans chaque commit sauf le
+dernier, qui le reçoit d'un bloc ; les commits qui ne touchaient que le journal
+ont disparu (72 → 37). Preuves : l'état final ne diffère de l'ancien que par ces
+remplacements, aucune donnée réelle dans l'historique local ni dans les
+messages, 461 tests verts. Brouillon des notes de version 1.38 rédigé (hors
 dépôt), vérifié contre le code.
 **Pourquoi.** Règle du dépôt public : aucune donnée réelle, ni dans le code, ni
 dans les tests, ni dans l'historique. La vérification du 25/09 ne portait que
 sur ce journal.
-**Reste.** Faire la réécriture avec l'auteur, puis vérifier que l'historique ne
-contient plus rien. Décider aussi du sort de montants réels présents dans ce
-journal **depuis début septembre** (entrées déjà publiées).
+**Reste.** Refaire la recherche juste avant le push, sur les commits ajoutés d'ici
+là. Décider du sort de montants réels présents dans ce journal **depuis début
+septembre** (entrées déjà publiées). Leçon : un relevé réel reçu pour reproduire
+un bug ne sert que de modèle de forme ; son contenu est inventé dès le premier
+commit.
 
 ## 2026-09-25 (5) — Numéro 1.38.0, installé chez l'auteur
 
