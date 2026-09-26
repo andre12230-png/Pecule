@@ -6,6 +6,7 @@ from PySide6.QtCore import QLibraryInfo, QLockFile, QTranslator
 from PySide6.QtGui import QColor, QIcon, QPalette
 from PySide6.QtWidgets import QApplication, QMessageBox
 
+from .erreurs import erreur_en_clair
 from .utils import _app_dir, _data_dir, backup_db, SauvegardeImpossible
 from .database import Database
 from .labels import charger_alias
@@ -199,7 +200,7 @@ def main():
         QMessageBox.warning(
             None, "Sauvegarde automatique",
             "La copie de sécurité du jour n'a pas pu être faite :\n"
-            f"{e}\n\n"
+            f"{erreur_en_clair(e)}\n\n"
             "Pécule s'ouvre quand même, mais vos données ne sont pas "
             "sauvegardées aujourd'hui. Vérifiez la place libre sur le disque, "
             "ou faites une « 💾 Sauvegarde externe » depuis le menu de gauche.")

@@ -282,7 +282,9 @@ def test_echec_de_sauvegarde_n_est_plus_muet(tmp_path, monkeypatch):
     monkeypatch.setattr(u.shutil, "copy2", disque_plein)
     with pytest.raises(u.SauvegardeImpossible) as err:
         u.backup_db(str(base))
-    assert "espace" in str(err.value)
+    # La cause, dite en français par erreurs.py (26/09/2026) plutôt que
+    # recopiée depuis le message d'origine.
+    assert "disque est plein" in str(err.value)
     # Pas encore de base (premier lancement) : rien à sauvegarder, sans erreur.
     assert u.backup_db(str(tmp_path / "absente.db")) is None
 

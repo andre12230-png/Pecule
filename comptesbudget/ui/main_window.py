@@ -23,6 +23,7 @@ from ..utils import (
     suggest_category,
 )
 from ..database import Database
+from ..erreurs import erreur_en_clair
 from ..labels import charger_alias, clean_libelle
 from ..csv_import import diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
@@ -437,7 +438,8 @@ class MainWindow(QMainWindow):
                 total_recap += recap
                 total_rappr += rappr
             except Exception as e:
-                errors.append(f"{os.path.basename(p)} : {e}")
+                errors.append(
+                    f"{os.path.basename(p)} : {erreur_en_clair(e)}")
         msg = (f"{total_imp} opération(s) importée(s).\n"
                f"{total_skip} doublon(s) ignoré(s).")
         if total_recap:
@@ -898,7 +900,8 @@ class MainWindow(QMainWindow):
             self.db.rouvrir()             # on retombe sur la base d'origine
             QMessageBox.critical(
                 self, "Reprendre mes données",
-                f"La copie a échoué :\n{e}\n\nRien n'a été modifié.")
+                f"La copie a échoué :\n{erreur_en_clair(e)}\n\n"
+                "Rien n'a été modifié.")
             return False
         charger_alias(self.db.get_alias_libelles())
         self._fill_comptes()
@@ -1177,7 +1180,8 @@ class MainWindow(QMainWindow):
                     [instant], Path(choisi), base.parent, "Pécule",
                     constants.APP_VERSION)
         except (SauvegardeImpossible, sqlite3.Error) as e:
-            QMessageBox.warning(self, "Sauvegarde impossible", str(e))
+            QMessageBox.warning(self, "Sauvegarde impossible",
+                                erreur_en_clair(e))
             return
         self._destination_sauvegarde = choisi
         liste = "\n".join(f"  • {nom}" for nom in copies)

@@ -18,6 +18,7 @@ from ..utils import (
     fmt_euro, fmt_date_fr, carte_a_debit_differe, regle_debit_differe,
     numero_cheque, alerte_sens_saisie,
 )
+from ..erreurs import erreur_en_clair
 from ..labels import build_libelle_profiles
 from .widgets import MontantSpinBox, demander_montant
 
@@ -840,7 +841,8 @@ class ComptesDialog(QDialog):
         try:
             self.db.delete_compte(cid)
         except ValueError as e:
-            QMessageBox.warning(self, "Suppression impossible", str(e))
+            QMessageBox.warning(self, "Suppression impossible",
+                                erreur_en_clair(e))
             return
         self.remplir()
 

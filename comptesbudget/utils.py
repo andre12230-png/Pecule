@@ -8,6 +8,7 @@ from collections import Counter
 from datetime import date, datetime, timezone
 from typing import Optional
 
+from .erreurs import erreur_en_clair
 from .constants import (
     _app_dir,  # noqa: F401 - réexporté : app.py l'importe d'ici (icône)
     _data_dir,
@@ -105,7 +106,9 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
     except OSError as e:
         # Disque plein, droits… : on le dit, sans bloquer le lancement (c'est
         # l'appelant qui prévient l'utilisateur, puis continue).
-        raise SauvegardeImpossible(e.strerror or str(e)) from e
+        # erreur_en_clair : le message de Windows ou de Python arrivait tel
+        # quel, parfois en anglais (« No space left on device »).
+        raise SauvegardeImpossible(erreur_en_clair(e)) from e
 
 
 def depense_nette_par_categorie(txs: list[dict]) -> dict[str, float]:
