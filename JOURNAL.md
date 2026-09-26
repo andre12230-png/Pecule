@@ -21,6 +21,26 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (8) — Erreurs techniques dites en français
+
+**Fait.** Nouveau module `comptesbudget/erreurs.py`, commun aux trois
+applications de l'auteur (même fichier) : `erreur_en_clair(e)` dit en français
+les erreurs de Python et de SQLite (fichier ouvert dans un autre programme,
+disque plein, base occupée ou abîmée…) ; les messages rédigés par Pécule
+passent inchangés, même quand leur classe dérive d'OSError. Branché aux six
+endroits qui recopiaient l'erreur brute : import d'un relevé, « Reprendre mes
+données », sauvegarde du jour (`utils.backup_db`, et son message au
+démarrage), sauvegarde externe, suppression d'un compte.
+`tests/test_erreurs_en_clair.py`, qui contrôle aussi le code : plus aucune
+erreur recopiée telle quelle hors `print()`. Un test existant
+(`test_echec_de_sauvegarde_n_est_plus_muet`) cherche désormais « disque est
+plein » au lieu du mot du message d'origine : même intention. 523/523.
+**Pourquoi.** Diagnostic de langue du 26/09/2026 : les textes de Pécule et les
+boutons de Qt étaient déjà en français ; seules ces erreurs rares pouvaient
+apparaître en anglais (« Permission denied », « database is locked »).
+**Reste.** Rien de construit ni de poussé : nouveau numéro et exe si l'auteur
+le demande ; sortie de mi-octobre.
+
 ## 2026-09-26 (7) — Version 1.39.0 installée chez l'auteur
 
 **Fait.** Numéro 1.39.0 (constants.py, Lisez-moi.txt), exe reconstruit et
