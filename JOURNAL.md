@@ -31,8 +31,11 @@ remplacés par des montants inventés et ronds ; un test d'import Crédit Agrico
 passe d'une cotisation réelle à 50,00 €. Aucun calcul ne change.
 **Pourquoi.** Règle du dépôt public : exemples inventés et ronds dès la première
 écriture. Le script de contrôle ne sait pas juger si un montant est inventé.
-**Reste.** Deux messages de commit locaux citent encore deux de ces montants
-(décision de l'auteur attendue). Le reste du diagnostic : défauts qui touchent
+Deux messages de commit locaux, non publiés, qui citaient deux de ces montants
+ont été réécrits avec l'accord de l'auteur, après une sauvegarde complète : les
+fichiers de tous les commits sont identiques, seules ces deux lignes de message
+changent ; le contrôle avant livraison est de nouveau au vert.
+**Reste.** Le reste du diagnostic : défauts qui touchent
 les autres utilisateurs (import QIF non pointé, dates « 5/9/2026 » écartées sans
 le dire, report au 4 appliqué aux cartes à débit immédiat, jour de prélèvement
 figé), notice, classement automatique.
