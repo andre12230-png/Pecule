@@ -21,6 +21,21 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (5) — Notice : plus de cas particulier présenté comme une règle
+
+**Fait.** Le 4 du mois suivant est présenté pour ce qu'il est : la proposition de
+Pécule pour une carte à débit différé, à corriger si la banque prélève un autre
+jour (notice, rappel de saisie, glossaire qui annonçait « le 5 ou le 6 »). Le
+calendrier d'un compte précis (lot carte, puis pensions quelques jours après)
+devient un exemple général, dans la notice et les commentaires. Les libellés
+d'une banque en ligne cités comme universels sont retirés. Le refus d'un QIF à
+plusieurs comptes donne une raison à jour depuis le multicomptes. Nouveau test
+`test_notice_generale.py` (474 tests).
+**Pourquoi.** Lot 3 du diagnostic « autres utilisateurs ».
+**Reste.** La phrase sur la ligne récapitulative du débit différé (« totalise des
+achats qui figurent déjà un par un ») attend le lot 4, qui touchera au
+comportement lui-même.
+
 ## 2026-09-26 (4) — Quatre défauts qui touchaient les autres utilisateurs
 
 **Fait.** Chacun reproduit d'abord par un test (9 nouveaux, 470 au total) :
