@@ -290,15 +290,15 @@ def import_qif_text(text: str, db: Database) -> ResultatImport:
     """Cœur de l'import QIF, séparé pour pouvoir être testé sans fichier."""
     operations, comptes, illisibles = lire_qif(text)
 
-    # Pécule suit UN compte par base de données (la table des opérations n'a
-    # pas de colonne « compte »). Mélanger deux comptes dans la même base
-    # fausserait le solde, le budget et le prévisionnel : mieux vaut refuser
-    # franchement que produire des chiffres faux.
+    # Un import va dans le compte ouvert. Mélanger deux comptes du fichier
+    # dans ce seul compte fausserait le solde, le budget et le prévisionnel :
+    # mieux vaut refuser franchement que produire des chiffres faux.
     if len(comptes) > 1:
         raise ValueError(
             "ce fichier contient plusieurs comptes (" + ", ".join(comptes)
-            + "). Pécule suit un seul compte par base de données : "
-            "réexportez un compte à la fois depuis votre logiciel.")
+            + "). Un import va dans le compte ouvert : réexportez un "
+            "compte à la fois depuis votre logiciel, puis importez chacun "
+            "dans son compte.")
     if not operations:
         raise ValueError(
             "aucune opération lisible dans ce fichier QIF. Vérifiez qu'il "

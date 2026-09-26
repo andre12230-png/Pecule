@@ -33,8 +33,9 @@ from ...recurring import echeances_du_mois
 JOUR_TENDANCE = 10
 
 # Horizon de la recherche du prochain découvert. 45 jours plutôt que la fin du
-# mois : le moment le plus risqué est le prélèvement carte du 4 du mois
-# suivant, et il faut voir la remontée des pensions qui arrivent derrière.
+# mois : le moment le plus risqué est souvent un prélèvement de début de mois
+# (lot carte, loyer), et il faut voir la remontée des revenus qui arrivent
+# derrière.
 HORIZON_DECOUVERT = 45
 
 class CatRowsWidget(QWidget):
@@ -199,7 +200,7 @@ class BilanView(QWidget):
         # ouvrant l'application : « est-ce que je passe le mois ? ». Où le
         # compte finira, à partir de quand il sera négatif, et son point le
         # plus bas. Le jour compte autant que le total : le creux vient du
-        # calendrier — lot carte prélevé le 4-5, pensions le 7 et le 9.
+        # calendrier — un prélèvement qui passe avant l'arrivée des revenus.
         #
         # Il parle TOUJOURS du mois en cours, même quand on consulte un mois
         # passé : c'est un verdict pour agir, pas une fiche de consultation.
@@ -259,7 +260,8 @@ class BilanView(QWidget):
         self.cb_bloc1, self.cb_courant, _ = _mini("Prochain prélèvement")
         self.cb_bloc1.setToolTip(
             "Achats que la banque a déjà rattachés au prélèvement à venir "
-            "(vos opérations pointées) : son « débit différé au 4 ».")
+            "(vos opérations pointées) : le montant qu'elle annonce pour "
+            "le prochain prélèvement de la carte.")
         self.cb_bloc2, self.cb_precedent, _ = _mini("Opérations en cours")
         self.cb_bloc2.setToolTip(
             "Opérations faites mais pas encore intégrées par la banque "
@@ -619,9 +621,9 @@ class BilanView(QWidget):
           • `fin`      — dernier jour examiné ;
           • `deja`     — vrai si le compte est déjà négatif aujourd'hui.
 
-        Le montant total d'un mois ne répond pas à cette question : chez
-        André, le creux vient de l'ordre des dates — le lot carte prélevé le
-        4-5 quand les pensions n'arrivent que le 7 et le 9."""
+        Le montant total d'un mois ne répond pas à cette question : le creux
+        vient souvent de l'ordre des dates — un prélèvement qui passe avant
+        l'arrivée des revenus."""
         today = date.today()
         fin = today + timedelta(days=jours)
         lignes, _ = self._lignes_a_venir(txs, today + timedelta(days=1), fin)
@@ -663,9 +665,9 @@ class BilanView(QWidget):
 
         On repart du solde constaté à la fin du mois précédent, puis on rejoue
         les mouvements du mois dans l'ordre des dates : le total du mois ne
-        dirait pas si le compte a plongé en cours de route — chez André, le
-        creux vient de l'ordre des dates, le lot carte partant avant l'arrivée
-        des pensions."""
+        dirait pas si le compte a plongé en cours de route — le creux vient
+        souvent de l'ordre des dates, un prélèvement partant avant l'arrivée
+        des revenus."""
         debut = date(int(mois[:4]), int(mois[5:7]), 1).isoformat()
         solde = self._solde_fin_de_mois(
             txs, self._mois_precedent(mois), solde_compte)

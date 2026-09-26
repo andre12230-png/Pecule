@@ -107,8 +107,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
             « CB&nbsp;AMAZON » créditeur est un remboursement.</li>
         <li>Le relevé de la <b>carte à débit différé</b> est reconnu comme tel : ses achats
             prennent pour date de valeur le <b>4 du mois qui suit la fin du relevé</b>, jour
-            du prélèvement groupé. Ils ne pèsent donc sur le solde qu'à cette date, comme à
-            la banque.</li>
+            habituel du prélèvement groupé. Ils ne pèsent donc sur le solde qu'à cette date,
+            comme à la banque. Si votre banque prélève un autre jour, le solde s'en écarte de
+            quelques jours : la date de valeur se corrige dans la fiche de l'opération.</li>
         <li>Chaque opération porte l'<b>identifiant unique</b> que lui donne la banque : un
             relevé réimporté par erreur ne crée aucun doublon, même si vous avez renommé les
             libellés entre-temps.</li>
@@ -130,8 +131,8 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
             montant total, avec sa première catégorie : Pécule ne sait pas découper une
             opération en plusieurs morceaux.</li>
         <li><b>Un fichier contenant plusieurs comptes est refusé</b>, sans rien enregistrer.
-            Pécule suit un seul compte par fichier de données : exportez un compte à la fois
-            depuis votre ancien logiciel.</li>
+            Un import va dans le compte ouvert : exportez un compte à la fois depuis votre
+            ancien logiciel, puis importez chacun dans son compte.</li>
       </ul>
   </li>
 </ol>
@@ -190,7 +191,7 @@ sources de revenus / plus grosses dépenses individuelles.</p>
 solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Il est
 <b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de
 l'app : les achats par carte à débit différé n'y entrent donc que le jour où la banque les
-prélève (le 4 du mois suivant), pas avant. Le KPI
+prélève (au prélèvement groupé du mois suivant), pas avant. Le KPI
 <b>« ✔ Mouvement pointé »</b>, lui, additionne les opérations pointées de la
 période affichée : ce n'est pas un solde mais un mouvement, à comparer à votre
 relevé. Il se lit en face de la tuile voisine : <b>quand « Mouvement pointé »
@@ -434,11 +435,14 @@ tous les cas : passer en « Date d'opération » ne le fait plus gonfler de
 l'encours carte pas encore prélevé.</p>
 <p>Deux écrans ignorent ce sélecteur, chacun dans son sens : le KPI ci-dessus,
 toujours en date de valeur, et l'onglet <b>Budget</b> (avec le bandeau d'alerte
-du Bilan), toujours en <b>date d'achat</b> — sinon le prélèvement groupé du 4
-ferait déborder les budgets du mois suivant.</p>
-<p>Quand vous saisissez une opération de type <b>Carte bancaire</b>, la
-<b>date de valeur</b> est proposée automatiquement au <b>4 du mois suivant</b>
-l'achat (jour du prélèvement groupé). Vous pouvez la corriger : dès que vous
+du Bilan), toujours en <b>date d'achat</b> — sinon le prélèvement groupé du mois
+suivant ferait déborder ses budgets.</p>
+<p>Sur un compte dont la carte est à <b>débit différé</b> (Pécule le reconnaît
+à vos relevés), quand vous saisissez une opération de type <b>Carte bancaire</b>,
+la <b>date de valeur</b> est proposée au <b>4 du mois suivant</b> l'achat, jour
+habituel du prélèvement groupé. Sur une carte à débit immédiat, elle reste celle
+de l'achat. Vous pouvez la corriger — si votre banque prélève un autre jour, par
+exemple : dès que vous
 la modifiez vous-même, l'app ne la recalcule plus — sauf si vous changez
 ensuite le <b>type</b> ou le <b>sens</b> de l'opération, car la règle de calcul
 n'est alors plus la même. Corriger un type saisi par erreur remet donc la date
@@ -468,9 +472,10 @@ a fini le mois à 100,00 €. Au plus bas : −300,00 € le 01/08/2026 »), sur
 un verdict pour agir. Une année ou « Toutes périodes » ne désignent aucun mois :
 le bandeau revient alors au mois en cours.</p>
 <p><b>Pourquoi le jour et pas seulement le total.</b> Un creux vient souvent du
-<b>calendrier</b>, pas du niveau de dépenses : le prélèvement de la carte tombe
-le 4 ou le 5, alors que les pensions n'arrivent que le 7 et le 9. Un mois peut
-finir à l'équilibre en étant passé dans le rouge au milieu.</p>
+<b>calendrier</b>, pas du niveau de dépenses : un prélèvement (le lot de la
+carte, un loyer, un crédit) peut tomber quelques jours avant l'arrivée du salaire
+ou de la pension. Un mois peut finir à l'équilibre en étant passé dans le rouge
+au milieu.</p>
 <p>Le calcul part du solde en banque d'aujourd'hui et applique, jour après jour,
 tout ce qui doit encore passer sur <b>45 jours</b> — assez pour couvrir le
 prélèvement carte du mois suivant et la remontée derrière. Il ne compte que ce
@@ -481,7 +486,7 @@ chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
 <ul>
   <li><b>Prochain prélèvement</b> — les achats que la banque a déjà rattachés
       au prélèvement à venir. Ce sont vos opérations <b>pointées</b> : c'est le
-      montant « débit différé au 4 » de la banque.</li>
+      montant que votre banque annonce pour le prochain prélèvement de la carte.</li>
   <li><b>Opérations en cours</b> — faites, mais pas encore passées chez la
       banque (non pointées). Ce peut être un achat comme un
       <b>remboursement</b>.</li>
@@ -501,7 +506,7 @@ dépense, carte ou pas. Un bloc de chiffre à côté de trois autres se lit comm
 un budget encore disponible ; la phrase, elle, ne peut pas être lue de
 travers.</p>
 <p><b>Les achats se comptent sur le mois de l'achat</b>, pas sur celui du
-prélèvement. Le lot d'un mois part le 4 du mois suivant : il reste l'encours du
+prélèvement. Le lot d'un mois part au début du mois suivant : il reste l'encours du
 mois où vous avez dépensé. C'est pourquoi « Total des achats à débiter » et
 ce que le mois laisse ne reposent pas sur les mêmes opérations.</p>
 <p><b>Le bandeau suit la période choisie en haut.</b> Sélectionnez « Août 2026 »
@@ -529,9 +534,9 @@ C'est pourquoi il n'entre pas dans le total à débiter, et pourquoi le
 formulaire ne lui propose pas de date de valeur différée — sa date de valeur
 suit la date de l'opération.</p>
 <p>La ligne sous ces chiffres donne le <b>solde incluant les opérations carte
-en cours</b> : c'est le montant que votre banque affiche au-dessus de la liste
-« Opérations carte en cours ». Les deux doivent être identiques — sinon, il
-manque une opération dans l'application (ou un pointage).</p>
+en cours</b>. Si votre espace bancaire affiche lui aussi un solde qui tient
+compte des opérations carte en cours, les deux doivent être identiques — sinon,
+il manque une opération dans l'application (ou un pointage).</p>
 
 <h3>Le bandeau « 🗓 Ce mois-ci »</h3>
 <p>Le bandeau vert répond à la question : <b>que reste-t-il à passer avant la
@@ -543,7 +548,7 @@ n'ont pas encore d'opération correspondante. Rien n'est compté deux fois.</p>
 <ul>
   <li><b>À débiter (hors carte)</b> — prélèvements et dépenses attendus
       jusqu'au dernier jour du mois.</li>
-  <li><b>À encaisser</b> — pensions, virements et remboursements attendus
+  <li><b>À encaisser</b> — salaires, pensions, virements et remboursements attendus
       d'ici là.</li>
   <li><b>Solde au …</b> — la date est celle du dernier jour du mois : solde en
       banque aujourd'hui, moins ce qui reste à débiter, plus ce qui reste à
@@ -571,8 +576,8 @@ achats que la banque a déjà rattachés au prélèvement (vos opérations
 <b>pointées</b>). Une opération encore « en cours » — un remboursement, par
 exemple — ne réduit pas ce prélèvement-ci : elle partira au suivant, et elle est
 signalée à part.</p>
-<p><b>Attention</b> : ce chiffre ne correspond pas à celui que votre banque
-affiche sous « X € d'opérations prévues prochainement ». La banque n'annonce que
+<p><b>Attention</b> : ce chiffre peut différer de celui que votre banque
+annonce pour les opérations à venir. La banque n'annonce que
 les prélèvements dont elle a <i>déjà reçu l'avis</i> ; l'application, elle,
 connaît toutes vos échéances récurrentes. Le montant de l'application est donc
 normalement plus élevé — ce n'est pas une erreur.</p>
@@ -815,8 +820,8 @@ Pour une carte à débit différé, elle peut être plusieurs semaines plus tard
 
 <dt>Débit différé</dt>
 <dd>Mode de fonctionnement de certaines cartes bancaires où tous les achats
-du mois sont regroupés et débités en une seule fois (souvent le 5 ou le 6 du
-mois suivant). Reconnu par l'icône ⏱ orange dans la colonne Date valeur.</dd>
+du mois sont regroupés et débités en une seule fois, au début du mois
+suivant, à une date fixée par la banque (Pécule propose le 4). Reconnu par l'icône ⏱ orange dans la colonne Date valeur.</dd>
 
 <dt>Doublon</dt>
 <dd>Opération qui apparaît deux fois dans la base (même date, même montant,

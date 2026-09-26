@@ -47,9 +47,10 @@ class TxDialog(QDialog):
 
         # Rappel affiché seulement pour les achats par carte (débit différé)
         self.dv_hint = QLabel(
-            f"💳 Carte à débit différé : la banque prélève le "
-            f"{JOUR_DEBIT_DIFFERE:02d} du mois suivant l'achat. "
-            "L'opération ne comptera dans le solde qu'à cette date.")
+            f"💳 Carte à débit différé : date de valeur proposée au "
+            f"{JOUR_DEBIT_DIFFERE:02d} du mois suivant l'achat — corrigez-la "
+            "si votre banque prélève un autre jour. L'opération ne comptera "
+            "dans le solde qu'à cette date.")
         self.dv_hint.setWordWrap(True)
         self.dv_hint.setStyleSheet("color:#7E5A18; font-size:9pt")
         self.dv_hint.setVisible(False)
