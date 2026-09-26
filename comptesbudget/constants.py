@@ -854,7 +854,19 @@ SYNC_VERSION = 3
 #          - Theme clair impose meme sous un Windows en mode sombre ; couleurs
 #            lisibles, identiques dans les trois applications de l'auteur ;
 #            fond du Bilan en creme, cartes en ivoire.
-APP_VERSION = "1.38.0"
+# 1.39.0 : Pecule suit chaque banque, pas seulement celle de l'auteur.
+#          - Debit differe reconnu sur plusieurs achats (un decalage de
+#            week-end ne suffit plus) ; date de debit proposee d'apres les
+#            achats carte passes du compte (jour habituel, fin de mois...).
+#          - Carte a debit immediat : echeances et Bilan ne reportent plus
+#            les achats au mois suivant.
+#          - Import QIF sans pointage : operations pointees ; import CSV :
+#            dates << 5/9/2026 >> lues, dates illisibles signalees.
+#          - Classement automatique plus prudent ; << Revenus >> reserve aux
+#            rentrees d'argent.
+#          - Notice : plus de cas particulier presente comme une regle ;
+#            montants d'exemple arrondis.
+APP_VERSION = "1.39.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

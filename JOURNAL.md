@@ -21,6 +21,16 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-26 (7) — Version 1.39.0 installée chez l'auteur
+
+**Fait.** Numéro 1.39.0 (constants.py, Lisez-moi.txt), exe reconstruit et
+installé chez l'auteur, sa base vérifiée identique avant et après.
+**Pourquoi.** Règle : un nouveau numéro à chaque exe déployé ; le deuxième
+chiffre monte, la journée ayant changé des comportements (débit différé,
+classement, imports).
+**Reste.** Publication groupée de mi-octobre (README, site, Scoop restent sur la
+version publiée).
+
 ## 2026-09-26 (6) — Débit différé et classement lus dans le compte
 
 **Fait.** (`80cc328`, 487 tests)
