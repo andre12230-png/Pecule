@@ -872,7 +872,15 @@ SYNC_VERSION = 3
 # 1.39.2 : Rappel de sauvegarde externe : au-dela de 30 jours sans copie sur
 #          cle USB, un bandeau du Bilan le rappelle, avec un lien qui lance la
 #          sauvegarde.
-APP_VERSION = "1.39.2"
+# 1.40.0 : - Operations : clic droit << Changer la categorie de ces N
+#            operations... >> pour reclasser toute une selection d'un coup.
+#          - Operations : bouton << Exporter >> : les lignes affichees (filtres
+#            et tri compris) dans un fichier CSV qui s'ouvre dans Excel.
+#          - Operations : une suppression s'annule (bandeau << Annuler la
+#            suppression >>).
+#          - Bilan : courbe du solde en fin de mois sur douze mois, constate
+#            en trait plein, prevu en pointilles.
+APP_VERSION = "1.40.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
