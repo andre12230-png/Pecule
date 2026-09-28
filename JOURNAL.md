@@ -35,9 +35,9 @@ sur une copie de la base : titre « Pécule — v1.39.2 », fermeture propre.
 Installé : ancien exe renommé `Pecule.exe.avant-rappel-sauvegarde`, robocopy
 code 1, `comptes.db` identique avant et après.
 **Pourquoi.** Demande de l'auteur : déploiement des trois applications.
-**Reste.** Rien de poussé ; sortie de mi-octobre. Deux anciens exe à côté
-(`.avant-1.39.1`, `.avant-rappel-sauvegarde`) : proposer de garder le plus
-récent seul.
+**Reste.** Rien de poussé ; sortie de mi-octobre. `Pecule.exe.avant-1.39.1`
+(l'exe 1.39.0) mis à la Corbeille avec l'accord de l'auteur : seul filet,
+`Pecule.exe.avant-rappel-sauvegarde` (1.39.1).
 
 ## 2026-09-28 — Rappel de sauvegarde externe sur le Bilan
 
