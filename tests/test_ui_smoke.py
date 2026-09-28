@@ -1799,6 +1799,57 @@ def test_operations_menu_contextuel_se_construit(qapp, tmp_path):
     intitules = [a.text() for a in vue._construire_menu().actions()]
     assert any("Pointer ces 2 opérations" in t for t in intitules)
     assert any("Supprimer ces 2 opérations" in t for t in intitules)
+    assert any("Changer la catégorie de ces 2 opérations" in t for t in intitules)
+
+
+def test_operations_categorie_en_masse(qapp, tmp_path):
+    """Reclasser après un import se faisait ligne à ligne : le clic droit
+    change la catégorie de toute la sélection, et d'elle seule."""
+    from comptesbudget.ui.views.operations import OperationsView
+
+    db = Database(str(tmp_path / "recat.db"))
+    for i in range(3):
+        db.insert_tx(_tx(id=f"r{i}", date=f"2026-06-0{i + 1}",
+                         date_valeur=f"2026-06-0{i + 1}", montant=-10.0,
+                         categorie="Non classé", sous_cat="Ancienne"))
+    vue = OperationsView(db)
+    vue.period = "all"
+    vue.reload_from_db()
+
+    vue.appliquer_categorie(["r0", "r1"], "Loisirs", "Cinéma")
+    par_id = {dict(t)["id"]: dict(t) for t in db.list_tx()}
+    assert par_id["r0"]["categorie"] == "Loisirs"
+    assert par_id["r1"]["sous_cat"] == "Cinéma"
+    # La ligne non sélectionnée ne bouge pas.
+    assert par_id["r2"]["categorie"] == "Non classé"
+    assert par_id["r2"]["sous_cat"] == "Ancienne"
+
+    # Sous-catégorie laissée vide : l'ancienne, propre à l'autre catégorie,
+    # est effacée plutôt que gardée sous un parent qui n'est plus le sien.
+    vue.appliquer_categorie(["r2"], "Loisirs", "")
+    r2 = next(dict(t) for t in db.list_tx() if dict(t)["id"] == "r2")
+    assert r2["categorie"] == "Loisirs"
+    assert r2["sous_cat"] == ""
+
+
+def test_fenetre_categorie_en_masse(qapp):
+    """La fenêtre du clic droit : pré-remplie quand toute la sélection
+    partage la même catégorie, vide sinon, et impossible à valider sans
+    catégorie."""
+    from comptesbudget.ui.dialogs import CategorieEnMasseDialog
+
+    txs = [{"categorie": "Loisirs", "sous_cat": "Cinéma"},
+           {"categorie": "Alimentation", "sous_cat": "Supermarché"}]
+    dlg = CategorieEnMasseDialog(None, 2, ["Alimentation", "Loisirs"], txs,
+                                 categorie="Loisirs", sous_cat="Cinéma")
+    assert dlg.values() == ("Loisirs", "Cinéma")
+    assert "2 opérations" in dlg.windowTitle() + dlg.lbl_quoi.text()
+
+    vide = CategorieEnMasseDialog(None, 3, ["Alimentation", "Loisirs"], txs)
+    assert vide.values() == ("", "")
+    assert not vide.btn_ok.isEnabled()
+    vide.cat.setCurrentText("Loisirs")
+    assert vide.btn_ok.isEnabled()
 
 
 def test_fenetre_tient_sur_un_petit_ecran(qapp, tmp_path):

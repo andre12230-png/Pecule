@@ -108,6 +108,8 @@ FONCTIONS
 - Pointage EN MASSE : selectionnez plusieurs lignes (Maj+clic, Ctrl+clic,
   Ctrl+A), puis barre d'espace ou clic droit pour toutes les pointer ou
   depointer d'un coup. La touche Suppr porte aussi sur la selection.
+- Reclassement EN MASSE : meme selection, puis clic droit > "Changer la
+  categorie de ces N operations..." pour leur donner une autre categorie.
 - Vos propres categories : le champ Categorie s'ecrit librement. Tapez
   "Animaux" ou "Vacances" et la categorie est creee, avec sa couleur et
   son budget possible.

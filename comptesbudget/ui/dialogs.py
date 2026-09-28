@@ -604,6 +604,81 @@ class TxDialog(QDialog):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Changer la catégorie de plusieurs opérations (clic droit de la liste)
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CategorieEnMasseDialog(QDialog):
+    """Demande la catégorie (et la sous-catégorie) à donner à toutes les
+    opérations sélectionnées. Pré-remplie si elles partagent déjà la même."""
+
+    def __init__(self, parent=None, nombre: int = 1,
+                 categories: list[str] = None,
+                 all_transactions: list[dict] = None,
+                 categorie: str = "", sous_cat: str = ""):
+        super().__init__(parent)
+        self.setWindowTitle("Changer la catégorie")
+        self.setMinimumWidth(420)
+        layout = QFormLayout(self)
+
+        quoi = "cette opération" if nombre == 1 else f"ces {nombre} opérations"
+        self.lbl_quoi = QLabel(f"Nouvelle catégorie pour {quoi} :")
+        layout.addRow(self.lbl_quoi)
+
+        # Même liste et même liberté que dans le formulaire d'une opération :
+        # on peut taper une catégorie nouvelle.
+        self.cat = QComboBox()
+        self.cat.setEditable(True)
+        self.cat.addItems(sorted(set(categories)) if categories
+                          else sorted(CATEGORIES_DEFAUT))
+        self.cat.setCurrentText(categorie)
+        layout.addRow("Catégorie :", self.cat)
+
+        # Sous-catégories déjà employées, rangées par catégorie : la liste
+        # proposée suit la catégorie choisie.
+        self._subcat_by_cat: dict[str, set[str]] = {}
+        for t in all_transactions or []:
+            c = (t.get("categorie") or "").strip()
+            sc = (t.get("sous_cat") or "").strip()
+            if c and sc:
+                self._subcat_by_cat.setdefault(c, set()).add(sc)
+        self.sous_cat = QComboBox()
+        self.sous_cat.setEditable(True)
+        self.sous_cat.lineEdit().setMaxLength(80)
+        self.sous_cat.setInsertPolicy(QComboBox.NoInsert)
+        layout.addRow("Sous-catégorie :", self.sous_cat)
+        aide = QLabel("Laissée vide, la sous-catégorie actuelle est effacée.")
+        aide.setStyleSheet("color: #666")
+        layout.addRow(aide)
+
+        self.btns = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btn_ok = self.btns.button(QDialogButtonBox.Ok)
+        self.btn_ok.setText("Appliquer")
+        self.btns.accepted.connect(self.accept)
+        self.btns.rejected.connect(self.reject)
+        layout.addRow(self.btns)
+
+        self.cat.currentTextChanged.connect(self._categorie_changee)
+        self._categorie_changee(categorie)
+        self.sous_cat.setCurrentText(sous_cat)
+
+    def _categorie_changee(self, texte: str):
+        """Repeuple les sous-catégories proposées et n'autorise « Appliquer »
+        qu'avec une catégorie."""
+        saisie = self.sous_cat.currentText()
+        self.sous_cat.blockSignals(True)
+        self.sous_cat.clear()
+        self.sous_cat.addItems(sorted(self._subcat_by_cat.get(texte.strip(), set())))
+        self.sous_cat.setCurrentText(saisie)
+        self.sous_cat.blockSignals(False)
+        self.btn_ok.setEnabled(bool(texte.strip()))
+
+    def values(self) -> tuple[str, str]:
+        """(catégorie, sous-catégorie), sans espaces autour."""
+        return self.cat.currentText().strip(), self.sous_cat.currentText().strip()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Dialogue de paramètres (solde initial)
 # ─────────────────────────────────────────────────────────────────────────────
 

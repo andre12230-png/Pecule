@@ -21,6 +21,28 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-28 (4) — Changer la catégorie de plusieurs opérations d'un coup
+
+**Fait.** Clic droit sur la liste des Opérations : nouveau choix « Changer la
+catégorie de ces N opérations… ». Une petite fenêtre (`CategorieEnMasseDialog`,
+`ui/dialogs.py`) demande la catégorie (liste ou saisie libre, comme dans le
+formulaire) et la sous-catégorie ; elle est pré-remplie quand toute la
+sélection est déjà rangée au même endroit, et « Appliquer » reste grisé sans
+catégorie. Sous-catégorie laissée vide : l'ancienne est effacée, elle
+appartenait à l'autre catégorie. Les règles auto ne sont pas touchées. Notice,
+README (FR et EN) et Lisez-moi complétés. Trois tests écrits avant le code
+(`test_ui_smoke.py`) ; 533/533.
+**Pourquoi.** Premier point de la revue des améliorations possibles : on
+pouvait déjà pointer ou supprimer toute une sélection, mais reclasser se
+faisait ligne à ligne, ou par catégorie entière depuis l'onglet Catégories.
+**Reste.** Pas de numéro de version ni d'exe : à la prochaine installation
+chez l'auteur, puis sortie de mi-octobre. Les échéances futures d'une
+récurrence gardent la catégorie de la récurrence (comme pour une modification
+à l'unité). Autres pistes de la revue, non commencées : export CSV des
+opérations affichées, courbe du solde sur le Bilan, « Annuler » après une
+suppression ; à trancher : Catégories suit la date choisie, le Budget la date
+d'achat.
+
 ## 2026-09-28 (3) — Historique public réécrit
 
 **Fait.** Les données réelles retirées au fil des nettoyages (tests, commentaires,

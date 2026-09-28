@@ -25,7 +25,7 @@ from ...rules import apply_rules_to_tx
 
 from ..flow_layout import FlowLayout
 from ..models import TxTableModel, charger_en_conservant_le_tri
-from ..dialogs import TxDialog
+from ..dialogs import TxDialog, CategorieEnMasseDialog
 
 class OperationsView(QWidget):
     tx_changed = Signal()  # émis quand une transaction est ajoutée/modifiée/supprimée
@@ -332,8 +332,43 @@ class OperationsView(QWidget):
         menu.addSeparator()
         if n == 1:
             menu.addAction("\u270f Modifier", self.edit_selected)
+        de_quoi = "de cette op\u00e9ration" if n == 1 else f"de ces {n} op\u00e9rations"
+        menu.addAction(f"\U0001f3f7 Changer la cat\u00e9gorie {de_quoi}\u2026",
+                       self.recategoriser_selection)
         menu.addAction(f"\U0001f5d1 Supprimer {quoi}", self.delete_selected)
         return menu
+
+    def recategoriser_selection(self):
+        """Clic droit \u00ab Changer la cat\u00e9gorie\u2026 \u00bb : une seule question pour
+        toute la s\u00e9lection, au lieu d'ouvrir chaque op\u00e9ration."""
+        ids = self.selected_tx_ids()
+        if not ids:
+            return
+        choisies = [t for t in self.transactions if t["id"] in set(ids)]
+        # Pr\u00e9-remplissage seulement si toute la s\u00e9lection est d\u00e9j\u00e0 rang\u00e9e au
+        # m\u00eame endroit ; sinon la fen\u00eatre s'ouvre vide.
+        cats = {t.get("categorie") or "" for t in choisies}
+        scs = {t.get("sous_cat") or "" for t in choisies}
+        cat = cats.pop() if len(cats) == 1 else ""
+        sc = scs.pop() if cat and len(scs) == 1 else ""
+        dlg = CategorieEnMasseDialog(self, len(ids),
+                                     self.db.categories_proposees(),
+                                     self.transactions, cat, sc)
+        if dlg.exec() != QDialog.Accepted:
+            return
+        categorie, sous_cat = dlg.values()
+        if categorie:
+            self.appliquer_categorie(ids, categorie, sous_cat)
+
+    def appliquer_categorie(self, ids: list[str], categorie: str, sous_cat: str):
+        """Range les op\u00e9rations d\u00e9sign\u00e9es dans la cat\u00e9gorie donn\u00e9e. Les r\u00e8gles
+        auto ne sont pas touch\u00e9es : seules ces op\u00e9rations-l\u00e0 changent."""
+        with self.db.batch():
+            for tx_id in ids:
+                self.db.update_tx(tx_id, {"categorie": categorie,
+                                          "sous_cat": sous_cat})
+        self.reload_from_db()
+        self.tx_changed.emit()
 
     def handle_click(self, index):
         """Clic sur la colonne P → bascule le pointage."""

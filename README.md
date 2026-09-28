@@ -47,7 +47,7 @@ telemetry — your financial data never leaves your computer.
 
 **What it does**
 
-- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear or delete a whole batch at once (space bar or right-click)
+- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear, recategorize or delete a whole batch at once (space bar or right-click)
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import, backed by built-in patterns (CARREFOUR → Groceries, EDF → Home…) so the very first statement lands categorised; anything explicit — the bank's own category, your rules, your habits — always wins over the guess
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
@@ -157,6 +157,8 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 - **Pointer plusieurs lignes d'un coup** : sélection multiple dans la liste
   (Maj+clic, Ctrl+clic, Ctrl+A), puis <kbd>barre d'espace</kbd> ou clic droit.
   La touche <kbd>Suppr</kbd> porte elle aussi sur toute la sélection.
+- **Reclasser plusieurs lignes d'un coup** : même sélection, puis clic droit
+  → « Changer la catégorie de ces N opérations… ».
 - **Vos propres catégories** : le champ Catégorie s'écrit librement — tapez
   « Animaux », elle est créée, colorée et budgétable comme les autres.
 - **Une seule fenêtre à la fois** sur un même fichier de données : deux

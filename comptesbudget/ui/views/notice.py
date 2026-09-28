@@ -621,6 +621,13 @@ elle pointe la sélection, ou la dépointe si tout est déjà pointé. La touche
 <kbd>Suppr</kbd> supprime, elle aussi, toute la sélection — le nombre est
 rappelé dans la question posée.</p>
 
+<p><b>Reclasser plusieurs lignes d'un coup.</b> Sélectionnez-les de la même
+façon, faites un <b>clic droit</b> puis « Changer la catégorie de ces N
+opérations… » : choisissez la catégorie (ou tapez-en une nouvelle) et, si vous
+le souhaitez, la sous-catégorie. Laissée vide, la sous-catégorie actuelle est
+effacée. Seules les lignes sélectionnées changent : vos règles auto restent
+telles quelles.</p>
+
 <p>Le filtre <b>Pointage → Non pointées</b> répond à la question
 « que me reste-t-il à pointer ? » : il affiche <b>toutes</b> les opérations en
 attente, sans se limiter à la période choisie en haut de la fenêtre — une ligne
