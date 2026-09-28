@@ -1417,17 +1417,24 @@ def test_generer_echeances_du_mois(qapp, db):
     assert all(e["_deja"] for e in view._echeances(mois))
 
 
-def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db):
+def test_bilan_ne_compte_pas_deux_fois_une_echeance_generee(qapp, db,
+                                                          monkeypatch):
     """Une échéance matérialisée en opération ne doit pas s'ajouter à la
-    récurrence dont elle vient : « ce qui est prévu » compterait le double."""
+    récurrence dont elle vient : « ce qui est prévu » compterait le double.
+
+    Le jour vu par le Bilan est figé au 10 du mois (28/09/2026) : placée à
+    « aujourd'hui + 3 jours », l'échéance tombait le mois suivant les trois
+    derniers jours de chaque mois, et le test échouait."""
     from comptesbudget.ui.views.bilan import BilanView
     from comptesbudget.ui.views.previsionnel import PrevisionnelView
 
+    aujourd_hui = date.today().replace(day=10)
+    _fige_aujourdhui(monkeypatch, aujourd_hui)
     bilan = BilanView(db)
     bilan.refresh()
     sans_assurance = _euros(bilan.mois_sorties.text())
 
-    cible = date.today() + timedelta(days=3)      # dans la fenêtre du mois
+    cible = aujourd_hui + timedelta(days=3)       # le 13 : dans le mois
     db.insert_recurring({"id": "rec-test", "libelle": "ASSURANCE TEST",
                          "montant": -123.45, "categorie": "Assurances",
                          "sous_cat": "", "type": "Prelevement",

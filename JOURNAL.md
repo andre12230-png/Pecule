@@ -23,7 +23,13 @@ La date la plus récente est en haut.
 
 ## 2026-09-28 (2) — Installée chez l'auteur (1.39.2)
 
-**Fait.** Numéro monté à 1.39.2 (rappel de sauvegarde externe).
+**Fait.** Numéro monté à 1.39.2 (rappel de sauvegarde externe). Le contrôle
+de livraison bloquait sur le test antérieur qui dépendait du jour
+(`test_bilan_ne_compte_pas_deux_fois_une_echeance_generee`) : corrigé en
+figeant le jour du Bilan au 10 du mois (`_fige_aujourdhui`, déjà dans le
+fichier), échéance au 13. Vérifié en simulant le 29, le 31, le 1er, le 28
+février et le 31 décembre : il passe ; l'ancienne version échoue bien le 29
+simulé. 531/531.
 **Pourquoi.** Demande de l'auteur : déploiement des trois applications.
 **Reste.** À compléter après l'installation.
 
@@ -43,8 +49,8 @@ Suite : 530 passent ; un échec antérieur et sans lien,
 échéance à aujourd'hui + 3 jours : les trois derniers jours du mois, elle
 tombe le mois suivant (il échoue de même sur la version commitée).
 **Pourquoi.** Demande de l'auteur, pour les trois applications.
-**Reste.** Entré dans l'exe avec la 1.39.2. Le test dépendant de la date est à rendre indépendant du
-jour. Tant qu'aucune sauvegarde externe n'a été refaite avec cette version,
+**Reste.** Entré dans l'exe avec la 1.39.2. Le test dépendant de la date a
+été corrigé au déploiement (entrée suivante). Tant qu'aucune sauvegarde externe n'a été refaite avec cette version,
 le rappel dit « jamais » : les précédentes n'étaient pas notées.
 
 ## 2026-09-26 (9) — Version 1.39.1 installée chez l'auteur
