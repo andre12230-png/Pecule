@@ -21,6 +21,21 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-28 (6) — Version 1.40.0 installée chez l'auteur
+
+**Fait.** Numéro 1.40.0 (constants.py avec son historique, Lisez-moi.txt) :
+reclassement en masse, export CSV, suppression annulable, courbe du solde.
+Contrôle de livraison vert (544/544). Exe construit sans le .bat (version du
+fichier 1.40.0), essayé sur une base inventée : titre « Pécule — v1.40.0 »,
+fermeture propre. Installé : ancien exe renommé `Pecule.exe.avant-1.40.0`
+(1.39.2), exe copié (identique à celui construit), `_internal` synchronisé
+(robocopy code 1) ; `comptes.db` identique avant et après.
+**Pourquoi.** Demande de l'auteur : « déploie chez moi et supprime l'ancien
+exe ». Deuxième chiffre monté : nouvelles fonctions.
+**Reste.** `Pecule.exe.avant-rappel-sauvegarde` (1.39.1) mis à la Corbeille à
+sa demande : seul filet, `Pecule.exe.avant-1.40.0`. Rien de poussé ; sortie de
+mi-octobre.
+
 ## 2026-09-28 (5) — Export CSV, courbe du solde, suppression annulable
 
 **Fait.** Les trois autres pistes de la revue des améliorations :
