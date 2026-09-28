@@ -716,7 +716,8 @@ base sur la clé USB ou le disque de votre choix, dans un dossier daté, et
 vérifie la copie. Un fichier <code>LISEZMOI.txt</code>, déposé à côté, explique
 comment la remettre en service : fermer Pécule, recopier
 <code>comptes.db</code> à sa place, relancer. Faites-le de temps en temps, par
-exemple après chaque import de relevé.</p>
+exemple après chaque import de relevé : au-delà de 30 jours sans sauvegarde
+externe, un bandeau du Bilan vous le rappelle, avec un lien qui la lance.</p>
 <p><b>Transférer ou fusionner deux installations.</b> Dans
 <code>⚙️ Paramètres</code>, partie « Avancé » : <code>Exporter (JSON)</code>
 écrit un export complet, <code>Restaurer (JSON)</code> le réimporte dans une

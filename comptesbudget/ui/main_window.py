@@ -259,6 +259,9 @@ class MainWindow(QMainWindow):
         self.bilan_view.goto_parametres.connect(self.regler_solde_depart)
         self.bilan_view.goto_recul_depart.connect(
             lambda: self.proposer_recul_depart(repli_parametres=True))
+        # Le bandeau de rappel de sauvegarde externe lance la sauvegarde.
+        self.bilan_view.sauvegarde_demandee.connect(
+            lambda: self.action_sauvegarde_externe())
         self.tabs.currentChanged.connect(self.refresh_current)
         self.period_bar.period_changed.connect(self.on_period_changed)
         self.period_bar.date_mode_changed.connect(self.on_date_mode_changed)
@@ -1184,6 +1187,12 @@ class MainWindow(QMainWindow):
                                 erreur_en_clair(e))
             return
         self._destination_sauvegarde = choisi
+        # Retenue pour le bandeau de rappel du Bilan (28/09/2026), puis le
+        # bandeau est recalculé : il disparaît aussitôt.
+        from datetime import date
+        from .views.bilan import CLE_DERNIERE_SAUVEGARDE
+        self.db.set_setting(CLE_DERNIERE_SAUVEGARDE, date.today().isoformat())
+        self.bilan_view._refresh_sauvegarde_alert()
         liste = "\n".join(f"  • {nom}" for nom in copies)
         QMessageBox.information(
             self, "Sauvegarde terminée",

@@ -21,6 +21,26 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-28 — Rappel de sauvegarde externe sur le Bilan
+
+**Fait.** Après chaque sauvegarde externe réussie, la date est retenue dans la
+base (réglage `_meta_sauvegarde_externe_derniere`, hors synchronisation comme
+les dates d'`avis.py`). Le Bilan affiche un bandeau au-delà de 30 jours, dans
+le style des autres bandeaux, avec un lien « Faire une sauvegarde externe » ;
+sans sauvegarde jamais faite, 30 jours après la première utilisation. Texte
+commun aux trois applications : `sauvegarde_externe.rappel_sauvegarde_externe`
+(même bloc, mêmes tests que Recharges VE et Gestion Photovoltaïque). Notice
+§ 8 complétée. Tests : 4 dans `test_sauvegarde_externe.py`, 4 dans
+`test_rappel_sauvegarde.py` (écrits avant le code).
+Suite : 530 passent ; un échec antérieur et sans lien,
+`test_bilan_ne_compte_pas_deux_fois_une_echeance_generee`, qui place une
+échéance à aujourd'hui + 3 jours : les trois derniers jours du mois, elle
+tombe le mois suivant (il échoue de même sur la version commitée).
+**Pourquoi.** Demande de l'auteur, pour les trois applications.
+**Reste.** Pas d'exe. Le test dépendant de la date est à rendre indépendant du
+jour. Tant qu'aucune sauvegarde externe n'a été refaite avec cette version,
+le rappel dit « jamais » : les précédentes n'étaient pas notées.
+
 ## 2026-09-26 (9) — Version 1.39.1 installée chez l'auteur
 
 **Fait.** Numéro 1.39.1 (constants.py avec son historique, Lisez-moi.txt) : les

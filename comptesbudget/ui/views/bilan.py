@@ -26,6 +26,13 @@ from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
 from ...labels import clean_libelle
 from ...recurring import echeances_du_mois
+from ...sauvegarde_externe import rappel_sauvegarde_externe
+from ..avis import CLE_PREMIERE_UTILISATION
+
+# Jour de la dernière sauvegarde externe réussie (AAAA-MM-JJ), pour le
+# bandeau de rappel (28/09/2026). Le préfixe « _meta_ » la tient à l'écart
+# de la synchronisation, comme les dates d'avis.py.
+CLE_DERNIERE_SAUVEGARDE = "_meta_sauvegarde_externe_derniere"
 
 # Jour du mois à partir duquel on ose annoncer une tendance de fin de mois.
 # Avant, le calcul est trompeur : une grosse course le 3 du mois annonçait
@@ -138,6 +145,7 @@ class BilanView(QWidget):
     goto_budget = Signal()   # clic sur l'alerte budget → ouvrir l'onglet Budget
     goto_parametres = Signal()   # clic sur le bandeau du solde de départ
     goto_recul_depart = Signal()   # clic sur le bandeau des opérations antérieures
+    sauvegarde_demandee = Signal()   # clic sur le bandeau de sauvegarde externe
 
     def __init__(self, db: Database, parent=None):
         super().__init__(parent)
@@ -370,6 +378,19 @@ class BilanView(QWidget):
         self.hors_solde_alert.linkActivated.connect(
             lambda _l: self.goto_recul_depart.emit())
         main.addWidget(self.hors_solde_alert)
+
+        # Bandeau de rappel de sauvegarde externe (28/09/2026) : au-delà de
+        # 30 jours sans copie sur clé USB. Le lien lance la sauvegarde.
+        self.sauvegarde_alert = QLabel()
+        self.sauvegarde_alert.setWordWrap(True)
+        self.sauvegarde_alert.setTextFormat(Qt.RichText)
+        self.sauvegarde_alert.setVisible(False)
+        self.sauvegarde_alert.setStyleSheet(
+            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
+            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+        self.sauvegarde_alert.linkActivated.connect(
+            lambda _l: self.sauvegarde_demandee.emit())
+        main.addWidget(self.sauvegarde_alert)
 
         # ── Ligne 2 : 2 graphiques ────────────────────────────────────
         mid_row = QHBoxLayout(); mid_row.setSpacing(8)
@@ -1256,11 +1277,27 @@ class BilanView(QWidget):
             "<a href='#'>reculer la date de départ</a>.")
         self.hors_solde_alert.setVisible(True)
 
+    def _refresh_sauvegarde_alert(self):
+        """Rappelle la sauvegarde externe au-delà de 30 jours (texte commun
+        aux trois applications). Jamais faite : on compte depuis la première
+        utilisation de Pécule."""
+        texte = rappel_sauvegarde_externe(
+            self.db.get_setting(CLE_DERNIERE_SAUVEGARDE) or None,
+            self.db.get_setting(CLE_PREMIERE_UTILISATION) or None)
+        if not texte:
+            self.sauvegarde_alert.setVisible(False)
+            return
+        self.sauvegarde_alert.setText(
+            "&#128190; " + _esc(texte)
+            + " <a href='#'>Faire une sauvegarde externe</a>.")
+        self.sauvegarde_alert.setVisible(True)
+
     def refresh(self):
         txs = [dict(r) for r in self.db.list_tx()]
         self._refresh_budget_alert(txs)
         self._refresh_solde_depart_alert()
         self._refresh_hors_solde_alert(txs)
+        self._refresh_sauvegarde_alert()
 
         # Paramètres : solde de départ
         initial_date = self.db.get_setting("initial_date", "2025-01-01")
