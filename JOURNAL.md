@@ -51,9 +51,10 @@ base inventée de `captures_promo.py`, sans fenêtre.
 **Pourquoi.** Demande de l'auteur : « fais les autres points à la suite ».
 **Reste.** Pas de numéro ni d'exe. Seule la dernière suppression de la liste
 s'annule ; l'outil Doublons et la suppression d'un compte n'y passent pas. Deux
-points laissés à l'auteur : aligner l'onglet Catégories sur le Budget (date
-d'achat), et le solde de départ lu dans l'OFX (déconseillé : ce solde est daté
-du téléchargement).
+points laissés à l'auteur, tranchés le jour même : **on ne change rien**.
+L'onglet Catégories garde la date choisie (sa phrase d'explication reste), et
+le solde de départ n'est pas lu dans l'OFX (ce solde est daté du
+téléchargement).
 
 ## 2026-09-28 (4) — Changer la catégorie de plusieurs opérations d'un coup
 
