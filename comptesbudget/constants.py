@@ -869,7 +869,10 @@ SYNC_VERSION = 3
 # 1.39.1 : Messages d'erreur dits en francais (fichier ouvert dans un autre
 #          programme, disque plein, base occupee...) au lieu du texte technique
 #          en anglais.
-APP_VERSION = "1.39.1"
+# 1.39.2 : Rappel de sauvegarde externe : au-dela de 30 jours sans copie sur
+#          cle USB, un bandeau du Bilan le rappelle, avec un lien qui lance la
+#          sauvegarde.
+APP_VERSION = "1.39.2"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
