@@ -30,8 +30,14 @@ figeant le jour du Bilan au 10 du mois (`_fige_aujourdhui`, déjà dans le
 fichier), échéance au 13. Vérifié en simulant le 29, le 31, le 1er, le 28
 février et le 31 décembre : il passe ; l'ancienne version échoue bien le 29
 simulé. 531/531.
+Contrôle de livraison vert. Exe construit (version du fichier 1.39.2), essayé
+sur une copie de la base : titre « Pécule — v1.39.2 », fermeture propre.
+Installé : ancien exe renommé `Pecule.exe.avant-rappel-sauvegarde`, robocopy
+code 1, `comptes.db` identique avant et après.
 **Pourquoi.** Demande de l'auteur : déploiement des trois applications.
-**Reste.** À compléter après l'installation.
+**Reste.** Rien de poussé ; sortie de mi-octobre. Deux anciens exe à côté
+(`.avant-1.39.1`, `.avant-rappel-sauvegarde`) : proposer de garder le plus
+récent seul.
 
 ## 2026-09-28 — Rappel de sauvegarde externe sur le Bilan
 
