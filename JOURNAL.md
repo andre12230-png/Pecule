@@ -21,6 +21,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-28 (3) — Historique public réécrit
+
+**Fait.** Les données réelles retirées au fil des nettoyages (tests, commentaires,
+notice, journal de version, ce journal, un message de commit) ont été effacées de
+**toutes** les versions de l'historique, pas seulement de la dernière. Méthode :
+export de l'historique, remplacement de chaque bloc neutralisé par sa version
+inventée, réimport dans un dépôt à part. Preuves : contenu du sommet identique au
+bit près ; aucune des valeurs retirées dans les 184 commits publics ni dans les
+messages ; mêmes résultats de tests avant et après sur le sommet public. Branche
+publique et 27 étiquettes renvoyées ; les 23 versions publiées gardent leurs
+fichiers, dont l'archive de la 1.23.0 soumise à Winget (même empreinte en ligne
+avant et après).
+**Pourquoi.** Décision de l'auteur, après la même opération sur son application
+photovoltaïque : une valeur retirée du dernier état restait lisible dans les
+versions précédentes.
+**Reste.** L'ancien sommet reste joignable chez GitHub par son numéro exact : seul
+le support de GitHub peut le purger. Une sauvegarde de l'ancien historique est
+gardée hors du dépôt jusqu'à la sortie de mi-octobre.
+
 ## 2026-09-28 (2) — Installée chez l'auteur (1.39.2)
 
 **Fait.** Numéro monté à 1.39.2 (rappel de sauvegarde externe). Le contrôle
