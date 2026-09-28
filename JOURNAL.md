@@ -21,6 +21,40 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-28 (5) — Export CSV, courbe du solde, suppression annulable
+
+**Fait.** Les trois autres pistes de la revue des améliorations :
+- **📤 Exporter** (onglet Opérations) : les lignes affichées, filtres et tri
+  compris, dans un CSV pour Excel (`export_csv.py`, sans Qt) : « ; », UTF-8
+  avec BOM, dates JJ/MM/AAAA, montants « -45,30 » en Débit / Crédit. Un texte
+  commençant par = + - @ est précédé d'une apostrophe, pour qu'Excel n'en
+  fasse pas une formule. Fichier ouvert dans Excel : message en français.
+  Proposé dans Documents ; « Ouvrir le fichier » le passe au programme de
+  Windows (aucun accès réseau).
+- **Courbe du solde en fin de mois** (Bilan, pleine largeur sous les deux
+  graphiques) : mêmes douze mois que les barres ; trait plein pour le constaté,
+  pointillés pour le prévu (`_solde_fin_de_mois`, donc le même chiffre que le
+  bandeau du mois) ; rien avant la date de départ ; ligne rouge du zéro en cas
+  de découvert ; montant exact au survol. L'Épargne y reste (elle fait baisser
+  le solde). Nom de mois court mis en commun (`_mois_court`) avec les barres.
+- **Annuler une suppression** (liste des Opérations) : copie complète des
+  lignes avant `delete_tx`, bandeau « ↩ Annuler la suppression » ;
+  `Database.restaurer_tx` les remet et efface leur trace dans `deletions`
+  (sinon une fusion JSON les supprimerait de nouveau). Le bandeau reste jusqu'à
+  sa fermeture, une autre suppression ou un changement de compte : pas de
+  minuterie.
+Notice, README (FR et EN) et Lisez-moi complétés. Tests écrits avant le code :
+`test_export_csv.py` (6), `test_annuler_suppression.py` (4), courbe dans
+`test_ui_smoke.py` (1). 544/544 ; contrôle de livraison vert hors les deux
+points attendus (code non commité, numéro non monté). Aperçus rendus sur la
+base inventée de `captures_promo.py`, sans fenêtre.
+**Pourquoi.** Demande de l'auteur : « fais les autres points à la suite ».
+**Reste.** Pas de numéro ni d'exe. Seule la dernière suppression de la liste
+s'annule ; l'outil Doublons et la suppression d'un compte n'y passent pas. Deux
+points laissés à l'auteur : aligner l'onglet Catégories sur le Budget (date
+d'achat), et le solde de départ lu dans l'OFX (déconseillé : ce solde est daté
+du téléchargement).
+
 ## 2026-09-28 (4) — Changer la catégorie de plusieurs opérations d'un coup
 
 **Fait.** Clic droit sur la liste des Opérations : nouveau choix « Changer la

@@ -6,14 +6,14 @@ from html import escape as _esc   # noms de catégories insérés dans du HTML
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import (
-    QColor, QPainter,
+    QColor, QCursor, QPainter, QPen,
 )
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
-    QLabel, QFrame, QScrollArea,
+    QLabel, QFrame, QScrollArea, QToolTip,
 )
 from PySide6.QtCharts import (
-    QChart, QChartView, QPieSeries, QBarSeries, QBarSet,
+    QChart, QChartView, QLegend, QPieSeries, QBarSeries, QBarSet, QLineSeries,
     QAbstractBarSeries, QBarCategoryAxis, QValueAxis,
 )
 
@@ -111,6 +111,19 @@ class CatRowsWidget(QWidget):
         # étirerait les lignes pour remplir la hauteur du cadre.
         self._nb_lignes = len(items)
         self.lay.setRowStretch(self._nb_lignes, 1)
+
+
+_MOIS_COURTS = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
+                "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
+
+
+def _mois_court(m: str) -> str:
+    """« 2026-10 » → « Oct » : le nom du mois seul, pour les axes des
+    graphiques (l'année va dans le titre du panneau)."""
+    try:
+        return _MOIS_COURTS[int(m[5:7])]
+    except (ValueError, IndexError):
+        return m
 
 
 def _make_panel(title: str, body: QWidget) -> QFrame:
@@ -422,6 +435,23 @@ class BilanView(QWidget):
         mid_row.addWidget(_make_panel("Répartition des dépenses", pie_view), 2)
 
         main.addLayout(mid_row, 1)
+
+        # ── Courbe du solde en fin de mois (28/09/2026) ──────────────
+        # Sur toute la largeur, sous les deux graphiques : les mêmes douze
+        # mois que les barres. Trait plein pour ce qui est constaté,
+        # pointillés pour ce qui est prévu.
+        self.solde_chart = QChart()
+        self.solde_chart.setBackgroundVisible(False)
+        self.solde_chart.legend().setAlignment(Qt.AlignBottom)
+        # Légende dessinée avec le trait de chaque courbe (plein, pointillé) :
+        # deux carrés de la même couleur ne se distinguaient pas.
+        self.solde_chart.legend().setMarkerShape(QLegend.MarkerShapeFromSeries)
+        solde_view = QChartView(self.solde_chart)
+        solde_view.setRenderHint(QPainter.Antialiasing)
+        solde_view.setMinimumHeight(200)
+        self.solde_panel = _make_panel("Solde en fin de mois", solde_view)
+        main.addWidget(self.solde_panel, 1)
+        self.soldes_de_la_courbe: list[tuple] = []
 
         # ── Ligne 3 : 3 listes ────────────────────────────────────────
         bot_row = QHBoxLayout(); bot_row.setSpacing(8)
@@ -1399,6 +1429,9 @@ class BilanView(QWidget):
         # mois affiché, il ne dessinait qu'une seule barre.
         self._refresh_bar_chart([t for t in all_active
                                  if t.get("categorie") != "Épargne"])
+        # La courbe du solde, elle, garde l'Épargne : un virement vers le
+        # livret fait bien baisser le solde du compte.
+        self._refresh_courbe_solde(txs_prevus, all_active, solde_compte)
 
         # ── Camembert dépenses ────────────────────────────────────────
         by_cat: dict[str, float] = {}
@@ -1487,6 +1520,118 @@ class BilanView(QWidget):
             return sorted(presents)[-12:]
         return mois
 
+    def _points_de_la_courbe(self, txs: list[dict], actives: list[dict],
+                            solde_compte: float) -> list[tuple]:
+        """(mois, solde, prévu) pour chacun des douze mois du graphique.
+
+        Le solde vient de `_solde_fin_de_mois` : constaté pour un mois fini,
+        prévu pour le mois en cours et les suivants — le même chiffre que le
+        bandeau « Ce mois-ci ». Avant la date de départ, aucun solde n'est
+        connu : le point est laissé vide (None) plutôt que de tracer un
+        faux plat au niveau du solde de départ."""
+        initial_date = self.db.get_setting("initial_date", "2025-01-01")
+        today = date.today()
+        points = []
+        for mois in self._mois_du_graphique(actives):
+            an, m = int(mois[:4]), int(mois[5:7])
+            fin = date(an, m, monthrange(an, m)[1])
+            if fin.isoformat() < initial_date:
+                points.append((mois, None, False))
+                continue
+            solde = round(self._solde_fin_de_mois(txs, mois, solde_compte), 2)
+            points.append((mois, solde, fin >= today))
+        return points
+
+    def _refresh_courbe_solde(self, txs: list[dict], actives: list[dict],
+                              solde_compte: float):
+        """Dessine la courbe du solde en fin de mois."""
+        points = self._points_de_la_courbe(txs, actives, solde_compte)
+        self.soldes_de_la_courbe = points
+        self.solde_chart.removeAllSeries()
+        for ax in self.solde_chart.axes():
+            self.solde_chart.removeAxis(ax)
+        valeurs = [s for _m, s, _p in points if s is not None]
+        if not points or not valeurs:
+            return
+
+        bleu = QColor("#1F3A6B")
+        constate = QLineSeries()
+        constate.setName("Constaté")
+        constate.setPen(QPen(bleu, 2))
+        prevu = QLineSeries()
+        prevu.setName("Prévu")
+        prevu.setPen(QPen(bleu, 2, Qt.DashLine))
+        for serie in (constate, prevu):
+            serie.setPointsVisible(True)
+            serie.setColor(bleu)
+        dernier_constate = None
+        for i, (_m, s, est_prevu) in enumerate(points):
+            if s is None:
+                continue
+            if est_prevu:
+                # La ligne pointillée part du dernier point constaté, pour
+                # que la courbe ne soit pas coupée en deux.
+                if dernier_constate is not None and prevu.count() == 0:
+                    prevu.append(*dernier_constate)
+                prevu.append(i, s)
+            else:
+                constate.append(i, s)
+                dernier_constate = (i, s)
+
+        ax_x = QBarCategoryAxis()
+        ax_x.append([_mois_court(m) for m, _s, _p in points])
+        self.solde_chart.addAxis(ax_x, Qt.AlignBottom)
+        ax_y = QValueAxis()
+        bas, haut = min(valeurs), max(valeurs)
+        marge = max((haut - bas) * 0.1, 50)
+        # Un solde toujours positif garde un axe qui commence à 0 au plus bas :
+        # pas de faux « découvert » dessiné par la marge.
+        ax_y.setRange(max(bas - marge, 0) if bas >= 0 else bas - marge,
+                      haut + marge)
+        ax_y.setLabelFormat("%d")   # pas de « € » : QtCharts le rend en « ? »
+        ax_y.applyNiceNumbers()
+        self.solde_chart.addAxis(ax_y, Qt.AlignLeft)
+
+        series = [constate, prevu]
+        if bas < 0:
+            # Découvert au moins un mois : la ligne du zéro, en rouge, montre
+            # quand la courbe passe dessous.
+            zero = QLineSeries()
+            zero.setPen(QPen(QColor("#C0392B"), 1))
+            zero.append(0, 0)
+            zero.append(len(points) - 1, 0)
+            series.append(zero)
+        for serie in series:
+            if serie.count() == 0:
+                continue
+            self.solde_chart.addSeries(serie)
+            serie.attachAxis(ax_x)
+            serie.attachAxis(ax_y)
+            serie.hovered.connect(self._infobulle_solde)
+        for marqueur in self.solde_chart.legend().markers():
+            # Seules « Constaté » et « Prévu » ont leur place dans la légende.
+            if not marqueur.series().name():
+                marqueur.setVisible(False)
+
+        premier, dernier = points[0][0], points[-1][0]
+        self.solde_panel._header.setText(
+            f"SOLDE EN FIN DE MOIS — {_mois_court(premier).upper()} "
+            f"{premier[:4]} → {_mois_court(dernier).upper()} {dernier[:4]}")
+
+    def _infobulle_solde(self, point, survole: bool):
+        """Au survol d'un point : le mois et le solde exact, en euros."""
+        if not survole:
+            QToolTip.hideText()
+            return
+        i = round(point.x())
+        if 0 <= i < len(self.soldes_de_la_courbe):
+            mois, solde, est_prevu = self.soldes_de_la_courbe[i]
+            if solde is not None:
+                QToolTip.showText(
+                    QCursor.pos(),
+                    f"Fin {_mois_court(mois).lower()} {mois[:4]} : "
+                    f"{fmt_euro(solde)}{' (prévu)' if est_prevu else ''}")
+
     def _refresh_bar_chart(self, actives: list[dict]):
         """Barres mensuelles revenus / dépenses sur douze mois, en utilisant
         la date effective (opération ou valeur).
@@ -1554,15 +1699,7 @@ class BilanView(QWidget):
         # Qt tronquait en « Oc… », et réduire la police n'y changeait rien,
         # le découpage se faisant à la largeur de la colonne. L'année est
         # donc passée dans le TITRE du panneau, où elle a toute la place.
-        mois_court = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
-                      "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
-
-        def _court(m: str) -> str:
-            try:
-                return mois_court[int(m[5:7])]
-            except (ValueError, IndexError):
-                return m
-
+        _court = _mois_court
         labels = [_court(m) for m in months]
         self.bar_panel._header.setText(
             f"ÉVOLUTION SUR 12 MOIS — {_court(months[0]).upper()} "

@@ -186,8 +186,9 @@ rattachées à un compte nommé <b>Compte courant</b> : rien n'a bougé.</p>
 
 <h3>🏠 Bilan (tableau de bord)</h3>
 <p>Vue d'ensemble avec 4 indicateurs clés, le verdict du mois, l'évolution sur
-12 mois, la répartition des dépenses par catégorie, et les listes top dépenses /
-sources de revenus / plus grosses dépenses individuelles.</p>
+12 mois, la répartition des dépenses par catégorie, la courbe du solde en fin de
+mois, et les listes top dépenses / sources de revenus / plus grosses dépenses
+individuelles.</p>
 <p>Le KPI <b>« 💼 Solde bancaire réel (pointé) »</b> donne le solde réel du compte :
 solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Il est
 <b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de
@@ -387,6 +388,15 @@ si votre historique compte moins de six mois.</p>
 <p>Pour la <b>répartition des dépenses</b>, le montant de chaque catégorie est
 indiqué dans la <b>légende</b>, à droite du camembert — écrit autour des parts,
 il se chevaucherait et masquerait les noms de catégories.</p>
+<p>La <b>courbe du solde en fin de mois</b> couvre les mêmes douze mois. En
+<b>trait plein</b>, le solde constaté à la fin de chaque mois écoulé (solde de
+départ plus les opérations pointées, comme le solde bancaire réel) ; en
+<b>pointillés</b>, le solde prévu pour le mois en cours et les suivants — le
+même calcul que le bandeau du mois, opérations à venir et échéances du
+Prévisionnel comprises. Si le compte passe à découvert un de ces mois, une
+<b>ligne rouge</b> marque le zéro. Le survol d'un point donne le montant exact.
+Avant la date de départ, aucun point n'est tracé : le solde n'y est pas
+connu.</p>
 
 <h3>↕️ Trier les tableaux</h3>
 <p>Dans les onglets <b>Opérations</b>, <b>Catégories</b>, <b>Budget</b>,
@@ -620,6 +630,22 @@ prendre à la carte, <kbd>Ctrl+A</kbd> pour toutes — puis appuyez sur la
 elle pointe la sélection, ou la dépointe si tout est déjà pointé. La touche
 <kbd>Suppr</kbd> supprime, elle aussi, toute la sélection — le nombre est
 rappelé dans la question posée.</p>
+
+<p><b>Annuler une suppression.</b> Après une suppression dans la liste, un
+bandeau orange rappelle combien d'opérations ont été supprimées et propose
+« ↩ Annuler la suppression » : elles reviennent telles qu'elles étaient
+(catégorie, pointage, note…). Le bandeau reste jusqu'à ce que vous le fermiez
+(✕), que vous supprimiez autre chose ou que vous changiez de compte ; seule la
+dernière suppression peut être annulée. Les suppressions faites ailleurs (outil
+Doublons, suppression d'un compte) ne passent pas par ce bandeau.</p>
+
+<p><b>Exporter vers Excel.</b> Le bouton <b>📤 Exporter</b> enregistre les
+opérations <i>affichées</i> — période, recherche, filtres et tri compris — dans
+un fichier CSV qui s'ouvre d'un double-clic dans Excel ou LibreOffice : dates
+et montants y sont reconnus comme tels, prêts à trier ou additionner. Pratique
+pour une déclaration, un dossier ou un tableur personnel. Si le fichier est
+encore ouvert dans Excel, Windows refuse de l'écraser : fermez-le, ou choisissez
+un autre nom.</p>
 
 <p><b>Reclasser plusieurs lignes d'un coup.</b> Sélectionnez-les de la même
 façon, faites un <b>clic droit</b> puis « Changer la catégorie de ces N

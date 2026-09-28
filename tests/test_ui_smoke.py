@@ -1852,6 +1852,48 @@ def test_fenetre_categorie_en_masse(qapp):
     assert vide.btn_ok.isEnabled()
 
 
+def test_bilan_courbe_du_solde_fin_de_mois(qapp, tmp_path, monkeypatch):
+    """Courbe du solde sur le Bilan : un point par mois, le solde constaté
+    pour les mois finis, le solde prévu (même calcul que le bandeau « Ce
+    mois-ci ») pour le mois en cours et les suivants, et rien avant la date
+    de départ, où aucun solde n'est connu."""
+    from comptesbudget.ui.views.bilan import BilanView
+
+    _fige_aujourdhui(monkeypatch, date(2026, 6, 15))
+    db = Database(str(tmp_path / "courbe.db"))
+    db.set_setting("initial_date", "2026-02-01")
+    db.set_setting("initial_balance", "1000")
+    db.insert_tx(_tx(id="c1", date="2026-02-10", date_valeur="2026-02-10",
+                     montant=-100.0, pointee=1))
+    db.insert_tx(_tx(id="c2", date="2026-06-03", date_valeur="2026-06-03",
+                     montant=50.0, pointee=1))
+    db.insert_tx(_tx(id="c3", date="2026-06-20", date_valeur="2026-06-20",
+                     montant=-30.0, pointee=0))
+    vue = BilanView(db)
+    vue.period = "2026"
+    vue.refresh()
+
+    points = {m: (s, prevu) for m, s, prevu in vue.soldes_de_la_courbe}
+    assert len(points) == 12
+    assert points["2026-01"][0] is None           # avant la date de départ
+    assert points["2026-02"] == (900.0, False)
+    assert points["2026-05"] == (900.0, False)
+    # Juin : 950 € en banque aujourd'hui, 30 € encore à passer.
+    assert points["2026-06"] == (920.0, True)
+    assert points["2026-12"] == (920.0, True)
+    # Jamais de découvert : pas de ligne du zéro, deux courbes seulement.
+    assert len(vue.solde_chart.series()) == 2
+
+    # Un découvert en mars : la ligne rouge du zéro apparaît. (Son absence
+    # de la légende se contrôle sur une image : hors écran, Qt ne dit pas
+    # quels éléments de légende sont visibles.)
+    db.insert_tx(_tx(id="c4", date="2026-03-05", date_valeur="2026-03-05",
+                     montant=-1500.0, pointee=1))
+    vue.refresh()
+    assert len(vue.solde_chart.series()) == 3
+    assert vue.soldes_de_la_courbe[2][1] == -600.0     # fin mars
+
+
 def test_fenetre_tient_sur_un_petit_ecran(qapp, tmp_path):
     """La fenêtre doit tenir sur un portable 1366 × 768 : une fois retirées
     la barre des tâches et la barre de titre, il reste environ 700 px. Qt ne

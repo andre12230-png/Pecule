@@ -1,17 +1,18 @@
 """Vue Opérations."""
 
+import os
 import uuid
 from datetime import date
 from typing import Optional
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QStandardPaths, QUrl
 from PySide6.QtGui import (
-    QKeySequence, QShortcut,
+    QKeySequence, QShortcut, QDesktopServices,
 )
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QLineEdit, QComboBox, QTableView, QHeaderView, QAbstractItemView,
-    QDialog, QMenu, QMessageBox,
+    QDialog, QMenu, QMessageBox, QFileDialog, QFrame,
 )
 
 from ...constants import (
@@ -21,6 +22,8 @@ from ...utils import (
     deaccent, fmt_date_fr, fmt_euro, in_period,
 )
 from ...database import Database
+from ...erreurs import erreur_en_clair
+from ...export_csv import ecrire_csv_operations
 from ...rules import apply_rules_to_tx
 
 from ..flow_layout import FlowLayout
@@ -51,6 +54,13 @@ class OperationsView(QWidget):
         self.btn_new = QPushButton("➕ Nouvelle")
         self.btn_new.clicked.connect(self.add_tx)
         toolbar.addWidget(self.btn_new)
+
+        self.btn_export = QPushButton("📤 Exporter")
+        self.btn_export.setToolTip(
+            "Enregistre les opérations affichées (filtres et tri compris) "
+            "dans un fichier CSV qui s'ouvre dans Excel ou LibreOffice.")
+        self.btn_export.clicked.connect(self.exporter_csv)
+        toolbar.addWidget(self.btn_export)
 
         self.search = QLineEdit()
         self.search.setPlaceholderText("Libellé, montant (45,30), date (12/05/2026)…")
@@ -101,6 +111,34 @@ class OperationsView(QWidget):
 
         v.addLayout(barre)
 
+        # Bandeau « Annuler » après une suppression (28/09/2026). Il reste
+        # affiché jusqu'à ce qu'on le ferme, qu'on supprime autre chose ou
+        # qu'on change de compte : pas de minuterie qui le ferait disparaître
+        # avant qu'on ait eu le temps de le lire.
+        self._supprimees: list[dict] = []
+        self._compte_suppression = None
+        self.bandeau_annuler = QFrame()
+        self.bandeau_annuler.setObjectName("bandeauAnnuler")
+        self.bandeau_annuler.setStyleSheet(
+            "QFrame#bandeauAnnuler { background:#FEF5E7; "
+            "border:1px solid #E67E22; border-radius:4px; }"
+            "QLabel { color:#7E5109; }")
+        ligne_annuler = QHBoxLayout(self.bandeau_annuler)
+        ligne_annuler.setContentsMargins(10, 4, 6, 4)
+        self.lbl_annuler = QLabel()
+        ligne_annuler.addWidget(self.lbl_annuler)
+        self.btn_annuler = QPushButton("↩ Annuler la suppression")
+        self.btn_annuler.clicked.connect(self.annuler_suppression)
+        ligne_annuler.addWidget(self.btn_annuler)
+        ligne_annuler.addStretch(1)
+        fermer = QPushButton("✕")
+        fermer.setFlat(True)
+        fermer.setToolTip("Fermer ce bandeau (la suppression est gardée)")
+        fermer.clicked.connect(self._oublier_suppression)
+        ligne_annuler.addWidget(fermer)
+        self.bandeau_annuler.setVisible(False)
+        v.addWidget(self.bandeau_annuler)
+
         # Tableau
         self.model = TxTableModel()
         self.table = QTableView()
@@ -147,6 +185,10 @@ class OperationsView(QWidget):
             sc.setContext(Qt.WidgetWithChildrenShortcut)
 
     def reload_from_db(self):
+        # Changement de compte : « Annuler » viserait des lignes d'un autre
+        # compte que celui affiché, le bandeau n'a plus de sens.
+        if self._supprimees and self.db.compte_id != self._compte_suppression:
+            self._oublier_suppression()
         self.transactions = [dict(r) for r in self.db.list_tx()]
         # Catégories disponibles
         cats = sorted(set(t.get("categorie") for t in self.transactions if t.get("categorie")))
@@ -266,6 +308,51 @@ class OperationsView(QWidget):
         if not idx.isValid():
             return None
         return self.model.item(idx.row(), 0).data(Qt.UserRole)
+
+    def operations_affichees(self) -> list[dict]:
+        """Les opérations visibles, dans l'ordre du tableau (le tri choisi en
+        cliquant sur un en-tête compris)."""
+        par_id = {t["id"]: t for t in self.filtered}
+        ops = []
+        for r in range(self.model.rowCount()):
+            item = self.model.item(r, 0)
+            t = par_id.get(item.data(Qt.UserRole)) if item is not None else None
+            if t is not None:
+                ops.append(t)
+        return ops
+
+    def exporter_csv(self):
+        """Bouton « Exporter » : les lignes affichées vers un fichier CSV,
+        proposé dans le dossier Documents."""
+        ops = self.operations_affichees()
+        if not ops:
+            QMessageBox.information(self, "Exporter",
+                "Aucune opération affichée : rien à exporter.")
+            return
+        dossier = QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
+        nom = f"Pecule-operations-{date.today().isoformat()}.csv"
+        chemin, _ = QFileDialog.getSaveFileName(
+            self, "Exporter les opérations affichées",
+            os.path.join(dossier, nom), "Fichier CSV pour Excel (*.csv)")
+        if not chemin:
+            return
+        try:
+            n = ecrire_csv_operations(chemin, ops)
+        except OSError as e:
+            # Le cas courant : le même fichier est encore ouvert dans Excel.
+            QMessageBox.warning(self, "Exporter",
+                f"Le fichier n'a pas pu être enregistré.\n\n{erreur_en_clair(e)}")
+            return
+        boite = QMessageBox(QMessageBox.Information, "Exporter",
+            f"{n} opération{'s' if n > 1 else ''} exportée{'s' if n > 1 else ''} "
+            f"dans :\n{chemin}", parent=self)
+        ouvrir = boite.addButton("Ouvrir le fichier", QMessageBox.AcceptRole)
+        boite.addButton(QMessageBox.Close)
+        boite.exec()
+        if boite.clickedButton() is ouvrir:
+            # Fichier local ouvert par le programme choisi par Windows
+            # (Excel, LibreOffice…) : aucun accès réseau.
+            QDesktopServices.openUrl(QUrl.fromLocalFile(chemin))
 
     def selected_tx_ids(self) -> list:
         """Identifiants de toutes les lignes sélectionnées, dans l'ordre du
@@ -568,8 +655,35 @@ class OperationsView(QWidget):
                     else f"Supprimer ces {len(ids)} opérations ?")
         if QMessageBox.question(self, "Supprimer", question) != QMessageBox.Yes:
             return
+        # Copie complète des lignes AVANT de les effacer : c'est ce que le
+        # bouton « Annuler » remettra en place.
+        par_id = {t["id"]: dict(t) for t in self.transactions}
+        copies = [par_id[i] for i in ids if i in par_id]
         with self.db.batch():
             for tx_id in ids:
                 self.db.delete_tx(tx_id)
         self.reload_from_db()
+        self._supprimees = copies
+        self._compte_suppression = self.db.compte_id
+        n = len(copies)
+        self.lbl_annuler.setText(
+            f"{n} opération{'s' if n > 1 else ''} "
+            f"supprimée{'s' if n > 1 else ''}.")
+        self.bandeau_annuler.setVisible(bool(copies))
         self.tx_changed.emit()
+
+    def annuler_suppression(self):
+        """Bouton « Annuler la suppression » : remet les lignes effacées."""
+        if not self._supprimees:
+            return
+        with self.db.batch():
+            self.db.restaurer_tx(self._supprimees)
+        self._oublier_suppression()
+        self.reload_from_db()
+        self.tx_changed.emit()
+
+    def _oublier_suppression(self):
+        """Ferme le bandeau ; la suppression devient définitive."""
+        self._supprimees = []
+        self._compte_suppression = None
+        self.bandeau_annuler.setVisible(False)

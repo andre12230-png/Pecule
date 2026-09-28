@@ -47,14 +47,14 @@ telemetry — your financial data never leaves your computer.
 
 **What it does**
 
-- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear, recategorize or delete a whole batch at once (space bar or right-click)
+- **Transactions** — filterable ledger with reconciliation (cleared/uncleared), inline editing and duplicate detection; multi-row selection lets you clear, unclear, recategorize or delete a whole batch at once (space bar or right-click), with an Undo banner after a deletion; the displayed rows export to a CSV file that opens in Excel
 - **Budgets** — monthly per-category budgets with progress bars and overspend alerts
 - **Auto-categorisation** — user-defined rules (pattern → category) applied on import, backed by built-in patterns (CARREFOUR → Groceries, EDF → Home…) so the very first statement lands categorised; anything explicit — the bank's own category, your rules, your habits — always wins over the guess
 - **Recurring & forecast** — model recurring transactions, project the coming months, and pre-generate the current month's expected entries; each one is later *completed* by the real bank line at import time instead of creating a duplicate
 - **CSV, OFX and QIF import** — French bank statement exports; CSV columns are matched by name, so no bank-specific setup (semicolon-separated, windows-1252 or UTF-8). OFX statements are read in both flavours of the format (1.x SGML and 2.x XML), deferred-debit card statements included; QIF files exported from another program are read as well. Imported entries are marked as cleared — a statement only carries transactions the bank has already processed — unless the file itself provides a "Pointage" column (BPCE), which then has the final say. When nothing can be read, the report says why: comma separator, unrecognised column names, or dates outside DD/MM/YYYY
 - **Multiple accounts** — track several bank accounts in one file; the account picker drives the whole window. Transactions, budgets, forecast and opening balance belong to each account, while auto-categorisation rules and categories are shared
 - **Archiving** — set aside older transactions so lists and period pickers stay short. Nothing is deleted: archived entries stay in the database, and their total rolls into the opening balance, so the displayed balance never changes. A checkbox brings them back, and archiving can be undone
-- **Reports** — printable / PDF monthly report, dashboard with KPIs and charts, global search
+- **Reports** — printable / PDF monthly report, dashboard with KPIs and charts (including a month-end balance line, actual vs forecast), global search
 - **Export & restore** — write everything (transactions, rules, budgets, recurring entries, settings) to a JSON file, and merge it back later: on restore the most recent version of each record wins, so nothing newer than the file is overwritten
 - **Automatic daily backup** of the database
 
@@ -123,6 +123,7 @@ bouton du menu de gauche, qui l'ouvre dans une fenêtre à part.
 Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
+**export CSV** des opérations affichées (pour Excel),
 **export et restauration JSON** de toutes vos données, et **sauvegarde
 quotidienne automatique** de la base.
 
@@ -159,6 +160,13 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
   La touche <kbd>Suppr</kbd> porte elle aussi sur toute la sélection.
 - **Reclasser plusieurs lignes d'un coup** : même sélection, puis clic droit
   → « Changer la catégorie de ces N opérations… ».
+- **Annuler une suppression** : après une suppression, un bandeau propose
+  « ↩ Annuler la suppression » et remet les lignes telles qu'elles étaient.
+- **Exporter vers Excel** : le bouton 📤 Exporter de l'onglet Opérations
+  enregistre les lignes affichées (filtres et tri compris) dans un CSV qui
+  s'ouvre d'un double-clic dans Excel ou LibreOffice.
+- **Courbe du solde** : sur le Bilan, le solde en fin de mois sur douze mois,
+  en trait plein pour ce qui est constaté, en pointillés pour ce qui est prévu.
 - **Vos propres catégories** : le champ Catégorie s'écrit librement — tapez
   « Animaux », elle est créée, colorée et budgétable comme les autres.
 - **Une seule fenêtre à la fois** sur un même fichier de données : deux
@@ -379,6 +387,7 @@ comptesbudget/
 ├── qif_import.py            Import des fichiers QIF (autres logiciels)
 ├── sync.py                  Moteur de fusion (LWW) : export et restauration
 │                            JSON du menu de gauche
+├── export_csv.py            Export CSV des opérations affichées (pour Excel)
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
     ├── models.py            TxTableModel (modèle de table)

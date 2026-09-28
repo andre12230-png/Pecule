@@ -712,6 +712,28 @@ class Database:
         self.conn.execute("DELETE FROM transactions WHERE id = ?", (tx_id,))
         self._commit()
 
+    def restaurer_tx(self, lignes: list[dict]):
+        """Remet des opérations supprimées, telles qu'elles étaient (bouton
+        « Annuler » de la liste des Opérations).
+
+        Chaque ligne est une opération relue AVANT sa suppression (toutes ses
+        colonnes). La trace laissée par delete_tx est effacée, sinon la
+        fusion d'un export JSON supprimerait de nouveau l'opération ; et la
+        date de mise à jour passe à maintenant, pour qu'une fusion la tienne
+        pour la version la plus récente."""
+        colonnes = {r[1] for r in self.conn.execute(
+            "PRAGMA table_info(transactions)")}
+        for t in lignes:
+            valeurs = {k: v for k, v in t.items() if k in colonnes}
+            valeurs["updated_at"] = _now_iso()
+            noms = ", ".join(valeurs)
+            marques = ", ".join(f":{k}" for k in valeurs)
+            self.conn.execute(
+                f"INSERT OR REPLACE INTO transactions ({noms}) VALUES ({marques})",
+                valeurs)
+            self._clear_deletion("transactions", t["id"])
+        self._commit()
+
     def toggle_pointee(self, tx_id: str):
         """Bascule le pointage — et CONFIRME l'opération si elle était prévue.
 

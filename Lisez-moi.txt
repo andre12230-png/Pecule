@@ -110,6 +110,13 @@ FONCTIONS
   depointer d'un coup. La touche Suppr porte aussi sur la selection.
 - Reclassement EN MASSE : meme selection, puis clic droit > "Changer la
   categorie de ces N operations..." pour leur donner une autre categorie.
+- Suppression annulable : apres une suppression, un bandeau propose
+  "Annuler la suppression" et remet les lignes telles qu'elles etaient.
+- Export vers Excel : bouton "Exporter" de l'onglet Operations. Les lignes
+  affichees (filtres et tri compris) partent dans un fichier CSV qui s'ouvre
+  d'un double-clic dans Excel ou LibreOffice.
+- Courbe du solde en fin de mois sur le Bilan : trait plein pour le solde
+  constate, pointilles pour le solde prevu.
 - Vos propres categories : le champ Categorie s'ecrit librement. Tapez
   "Animaux" ou "Vacances" et la categorie est creee, avec sa couleur et
   son budget possible.
