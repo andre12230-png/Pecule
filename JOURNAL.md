@@ -21,6 +21,20 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-29 — Vert des confirmations aligné sur les deux autres applis
+
+**Fait.** Les confirmations de « Votre avis » et « Mise à jour » passent de
+`#2E7D32` à `#18733A`, le vert de texte commun aux trois applis. Test
+`test_vert_de_confirmation_commun_aux_trois_applis` (échoue sans la
+correction). 545/545, commit local `dee5c90`, pas d'exe. Mesure de la taille
+minimale de la fenêtre sur une copie de base : 1146 × 383 px (plafond :
+onglet Prévisionnel), elle tient en moitié d'écran de 1280 px.
+**Pourquoi.** Écart relevé en confrontant les trois applis à leur charte
+d'interface commune (règle : exactement les mêmes couleurs partout).
+**Reste.** Pas de nouveau numéro tant qu'aucun exe n'est construit. Écarts
+de forme entre les trois applis (cartes, sélecteur de période, fin du menu)
+présentés à l'auteur, en attente de sa décision.
+
 ## 2026-09-28 (6) — Version 1.40.0 installée chez l'auteur
 
 **Fait.** Numéro 1.40.0 (constants.py avec son historique, Lisez-moi.txt) :
