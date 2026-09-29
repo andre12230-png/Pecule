@@ -21,6 +21,13 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-29 (4) — Version 1.40.2 installée chez l'auteur
+
+**Fait.** Numéro 1.40.2 (constants.py et son historique, Lisez-moi.txt) :
+les pluriels accordés de l'entrée ci-dessous.
+**Pourquoi.** « installe les exe chez moi ».
+**Reste.** Rien.
+
 ## 2026-09-29 (3) — Pluriels accordés au lieu de « (s) »
 
 **Fait.** Les quelque 65 textes à pluriel entre parenthèses (« 3 opération(s)

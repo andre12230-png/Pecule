@@ -882,7 +882,9 @@ SYNC_VERSION = 3
 #            en trait plein, prevu en pointilles.
 # 1.40.1 : Confirmations de << Votre avis >> et << Mise a jour >> dans le vert
 #          commun aux trois applications.
-APP_VERSION = "1.40.1"
+# 1.40.2 : Les messages accordent avec le nombre (<< 1 operation importee >>,
+#          << 3 operations importees >>) au lieu de << operation(s) >>.
+APP_VERSION = "1.40.2"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
