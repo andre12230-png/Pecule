@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QPushButton, QDialog, QMessageBox, QFileDialog, QTextBrowser,
 )
 
+from ..accords import pluriel
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
 )
@@ -79,7 +80,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         suffixe = f" — {db.nom_compte()}"
     H.append(f"<h1>📒 Pécule — Rapport {MOIS_FR[m]} {y}{suffixe}</h1>")
     H.append(f"<p><i>Généré le {fmt_date_fr(date.today().isoformat())} — "
-             f"{len(act)} opération(s) sur le mois.</i></p><hr>")
+             f"{pluriel(len(act), 'opération', 'opérations')} sur le mois.</i></p><hr>")
 
     # — KPI —
     H.append("<h2>Synthèse</h2>")

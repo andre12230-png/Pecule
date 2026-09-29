@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QDialog, QMessageBox, QMenu,
 )
 
+from ...accords import accorde, pluriel
 from ...utils import (
     fmt_euro,
 )
@@ -175,5 +176,6 @@ class RulesView(QWidget):
                     self.db.update_tx(tx["id"], fields)
                     modified += 1
         QMessageBox.information(self, "Règles",
-            f"{modified} opération(s) mise(s) à jour.")
+            f"{pluriel(modified, 'opération', 'opérations')} "
+            f"{accorde(modified, 'mise', 'mises')} à jour.")
         self.rules_changed.emit()

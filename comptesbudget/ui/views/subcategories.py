@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QMessageBox, QInputDialog,
 )
 
+from ...accords import accorde, nombre, pluriel
 from ...utils import (
     deaccent, cat_color, fmt_euro,
 )
@@ -193,10 +194,13 @@ class SubcategoriesView(QWidget):
         self.table.setColumnWidth(3, 130)
 
         total_tx = sum(len(ids) for ids in self._index.values())
+        n_affichees = self.model.rowCount()
+        n_total = len(self._index)
         self.lbl_count.setText(
-            f"{self.model.rowCount()} affichée(s) — "
-            f"{len(self._index)} sous-catégorie(s) au total — "
-            f"{total_tx} opération(s) concernée(s)"
+            f"{nombre(n_affichees)} {accorde(n_affichees, 'affichée')} — "
+            f"{pluriel(n_total, 'sous-catégorie', 'sous-catégories')} au total — "
+            f"{pluriel(total_tx, 'opération', 'opérations')} "
+            f"{accorde(total_tx, 'concernée', 'concernées')}"
         )
 
     # ──────────────────────────────────────────────────────────────────
@@ -261,7 +265,7 @@ class SubcategoriesView(QWidget):
         if QMessageBox.question(
                 self, "Confirmer",
                 f"Appliquer le libellé « {new_name} » à "
-                f"{len(tx_ids)} opération(s) ?"
+                f"{pluriel(len(tx_ids), 'opération', 'opérations')} ?"
         ) != QMessageBox.Yes:
             return
 
@@ -291,7 +295,7 @@ class SubcategoriesView(QWidget):
         if QMessageBox.question(
                 self, "Confirmer la suppression",
                 f"Vider la sous-catégorie ({preview}) sur "
-                f"{len(tx_ids)} opération(s) ?\n\n"
+                f"{pluriel(len(tx_ids), 'opération', 'opérations')} ?\n\n"
                 "Les opérations ne sont pas supprimées : seul le champ "
                 "« sous-catégorie » est mis à blanc."
         ) != QMessageBox.Yes:
@@ -336,8 +340,8 @@ class SubcategoriesView(QWidget):
                 lines.append(f"  • [{cat}] « {v} »  →  « {target} »   ({n} op.)")
                 total_tx += n
         msg = (
-            f"Le nettoyage normalisera {len(plans)} groupe(s) de variantes, "
-            f"affectant {total_tx} opération(s) :\n\n"
+            f"Le nettoyage normalisera {pluriel(len(plans), 'groupe', 'groupes')} de variantes, "
+            f"affectant {pluriel(total_tx, 'opération', 'opérations')} :\n\n"
             + "\n".join(lines[:30])
             + ("\n  …" if len(lines) > 30 else "")
             + "\n\nAppliquer ces changements ?"
@@ -356,7 +360,8 @@ class SubcategoriesView(QWidget):
                         n_updated += 1
         QMessageBox.information(
             self, "Nettoyage terminé",
-            f"{n_updated} opération(s) mise(s) à jour."
+            f"{pluriel(n_updated, 'opération', 'opérations')} "
+            f"{accorde(n_updated, 'mise', 'mises')} à jour."
         )
         self.refresh()
         self.sub_changed.emit()

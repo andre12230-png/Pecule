@@ -17,6 +17,7 @@ from PySide6.QtCharts import (
     QAbstractBarSeries, QBarCategoryAxis, QValueAxis,
 )
 
+from ...accords import accorde, pluriel
 from ...utils import (
     carte_a_debit_differe, cat_color,
     depense_nette_par_categorie, est_paiement_carte,
@@ -927,7 +928,7 @@ class BilanView(QWidget):
                 f"💳 ENCOURS CARTE — {period_label(mois).upper()} "
                 "(prélevé le "
                 + " et le ".join(fmt_date_fr(d) for d in debits) + ")")
-            detail = (f"{len(achats_mois)} achat(s) par carte sur le mois — "
+            detail = (f"{pluriel(len(achats_mois), 'achat', 'achats')} par carte sur le mois — "
                       + (f"il a MANQUÉ {fmt_euro(-disponible)}" if disponible < 0
                          else f"il restait {fmt_euro(disponible)}")
                       + " une fois tout payé")
@@ -944,7 +945,7 @@ class BilanView(QWidget):
             titre += f" — prochain prélèvement le {fmt_date_fr(prochaine)}"
         self.cb_title.setText(titre)
 
-        detail = (f"{len(confirmes)} confirmée(s)  •  {len(en_cours)} en cours"
+        detail = (f"{pluriel(len(confirmes), 'confirmée', 'confirmées')}  •  {len(en_cours)} en cours"
                   f"  •  {len(lot)} au total sur ce prélèvement")
         # La phrase qui porte, depuis la suppression du quatrième bloc, ce
         # que le mois laisse : le solde qu'aura le compte à la fin du mois
@@ -974,7 +975,7 @@ class BilanView(QWidget):
                        "des achats")
         detail += verdict
         if plus_tard:
-            detail += (f"  •  {len(plus_tard)} opération(s) au-delà "
+            detail += (f"  •  {pluriel(len(plus_tard), 'opération', 'opérations')} au-delà "
                        f"({fmt_euro(sum(t['montant'] for t in plus_tard))})")
         if solde_compte is not None:
             # Chiffre mis en avant par la banque sous « Opérations carte en
@@ -1147,7 +1148,7 @@ class BilanView(QWidget):
 
         n_sorties = sum(1 for _d, _l, m_, c in lignes if not c and m_ < 0)
         n_entrees = sum(1 for _d, _l, m_, c in lignes if not c and m_ > 0)
-        detail = f"{n_sorties} prélèvement(s)  •  {n_entrees} rentrée(s)"
+        detail = f"{pluriel(n_sorties, 'prélèvement', 'prélèvements')}  •  {pluriel(n_entrees, 'rentrée', 'rentrées')}"
         if carte:
             jour_carte = min((d for d, _l, _m, c in lignes if c), default="")
             detail += (f"  •  débit carte {fmt_euro(carte)}"
@@ -1155,7 +1156,7 @@ class BilanView(QWidget):
         if en_cours_carte:
             # Écartées du calcul : elles iront au prélèvement d'après.
             somme = sum(t["montant"] for t in en_cours_carte)
-            detail += (f"  •  {len(en_cours_carte)} opération(s) carte en cours "
+            detail += (f"  •  {pluriel(len(en_cours_carte), 'opération', 'opérations')} carte en cours "
                        f"({fmt_euro(somme)}) au prélèvement suivant")
         if not clos:
             # Part déjà saisie en opérations (⏳) : le reste vient du
@@ -1166,7 +1167,8 @@ class BilanView(QWidget):
                 if t.get("prevue") and not t.get("pointee")
                 and debut_iso <= (t.get("date_valeur") or t.get("date", "")) <= fin_iso)
             if n_prevues:
-                detail += f"  •  dont {n_prevues} échéance(s) déjà saisie(s) ⏳"
+                detail += (f"  •  dont {pluriel(n_prevues, 'échéance', 'échéances')} "
+                          f"déjà {accorde(n_prevues, 'saisie', 'saisies')} ⏳")
             # Les trois prochaines échéances, pour situer. Elles venaient du
             # bandeau des 15 jours : ne comptant que ce qui est ENCORE à venir,
             # elles gardent tout leur sens dans une fenêtre qui part du 1er.
@@ -1298,10 +1300,13 @@ class BilanView(QWidget):
             self.hors_solde_alert.setVisible(False)
             return
         total = sum(t.get("montant", 0) for t in avant)
+        n = len(avant)
         self.hors_solde_alert.setText(
-            "&#9888; <b>" + str(len(avant)) + " opération(s) antérieure(s) au "
-            + fmt_date_fr(depart) + "</b>, la date de départ du compte : leur "
-            "total (" + fmt_euro(total) + ") <b>n'entre pas</b> dans le solde "
+            f"&#9888; <b>{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'antérieure', 'antérieures')} au "
+            f"{fmt_date_fr(depart)}</b>, la date de départ du compte : "
+            f"{accorde(n, 'son montant', 'leur total')} "
+            f"({fmt_euro(total)}) <b>n'entre pas</b> dans le solde "
             "ci-dessus — il est censé être déjà compris dans le solde de "
             "départ. Pour les compter sans changer le solde d'aujourd'hui : "
             "<a href='#'>reculer la date de départ</a>.")
@@ -1389,10 +1394,14 @@ class BilanView(QWidget):
         self.kpis["solde"]._value.setText(fmt_euro(solde_compte))
         self._colorer_kpi("solde", "#18733A" if solde_compte >= 0 else "#C0392B")
         sub = (f"Au {fmt_date_fr(today_iso)} — initial {fmt_euro(initial_balance)} + "
-               f"{len(pointees_up)} opér. pointée(s) — toujours en date de valeur "
+               f"{pluriel(len(pointees_up), 'opération', 'opérations')} "
+               f"{accorde(len(pointees_up), 'pointée', 'pointées')} — toujours en date de valeur "
                "(banque), encours carte non compris")
         if non_pointees_up:
-            sub += (f"  •  {len(non_pointees_up)} non pointée(s) ignorée(s) "
+            n = len(non_pointees_up)
+            sub += (f"  •  {pluriel(n, 'opération', 'opérations')} non "
+                    f"{accorde(n, 'pointée', 'pointées')} "
+                    f"{accorde(n, 'ignorée', 'ignorées')} "
                     f"({fmt_euro(montant_en_attente)}) — engagé : {fmt_euro(solde_engage)}")
         self.kpis["solde"]._sub.setText(sub)
 
@@ -1422,7 +1431,8 @@ class BilanView(QWidget):
         # La période est rappelée ici : le titre ne la porte plus depuis qu'il
         # dit ce qu'on additionne (« Mouvement pointé »).
         self.kpis["pointe"]._sub.setText(
-            f"{n_pt} opération(s) pointée(s) — {period_label(self.period)}")
+            f"{pluriel(n_pt, 'opération', 'opérations')} "
+            f"{accorde(n_pt, 'pointée', 'pointées')} — {period_label(self.period)}")
 
         # ── Graphique en barres : douze mois ──────────────────────────
         # Il reçoit TOUTES les opérations, pas celles de la période : sur un

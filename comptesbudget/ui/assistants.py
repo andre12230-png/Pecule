@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from ..constants import (
     FREQUENCIES,
 )
+from ..accords import accorde, nombre, pluriel
 from ..utils import (
     cat_color, fmt_euro, fmt_date_fr, period_label,
 )
@@ -67,7 +68,7 @@ class HarmonizeDialog(QDialog):
             self.model.appendRow(row)
 
         btn_row = QHBoxLayout()
-        self.lbl_summary = QLabel(f"{len(suggestions)} suggestion(s)")
+        self.lbl_summary = QLabel(pluriel(len(suggestions), "suggestion"))
         btn_row.addWidget(self.lbl_summary)
         btn_row.addStretch()
         self.btn_none = QPushButton("Tout décocher")
@@ -217,8 +218,10 @@ class DuplicatesDialog(QDialog):
     def _update_summary(self):
         n = sum(1 for r in range(self.model.rowCount())
                 if self.model.item(r, 0).data(Qt.UserRole + 1))
+        total = self.model.rowCount()
         self.lbl_summary.setText(
-            f"{n} à supprimer sur {self.model.rowCount()} détectée(s)")
+            f"{nombre(n)} à supprimer sur {nombre(total)} "
+            f"{accorde(total, 'détectée')}")
 
     def selected(self) -> list[str]:
         """Ids des opérations cochées (à supprimer)."""
@@ -349,8 +352,10 @@ class PrefillRecurringDialog(QDialog):
     def _update_summary(self):
         n = sum(1 for r in range(self.model.rowCount())
                 if self.model.item(r, 0).data(Qt.UserRole + 1))
+        total = self.model.rowCount()
         self.lbl_summary.setText(
-            f"{n} sélectionnée(s) sur {self.model.rowCount()} détectée(s)")
+            f"{nombre(n)} {accorde(n, 'sélectionnée', 'sélectionnées')} sur "
+            f"{nombre(total)} {accorde(total, 'détectée', 'détectées')}")
 
     def selected(self) -> list[dict]:
         """Liste des candidats cochés (dicts de détection)."""
@@ -521,10 +526,10 @@ class GenererEcheancesDialog(QDialog):
         entrees = sum(e["montant"] for e in choisies if e["montant"] > 0)
         deja = sum(1 for r in range(self.model.rowCount())
                    if self.model.item(r, 0).data(self.VERROU))
-        txt = (f"{len(choisies)} opération(s) à créer sur "
-               f"{self.model.rowCount()} échéance(s) du mois")
+        txt = (f"{pluriel(len(choisies), 'opération', 'opérations')} à créer sur "
+               f"{pluriel(self.model.rowCount(), 'échéance', 'échéances')} du mois")
         if deja:
-            txt += f" ({deja} déjà enregistrée(s))"
+            txt += f" ({nombre(deja)} déjà {accorde(deja, 'enregistrée', 'enregistrées')})"
         if choisies:
             txt += (f"  —  à débiter : {fmt_euro(sorties)}"
                     f"  •  à encaisser : {fmt_euro(entrees)}")
@@ -641,7 +646,7 @@ class HarmonizeLabelsDialog(QDialog):
         n = sum(1 for r in range(self.model.rowCount())
                 if self.model.item(r, 0).data(Qt.UserRole + 1))
         self.lbl_summary.setText(
-            f"{n} libellé(s) à harmoniser sur {self.model.rowCount()}")
+            pluriel(n, "libellé", "libellés") + f" à harmoniser sur {self.model.rowCount()}")
 
     def selected(self) -> list[dict]:
         """Lignes cochées avec la cible éventuellement éditée :

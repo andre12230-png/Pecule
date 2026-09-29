@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 from ..constants import (
     APP_VERSION, _app_dir,
 )
+from ..accords import accorde, pluriel
 from ..utils import (
     canonical_cat, fmt_euro, fmt_date_fr,
     suggest_category,
@@ -443,8 +444,10 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 errors.append(
                     f"{os.path.basename(p)} : {erreur_en_clair(e)}")
-        msg = (f"{total_imp} opération(s) importée(s).\n"
-               f"{total_skip} doublon(s) ignoré(s).")
+        msg = (f"{pluriel(total_imp, 'opération', 'opérations')} "
+               f"{accorde(total_imp, 'importée', 'importées')}.\n"
+               f"{pluriel(total_skip, 'doublon', 'doublons')} "
+               f"{accorde(total_skip, 'ignoré', 'ignorés')}.")
         if total_recap:
             # Pas de pictogramme sur cette ligne : la carte bancaire (U+1F4B3)
             # ne fait pas partie de Segoe UI, la police des boîtes de dialogue,
@@ -453,19 +456,26 @@ class MainWindow(QMainWindow):
             # Écarté parce que les achats sont détaillés ailleurs : dans ce
             # relevé, ou dans le relevé de la CARTE, que certaines banques
             # donnent à part. Rien ne permet de le vérifier ici : on le dit.
-            msg += (f"\n{total_recap} récapitulatif(s) de débit différé "
-                    "écarté(s) : ils totalisent des achats carte qui se "
+            msg += (f"\n{pluriel(total_recap, 'récapitulatif', 'récapitulatifs')} "
+                    f"de débit différé {accorde(total_recap, 'écarté', 'écartés')} : "
+                    f"{accorde(total_recap, 'il totalise', 'ils totalisent')} "
+                    "des achats carte qui se "
                     "comptent un par un. Si votre banque les donne dans un "
                     "relevé de carte séparé, importez-le aussi.")
         if total_pt:
-            msg += (f"\n✔ {total_pt} opération(s) déjà enregistrée(s) pointée(s) "
+            msg += (f"\n✔ {pluriel(total_pt, 'opération', 'opérations')} "
+                    f"déjà {accorde(total_pt, 'enregistrée', 'enregistrées')} "
+                    f"{accorde(total_pt, 'pointée', 'pointées')} "
                     "automatiquement (confirmées par le relevé).")
         if total_rappr:
-            msg += (f"\n⏳ {total_rappr} échéance(s) prévue(s) rattachée(s) à la "
+            msg += (f"\n⏳ {pluriel(total_rappr, 'échéance', 'échéances')} "
+                    f"{accorde(total_rappr, 'prévue', 'prévues')} "
+                    f"{accorde(total_rappr, 'rattachée', 'rattachées')} à la "
                     "ligne correspondante du relevé (date et montant réels "
                     "repris) — aucun doublon créé.")
         if total_bad:
-            msg += (f"\n\n⚠ {total_bad} ligne(s) NON importée(s) : date ou montant illisible.\n"
+            msg += (f"\n\n⚠ {pluriel(total_bad, 'ligne', 'lignes')} NON "
+                    f"{accorde(total_bad, 'importée', 'importées')} : date ou montant illisible.\n"
                     "Vérifiez le fichier, ou saisissez ces opérations à la main.")
         # Rien du tout n'a été lu : annoncer « 0 opération importée » sans un
         # mot laissait l'utilisateur devant une énigme. On cherche la cause
@@ -549,7 +559,7 @@ class MainWindow(QMainWindow):
         if self._accepted_drop_paths(event):
             event.acceptProposedAction()
             self.statusBar().showMessage(
-                "📥 Relâchez pour importer le(s) relevé(s)…")
+                "📥 Relâchez pour importer vos relevés…")
         elif self._conseil_depot(event):
             # On accepte le dépôt pour pouvoir expliquer le refus.
             event.acceptProposedAction()
@@ -598,14 +608,16 @@ class MainWindow(QMainWindow):
         summary = "\n".join(
             f"  • « {fr} » → « {to} » ({n})"
             for (fr, to), n in sorted(groups.items(), key=lambda x: -x[1]))
-        msg = f"{len(changes)} catégorie(s) à normaliser :\n\n{summary}\n\nAppliquer ?"
+        msg = f"{pluriel(len(changes), 'catégorie', 'catégories')} à normaliser :\n\n{summary}\n\nAppliquer ?"
         if QMessageBox.question(self, "Nettoyer les catégories", msg) != QMessageBox.Yes:
             return
         with self.db.batch():
             for tx_id, _, to in changes:
                 self.db.update_tx(tx_id, {"categorie": to})
+        n = len(changes)
         QMessageBox.information(self, "Nettoyage",
-            f"{len(changes)} catégorie(s) normalisée(s).")
+            f"{pluriel(n, 'catégorie', 'catégories')} "
+            f"{accorde(n, 'normalisée', 'normalisées')}.")
         self.refresh_all()
 
     def action_settings(self):
@@ -740,21 +752,40 @@ class MainWindow(QMainWindow):
 
     def _demander_recul_depart(self, prop: dict) -> str:
         """La question posée. Renvoie « reculer », « parametres » ou « rien »."""
+        n = prop['nb']
+        ops = pluriel(n, "opération", "opérations")
+        verbe = accorde(n, "est", "sont")
+        adj = accorde(n, "antérieure", "antérieures")
         texte = (
-            f"<b>{prop['nb']} opération(s)</b> sont antérieures au "
+            f"<b>{ops}</b> {verbe} {adj} au "
             f"{fmt_date_fr(prop['ancienne_date'])}, la date de départ du "
-            "compte : elles <b>n'entrent pas</b> dans le solde.<br><br>"
+            "compte : "
+            + ("elle <b>n'entre pas</b>" if n == 1
+               else "elles <b>n'entrent pas</b>")
+            + " dans le solde.<br><br>"
             "Pécule peut reculer la date de départ au "
             f"<b>{fmt_date_fr(prop['date'])}</b> (la plus ancienne), avec un "
             f"solde de départ de <b>{fmt_euro(prop['solde'])}</b> : ce montant "
             "est calculé pour que <b>le solde d'aujourd'hui reste le "
-            "même</b>. Ces opérations compteront alors dans le solde de "
-            "chaque mois passé.")
-        if prop["nb_non_pointees"]:
-            texte += (
-                f"<br><br>{prop['nb_non_pointees']} d'entre elles ne sont pas "
-                "pointées : elles resteront « en attente » tant que vous ne "
-                "les aurez pas pointées.")
+            "même</b>. "
+            + ("Cette opération comptera" if n == 1
+               else "Ces opérations compteront")
+            + " alors dans le solde de chaque mois passé.")
+        k = prop["nb_non_pointees"]
+        if k:
+            if n == 1:
+                texte += ("<br><br>Elle n'est pas pointée : elle restera "
+                          "« en attente » tant que vous ne l'aurez pas "
+                          "pointée.")
+            elif k == 1:
+                texte += ("<br><br>1 d'entre elles n'est pas pointée : elle "
+                          "restera « en attente » tant que vous ne l'aurez "
+                          "pas pointée.")
+            else:
+                texte += (
+                    f"<br><br>{k} d'entre elles ne sont pas pointées : elles "
+                    "resteront « en attente » tant que vous ne les aurez pas "
+                    "pointées.")
         texte += (
             "<br><br>Répondez oui si le solde de départ actuel "
             f"({fmt_euro(prop['ancien_solde'])} au "
@@ -858,7 +889,8 @@ class MainWindow(QMainWindow):
         None si l'utilisateur referme la boîte sans répondre."""
         montant, ok = demander_montant(
             self, "Solde de votre compte",
-            f"{nb} opération(s) importée(s), du {fmt_date_fr(premiere)} "
+            f"{pluriel(nb, 'opération', 'opérations')} "
+            f"{accorde(nb, 'importée', 'importées')}, du {fmt_date_fr(premiere)} "
             f"au {fmt_date_fr(derniere)}.\n\n"
             f"Quel était le solde de votre compte le {fmt_date_fr(derniere)},\n"
             "jour de la dernière opération du relevé ?\n\n"
@@ -912,7 +944,7 @@ class MainWindow(QMainWindow):
         n = len(self.db.list_tx())
         QMessageBox.information(
             self, "Reprendre mes données",
-            f"Vos données sont reprises : {n} opération(s) sur le compte "
+            f"Vos données sont reprises : {pluriel(n, 'opération', 'opérations')} sur le compte "
             f"« {self.db.nom_compte()} ».\n\nL'ancien fichier n'a pas été "
             "touché — gardez-le de côté jusqu'à ce que tout vous paraisse "
             "juste. Les sauvegardes automatiques recommencent ici, à côté de "
@@ -982,8 +1014,10 @@ class MainWindow(QMainWindow):
         with self.db.batch():
             for tx_id, new_cat in changes:
                 self.db.update_tx(tx_id, {"categorie": new_cat})
+        n = len(changes)
         QMessageBox.information(self, "Harmoniser",
-            f"{len(changes)} opération(s) recatégorisée(s).")
+            f"{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'recatégorisée', 'recatégorisées')}.")
         self.refresh_all()
 
     def action_harmonize_labels(self):
@@ -1038,9 +1072,12 @@ class MainWindow(QMainWindow):
                 for rec_id in d["rec_ids"]:
                     self.db.update_recurring(rec_id, {"libelle": d["new"]})
                     n_rec += 1
+        n_chosen = len(chosen)
         QMessageBox.information(self, "Harmoniser les libellés",
-            f"{len(chosen)} libellé(s) harmonisé(s) — "
-            f"{n_tx} opération(s) et {n_rec} récurrence(s) mises à jour.")
+            f"{pluriel(n_chosen, 'libellé', 'libellés')} "
+            f"{accorde(n_chosen, 'harmonisé', 'harmonisés')} — "
+            f"{pluriel(n_tx, 'opération', 'opérations')} et "
+            f"{pluriel(n_rec, 'récurrence', 'récurrences')} mises à jour.")
         self.refresh_all()
 
     def action_find_duplicates(self):
@@ -1069,8 +1106,10 @@ class MainWindow(QMainWindow):
         with self.db.batch():
             for tx_id in ids:
                 self.db.delete_tx(tx_id)
+        n = len(ids)
         QMessageBox.information(self, "Doublons",
-            f"{len(ids)} opération(s) supprimée(s).")
+            f"{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'supprimée', 'supprimées')}.")
         self.refresh_all()
 
     def action_export(self):
@@ -1110,12 +1149,19 @@ class MainWindow(QMainWindow):
                 "fichier ne sera écrasé.") != QMessageBox.Yes:
             return
         stats = merge_remote_into_db(self.db, data)
-        msg = (f"Fusion terminée : {stats['applied']} enregistrement(s) "
-               f"appliqué(s), {stats['deleted']} suppression(s) propagée(s).")
+        n_app = stats['applied']
+        n_del = stats['deleted']
+        msg = (f"Fusion terminée : {pluriel(n_app, 'enregistrement', 'enregistrements')} "
+               f"{accorde(n_app, 'appliqué', 'appliqués')}, "
+               f"{pluriel(n_del, 'suppression', 'suppressions')} "
+               f"{accorde(n_del, 'propagée', 'propagées')}.")
         if stats["comptes_retablis"]:
             # Compte absent d'ici (supprimé, ou venu d'une autre
             # installation) : il revient avec tout son contenu.
-            msg += ("\n\nCompte(s) rétabli(s) avec leurs opérations : "
+            n_cpts = len(stats["comptes_retablis"])
+            msg += ("\n\n"
+                    + ("Compte rétabli avec ses opérations : " if n_cpts == 1
+                       else "Comptes rétablis avec leurs opérations : ")
                     + ", ".join(f"« {n} »" for n in stats["comptes_retablis"])
                     + ".")
         QMessageBox.information(self, "Restaurer", msg)

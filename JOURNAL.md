@@ -21,6 +21,26 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-29 (3) — Pluriels accordés au lieu de « (s) »
+
+**Fait.** Les quelque 65 textes à pluriel entre parenthèses (« 3 opération(s)
+importée(s) », « suggestion(s) », « détectée(s) »…) accordent désormais avec
+le nombre, adjectifs, verbes et pronoms compris (« 1 opération est
+antérieure… elle n'entre pas », « 3 opérations sont antérieures… elles
+n'entrent pas »). Nouveau module `comptesbudget/accords.py` (nombre,
+accorde, pluriel), le même que dans les deux autres applis.
+`tests/test_pluriels.py` lit tout le code de l'appli et refuse un pluriel
+entre parenthèses ; `tests/test_accords.py` et un test de la question sur
+les opérations antérieures au singulier et au pluriel. 552 tests passent,
+ruff (F) sans remarque. Pas d'exe.
+**Pourquoi.** Règle ajoutée ce jour à la charte des trois applis, après la
+relecture d'un écran de l'appli Photovoltaïque. Le remplacement a été fait
+par un sous-agent, puis relu ligne à ligne : sept tournures reprises
+(« Son 1 opération », « il totalise » au singulier, « Compte rétabli avec
+ses opérations », « son montant n'entre pas », sens d'origine gardé pour les
+doublons et les sous-catégories).
+**Reste.** Rien sur ce sujet.
+
 ## 2026-09-29 (2) — Version 1.40.1 installée chez l'auteur
 
 **Fait.** Numéro 1.40.1 (vert des confirmations commun aux trois applis,

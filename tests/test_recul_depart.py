@@ -153,3 +153,29 @@ def test_pas_de_proposition_avec_des_archives(tmp_path):
     db.insert_tx(_tx("vieux", "2024-01-01", -5.0))
     db.archiver("2024-06-30")
     assert db.proposition_recul_depart() is None
+
+
+def test_la_question_s_accorde_avec_le_nombre(qapp, tmp_path, monkeypatch):
+    """29/09/2026 : « opération(s) » devient un vrai accord, pronoms compris
+    (« elle n'entre pas » / « elles n'entrent pas »)."""
+    from PySide6.QtWidgets import QMessageBox
+
+    from comptesbudget.ui.main_window import MainWindow
+    textes = []
+    # La boite n'est jamais affichee : on lit son texte et on la referme.
+    monkeypatch.setattr(QMessageBox, "exec",
+                        lambda self: textes.append(self.text()) or 0)
+    fenetre = MainWindow(_base_historique(tmp_path))
+    base = {"ancienne_date": "2026-09-11", "date": "2025-09-15",
+            "solde": 1200.0, "ancien_solde": 2000.0}
+    fenetre._demander_recul_depart(dict(base, nb=1, nb_non_pointees=1))
+    fenetre._demander_recul_depart(dict(base, nb=3, nb_non_pointees=2))
+    un, trois = textes
+    assert "1 opération</b> est antérieure" in un
+    assert "elle <b>n'entre pas</b>" in un
+    assert "Cette opération comptera" in un
+    assert "Elle n'est pas pointée" in un
+    assert "3 opérations</b> sont antérieures" in trois
+    assert "elles <b>n'entrent pas</b>" in trois
+    assert "Ces opérations compteront" in trois
+    assert "2 d'entre elles ne sont pas pointées" in trois

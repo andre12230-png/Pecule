@@ -1582,7 +1582,7 @@ def test_bilan_bandeau_fin_de_mois(qapp, tmp_path):
     assert vue.kpis["solde"]._value.text() == fmt_euro(900.0)   # 1000 - 100
     assert vue.mois_sorties.text() == fmt_euro(-250.0)          # 50 + 200
     assert vue.mois_solde.text() == fmt_euro(650.0)             # 900 - 250
-    assert "2 échéance(s) déjà saisie(s)" in vue.mois_detail.text()
+    assert "2 échéances déjà saisies" in vue.mois_detail.text()
     assert vue.mois_banner.isVisibleTo(vue)
 
 

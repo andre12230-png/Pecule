@@ -18,6 +18,7 @@ from ..utils import (
     fmt_euro, fmt_date_fr, carte_a_debit_differe, regle_debit_differe,
     numero_cheque, alerte_sens_saisie,
 )
+from ..accords import accorde, pluriel
 from ..erreurs import erreur_en_clair
 from ..labels import build_libelle_profiles
 from .widgets import MontantSpinBox, demander_montant
@@ -548,7 +549,8 @@ class TxDialog(QDialog):
         suffix = f" au montant exact de {fmt_euro(amt)}" if amt is not None else ""
         cats = sorted({t.get("categorie", "") for t in matches})
         already_classed = [c for c in cats if c not in ("", "Non classé")]
-        msg = f"{len(matches)} opération(s) correspondante(s){suffix}."
+        n = len(matches)
+        msg = f"{pluriel(n, 'opération', 'opérations')} {accorde(n, 'correspondante', 'correspondantes')}{suffix}."
         if len(cats) > 1 and already_classed:
             msg += f" ⚠️ Catégories existantes : {', '.join(f'« {c} »' for c in already_classed)}."
             self.rule_match_info.setStyleSheet("color:#C0392B; font-size:10pt; font-weight:600")
@@ -837,7 +839,7 @@ class ComptesDialog(QDialog):
             # rangement cosmétique.
             depart = " — ouvert au lancement" if rang == 0 else ""
             item = QListWidgetItem(
-                f"{r['nom']} — {n} opération(s){actuel}{depart}")
+                f"{r['nom']} — {pluriel(n, 'opération', 'opérations')}{actuel}{depart}")
             item.setData(Qt.UserRole, r["id"])
             self.liste.addItem(item)
             if r["id"] == self.db.compte_id:
@@ -905,10 +907,18 @@ class ComptesDialog(QDialog):
             return
         nom = self.db.nom_compte(cid)
         n = self.db.nb_operations(cid)
+        if n == 0:
+            ce_qui_part = "Ses budgets et ses récurrences seront"
+        elif n == 1:
+            ce_qui_part = ("Son opération, ses budgets et ses récurrences "
+                           "seront")
+        else:
+            ce_qui_part = (f"Ses {pluriel(n, 'opération')}, ses budgets et "
+                           "ses récurrences seront")
         rep = QMessageBox.question(
             self, "Supprimer le compte",
             f"Supprimer le compte « {nom} » ?\n\n"
-            f"Ses {n} opération(s), ses budgets et ses récurrences seront "
+            f"{ce_qui_part} "
             f"définitivement effacés. Cette action est irréversible.",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if rep != QMessageBox.Yes:
@@ -1030,8 +1040,10 @@ class ArchivesDialog(QDialog):
                 total += n
         self.total_a_archiver = total
         deja_total = sum(self.db.nb_archivees(c) for c in self.comptes_coches())
+        n_ops = pluriel(total, "opération", "opérations")
         self.resume.setText(
-            f"<b>{total}</b> opération(s) seraient mises de côté. "
+            f"<b>{n_ops}</b> {accorde(total, 'serait', 'seraient')} "
+            f"{accorde(total, 'mise', 'mises')} de côté. "
             f"Le solde affiché ne changera pas : leur total rejoint le solde "
             f"de départ.")
         self.b_ok.setEnabled(total > 0)
@@ -1044,8 +1056,9 @@ class ArchivesDialog(QDialog):
         if not comptes or not self.total_a_archiver:
             return
         detail = "\n".join(
-            f"  • {self.db.nom_compte(c)} : {self.db.a_archiver(jusqua, c)} "
-            f"opération(s)" for c in comptes)
+            f"  • {self.db.nom_compte(c)} : "
+            f"{pluriel(self.db.a_archiver(jusqua, c), 'opération', 'opérations')}"
+            for c in comptes)
         if QMessageBox.question(
                 self, "Archiver",
                 f"Mettre de côté les opérations jusqu'au "
@@ -1059,9 +1072,10 @@ class ArchivesDialog(QDialog):
         with self.db.batch():
             for cid in comptes:
                 n += self.db.archiver(jusqua, cid)
+        n_ops = pluriel(n, "opération", "opérations")
         QMessageBox.information(
             self, "Archivage",
-            f"{n} opération(s) mise(s) de côté jusqu'au "
+            f"{n_ops} {accorde(n, 'mise', 'mises')} de côté jusqu'au "
             f"{fmt_date_fr(jusqua)}.")
         self.rafraichir()
 
@@ -1070,8 +1084,9 @@ class ArchivesDialog(QDialog):
         if not comptes:
             return
         detail = "\n".join(
-            f"  • {self.db.nom_compte(c)} : {self.db.nb_archivees(c)} "
-            f"opération(s)" for c in comptes)
+            f"  • {self.db.nom_compte(c)} : "
+            f"{pluriel(self.db.nb_archivees(c), 'opération', 'opérations')}"
+            for c in comptes)
         if QMessageBox.question(
                 self, "Tout rétablir",
                 f"Remettre à la vue toutes les opérations archivées ?\n\n"
@@ -1082,8 +1097,9 @@ class ArchivesDialog(QDialog):
         with self.db.batch():
             for cid in comptes:
                 n += self.db.desarchiver(cid)
+        n_ops = pluriel(n, "opération", "opérations")
         QMessageBox.information(self, "Archives",
-                                f"{n} opération(s) remise(s) à la vue.")
+                                f"{n_ops} {accorde(n, 'remise', 'remises')} à la vue.")
         self.rafraichir()
 
 
@@ -1403,7 +1419,7 @@ class CategoriesMasqueesDialog(QDialog):
                 motif = "nécessaire au fonctionnement"
             elif nom in utilisees:
                 n = db.nb_operations_categorie(nom)
-                motif = f"utilisée par {n} opération(s)"
+                motif = f"utilisée par {pluriel(n, 'opération', 'opérations')}"
             if motif:
                 case.setChecked(True)
                 case.setEnabled(False)

@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 from ...constants import (
     FREQUENCIES,
 )
+from ...accords import accorde, pluriel
 from ...utils import (
     carte_a_debit_differe, cat_color, est_paiement_carte, fmt_euro,
     fmt_date_fr, period_label, regle_debit_differe,
@@ -182,8 +183,10 @@ class PrevisionnelView(QWidget):
 
         self.forecast_table.setSortingEnabled(True)
 
+        n = len(events)
         self.summary.setText(
-            f"📊 {len(events)} occurrence(s) prévue(s) jusqu'au {fmt_date_fr(until.isoformat())}  —  "
+            f"📊 {pluriel(n, 'occurrence', 'occurrences')} "
+            f"{accorde(n, 'prévue', 'prévues')} jusqu'au {fmt_date_fr(until.isoformat())}  —  "
             f"Recettes : {fmt_euro(total_pos)}  •  Dépenses : {fmt_euro(total_neg)}  •  "
             f"Net : {fmt_euro(total_pos + total_neg)}"
         )
@@ -313,7 +316,8 @@ class PrevisionnelView(QWidget):
 
         QMessageBox.information(
             self, "Échéances du mois",
-            f"{n} opération(s) créée(s) pour {period_label(mois_iso)}, "
+            f"{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'créée', 'créées')} pour {period_label(mois_iso)}, "
             "en NON pointé : elles n'entrent pas dans le solde en banque.\n\n"
             "Retrouvez-les dans l'onglet 📋 Opérations, repérées par ⏳ "
             "(filtre « Échéances prévues »).\n\n"
@@ -377,6 +381,8 @@ class PrevisionnelView(QWidget):
 
         QMessageBox.information(
             self, "Pré-remplir",
-            f"{n} opération(s) récurrente(s) ajoutée(s) au prévisionnel.")
+            f"{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'récurrente', 'récurrentes')} "
+            f"{accorde(n, 'ajoutée', 'ajoutées')} au prévisionnel.")
         self.refresh()
         self.changed.emit()

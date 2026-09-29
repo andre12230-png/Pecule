@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QInputDialog,
 )
 
+from ...accords import pluriel
 from ...utils import (
     carte_a_debit_differe, cat_color, deaccent, fmt_euro, in_period,
     period_label,
@@ -198,7 +199,7 @@ class CategoriesView(QWidget):
         txs = sorted(txs, key=self._eff_date, reverse=True)
         charger_en_conservant_le_tri(self.tx_table, self.tx_model, txs)
         total = sum(t["montant"] for t in txs)
-        self.cat_title.setText(f"« {cat} » — {len(txs)} opération(s)  —  {fmt_euro(total)}")
+        self.cat_title.setText(f"« {cat} » — {pluriel(len(txs), 'opération', 'opérations')}  —  {fmt_euro(total)}")
         self.btn_recat.setEnabled(True)
 
     def _edit_tx(self, index):
@@ -243,7 +244,7 @@ class CategoriesView(QWidget):
                   else f"sur la période affichée ({period_label(self.period)})")
         if QMessageBox.question(
                 self, "Confirmer",
-                f"Déplacer {len(affected)} opération(s) de « {self.current_cat} » "
+                f"Déplacer {pluriel(len(affected), 'opération', 'opérations')} de « {self.current_cat} » "
                 f"vers « {new_cat} » ?\n\n"
                 f"Seules les opérations {portee} sont concernées."
         ) != QMessageBox.Yes:

@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 from ...constants import (
     FREQUENCIES,
 )
+from ...accords import accorde, pluriel
 from ...utils import (
     deaccent, fmt_date_fr, fmt_euro, in_period,
 )
@@ -557,8 +558,11 @@ class OperationsView(QWidget):
         # Rien n'est modifié sans accord : ces changements ne sont pas annulables.
         deja_classees = sorted({t.get("categorie") for t, _f in a_changer
                                 if t.get("categorie") not in ("", "Non classé")})
-        msg = (f"{len(a_changer)} opération(s) de l'historique correspondent à "
-               f"cette règle et passeraient en « {v.get('categorie')} ».")
+        n = len(a_changer)
+        msg = (f"{pluriel(n, 'opération', 'opérations')} de l'historique "
+               f"{accorde(n, 'correspond', 'correspondent')} à "
+               f"cette règle et {accorde(n, 'passerait', 'passeraient')} "
+               f"en « {v.get('categorie')} ».")
         if deja_classees:
             msg += ("\n\n⚠ Dont des opérations déjà classées : "
                     + ", ".join(f"« {c} »" for c in deja_classees[:6])
@@ -571,8 +575,10 @@ class OperationsView(QWidget):
         with self.db.batch():
             for tx, fields in a_changer:
                 self.db.update_tx(tx["id"], fields)
+        n = len(a_changer)
         self.lbl_count.setText(
-            f"{len(a_changer)} opération(s) recatégorisée(s) par la règle.")
+            f"{pluriel(n, 'opération', 'opérations')} "
+            f"{accorde(n, 'recatégorisée', 'recatégorisées')} par la règle.")
 
     def add_tx(self):
         """Saisie d'une opération. Le bouton « Enregistrer et nouvelle » de la

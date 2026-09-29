@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QDialog,
 )
 
+from ..accords import accorde, pluriel
 from ..utils import (
     deaccent, fmt_euro, fmt_date_fr,
 )
@@ -109,8 +110,10 @@ class GlobalSearchDialog(QDialog):
         total = sum(t.get("montant", 0) for t in res)
         if words:
             extra = " — affichage des 500 premières" if len(res) > 500 else ""
+            n = len(res)
             self.lbl.setText(
-                f"{len(res)} opération(s) trouvée(s) — total {fmt_euro(total)}{extra}")
+                f"{pluriel(n, 'opération', 'opérations')} "
+                f"{accorde(n, 'trouvée', 'trouvées')} — total {fmt_euro(total)}{extra}")
         else:
             self.lbl.setText(
                 f"{len(self._rows)} opérations dans l'historique — tapez pour filtrer")

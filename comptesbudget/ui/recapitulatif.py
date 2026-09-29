@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout,
 )
 
+from ..accords import pluriel
 from ..utils import fmt_date_fr, fmt_euro
 
 ROUGE = "#C0392B"
@@ -115,7 +116,7 @@ class RecapComptesDialog(QDialog):
             self.table.setItem(ligne, 1, self._montant(s["banque"]))
             attente = self._montant(s["attente"], colorer=False)
             if s["nb_attente"]:
-                attente.setToolTip(f"{s['nb_attente']} opération(s)")
+                attente.setToolTip(pluriel(s['nb_attente'], 'opération', 'opérations'))
             self.table.setItem(ligne, 2, attente)
             self.table.setItem(ligne, 3, self._montant(s["comptable"]))
             jour = (fmt_date_fr(s["derniere_pointee"])
