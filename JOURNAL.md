@@ -24,9 +24,15 @@ La date la plus récente est en haut.
 ## 2026-09-29 (4) — Version 1.40.2 installée chez l'auteur
 
 **Fait.** Numéro 1.40.2 (constants.py et son historique, Lisez-moi.txt) :
-les pluriels accordés de l'entrée ci-dessous.
+les pluriels accordés de l'entrée ci-dessous. Contrôle de livraison vert
+(552/552 ; notice, Lisez-moi et README relus : aucun « (s) »). Exe lu en
+1.40.2 sans le lancer, module `comptesbudget.accords` présent dans
+l'archive. Installé : ancien exe renommé `Pecule.exe.avant-1.40.2`,
+`_internal` synchronisé (179 fichiers des deux côtés), base identique
+avant/après.
 **Pourquoi.** « installe les exe chez moi ».
-**Reste.** Rien.
+**Reste.** Deux anciens exe gardés (`avant-1.40.1`, `avant-1.40.2`) : proposer
+le plus ancien pour la Corbeille.
 
 ## 2026-09-29 (3) — Pluriels accordés au lieu de « (s) »
 
