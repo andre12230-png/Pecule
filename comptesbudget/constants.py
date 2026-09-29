@@ -880,7 +880,9 @@ SYNC_VERSION = 3
 #            suppression >>).
 #          - Bilan : courbe du solde en fin de mois sur douze mois, constate
 #            en trait plein, prevu en pointilles.
-APP_VERSION = "1.40.0"
+# 1.40.1 : Confirmations de << Votre avis >> et << Mise a jour >> dans le vert
+#          commun aux trois applications.
+APP_VERSION = "1.40.1"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

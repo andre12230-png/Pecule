@@ -21,6 +21,13 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-29 (2) — Version 1.40.1 installée chez l'auteur
+
+**Fait.** Numéro 1.40.1 (vert des confirmations commun aux trois applis).
+Exe construit et installé ; détail des contrôles plus bas dans la séance.
+**Pourquoi.** L'auteur : « deploie chez moi et supprime les ancien exe ».
+**Reste.** Rien.
+
 ## 2026-09-29 — Vert des confirmations aligné sur les deux autres applis
 
 **Fait.** Les confirmations de « Votre avis » et « Mise à jour » passent de
