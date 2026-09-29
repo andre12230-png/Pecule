@@ -31,8 +31,8 @@ l'archive. Installé : ancien exe renommé `Pecule.exe.avant-1.40.2`,
 `_internal` synchronisé (179 fichiers des deux côtés), base identique
 avant/après.
 **Pourquoi.** « installe les exe chez moi ».
-**Reste.** Deux anciens exe gardés (`avant-1.40.1`, `avant-1.40.2`) : proposer
-le plus ancien pour la Corbeille.
+**Reste.** Rien : `Pecule.exe.avant-1.40.1` (l'exe 1.40.0) est parti à la
+Corbeille à la demande de l'auteur ; filet unique `avant-1.40.2`.
 
 ## 2026-09-29 (3) — Pluriels accordés au lieu de « (s) »
 
