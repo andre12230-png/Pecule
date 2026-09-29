@@ -23,8 +23,11 @@ La date la plus récente est en haut.
 
 ## 2026-09-29 (2) — Version 1.40.1 installée chez l'auteur
 
-**Fait.** Numéro 1.40.1 (vert des confirmations commun aux trois applis).
-Exe construit et installé ; détail des contrôles plus bas dans la séance.
+**Fait.** Numéro 1.40.1 (vert des confirmations commun aux trois applis,
+`cb0eafd`). Contrôle de livraison vert (545/545). Exe essayé sur une base de
+démonstration (titre « v1.40.1 »), installé ; `comptes.db` identique avant et
+après. L'exe 1.40.0 devient le filet unique (`Pecule.exe.avant-1.40.1`),
+l'exe 1.39.2 part à la Corbeille.
 **Pourquoi.** L'auteur : « deploie chez moi et supprime les ancien exe ».
 **Reste.** Rien.
 
