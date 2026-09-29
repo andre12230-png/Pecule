@@ -94,3 +94,16 @@ def test_texte_grise_reste_visible():
     assert contraste(fond, invite) >= 3.0
     desactive = pal.color(QPalette.Disabled, QPalette.WindowText)
     assert contraste(pal.color(QPalette.Window), desactive) >= 3.0
+
+
+def test_vert_de_confirmation_commun_aux_trois_applis(qapp):
+    """29/09/2026 : les confirmations de « Votre avis » et « Mise à jour »
+    étaient écrites en #2E7D32, les deux autres applis en #18733A, le vert de
+    texte de la palette commune (règle : les trois applis ont exactement les
+    mêmes couleurs)."""
+    from comptesbudget.ui.avis import AvisDialog
+    from comptesbudget.ui.mise_a_jour import MiseAJourDialog
+
+    for fenetre in (AvisDialog(), MiseAJourDialog()):
+        style = fenetre.confirmation.styleSheet().upper()
+        assert "#18733A" in style, type(fenetre).__name__
