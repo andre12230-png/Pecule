@@ -43,8 +43,8 @@ class SubcategoriesView(QWidget):
         )
         help_lbl.setWordWrap(True)
         help_lbl.setStyleSheet(
-            "background:#FFF9E6; border:1px solid #E6D38A; "
-            "border-radius:4px; padding:6px 8px; color:#5B4900;"
+            "background:#FFFBE6; border:1px solid #E8D77B; "
+            "border-radius:4px; padding:6px 8px;"
         )
         v.addWidget(help_lbl)
 

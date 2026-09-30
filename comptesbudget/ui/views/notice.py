@@ -14,18 +14,18 @@ NOTICE_HTML = """
   body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; }
   h1 { color: #1F3A6B; border-bottom: 2px solid #1F3A6B; padding-bottom: 4px; }
   h2 { color: #1F3A6B; margin-top: 22px; }
-  h3 { color: #2E5C9E; margin-top: 16px; }
-  .tip { background: #FFFBE6; border-left: 4px solid #E8C77B;
+  h3 { color: #1F3A6B; margin-top: 16px; }
+  .tip { background: #FFFBE6; border-left: 4px solid #E8D77B;
          padding: 8px 12px; margin: 8px 0; }
-  .warn { background: #FDECEA; border-left: 4px solid #E74C3C;
+  .warn { background: #FDEDEB; border-left: 4px solid #E74C3C;
           padding: 8px 12px; margin: 8px 0; }
-  code { background: #F4F4F4; padding: 1px 5px; border-radius: 3px;
+  code { background: #F5F5F0; padding: 1px 5px; border-radius: 3px;
          font-family: 'Consolas', monospace; }
   ul li { margin-bottom: 4px; }
   table { border-collapse: collapse; margin: 8px 0; }
-  th, td { border: 1px solid #CCC; padding: 4px 8px; }
+  th, td { border: 1px solid #A9A9A9; padding: 4px 8px; }
   th { background: #E8EEF7; }
-  kbd { background: #F4F4F4; border: 1px solid #BBB; border-radius: 3px;
+  kbd { background: #F5F5F0; border: 1px solid #A9A9A9; border-radius: 3px;
         padding: 1px 6px; font-family: 'Consolas', monospace; font-size: 10pt; }
 </style>
 
@@ -815,8 +815,8 @@ GLOSSAIRE_HTML = """
   body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; }
   h1 { color: #1F3A6B; border-bottom: 2px solid #1F3A6B; padding-bottom: 4px; }
   dt { font-weight: bold; color: #1F3A6B; margin-top: 12px; font-size: 12pt; }
-  dd { margin-left: 16px; margin-bottom: 6px; color: #333; }
-  code { background: #F4F4F4; padding: 1px 5px; border-radius: 3px;
+  dd { margin-left: 16px; margin-bottom: 6px; color: #222; }
+  code { background: #F5F5F0; padding: 1px 5px; border-radius: 3px;
          font-family: 'Consolas', monospace; }
 </style>
 

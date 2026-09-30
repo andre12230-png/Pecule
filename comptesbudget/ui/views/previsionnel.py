@@ -114,7 +114,7 @@ class PrevisionnelView(QWidget):
         blay.addWidget(self.forecast_table)
 
         self.summary = QLabel("")
-        self.summary.setStyleSheet("padding:6px; background:#FFF7E6; border:1px solid #E8C77B")
+        self.summary.setStyleSheet("padding:6px; background:#FFFBE6; border:1px solid #E8D77B")
         blay.addWidget(self.summary)
 
         splitter.addWidget(bot)

@@ -166,7 +166,7 @@ class BudgetView(QWidget):
             # écrit en blanc (5,44 pour 1 ; en noir, 3,86 seulement).
             encre = "#FFFFFF" if ratio >= 100 and budget else "#000000"
             bar.setStyleSheet(f"""
-                QProgressBar {{ border:1px solid #BBB; border-radius:3px; text-align:center; background:#F5F5F5; color:{encre}; }}
+                QProgressBar {{ border:1px solid #A9A9A9; border-radius:3px; text-align:center; background:#F5F5F0; color:{encre}; }}
                 QProgressBar::chunk {{ background:{color}; }}
             """)
             self.table.setIndexWidget(self.model.index(i, 3), bar)

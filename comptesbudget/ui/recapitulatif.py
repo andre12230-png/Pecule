@@ -79,8 +79,8 @@ class RecapComptesDialog(QDialog):
             "Les virements entre vos comptes s'annulent dans le total quand "
             "ils sont saisis des deux côtés.")
         note.setWordWrap(True)
-        note.setStyleSheet("color:#555; padding:6px; background:#F6F7F9; "
-                           "border:1px solid #DCDCDC")
+        note.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
+                           "border:1px solid #E8D77B")
         lay.addWidget(note)
         # L'espace en trop va en bas, pas entre le texte et le tableau.
         lay.addStretch(1)

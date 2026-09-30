@@ -90,12 +90,12 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         ("Dépenses", euro(depenses), "#C0392B"),
     ]
     if mis_de_cote:
-        kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#16A085"))
+        kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#18733A"))
     kpis += [
         ("Mouvement net", euro(net), "#18733A" if net >= 0 else "#C0392B"),
         # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
         ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
-         "#16A085" if taux >= 0 else "#C0392B"),
+         "#18733A" if taux >= 0 else "#C0392B"),
         (f"Solde bancaire réel au {fmt_date_fr(arret)}", euro(solde_fin),
          "#1F3A6B" if solde_fin >= 0 else "#C0392B"),
     ]
@@ -108,7 +108,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     if budgets:
         H.append("<h2>Budgets du mois</h2>")
         H.append('<table cellpadding="5" cellspacing="0" width="100%">'
-                 '<tr bgcolor="#DCE6F1"><td><b>Catégorie</b></td>'
+                 '<tr bgcolor="#E8EEF7"><td><b>Catégorie</b></td>'
                  '<td align="right"><b>Budget</b></td>'
                  '<td align="right"><b>Dépensé</b></td>'
                  '<td align="right"><b>%</b></td>'
@@ -118,7 +118,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         for ratio, cat, b in reversed(rows):
             dep = spent_budget.get(cat, 0)
             reste = b - dep
-            col = "#C0392B" if ratio >= 100 else ("#E67E22" if ratio >= 85 else "#18733A")
+            col = "#C0392B" if ratio >= 100 else ("#7E5109" if ratio >= 85 else "#18733A")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
             H.append(f'<tr{bg}><td>{_esc(cat)}</td>'
                      f'<td align="right">{euro(b)}</td>'
@@ -131,7 +131,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     # — Dépenses par catégorie —
     H.append("<h2>Dépenses par catégorie</h2>")
     H.append('<table cellpadding="5" cellspacing="0" width="100%">'
-             '<tr bgcolor="#DCE6F1"><td><b>Catégorie</b></td>'
+             '<tr bgcolor="#E8EEF7"><td><b>Catégorie</b></td>'
              '<td align="right"><b>Montant</b></td>'
              '<td align="right"><b>Part</b></td></tr>')
     for cat, dep in sorted(spent.items(), key=lambda x: -x[1]):
@@ -145,7 +145,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     if top:
         H.append("<h2>Plus grosses dépenses</h2>")
         H.append('<table cellpadding="5" cellspacing="0" width="100%">'
-                 '<tr bgcolor="#DCE6F1"><td><b>Date</b></td><td><b>Libellé</b></td>'
+                 '<tr bgcolor="#E8EEF7"><td><b>Date</b></td><td><b>Libellé</b></td>'
                  '<td><b>Catégorie</b></td><td align="right"><b>Montant</b></td></tr>')
         for t in top:
             H.append(f'<tr><td>{fmt_date_fr(t["date"])}</td>'

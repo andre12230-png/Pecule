@@ -295,7 +295,7 @@ class PrefillRecurringDialog(QDialog):
             it_range = QStandardItem(f"{fmt_euro(c['_min'])} … {fmt_euro(c['_max'])}")
             it_range.setForeground(QBrush(QColor("#5A5A5A")))
             if not c["_stable"]:
-                it_range.setForeground(QBrush(QColor("#C77B00")))
+                it_range.setForeground(QBrush(QColor("#7E5109")))
 
             it_nb = QStandardItem(str(c["_months"]))
             it_nb.setTextAlignment(Qt.AlignCenter)
@@ -477,7 +477,7 @@ class GenererEcheancesDialog(QDialog):
             if verrou:
                 etat, couleur = "✔ déjà enregistrée", "#5A5A5A"
             elif e["_passee"]:
-                etat, couleur = "⚠ date déjà passée", "#C77B00"
+                etat, couleur = "⚠ date déjà passée", "#7E5109"
             else:
                 etat, couleur = "à créer", "#18733A"
             it_etat = QStandardItem(etat)

@@ -207,7 +207,7 @@ class BilanView(QWidget):
         # côté du vrai solde et pour une valeur voisine.
         defs = [
             ("solde",    "💼 Solde bancaire réel (pointé)", "#1F3A6B"),
-            ("net",      "Mouvement du mois",              "#34495E"),
+            ("net",      "Mouvement du mois",              "#1F3A6B"),
             ("epargne",  "Taux d'épargne",                 "#18733A"),
             ("pointe",   "✔ Mouvement pointé",             "#18733A"),
         ]
@@ -238,16 +238,15 @@ class BilanView(QWidget):
         self.cb_banner.setObjectName("bandeauCarte")
         self.cb_banner.setStyleSheet("""
             QFrame#bandeauCarte {
-                     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                        stop:0 #FFF8E1, stop:1 #FFECB3);
-                     border: 1px solid #E8C77B; border-radius: 4px; }
+                     background: #FFFBE6;
+                     border: 1px solid #E8D77B; border-radius: 4px; }
             QFrame#bandeauCarte QWidget { background: transparent; }
         """)
         cb_lay = QHBoxLayout(self.cb_banner)
         cb_lay.setContentsMargins(12, 4, 12, 4); cb_lay.setSpacing(18)
 
         self.cb_title = QLabel("💳 ENCOURS CARTE BANCAIRE")
-        self.cb_title.setStyleSheet("font-weight:bold; color:#7E5A18; font-size:9pt")
+        self.cb_title.setStyleSheet("font-weight:bold; color:#7E5109; font-size:9pt")
         # Repli sur deux lignes en fenêtre étroite (sinon le bandeau réclame
         # 1390 pixels de large et bloque le redimensionnement de la fenêtre).
         self.cb_title.setWordWrap(True)
@@ -257,12 +256,12 @@ class BilanView(QWidget):
         # 4 mini-blocs : confirmé / en cours / total à débiter / disponible
         def _mini(label_txt):
             w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
-            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#7E5A18; font-size:8pt")
+            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#7E5109; font-size:8pt")
             # Repli sur deux lignes, comme le titre : à quatre blocs, des
             # libellés d'un seul tenant imposeraient une fenêtre plus large
             # que la moitié d'écran sur laquelle André travaille.
             lbl.setWordWrap(True)
-            val = QLabel("—"); val.setStyleSheet("color:#5A2D00; font-size:12pt; font-weight:bold")
+            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
             # Le repli des libellés rétrécit le bloc au point de couper le
             # montant (« -241,39 » sans son €). Un chiffre tronqué est pire
             # qu'un bandeau large : on lui garantit sa place.
@@ -299,7 +298,7 @@ class BilanView(QWidget):
         cb_lay.addWidget(self.cb_bloc3)
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
-        self.cb_detail.setStyleSheet("color:#7E5A18; font-size:9pt")
+        self.cb_detail.setStyleSheet("color:#7E5109; font-size:9pt")
         self.cb_detail.setWordWrap(True)
         cb_lay.addWidget(self.cb_detail)
         # Une seconde ligne rappelait ce qui restait sur les six derniers
@@ -320,25 +319,24 @@ class BilanView(QWidget):
         self.mois_banner.setObjectName("bandeauMois")   # même raison
         self.mois_banner.setStyleSheet("""
             QFrame#bandeauMois {
-                     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                        stop:0 #EDF7EE, stop:1 #D8ECDC);
-                     border: 1px solid #A6CDAF; border-radius: 4px; }
+                     background: #EAF6EC;
+                     border: 1px solid #229954; border-radius: 4px; }
             QFrame#bandeauMois QWidget { background: transparent; }
         """)
         mo_lay = QHBoxLayout(self.mois_banner)
         mo_lay.setContentsMargins(12, 4, 12, 4); mo_lay.setSpacing(18)
 
         self.mois_title = QLabel("🗓 CE MOIS-CI")
-        self.mois_title.setStyleSheet("font-weight:bold; color:#1A5E2A; font-size:9pt")
+        self.mois_title.setStyleSheet("font-weight:bold; color:#1A5E32; font-size:9pt")
         self.mois_title.setWordWrap(True)
         mo_lay.addWidget(self.mois_title)
         mo_lay.addSpacing(10)
 
         def _mini_vert(label_txt):
             w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
-            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#1A5E2A; font-size:8pt")
+            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#1A5E32; font-size:8pt")
             lbl.setWordWrap(True)
-            val = QLabel("—"); val.setStyleSheet("color:#0F3D1B; font-size:12pt; font-weight:bold")
+            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
             l.addWidget(lbl); l.addWidget(val)
             return w, val, lbl
 
@@ -350,7 +348,7 @@ class BilanView(QWidget):
         mo_lay.addWidget(m1); mo_lay.addWidget(m2); mo_lay.addWidget(m3)
         mo_lay.addStretch()
         self.mois_detail = QLabel("")
-        self.mois_detail.setStyleSheet("color:#2F6B3C; font-size:9pt")
+        self.mois_detail.setStyleSheet("color:#1A5E32; font-size:9pt")
         self.mois_detail.setWordWrap(True)
         mo_lay.addWidget(self.mois_detail)
         main.addWidget(self.mois_banner)
@@ -922,7 +920,7 @@ class BilanView(QWidget):
             debits = [regle_debit_differe(cartes)(f"{mois}-01")]
 
         self.cb_total.setStyleSheet(
-            "color:#5A2D00; font-size:12pt; font-weight:bold")
+            "color:#000000; font-size:12pt; font-weight:bold")
 
         # ── Ce que le mois laisse, une fois tout payé ─────────────────
         # Le solde de fin de mois moins les achats carte déjà engagés. Il n'a
@@ -957,7 +955,7 @@ class BilanView(QWidget):
             self.cb_total_lbl.setText("Achats de la carte sur ce mois")
             self.cb_total.setText(fmt_euro(encours_mois))
             self.cb_total.setStyleSheet(
-                "color:#5A2D00; font-size:12pt; font-weight:bold")
+                "color:#000000; font-size:12pt; font-weight:bold")
             self.cb_title.setText(
                 f"💳 ENCOURS CARTE — {period_label(mois).upper()} "
                 "(prélevé le "
@@ -1709,9 +1707,9 @@ class BilanView(QWidget):
         bar_rev = QBarSet("Revenus")
         bar_dep = QBarSet("Dépenses")
         bar_rev.setColor(QColor("#229954"))
-        bar_dep.setColor(QColor("#E67E22"))
+        bar_dep.setColor(QColor("#B9551A"))
         bar_rev.setBorderColor(QColor("#229954"))
-        bar_dep.setBorderColor(QColor("#E67E22"))
+        bar_dep.setBorderColor(QColor("#B9551A"))
         for m in months:
             # Montants arrondis à l'euro : c'est ce que porteront les
             # étiquettes, et à cette échelle les centimes n'apportent rien.

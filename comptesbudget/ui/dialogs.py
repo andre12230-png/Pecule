@@ -69,7 +69,7 @@ class TxDialog(QDialog):
             "corrigez-la si besoin. L'opération ne comptera dans le solde "
             "qu'à cette date.")
         self.dv_hint.setWordWrap(True)
-        self.dv_hint.setStyleSheet("color:#7E5A18; font-size:9pt")
+        self.dv_hint.setStyleSheet("color:#7E5109; font-size:9pt")
         self.dv_hint.setVisible(False)
         layout.addRow("", self.dv_hint)
 
@@ -187,7 +187,7 @@ class TxDialog(QDialog):
                            self.prevue.setEnabled(not coche)))
 
         # ── Section « Mémoriser » (création de règle inline) ──────────
-        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setStyleSheet("color:#CCC")
+        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setStyleSheet("color:#A9A9A9")
         layout.addRow(sep)
 
         self.create_rule = QCheckBox("🧠 Mémoriser : créer une règle de catégorisation à partir de cette opération")
@@ -226,7 +226,7 @@ class TxDialog(QDialog):
         self.rule_pattern.textEdited.connect(lambda _: setattr(self, "_pattern_user_edited", True))
 
         # ── Section « Opération récurrente » ─────────────────────────
-        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setStyleSheet("color:#CCC")
+        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setStyleSheet("color:#A9A9A9")
         layout.addRow(sep2)
 
         self.create_recurring = QCheckBox(
@@ -745,7 +745,7 @@ class SettingsDialog(QDialog):
             # installations de Pécule, pas à l'usage de tous les jours.
             filet = QFrame()
             filet.setFrameShape(QFrame.HLine)
-            filet.setStyleSheet("color:#CCC")
+            filet.setStyleSheet("color:#A9A9A9")
             layout.addRow(filet)
             titre = QLabel("<b>Avancé</b>")
             layout.addRow(titre)
@@ -998,7 +998,7 @@ class ArchivesDialog(QDialog):
 
         self.resume = QLabel()
         self.resume.setWordWrap(True)
-        self.resume.setStyleSheet("color:#333; padding:4px")
+        self.resume.setStyleSheet("color:#000000; padding:4px")
         lay.addWidget(self.resume)
 
         barre = QHBoxLayout()

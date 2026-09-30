@@ -186,20 +186,20 @@ class TxTableModel(QStandardItemModel):
             items[0].setForeground(QBrush(QColor("#18733A")))
             items[0].setBackground(QBrush(QColor("#D6F0DC")))
         elif prevue:
-            items[0].setForeground(QBrush(QColor("#C77B00")))
+            items[0].setForeground(QBrush(QColor("#7E5109")))
             items[0].setToolTip(
                 "Échéance prévue : pas encore passée en banque.\n"
                 "Elle sera complétée automatiquement à l'import du relevé.\n\n"
                 + AIDE_POINTAGE)
         else:
-            items[0].setForeground(QBrush(QColor("#CCC")))
+            items[0].setForeground(QBrush(QColor("#6B6B6B")))
         if not prevue:
             items[0].setToolTip(AIDE_POINTAGE)
         items[0].setTextAlignment(Qt.AlignCenter)
 
         # Date valeur en orange si différée (débit différé)
         if is_deferred:
-            items[2].setForeground(QBrush(QColor("#E67E22")))
+            items[2].setForeground(QBrush(QColor("#7E5109")))
             items[2].setToolTip("Débit différé : la banque débitera à cette date")
         else:
             # Même remarque : #999 sur blanc rendait la date de valeur
