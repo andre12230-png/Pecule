@@ -20,7 +20,7 @@ from ...constants import (
 )
 from ...accords import accorde, pluriel
 from ...utils import (
-    carte_a_debit_differe, cat_color, est_paiement_carte, fmt_euro,
+    carte_a_debit_differe, est_paiement_carte, fmt_euro,
     fmt_date_fr, period_label, regle_debit_differe,
 )
 from ...database import Database
@@ -29,9 +29,10 @@ from ...recurring import (
     candidats_non_couverts, _recurring_aligned_start,
 )
 
-from ..models import SORT_ROLE
+from ..models import SORT_ROLE, cellule_categorie
 from ..dialogs import RecurringDialog
 from ..assistants import GenererEcheancesDialog, PrefillRecurringDialog
+from ..widgets import confirmer
 
 class PrevisionnelView(QWidget):
     changed = Signal()
@@ -126,7 +127,7 @@ class PrevisionnelView(QWidget):
             row = [
                 QStandardItem(r["libelle"]),
                 QStandardItem(fmt_euro(r["montant"])),
-                QStandardItem(r["categorie"]),
+                cellule_categorie(r["categorie"]),
                 QStandardItem(r["type"] or ""),
                 QStandardItem(freq_lbl.get(r["frequency"], r["frequency"])),
                 QStandardItem(f"{fmt_date_fr(r['start_date'])} → {fmt_date_fr(r['end_date']) if r['end_date'] else '…'}"),
@@ -134,7 +135,6 @@ class PrevisionnelView(QWidget):
             ]
             row[1].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             row[1].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
-            row[2].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
             row[6].setTextAlignment(Qt.AlignCenter)
             tris = [r["libelle"].lower(), r["montant"], r["categorie"].lower(),
                     (r["type"] or "").lower(), r["frequency"], r["start_date"],
@@ -171,11 +171,10 @@ class PrevisionnelView(QWidget):
                 QStandardItem(fmt_date_fr(d.isoformat())),
                 QStandardItem(r["libelle"]),
                 QStandardItem(fmt_euro(r["montant"])),
-                QStandardItem(r["categorie"]),
+                cellule_categorie(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             row[2].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
-            row[3].setForeground(QBrush(QColor(cat_color(r["categorie"]))))
             for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
                                      r["montant"], r["categorie"].lower()]):
                 it.setData(tri, SORT_ROLE)
@@ -232,7 +231,16 @@ class PrevisionnelView(QWidget):
         rid = self._selected_id()
         if not rid:
             return
-        if QMessageBox.question(self, "Supprimer", "Supprimer cette opération récurrente ?") != QMessageBox.Yes:
+        rec = next((dict(r) for r in self.db.list_recurring() if r["id"] == rid), None)
+        if not rec:
+            return
+        if not confirmer(
+                self, "Supprimer l'opération récurrente",
+                f"Supprimer l'opération récurrente « {rec['libelle']} » "
+                f"({fmt_euro(rec['montant'])}) ?\n\n"
+                "Elle disparaît du prévisionnel. Les opérations déjà "
+                "enregistrées ne sont pas touchées.",
+                action="Supprimer", garder="Garder", danger=True):
             return
         self.db.delete_recurring(rid)
         self.refresh()

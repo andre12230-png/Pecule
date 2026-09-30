@@ -21,6 +21,53 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-09-30 — Relecture de design : catégories lisibles, chiffres entiers, confirmations
+
+**Fait.** Relecture de toutes les pages et fenêtres avec les grilles du
+plugin Design (critique, accessibilité, textes), confrontée à la charte des
+applis ; trois points corrigés, choisis par l'auteur sur une liste de 23.
+- **Catégories lisibles** : le nom s'écrit dans la couleur du texte, la
+  couleur de la catégorie passe sur une pastille ronde devant lui
+  (`models.pastille_categorie`, `cellule_categorie`), dans Opérations,
+  Budget, Catégories, Sous-catégories, Prévisionnel, Recherche et quatre
+  assistants. Écrits dans leur couleur, 13 noms sur 17 passaient sous
+  4,5 pour 1 (jusqu'à 1,78).
+- **Chiffres entiers à 1280 px** : dates, montants et nombres à la largeur
+  de leur contenu, le libellé prend le reste (`models.colonnes_sans_coupure`,
+  `colonnes_des_operations`). Corrigés : colonne Crédit hors de l'écran et
+  date de valeur réduite à « ⏱ … » (Opérations, Recherche), total coupé
+  (Catégories, dont la colonne Catégorie, redondante, est masquée dans le
+  panneau de droite), fourchette coupée (Pré-remplir, fenêtre portée à
+  1 000 px), montant coupé dans la légende du camembert du Bilan.
+- **Confirmations** : neuf questions laissaient Qt mettre « Oui » par
+  défaut devant une action sans retour (supprimer une règle ou une
+  récurrence, vider, renommer ou nettoyer des sous-catégories, nettoyer les
+  catégories, restaurer, déplacer des opérations, appliquer une règle à
+  l'historique). Elles passent par `widgets.confirmer()` : « Garder » ou
+  « Annuler » par défaut, bouton qui dit l'action, objet nommé
+  (« Supprimer la règle « carrefour » ? »).
+- Tests : `test_tableaux_lisibles.py`, `test_confirmations.py` (7 tests,
+  écrits avant la correction et vus en échec) ; 559/559. Vérifié en image à
+  1280 px avec les vraies polices, sur une base inventée ; 3 000 opérations
+  s'affichent en 0,6 s, comme avant.
+
+**Pourquoi.** La charte demande 4,5 pour 1 pour tout texte, une fenêtre
+utilisable à 1280 px, et « Non » par défaut avant une suppression ; ces trois
+écarts étaient les plus visibles et touchaient tous les utilisateurs. La
+suppression d'opérations garde « Oui » par défaut, écrit exprès : elle
+s'annule par le bandeau « ↩ Annuler ».
+
+**Reste.** Les 20 autres points de la relecture : période sans effet sur
+Sous-catégories, Règles auto et Prévisionnel ; même nom pour deux mouvements
+différents (Bilan et Rapport mensuel) ; états vides sans phrase ; autres
+textes colorés sous 4,5 (taux d'épargne, orange des dates différées, texte
+noir sur la barre rouge du Budget) ; graphique d'évolution ; espace
+insécable dans `fmt_euro` ; menu de gauche trop haut ; dernière ligne de la
+légende du camembert rognée en hauteur à 800 px. Un test qui appelle
+`processEvents()` réveille les invites de premier lancement laissées par
+d'autres tests et bloque la suite : c'est ce qui a failli arriver ici.
+Aucun exe construit : pas de nouveau numéro de version.
+
 ## 2026-09-29 (4) — Version 1.40.2 installée chez l'auteur
 
 **Fait.** Numéro 1.40.2 (constants.py et son historique, Lisez-moi.txt) :

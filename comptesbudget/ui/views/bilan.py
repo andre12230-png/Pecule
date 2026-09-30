@@ -6,7 +6,7 @@ from html import escape as _esc   # noms de catégories insérés dans du HTML
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import (
-    QColor, QCursor, QPainter, QPen,
+    QColor, QCursor, QFontMetrics, QPainter, QPen,
 )
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
@@ -496,6 +496,26 @@ class BilanView(QWidget):
         f._sub = l_sub
         f._label = l_label          # le titre du « Mouvement » suit la période
         return f
+
+    def _legende_sans_coupure(self):
+        """Réserve à la légende du camembert la largeur de son libellé le
+        plus long, marqueur compris.
+
+        Qt coupait la fin des libellés trop longs, c'est-à-dire le montant
+        (« Logement - maison — -847,… ») : c'est le camembert qui rétrécit,
+        pas les chiffres (relecture du 30/09/2026)."""
+        legende = self.pie_chart.legend()
+        mesure = QFontMetrics(legende.font())
+        libelles = [m.label() for m in legende.markers()]
+        if not libelles:
+            legende.setMinimumWidth(0)
+            return
+        # En plus du texte : le carré de couleur (de la hauteur d'une ligne),
+        # l'espace qui le suit et les marges de la légende — mesuré sur
+        # l'image, 32 px fixes coupaient encore « -46,2… ».
+        legende.setMinimumWidth(
+            max(mesure.horizontalAdvance(t) for t in libelles)
+            + 2 * mesure.height() + 30)
 
     @staticmethod
     def _titre_mouvement(period: str) -> str:
@@ -1467,6 +1487,7 @@ class BilanView(QWidget):
             s.setLabelVisible(False)
         self.pie_chart.addSeries(series)
         self.pie_chart.setTitle("")
+        self._legende_sans_coupure()
 
         # ── Liste : dépenses par catégorie (top 8) ────────────────────
         total_dep = abs(dep_a) or 1

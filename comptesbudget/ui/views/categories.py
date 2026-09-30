@@ -9,19 +9,23 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QTableView, QAbstractItemView,
-    QDialog, QMessageBox, QSplitter,
+    QDialog, QSplitter,
     QInputDialog,
 )
 
 from ...accords import pluriel
 from ...utils import (
-    carte_a_debit_differe, cat_color, deaccent, fmt_euro, in_period,
+    carte_a_debit_differe, deaccent, fmt_euro, in_period,
     period_label,
 )
 from ...database import Database
 
-from ..models import SORT_ROLE, TxTableModel, charger_en_conservant_le_tri
+from ..models import (
+    SORT_ROLE, TxTableModel, cellule_categorie, charger_en_conservant_le_tri,
+    colonnes_des_operations, colonnes_sans_coupure,
+)
 from ..dialogs import CategoriesMasqueesDialog, TxDialog
+from ..widgets import confirmer
 
 class CategoriesView(QWidget):
     cat_changed = Signal()
@@ -52,6 +56,9 @@ class CategoriesView(QWidget):
         self.cats_model.setSortRole(SORT_ROLE)
         self.cats_table.setSortingEnabled(True)
         self.cats_table.horizontalHeader().setSortIndicatorShown(True)
+        # Nb et Total à la largeur de leur contenu, le nom prend le reste :
+        # à 1280 px, le total était coupé (« -16 » pour -161,75 €).
+        colonnes_sans_coupure(self.cats_table, au_contenu=(1, 2), etirable=0)
         lv.addWidget(self.cats_table)
         # Les 17 catégories livrées d'origine sont proposées même si l'on
         # ne s'en sert jamais. Ce bouton permet d'écarter celles qui ne
@@ -85,12 +92,14 @@ class CategoriesView(QWidget):
         self.tx_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tx_table.verticalHeader().setVisible(False)
         self.tx_table.doubleClicked.connect(self._edit_tx)
-        # Mêmes largeurs que la vue Opérations (P, Date opér., Date valeur,
-        # Libellé, Catégorie, Sous-cat, Type, Débit, Crédit). L'ancienne liste
-        # ignorait la colonne « Date valeur » : chaque largeur tombait sur la
-        # colonne voisine.
-        for i, w in enumerate([32, 90, 95, 230, 160, 140, 150, 100, 100]):
-            self.tx_table.setColumnWidth(i, w)
+        # Mêmes largeurs que la vue Opérations, dans un panneau plus étroit :
+        # la colonne « Catégorie » redisait sur chaque ligne le nom écrit en
+        # titre, elle est masquée, et Sous-catégorie et Type sont resserrées.
+        # Sans cela, Débit et Crédit sortaient du panneau à 1280 px.
+        colonnes_des_operations(self.tx_table)
+        self.tx_table.setColumnHidden(4, True)
+        self.tx_table.setColumnWidth(5, 120)
+        self.tx_table.setColumnWidth(6, 120)
         self.tx_table.setSortingEnabled(True)
         self.tx_table.horizontalHeader().setSortIndicatorShown(True)
         self.tx_table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
@@ -153,8 +162,7 @@ class CategoriesView(QWidget):
         for c in sorted(by_cat.keys()):
             n = len(by_cat[c])
             tot = sum(t["montant"] for t in by_cat[c])
-            it_c = QStandardItem(c)
-            it_c.setForeground(QBrush(QColor(cat_color(c))))
+            it_c = cellule_categorie(c)
             it_c.setData(c, Qt.UserRole)
             it_c.setData(deaccent(c), SORT_ROLE)
             it_n = QStandardItem(str(n)); it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -164,10 +172,6 @@ class CategoriesView(QWidget):
             it_t.setData(tot, SORT_ROLE)
             self.cats_model.appendRow([it_c, it_n, it_t])
         self.cats_table.setSortingEnabled(True)
-
-        self.cats_table.setColumnWidth(0, 200)
-        self.cats_table.setColumnWidth(1, 50)
-        self.cats_table.setColumnWidth(2, 110)
 
         # Re-rendu du panneau de droite avec la catégorie actuelle
         if self.current_cat and self.current_cat in by_cat:
@@ -242,12 +246,12 @@ class CategoriesView(QWidget):
             return
         portee = ("toutes périodes confondues" if self.period == "all"
                   else f"sur la période affichée ({period_label(self.period)})")
-        if QMessageBox.question(
-                self, "Confirmer",
+        if not confirmer(
+                self, "Recatégoriser",
                 f"Déplacer {pluriel(len(affected), 'opération', 'opérations')} de « {self.current_cat} » "
                 f"vers « {new_cat} » ?\n\n"
-                f"Seules les opérations {portee} sont concernées."
-        ) != QMessageBox.Yes:
+                f"Seules les opérations {portee} sont concernées.",
+                action="Déplacer"):
             return
         with self.db.batch():
             for t in affected:

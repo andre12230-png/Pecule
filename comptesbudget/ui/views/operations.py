@@ -11,7 +11,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QLineEdit, QComboBox, QTableView, QHeaderView, QAbstractItemView,
+    QPushButton, QLabel, QLineEdit, QComboBox, QTableView, QAbstractItemView,
     QDialog, QMenu, QMessageBox, QFileDialog, QFrame,
 )
 
@@ -28,8 +28,11 @@ from ...export_csv import ecrire_csv_operations
 from ...rules import apply_rules_to_tx
 
 from ..flow_layout import FlowLayout
-from ..models import TxTableModel, charger_en_conservant_le_tri
+from ..models import (
+    TxTableModel, charger_en_conservant_le_tri, colonnes_des_operations,
+)
 from ..dialogs import TxDialog, CategorieEnMasseDialog
+from ..widgets import confirmer
 
 class OperationsView(QWidget):
     tx_changed = Signal()  # émis quand une transaction est ajoutée/modifiée/supprimée
@@ -156,15 +159,12 @@ class OperationsView(QWidget):
         self.table.doubleClicked.connect(self.edit_selected)
         self.table.clicked.connect(self.handle_click)
 
-        # Largeurs de colonnes : P, Date opér., Date valeur, Libellé, Catégorie,
-        # Sous-cat, Type, Débit, Crédit. Type à 150 pour « Cheque n° 1234567 »
-        # (124 px de texte) ; les 30 px sont pris au Libellé, pour que le total
-        # — et donc la tenue en moitié d'écran — ne change pas.
+        # Largeurs de colonnes : dates et montants à la largeur de leur
+        # contenu, le Libellé prend le reste (voir colonnes_des_operations).
+        # Réglées à la main (1 097 px au total), elles débordaient à 1280 px
+        # de large : Crédit hors de l'écran, date de valeur réduite à « ⏱ … ».
         h = self.table.horizontalHeader()
-        h.setSectionResizeMode(QHeaderView.Interactive)
-        h.setStretchLastSection(False)
-        for i, w in enumerate([32, 90, 95, 230, 160, 140, 150, 100, 100]):
-            self.table.setColumnWidth(i, w)
+        colonnes_des_operations(self.table)
 
         # Tri par clic sur les en-têtes. Départ sur la date qui correspond au
         # mode d'affichage, de la plus récente à la plus ancienne — l'ordre
@@ -569,7 +569,8 @@ class OperationsView(QWidget):
                     + ("…" if len(deja_classees) > 6 else "")
                     + "\nLeur catégorie actuelle sera remplacée.")
         msg += "\n\nAppliquer la règle à l'historique ?"
-        if QMessageBox.question(self, "Appliquer la règle", msg) != QMessageBox.Yes:
+        if not confirmer(self, "Appliquer la règle", msg,
+                         action="Appliquer la règle", garder="Ne pas appliquer"):
             return
 
         with self.db.batch():
@@ -659,7 +660,12 @@ class OperationsView(QWidget):
             return
         question = ("Supprimer cette opération ?" if len(ids) == 1
                     else f"Supprimer ces {len(ids)} opérations ?")
-        if QMessageBox.question(self, "Supprimer", question) != QMessageBox.Yes:
+        # « Oui » par défaut, choisi exprès : cette suppression s'annule d'un
+        # clic (bandeau « ↩ Annuler »), contrairement à celles qui passent
+        # par confirmer().
+        if QMessageBox.question(self, "Supprimer", question,
+                                QMessageBox.Yes | QMessageBox.No,
+                                QMessageBox.Yes) != QMessageBox.Yes:
             return
         # Copie complète des lignes AVANT de les effacer : c'est ce que le
         # bouton « Annuler » remettra en place.

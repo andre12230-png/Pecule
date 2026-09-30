@@ -31,7 +31,7 @@ from ..ofx_import import import_ofx
 from ..qif_import import import_qif
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
-from .widgets import PeriodBar, demander_montant
+from .widgets import PeriodBar, confirmer, demander_montant
 from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
 from .report import MonthlyReportDialog
@@ -609,7 +609,8 @@ class MainWindow(QMainWindow):
             f"  • « {fr} » → « {to} » ({n})"
             for (fr, to), n in sorted(groups.items(), key=lambda x: -x[1]))
         msg = f"{pluriel(len(changes), 'catégorie', 'catégories')} à normaliser :\n\n{summary}\n\nAppliquer ?"
-        if QMessageBox.question(self, "Nettoyer les catégories", msg) != QMessageBox.Yes:
+        if not confirmer(self, "Nettoyer les catégories", msg,
+                         action="Nettoyer"):
             return
         with self.db.batch():
             for tx_id, _, to in changes:
@@ -1141,12 +1142,13 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Restaurer",
                 "Fichier illisible : ce n'est pas un export JSON de l'application.")
             return
-        if QMessageBox.question(
+        if not confirmer(
                 self, "Restaurer / fusionner",
                 "Fusionner ce fichier avec vos données ?\n\n"
                 "Pour chaque opération, règle ou récurrence, la version la "
                 "plus récente est conservée : rien de plus récent que le "
-                "fichier ne sera écrasé.") != QMessageBox.Yes:
+                "fichier ne sera écrasé.",
+                action="Fusionner"):
             return
         stats = merge_remote_into_db(self.db, data)
         n_app = stats['applied']

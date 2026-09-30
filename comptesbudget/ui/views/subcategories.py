@@ -14,9 +14,11 @@ from PySide6.QtWidgets import (
 
 from ...accords import accorde, nombre, pluriel
 from ...utils import (
-    deaccent, cat_color, fmt_euro,
+    deaccent, fmt_euro,
 )
 from ...database import Database
+from ..models import cellule_categorie
+from ..widgets import confirmer
 
 class SubcategoriesView(QWidget):
     """Gestion des sous-catégories utilisées dans les opérations.
@@ -172,8 +174,7 @@ class SubcategoriesView(QWidget):
             it_sub.setData((cat, sub), Qt.UserRole)
             it_sub.setData(deaccent(sub), Qt.UserRole + 1)
 
-            it_cat = QStandardItem(cat)
-            it_cat.setForeground(QBrush(QColor(cat_color(cat))))
+            it_cat = cellule_categorie(cat)
             it_cat.setData(deaccent(cat), Qt.UserRole + 1)
 
             it_n = QStandardItem(str(n))
@@ -262,11 +263,11 @@ class SubcategoriesView(QWidget):
         if not tx_ids:
             return
 
-        if QMessageBox.question(
-                self, "Confirmer",
+        if not confirmer(
+                self, title,
                 f"Appliquer le libellé « {new_name} » à "
-                f"{pluriel(len(tx_ids), 'opération', 'opérations')} ?"
-        ) != QMessageBox.Yes:
+                f"{pluriel(len(tx_ids), 'opération', 'opérations')} ?",
+                action="Renommer" if len(keys) == 1 else "Fusionner"):
             return
 
         with self.db.batch():
@@ -292,13 +293,13 @@ class SubcategoriesView(QWidget):
         preview = ", ".join(f"« {s} »" for (_c, s) in keys[:6])
         if len(keys) > 6:
             preview += f", … (+{len(keys) - 6})"
-        if QMessageBox.question(
-                self, "Confirmer la suppression",
+        if not confirmer(
+                self, "Vider la sous-catégorie",
                 f"Vider la sous-catégorie ({preview}) sur "
                 f"{pluriel(len(tx_ids), 'opération', 'opérations')} ?\n\n"
                 "Les opérations ne sont pas supprimées : seul le champ "
-                "« sous-catégorie » est mis à blanc."
-        ) != QMessageBox.Yes:
+                "« sous-catégorie » est mis à blanc.",
+                action="Vider", garder="Garder", danger=True):
             return
         with self.db.batch():
             for tx_id in tx_ids:
@@ -346,7 +347,8 @@ class SubcategoriesView(QWidget):
             + ("\n  …" if len(lines) > 30 else "")
             + "\n\nAppliquer ces changements ?"
         )
-        if QMessageBox.question(self, "Nettoyer les doublons", msg) != QMessageBox.Yes:
+        if not confirmer(self, "Nettoyer les doublons", msg,
+                         action="Nettoyer"):
             return
 
         n_updated = 0

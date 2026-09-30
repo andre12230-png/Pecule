@@ -16,8 +16,9 @@ from ..constants import (
 )
 from ..accords import accorde, nombre, pluriel
 from ..utils import (
-    cat_color, fmt_euro, fmt_date_fr, period_label,
+    fmt_euro, fmt_date_fr, period_label,
 )
+from .models import cellule_categorie, colonnes_sans_coupure
 
 class HarmonizeDialog(QDialog):
     """Affiche un aperçu des changements suggérés et applique sur sélection."""
@@ -59,11 +60,9 @@ class HarmonizeDialog(QDialog):
                 it_check,
                 QStandardItem(fmt_date_fr(tx["date"])),
                 QStandardItem(tx.get("libelle", "")),
-                QStandardItem(tx.get("categorie", "")),
-                QStandardItem(suggested),
+                cellule_categorie(tx.get("categorie", "")),
+                cellule_categorie(suggested),
             ]
-            row[3].setForeground(QBrush(QColor(cat_color(tx.get("categorie", "")))))
-            row[4].setForeground(QBrush(QColor(cat_color(suggested))))
             row[0].setData(tx["id"], Qt.UserRole)
             self.model.appendRow(row)
 
@@ -164,8 +163,7 @@ class DuplicatesDialog(QDialog):
             it_montant.setForeground(
                 QBrush(QColor("#C0392B" if t.get("montant", 0) < 0 else "#18733A")))
 
-            it_cat = QStandardItem(t.get("categorie", ""))
-            it_cat.setForeground(QBrush(QColor(cat_color(t.get("categorie", "")))))
+            it_cat = cellule_categorie(t.get("categorie", ""))
 
             self.model.appendRow([
                 it_check,
@@ -246,7 +244,9 @@ class PrefillRecurringDialog(QDialog):
     def __init__(self, parent, candidates: list[dict]):
         super().__init__(parent)
         self.setWindowTitle("Pré-remplir le prévisionnel depuis l'historique")
-        self.resize(900, 560)
+        # 1 000 px : la fourchette entière (« 2 380,00 € … 2 380,00 € ») et
+        # un libellé lisible tiennent côte à côte.
+        self.resize(1000, 560)
         self.candidates = candidates
 
         v = QVBoxLayout(self)
@@ -271,8 +271,10 @@ class PrefillRecurringDialog(QDialog):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.clicked.connect(self._toggle)
-        for i, w in enumerate([34, 230, 170, 110, 110, 50, 60, 130]):
-            self.table.setColumnWidth(i, w)
+        # Chiffres et fréquence à la largeur de leur contenu, le libellé prend
+        # le reste : la fourchette était coupée à 900 px.
+        colonnes_sans_coupure(self.table, au_contenu=(3, 4, 5, 6, 7),
+                              etirable=1, largeurs={0: 34, 2: 190})
         v.addWidget(self.table)
 
         for c in candidates:
@@ -288,8 +290,7 @@ class PrefillRecurringDialog(QDialog):
             it_montant.setForeground(
                 QBrush(QColor("#C0392B" if c["montant"] < 0 else "#18733A")))
 
-            it_cat = QStandardItem(c["categorie"])
-            it_cat.setForeground(QBrush(QColor(cat_color(c["categorie"]))))
+            it_cat = cellule_categorie(c["categorie"])
 
             it_range = QStandardItem(f"{fmt_euro(c['_min'])} … {fmt_euro(c['_max'])}")
             it_range.setForeground(QBrush(QColor("#5A5A5A")))
@@ -471,8 +472,7 @@ class GenererEcheancesDialog(QDialog):
             it_montant.setForeground(
                 QBrush(QColor("#C0392B" if e["montant"] < 0 else "#18733A")))
 
-            it_cat = QStandardItem(e["categorie"])
-            it_cat.setForeground(QBrush(QColor(cat_color(e["categorie"]))))
+            it_cat = cellule_categorie(e["categorie"])
 
             if verrou:
                 etat, couleur = "✔ déjà enregistrée", "#5A5A5A"

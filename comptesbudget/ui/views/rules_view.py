@@ -22,6 +22,7 @@ from ...database import Database
 from ...rules import apply_rules_to_tx
 
 from ..dialogs import RuleDialog
+from ..widgets import confirmer
 
 class RulesView(QWidget):
     rules_changed = Signal()
@@ -155,7 +156,16 @@ class RulesView(QWidget):
         rid = self._selected_id()
         if not rid:
             return
-        if QMessageBox.question(self, "Supprimer", "Supprimer cette règle ?") != QMessageBox.Yes:
+        regle = next((dict(r) for r in self.db.list_rules() if r["id"] == rid), None)
+        if not regle:
+            return
+        if not confirmer(
+                self, "Supprimer la règle",
+                f"Supprimer la règle « {regle['pattern']} » ?\n\n"
+                "Les opérations déjà classées par elle gardent leur "
+                "catégorie ; les prochaines ne seront plus classées "
+                "automatiquement.",
+                action="Supprimer la règle", garder="Garder", danger=True):
             return
         self.db.delete_rule(rid)
         self.refresh()

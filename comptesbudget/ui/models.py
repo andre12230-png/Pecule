@@ -1,14 +1,51 @@
 """Modèle de table des transactions."""
 
+from typing import Optional
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
-    QColor, QStandardItemModel, QStandardItem, QBrush,
+    QColor, QStandardItemModel, QStandardItem, QBrush, QIcon, QPainter,
+    QPixmap,
 )
+from PySide6.QtWidgets import QHeaderView
 
 from ..utils import (
     cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
 )
+
+# Une pastille par couleur, dessinée une seule fois.
+_PASTILLES: dict[str, QIcon] = {}
+
+
+def pastille_categorie(categorie: str) -> QIcon:
+    """Petit rond de la couleur de la catégorie, à poser devant son nom.
+
+    Le nom, lui, s'écrit dans la couleur du texte. Écrits dans la couleur de
+    leur catégorie, 13 noms sur 17 passaient sous le contraste minimal de
+    4,5 pour 1 (« Virements internes » : 1,78 sur blanc). La pastille garde le
+    repère de couleur sans avoir besoin d'être lue : le nom est écrit à côté
+    (relecture du 30/09/2026)."""
+    couleur = cat_color(categorie)
+    if couleur not in _PASTILLES:
+        image = QPixmap(12, 12)
+        image.fill(Qt.transparent)
+        pinceau = QPainter(image)
+        pinceau.setRenderHint(QPainter.Antialiasing)
+        pinceau.setPen(Qt.NoPen)
+        pinceau.setBrush(QColor(couleur))
+        pinceau.drawEllipse(1, 1, 10, 10)
+        pinceau.end()
+        _PASTILLES[couleur] = QIcon(image)
+    return _PASTILLES[couleur]
+
+
+def cellule_categorie(categorie: str) -> QStandardItem:
+    """Cellule de tableau pour un nom de catégorie : le nom, lisible, précédé
+    de sa pastille de couleur."""
+    it = QStandardItem(categorie)
+    if categorie:
+        it.setIcon(pastille_categorie(categorie))
+    return it
 
 # Rôle sous lequel chaque cellule range sa valeur de TRI, distincte du texte
 # affiché. Sans cela, un clic sur l'en-tête trierait sur le texte : les dates
@@ -23,6 +60,39 @@ AIDE_POINTAGE = (
     "Cliquer pour pointer ou dépointer.\n"
     "Raccourci : barre d'espace, sur une ou plusieurs lignes\n"
     "sélectionnées (Ctrl+clic ou Maj+clic).")
+
+
+def colonnes_sans_coupure(table, au_contenu, etirable: int,
+                          largeurs: Optional[dict] = None):
+    """Règle les largeurs de colonnes d'un tableau pour qu'aucun chiffre ne
+    soit coupé.
+
+    - `au_contenu` : colonnes de dates, de montants, de nombres. Elles prennent
+      toujours la largeur de ce qu'elles affichent. Réglées à la main, elles
+      coupaient à 1280 px de large (« ⏱ … » au lieu de la date de valeur,
+      « -16 » au lieu du total) — relecture du 30/09/2026.
+    - `etirable` : la colonne de texte (le libellé, en général) qui prend la
+      place restante et cède la première quand la fenêtre rétrécit.
+    - `largeurs` : largeur de départ des autres colonnes, que l'utilisateur
+      peut toujours changer à la souris."""
+    entete = table.horizontalHeader()
+    entete.setStretchLastSection(False)
+    for col, largeur in (largeurs or {}).items():
+        entete.setSectionResizeMode(col, QHeaderView.Interactive)
+        table.setColumnWidth(col, largeur)
+    for col in au_contenu:
+        entete.setSectionResizeMode(col, QHeaderView.ResizeToContents)
+    entete.setSectionResizeMode(etirable, QHeaderView.Stretch)
+
+
+def colonnes_des_operations(table):
+    """Largeurs du tableau des opérations (onglet Opérations, panneau de
+    droite des Catégories, Recherche) : P, dates, Débit et Crédit à la
+    largeur de leur contenu, le Libellé prend le reste. Type à 150 pour
+    « Cheque n° 1234567 »."""
+    colonnes_sans_coupure(
+        table, au_contenu=(0, 1, 2, 7, 8), etirable=3,
+        largeurs={4: 170, 5: 140, 6: 150})
 
 
 def charger_en_conservant_le_tri(table, model, transactions: list[dict]):
@@ -141,8 +211,10 @@ class TxTableModel(QStandardItemModel):
         if num:
             items[6].setToolTip(f"Chèque n° {num}")
 
-        # Pastille de catégorie : couleur de catégorie
-        items[4].setForeground(QBrush(QColor(cat_color(tx.get("categorie", "")))))
+        # Pastille de la couleur de la catégorie, devant son nom (qui garde la
+        # couleur de texte de la ligne : noir, ou gris foncé si pointée).
+        if tx.get("categorie"):
+            items[4].setIcon(pastille_categorie(tx["categorie"]))
 
         # Alignement des montants à droite
         items[7].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)

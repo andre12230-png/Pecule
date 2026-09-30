@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QDialog, QDialogButtonBox,
-    QLabel, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton,
+    QLabel, QComboBox, QDoubleSpinBox, QCheckBox, QPushButton, QMessageBox,
 )
 
 from ..utils import (
@@ -84,6 +84,41 @@ def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
     lay.addWidget(btns)
     ok = dlg.exec() == QDialog.Accepted
     return champ.value(), ok
+
+
+def boite_de_confirmation(parent, titre: str, question: str, action: str,
+                          garder: str = "Annuler", danger: bool = False):
+    """Construit, sans l'afficher, la boîte qui demande confirmation d'une
+    action sans retour. Renvoie (boîte, bouton d'action).
+
+    - Le bouton par défaut est `garder` : Entrée, par réflexe, ne supprime
+      rien. Échap choisit aussi `garder`.
+    - Le bouton d'action dit ce qu'il fait (« Supprimer la règle »), au lieu
+      d'un « Oui » qui oblige à relire la question.
+    - `danger` : une suppression montre l'icône d'avertissement.
+
+    Laissée à Qt, une question mettait « Oui » par défaut (relecture du
+    30/09/2026)."""
+    boite = QMessageBox(parent)
+    boite.setWindowTitle(titre)
+    boite.setIcon(QMessageBox.Warning if danger else QMessageBox.Question)
+    boite.setTextFormat(Qt.PlainText)
+    boite.setText(question)
+    bouton_action = boite.addButton(action, QMessageBox.AcceptRole)
+    bouton_garder = boite.addButton(garder, QMessageBox.RejectRole)
+    boite.setDefaultButton(bouton_garder)
+    boite.setEscapeButton(bouton_garder)
+    return boite, bouton_action
+
+
+def confirmer(parent, titre: str, question: str, action: str,
+              garder: str = "Annuler", danger: bool = False) -> bool:
+    """Pose la question (voir boite_de_confirmation). True seulement si
+    l'utilisateur a cliqué le bouton d'action."""
+    boite, bouton_action = boite_de_confirmation(
+        parent, titre, question, action, garder, danger)
+    boite.exec()
+    return boite.clickedButton() is bouton_action
 
 
 class PeriodBar(QWidget):

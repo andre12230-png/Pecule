@@ -12,9 +12,10 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils import (
-    cat_color, deaccent, depense_nette_par_categorie, fmt_euro, in_period,
+    deaccent, depense_nette_par_categorie, fmt_euro, in_period,
 )
 from ...database import Database
+from ..models import cellule_categorie
 from ..widgets import demander_montant
 
 class BudgetView(QWidget):
@@ -132,8 +133,7 @@ class BudgetView(QWidget):
             ratio = (dep / budget_periode * 100) if budget_periode > 0 else 0
             reste = budget_periode - dep
 
-            it_cat = QStandardItem(cat)
-            it_cat.setForeground(QBrush(QColor(cat_color(cat))))
+            it_cat = cellule_categorie(cat)
             it_cat.setData(cat, Qt.UserRole)
 
             it_bud = QStandardItem(fmt_euro(budget) if budget else "—")
