@@ -19,7 +19,7 @@ from PySide6.QtCharts import (
 
 from ...accords import accorde, pluriel
 from ...utils import (
-    carte_a_debit_differe, cat_color,
+    carte_a_debit_differe, cat_color, de_mois_a_mois,
     depense_nette_par_categorie, est_paiement_carte,
     fmt_euro, fmt_date_fr, in_period, period_label, regle_debit_differe,
 )
@@ -208,7 +208,7 @@ class BilanView(QWidget):
         defs = [
             ("solde",    "💼 Solde bancaire réel (pointé)", "#1F3A6B"),
             ("net",      "Mouvement du mois",              "#34495E"),
-            ("epargne",  "Taux d'épargne",                 "#16A085"),
+            ("epargne",  "Taux d'épargne",                 "#18733A"),
             ("pointe",   "✔ Mouvement pointé",             "#18733A"),
         ]
         for key, label, color in defs:
@@ -529,18 +529,30 @@ class BilanView(QWidget):
             return "Mouvement de l'année"
         return "Mouvement — toutes périodes"
 
-    def _colorer_kpi(self, cle: str, couleur: str):
+    @staticmethod
+    def _couleur_du_signe(valeur: float):
+        """Vert si positif, rouge si négatif, None si nul : un bilan nul
+        s'écrit « 0,00 », sans couleur (charte ; relecture du 30/09/2026)."""
+        if valeur > 0.005:
+            return "#18733A"
+        if valeur < -0.005:
+            return "#C0392B"
+        return None
+
+    def _colorer_kpi(self, cle: str, couleur):
         """Recolore une tuile : le montant ET le liseré du haut, pour qu'ils
-        s'accordent toujours (vert quand c'est positif, rouge quand ça ne l'est pas)."""
+        s'accordent toujours (vert quand c'est positif, rouge quand ça ne l'est
+        pas). `couleur` None : montant nul, en noir sur un liseré gris."""
+        texte, trait = (couleur, couleur) if couleur else ("#000000", "#A9A9A9")
         carte = self.kpis[cle]
         carte.setStyleSheet(f"""
             QFrame#tuileKpi {{
                 background: #FAF8F1; border: 1px solid #BEC7D4;
-                border-top: 3px solid {couleur}; border-radius: 4px;
+                border-top: 3px solid {trait}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
         """)
-        carte._value.setStyleSheet(f"color:{couleur}; font-size:16pt; font-weight:bold")
+        carte._value.setStyleSheet(f"color:{texte}; font-size:16pt; font-weight:bold")
 
     def _eff_date(self, t: dict) -> str:
         """Date utilisée pour les chiffres de la PÉRIODE affichée (mouvement
@@ -802,7 +814,9 @@ class BilanView(QWidget):
                  f"<b>{fmt_euro(solde_fin)}</b>")
 
         if bascule is None:
-            texte = (f"✅ {debut}, et reste positif jusqu'au "
+            # « reste positif jusqu'au… » laissait croire à un découvert le
+            # lendemain : cette date n'est que la limite du calcul.
+            texte = (f"✅ {debut}, aucun découvert prévu d'ici le "
                      f"{fmt_date_fr(info['fin'])} — au plus bas "
                      f"{fmt_euro(creux_solde)} le {fmt_date_fr(creux_date)}.")
         else:
@@ -1412,7 +1426,7 @@ class BilanView(QWidget):
 
         mode_lbl = "valeur (banque)" if self.date_mode == "valeur" else "opération"
         self.kpis["solde"]._value.setText(fmt_euro(solde_compte))
-        self._colorer_kpi("solde", "#18733A" if solde_compte >= 0 else "#C0392B")
+        self._colorer_kpi("solde", self._couleur_du_signe(solde_compte))
         sub = (f"Au {fmt_date_fr(today_iso)} — initial {fmt_euro(initial_balance)} + "
                f"{pluriel(len(pointees_up), 'opération', 'opérations')} "
                f"{accorde(len(pointees_up), 'pointée', 'pointées')} — toujours en date de valeur "
@@ -1434,20 +1448,22 @@ class BilanView(QWidget):
             f"{fmt_euro(abs(depenses))} sortis ({n_dep})\n"
             f"{period_label(self.period)} — date {mode_lbl}")
         # Couleur dynamique pour mouvement net
-        self._colorer_kpi("net", "#18733A" if net >= 0 else "#C0392B")
+        self._colorer_kpi("net", self._couleur_du_signe(net))
 
         # Virgule décimale, comme partout ailleurs dans l'application : le
         # taux d'épargne était le seul chiffre à s'écrire « -10.6 % ».
         self.kpis["epargne"]._value.setText(
             f"{tx_epargne:.1f}".replace(".", ",") + " %")
-        self._colorer_kpi("epargne", "#16A085" if tx_epargne >= 0 else "#C0392B")
+        # Vert d'encre commun (#18733A) : le vert-bleu #16A085 d'avant ne
+        # faisait que 3,09 pour 1 sur l'ivoire de la tuile.
+        self._colorer_kpi("epargne", self._couleur_du_signe(tx_epargne))
         self.kpis["epargne"]._sub.setText(
             "part des revenus mis de côté" if tx_epargne >= 0
             else "dépenses supérieures aux revenus")
 
         self.kpis["pointe"]._value.setText(fmt_euro(solde_p_periode))
         # Couleur dynamique : vert si le solde pointé est positif, rouge s'il est négatif
-        self._colorer_kpi("pointe", "#18733A" if solde_p_periode >= 0 else "#C0392B")
+        self._colorer_kpi("pointe", self._couleur_du_signe(solde_p_periode))
         # La période est rappelée ici : le titre ne la porte plus depuis qu'il
         # dit ce qu'on additionne (« Mouvement pointé »).
         self.kpis["pointe"]._sub.setText(
@@ -1646,8 +1662,7 @@ class BilanView(QWidget):
 
         premier, dernier = points[0][0], points[-1][0]
         self.solde_panel._header.setText(
-            f"SOLDE EN FIN DE MOIS — {_mois_court(premier).upper()} "
-            f"{premier[:4]} → {_mois_court(dernier).upper()} {dernier[:4]}")
+            f"SOLDE EN FIN DE MOIS — {de_mois_a_mois(premier, dernier).upper()}")
 
     def _infobulle_solde(self, point, survole: bool):
         """Au survol d'un point : le mois et le solde exact, en euros."""
@@ -1733,8 +1748,7 @@ class BilanView(QWidget):
         _court = _mois_court
         labels = [_court(m) for m in months]
         self.bar_panel._header.setText(
-            f"ÉVOLUTION SUR 12 MOIS — {_court(months[0]).upper()} "
-            f"{months[0][:4]} → {_court(months[-1]).upper()} {months[-1][:4]}")
+            f"ÉVOLUTION SUR 12 MOIS — {de_mois_a_mois(months[0], months[-1]).upper()}")
         ax_x = QBarCategoryAxis(); ax_x.append(labels)
         self.bar_chart.addAxis(ax_x, Qt.AlignBottom)
         series.attachAxis(ax_x)

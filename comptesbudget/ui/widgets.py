@@ -61,6 +61,16 @@ class MontantSpinBox(QDoubleSpinBox):
         return super().valueFromText(self._normalise(texte))
 
 
+def boutons_enregistrer_annuler() -> QDialogButtonBox:
+    """Les deux boutons du bas d'un formulaire : « Enregistrer » (Entrée) et
+    « Annuler » (Échap). « OK » ne disait pas ce qu'il faisait (relecture du
+    30/09/2026)."""
+    btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+    btns.button(QDialogButtonBox.Ok).setText("Enregistrer")
+    btns.button(QDialogButtonBox.Cancel).setText("Annuler")
+    return btns
+
+
 def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
                      mini: float = 0.0, maxi: float = 1_000_000.0):
     """Petite boîte « saisissez un montant », équivalent de
@@ -78,7 +88,7 @@ def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
     champ.setValue(valeur)
     champ.selectAll()
     lay.addWidget(champ)
-    btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+    btns = boutons_enregistrer_annuler()
     btns.accepted.connect(dlg.accept)
     btns.rejected.connect(dlg.reject)
     lay.addWidget(btns)

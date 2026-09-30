@@ -214,6 +214,18 @@ def period_label(p: str) -> str:
 MOIS_TOUS = "*"      # entrée « Toute l'année » du menu des mois
 
 
+def de_mois_a_mois(debut: str, fin: str) -> str:
+    """« 2025-10 », « 2026-09 » → « d'octobre 2025 à septembre 2026 ».
+
+    Remplace la flèche « oct 2025 → sep 2026 » (charte : pas de symbole
+    entre deux mots). Élision devant avril, août, octobre."""
+    def mois(p: str) -> str:
+        return period_label(p).lower()
+    premier = mois(debut)
+    de = "d'" if premier[:1] in "aeiouéè" else "de "
+    return f"{de}{premier} à {mois(fin)}"
+
+
 def nom_mois_fr(period: str) -> str:
     """Nom du mois seul d'une période « 2026-09 » → « Septembre ».
 
@@ -333,9 +345,13 @@ def cat_color(name: str) -> str:
 
 
 def fmt_euro(value: float) -> str:
-    """Formatage français : 1 234,56 €."""
-    s = f"{value:,.2f}".replace(",", " ").replace(".", ",")
-    return f"{s} €"
+    """Formatage français : 1 234,56 €.
+
+    Les espaces sont insécables (\\xa0), entre les milliers comme devant le
+    « € » : un montant ne se coupe jamais en fin de ligne (« il reste 9 » /
+    « 474,37 € », relecture du 30/09/2026)."""
+    s = f"{value:,.2f}".replace(",", "\xa0").replace(".", ",")
+    return f"{s}\xa0€"
 
 
 # ── Carte à débit différé ───────────────────────────────────────────────────

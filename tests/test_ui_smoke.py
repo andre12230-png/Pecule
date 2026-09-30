@@ -1039,7 +1039,7 @@ def test_decouvert_solde_qui_tient(qapp, tmp_path):
     disparaître : une absence de message se lirait comme un calcul oublié."""
     v = _bilan_projection(tmp_path, [(5, -50.0), (10, 200.0)], nom="tient.db")
     texte = _texte(v.verdict_banner)
-    assert "reste positif" in texte
+    assert "aucun découvert prévu" in texte
     assert fmt_euro(50.0) in texte             # au plus bas : 100 - 50
     assert "#229954" in v.verdict_banner.styleSheet()      # bordure verte
 
@@ -1061,7 +1061,7 @@ def test_decouvert_ignore_ce_qui_est_au_dela_de_lhorizon(qapp, tmp_path):
     assert HORIZON_DECOUVERT == 45
     v = _bilan_projection(tmp_path, [(HORIZON_DECOUVERT + 10, -500.0)],
                           nom="horizon.db")
-    assert "reste positif" in _texte(v.verdict_banner)
+    assert "aucun découvert prévu" in _texte(v.verdict_banner)
 
 
 def test_encours_carte_avec_remboursement_en_cours(qapp, tmp_path):
@@ -1502,8 +1502,7 @@ def test_graphique_montre_douze_mois_meme_sur_un_mois(qapp, tmp_path):
     assert len(barres["Dépenses"]) == 12
     # Les douze mois s'achèvent sur le mois affiché, pour le situer dans son
     # histoire : juin 2025 → mai 2026.
-    assert "JUN 2025" in v.bar_panel._header.text()
-    assert "MAI 2026" in v.bar_panel._header.text()
+    assert "DE JUIN 2025 À MAI 2026" in v.bar_panel._header.text()
 
 
 def test_graphique_sur_une_annee_montre_ses_douze_mois(qapp, tmp_path):
@@ -1512,8 +1511,7 @@ def test_graphique_sur_une_annee_montre_ses_douze_mois(qapp, tmp_path):
     v.period = "2025"
     v.refresh()
     assert v._mois_du_graphique([]) == [f"2025-{m:02d}" for m in range(1, 13)]
-    assert "JAN 2025" in v.bar_panel._header.text()
-    assert "DÉC 2025" in v.bar_panel._header.text()
+    assert "DE JANVIER 2025 À DÉCEMBRE 2025" in v.bar_panel._header.text()
 
 
 def test_graphique_ignore_le_filtre_de_periode(qapp, tmp_path):
@@ -1932,7 +1930,7 @@ def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):
     assert "tableur" in fenetre._conseil_depot(_Evenement("C:/releve.xlsx"))
     assert "PDF" in fenetre._conseil_depot(_Evenement("C:/releve.pdf"))
     conseil_json = fenetre._conseil_depot(_Evenement("C:/sauve.json"))
-    assert "Restaurer (JSON)" in conseil_json
+    assert "Fusionner un export" in conseil_json
     assert "Paramètres" in conseil_json      # il n'est plus dans le menu
     # Un vrai relevé n'a pas besoin de conseil : il s'importe.
     assert fenetre._conseil_depot(_Evenement("C:/releve.csv")) == ""

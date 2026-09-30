@@ -314,7 +314,7 @@ librement. Tapez « Animaux », « Vacances » ou « Travaux » à la place d'un
 de la liste, et la catégorie est créée : elle apparaît ensuite dans tous les
 menus, reçoit sa couleur et peut recevoir un budget mensuel comme les autres.</p>
 
-<h3>🏷️ Sous-catégories</h3>
+<h3>🔖 Sous-catégories</h3>
 <p>Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
 <b>fusion</b> de variantes, <b>renommage</b> en masse et nettoyage des
 sous-catégories vides ou rarement utilisées.</p>
@@ -325,7 +325,7 @@ Trois façons d'en créer :</p>
 <ul>
   <li>Cocher <b>« Mémoriser »</b> dans le formulaire d'une opération</li>
   <li>Bouton <b>➕ Nouvelle règle</b> dans l'onglet</li>
-  <li>Bouton <b>🔧 Harmoniser</b> du menu de gauche (suggestions automatiques)</li>
+  <li>Bouton <b>🔧 Suggérer catégories</b> du menu de gauche (suggestions automatiques)</li>
 </ul>
 <p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
 la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
@@ -364,7 +364,7 @@ lisibles que ceux de la banque).</p>
 peut tomber le 12 — et fonctionne de deux façons : même montant au centime
 près, ou libellé concordant (pour les factures dont le montant varie,
 électricité ou téléphone). Au-delà, rien n'est deviné : la ligne est importée
-normalement et vous obtenez deux lignes, à corriger avec 🔍 Doublons.</p>
+normalement et vous obtenez deux lignes, à corriger avec 🔍 Chercher doublons.</p>
 <p>La case <b>⏳ Échéance prévue</b> existe aussi dans le formulaire d'une
 opération : cochez-la pour toute saisie faite d'avance (remboursement annoncé,
 virement attendu) afin qu'elle profite du même rattachement.</p>
@@ -381,7 +381,7 @@ fenêtre au lieu de la réduire :</p>
   <li><b>toutes périodes</b> — les douze derniers mois.</li>
 </ul>
 <p>Les bornes exactes sont rappelées dans le <b>titre</b> du cadre
-(« Évolution sur 12 mois — oct 2025 → sep 2026 ») : sur douze colonnes, les
+(« Évolution sur 12 mois — d'octobre 2025 à septembre 2026 ») : sur douze colonnes, les
 libellés de l'axe n'ont la place que du mois. À douze barres, les montants ne
 sont plus écrits à l'intérieur — ils ne tiendraient pas ; ils réapparaissent
 si votre historique compte moins de six mois.</p>
@@ -670,16 +670,16 @@ intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
   <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
-  <tr><td>🔧 Harmoniser</td><td>Suggère des catégorisations d'après les libellés</td></tr>
+  <tr><td>🔧 Suggérer catégories</td><td>Suggère des catégorisations d'après les libellés</td></tr>
   <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
-  <tr><td>🔍 Doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
+  <tr><td>🔍 Chercher doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
   <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer, supprimer un compte bancaire, et <b>ranger la liste</b> — le compte du haut est celui qui s'ouvre au lancement</td></tr>
-  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter (JSON)</b> et <b>Restaurer (JSON)</b>, pour transférer ou fusionner deux installations</td></tr>
+  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter vers une autre installation</b> et <b>Fusionner un export</b>, pour transférer ou fusionner deux installations</td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
   <tr><td>🔄 Mise à jour</td><td>Affiche votre version et ouvre, dans votre navigateur, la page de la dernière version ou son installeur (§&nbsp;9). Pécule ne se connecte à rien : c'est vous qui comparez les numéros</td></tr>
@@ -752,11 +752,11 @@ comment la remettre en service : fermer Pécule, recopier
 exemple après chaque import de relevé : au-delà de 30 jours sans sauvegarde
 externe, un bandeau du Bilan vous le rappelle, avec un lien qui la lance.</p>
 <p><b>Transférer ou fusionner deux installations.</b> Dans
-<code>⚙️ Paramètres</code>, partie « Avancé » : <code>Exporter (JSON)</code>
-écrit un export complet, <code>Restaurer (JSON)</code> le réimporte dans une
-autre installation de Pécule. Pour une simple sauvegarde, préférez la
-sauvegarde externe ci-dessus.</p>
-<div class="warn">⚠️ La restauration JSON <b>fusionne</b> : pour chaque opération,
+<code>⚙️ Paramètres</code>, partie « Avancé » : <code>Exporter vers une autre
+installation</code> écrit un export complet (un fichier <code>.json</code>),
+<code>Fusionner un export</code> le réimporte dans une autre installation de
+Pécule. Pour une simple sauvegarde, préférez la sauvegarde externe ci-dessus.</p>
+<div class="warn">⚠️ Réimporter un export <b>fusionne</b> : pour chaque opération,
 la version la plus récente gagne. Pour revenir exactement à un état antérieur,
 préférez la copie du fichier <code>comptes.db</code>.</div>
 
@@ -861,13 +861,21 @@ suivant, à une date fixée par la banque (Pécule la déduit de vos relevés). 
 
 <dt>Doublon</dt>
 <dd>Opération qui apparaît deux fois dans la base (même date, même montant,
-même libellé). L'outil 🔍 Doublons les détecte et ouvre une liste de
+même libellé). L'outil 🔍 Chercher doublons les détecte et ouvre une liste de
 vérification à cocher : décochez les « faux doublons » légitimes (deux achats
 identiques le même jour) avant de valider la suppression.</dd>
 
 <dt>Encours</dt>
 <dd>Ensemble des opérations en attente de débit, typiquement les achats à
 débit différé pas encore prélevés par la banque.</dd>
+
+<dt>Fusionner un export</dt>
+<dd>Réimporte un export de Pécule (fichier <code>.json</code> écrit par
+« Exporter vers une autre installation ») en le <i>fusionnant</i> avec les
+données : pour chaque opération, règle ou récurrence, la version la plus
+récente est conservée — rien de plus récent que le fichier n'est écrasé. Les
+suppressions plus récentes sont propagées. Se trouve dans ⚙️ Paramètres,
+partie « Avancé ».</dd>
 
 <dt>Harmonisation</dt>
 <dd>Outil qui propose automatiquement des catégorisations basées sur des motifs
@@ -941,13 +949,6 @@ périodes confondues : libellé, note, catégorie, montant ou date.</dd>
 <dd>Affectation automatique d'une catégorie et sous-catégorie aux opérations
 dont le libellé correspond à un motif donné. Appliquée à chaque import CSV
 et accessible depuis l'onglet Règles auto.</dd>
-
-<dt>Restaurer (JSON)</dt>
-<dd>Réimporte un export JSON en le <i>fusionnant</i> avec les données :
-pour chaque opération, règle ou récurrence, la version la plus récente
-est conservée — rien de plus récent que le fichier n'est écrasé. Les
-suppressions plus récentes sont propagées. Se trouve dans ⚙️ Paramètres,
-partie « Avancé ».</dd>
 
 <dt>Solde bancaire réel (pointé)</dt>
 <dd>Montant réellement disponible sur le compte, tel qu'affiché en premier

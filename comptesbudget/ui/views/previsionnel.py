@@ -30,7 +30,7 @@ from ...recurring import (
 )
 
 from ..models import SORT_ROLE, cellule_categorie
-from ..dialogs import RecurringDialog
+from ..dialogs import LIBELLE_RECURRENCE_MANQUANT, RecurringDialog
 from ..assistants import GenererEcheancesDialog, PrefillRecurringDialog
 from ..widgets import confirmer
 
@@ -75,7 +75,7 @@ class PrevisionnelView(QWidget):
         tlay.addWidget(QLabel("Opérations récurrentes définies :"))
         self.model = QStandardItemModel(0, 7, self)
         self.model.setHorizontalHeaderLabels(
-            ["Libellé", "Montant", "Catégorie", "Type", "Fréquence", "Début → fin", "Actif"])
+            ["Libellé", "Montant", "Catégorie", "Type", "Fréquence", "Période", "Actif"])
         self.table = QTableView()
         self.table.setModel(self.model)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -105,6 +105,10 @@ class PrevisionnelView(QWidget):
         for i, w in enumerate([100, 280, 110, 180]):
             self.forecast_table.setColumnWidth(i, w)
         self.forecast_model.setSortRole(SORT_ROLE)
+        # Tri de départ : de la plus proche échéance à la plus lointaine.
+        # L'indicateur de Qt est décroissant par défaut : la liste commençait
+        # dans un an. Un tri choisi ensuite d'un clic sur l'en-tête est gardé.
+        self.forecast_table.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         self.forecast_table.setSortingEnabled(True)
         self.forecast_table.horizontalHeader().setSortIndicatorShown(True)
         blay.addWidget(self.forecast_table)
@@ -130,7 +134,10 @@ class PrevisionnelView(QWidget):
                 cellule_categorie(r["categorie"]),
                 QStandardItem(r["type"] or ""),
                 QStandardItem(freq_lbl.get(r["frequency"], r["frequency"])),
-                QStandardItem(f"{fmt_date_fr(r['start_date'])} → {fmt_date_fr(r['end_date']) if r['end_date'] else '…'}"),
+                # « du … au … » plutôt qu'une flèche (charte, 30/09/2026).
+                QStandardItem(
+                    f"du {fmt_date_fr(r['start_date'])} au {fmt_date_fr(r['end_date'])}"
+                    if r["end_date"] else f"depuis le {fmt_date_fr(r['start_date'])}"),
                 QStandardItem("✔" if r["actif"] else ""),
             ]
             row[1].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -204,7 +211,7 @@ class PrevisionnelView(QWidget):
             return
         v = dlg.values()
         if not v["libelle"]:
-            QMessageBox.warning(self, "Récurrent", "Le libellé est obligatoire.")
+            QMessageBox.warning(self, "Libellé manquant", LIBELLE_RECURRENCE_MANQUANT)
             return
         v["id"] = str(uuid.uuid4())
         self.db.insert_recurring(v)

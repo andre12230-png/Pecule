@@ -29,9 +29,15 @@ def test_numero_cheque():
 
 
 def test_fmt_euro_francais():
-    assert fmt_euro(1234.56) == "1 234,56 €"
-    assert fmt_euro(0) == "0,00 €"
-    assert fmt_euro(-5) == "-5,00 €"
+    # Espaces insécables (\xa0), entre les milliers et devant le « € » : un
+    # montant ne se coupe jamais en fin de ligne. Le bandeau Encours carte
+    # affichait « il reste 9 » puis « 474,37 € » à la ligne (relecture du
+    # 30/09/2026).
+    assert fmt_euro(1234.56) == "1\xa0234,56\xa0€"
+    assert fmt_euro(1234567.8) == "1\xa0234\xa0567,80\xa0€"
+    assert fmt_euro(0) == "0,00\xa0€"
+    assert fmt_euro(-5) == "-5,00\xa0€"
+    assert " " not in fmt_euro(-98765.43)
 
 
 def test_fmt_date_fr():

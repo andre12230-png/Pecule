@@ -159,10 +159,14 @@ class BudgetView(QWidget):
             bar = QProgressBar()
             bar.setRange(0, 100)
             bar.setValue(min(int(ratio), 100) if budget > 0 else 0)
-            bar.setFormat(f"{ratio:.0f}%" if budget else "—")
+            # « 89 % » avec son espace (insécable), comme partout ailleurs.
+            bar.setFormat(f"{ratio:.0f}\xa0%" if budget else "—")
             color = "#27AE60" if ratio < 80 else ("#E67E22" if ratio < 100 else "#C0392B")
+            # Budget dépassé : la barre est pleine et rouge, le chiffre s'y
+            # écrit en blanc (5,44 pour 1 ; en noir, 3,86 seulement).
+            encre = "#FFFFFF" if ratio >= 100 and budget else "#000000"
             bar.setStyleSheet(f"""
-                QProgressBar {{ border:1px solid #BBB; border-radius:3px; text-align:center; background:#F5F5F5; }}
+                QProgressBar {{ border:1px solid #BBB; border-radius:3px; text-align:center; background:#F5F5F5; color:{encre}; }}
                 QProgressBar::chunk {{ background:{color}; }}
             """)
             self.table.setIndexWidget(self.model.index(i, 3), bar)

@@ -149,12 +149,17 @@ class MainWindow(QMainWindow):
 
         add_section("Mettre au propre")
         add_btn("🧹 Nettoyer catégories", self.action_clean_cats)
-        add_btn("🔧 Harmoniser", self.action_harmonize,
+        # Libellés courts, qui disent ce qu'on obtient : le menu fait 184 px
+        # de large (« Harmoniser » seul ne disait pas quoi, « Doublons »
+        # n'avait pas de verbe — relecture du 30/09/2026).
+        add_btn("🔧 Suggérer catégories", self.action_harmonize,
                 "Suggère une catégorie d'après le libellé (motifs prédéfinis)")
         add_btn("🔠 Harmoniser libellés", self.action_harmonize_labels,
                 "Normalise la casse et regroupe les variantes des libellés "
                 "(opérations et récurrences)")
-        add_btn("🔍 Doublons", self.action_find_duplicates)
+        add_btn("🔍 Chercher doublons", self.action_find_duplicates,
+                "Repère les opérations en double (même date, même montant, "
+                "même libellé) et vous laisse choisir lesquelles supprimer")
 
         add_section("Mes données")
         # Les sauvegardes automatiques restent sur le même disque que la
@@ -220,7 +225,8 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.ops_view, "📋 Opérations")
         self.tabs.addTab(self.budget_view, "🎯 Budget")
         self.tabs.addTab(self.cats_view, "🏷️ Catégories")
-        self.tabs.addTab(self.subs_view, "🏷️ Sous-catégories")
+        # Icône à elle : Catégories et Sous-catégories portaient la même 🏷️.
+        self.tabs.addTab(self.subs_view, "🔖 Sous-catégories")
         self.tabs.addTab(self.rules_view, "🧠 Règles auto")
         self.tabs.addTab(self.prev_view, "🔮 Prévisionnel")
 
@@ -539,8 +545,9 @@ class MainWindow(QMainWindow):
             "banque, cherchez « exporter » ou « télécharger » vos opérations "
             "au format CSV ou OFX.",
         (".json",):
-            "Pour réimporter un export JSON de Pécule, ouvrez « ⚙️ "
-            "Paramètres », partie « Avancé », bouton « Restaurer (JSON) » : "
+            "Pour réimporter un export de Pécule (fichier .json), ouvrez "
+            "« ⚙️ Paramètres », partie « Avancé », bouton « Fusionner un "
+            "export » : "
             "il fusionne vos données au lieu de les remplacer.",
     }
 
@@ -924,8 +931,8 @@ class MainWindow(QMainWindow):
                 self, "Reprendre mes données",
                 "Cette installation contient déjà des opérations : elles "
                 "seraient perdues.\n\nPour fusionner deux fichiers, passez "
-                "par « Exporter (JSON) » depuis l'autre installation, puis "
-                "« Restaurer (JSON) » ici : tous deux sont dans « ⚙️ "
+                "par « Exporter vers une autre installation » depuis l'autre, "
+                "puis « Fusionner un export » ici : tous deux sont dans « ⚙️ "
                 "Paramètres », partie « Avancé ».")
             return False
         try:
@@ -1116,17 +1123,17 @@ class MainWindow(QMainWindow):
     def action_export(self):
         """Export JSON COMPLET (via le snapshot de synchronisation) : inclut
         aussi les réglages (solde/date de départ) et les suppressions, pour
-        pouvoir être réimporté par « Restaurer (JSON) »."""
+        pouvoir être réimporté par « Fusionner un export »."""
         path, _ = QFileDialog.getSaveFileName(
-            self, "Exporter les données", "comptes_export.json",
-            "JSON (*.json)")
+            self, "Exporter vers une autre installation", "comptes_export.json",
+            "Export de Pécule (*.json)")
         if not path:
             return
         write_sync_file(self.db, path)
         QMessageBox.information(self, "Export",
             f"Données exportées : {path}\n\n"
             "L'export contient opérations, règles, budgets, récurrences et "
-            "réglages. Il peut être réimporté via « ♻️ Restaurer (JSON) » "
+            "réglages. Il se réimporte par « ♻️ Fusionner un export » "
             "(⚙️ Paramètres, partie « Avancé »).")
 
     def action_import_json(self):
@@ -1134,13 +1141,14 @@ class MainWindow(QMainWindow):
         version la plus récente gagne (rien de plus récent que le fichier
         n'est écrasé) ; les suppressions plus récentes sont propagées."""
         path, _ = QFileDialog.getOpenFileName(
-            self, "Restaurer / fusionner un export JSON", "", "JSON (*.json)")
+            self, "Fusionner un export de Pécule", "", "Export de Pécule (*.json)")
         if not path:
             return
         data = read_sync_file(path)
         if data is None:
-            QMessageBox.warning(self, "Restaurer",
-                "Fichier illisible : ce n'est pas un export JSON de l'application.")
+            QMessageBox.warning(self, "Fichier non reconnu",
+                "Ce fichier n'est pas un export de Pécule. Choisissez le fichier "
+                "écrit par « Exporter vers une autre installation ».")
             return
         if not confirmer(
                 self, "Restaurer / fusionner",

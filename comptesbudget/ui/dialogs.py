@@ -21,7 +21,22 @@ from ..utils import (
 from ..accords import accorde, pluriel
 from ..erreurs import erreur_en_clair
 from ..labels import build_libelle_profiles
-from .widgets import MontantSpinBox, demander_montant
+from .widgets import (
+    MontantSpinBox, boutons_enregistrer_annuler, demander_montant,
+)
+
+# Messages de saisie incomplète : ce qui manque, puis comment faire.
+LIBELLE_MANQUANT = ("Indiquez un libellé : le nom de l'opération, tel qu'il "
+                    "figure sur le relevé (par exemple « Boulangerie »).")
+MONTANT_MANQUANT = ("Indiquez un montant supérieur à zéro. Le sens — débit "
+                    "ou crédit — se choisit juste au-dessus.")
+LIBELLE_RECURRENCE_MANQUANT = ("Indiquez un libellé : le nom de l'opération "
+                               "récurrente (par exemple « Loyer »).")
+BOUTON_EXPORTER = "📤 Exporter vers une autre installation…"
+BOUTON_FUSIONNER = "♻️ Fusionner un export…"
+MOTIF_TROP_COURT = ("Le motif doit faire au moins 2 caractères : c'est le mot "
+                    "que le libellé doit contenir (par exemple « carrefour »).")
+
 
 class TxDialog(QDialog):
     """Boîte de dialogue d'ajout / modification d'opération."""
@@ -249,8 +264,7 @@ class TxDialog(QDialog):
         self._set_rec_rows_visible(False)
         self.create_recurring.toggled.connect(self._on_create_rec_toggled)
 
-        self.btns = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btns.accepted.connect(self._validate_and_accept)
         self.btns.rejected.connect(self.reject)
 
@@ -411,11 +425,12 @@ class TxDialog(QDialog):
         chez les appelants) pour s'appliquer partout : ajout, modification,
         depuis la vue Opérations, Catégories ou la Recherche."""
         if not self.libelle.text().strip():
-            QMessageBox.warning(self, "Saisie", "Le libellé est obligatoire.")
+            QMessageBox.warning(self, "Libellé manquant", LIBELLE_MANQUANT)
+            self.libelle.setFocus()
             return
         if self.montant.value() < 0.005:
-            QMessageBox.warning(self, "Saisie",
-                                "Le montant doit être supérieur à zéro.")
+            QMessageBox.warning(self, "Montant manquant", MONTANT_MANQUANT)
+            self.montant.setFocus()
             return
         # Recette enregistrée en dépense : on demande confirmation au lieu de
         # refuser, car l'utilisateur peut avoir une raison (une régularisation).
@@ -652,8 +667,7 @@ class CategorieEnMasseDialog(QDialog):
         aide.setStyleSheet("color: #666")
         layout.addRow(aide)
 
-        self.btns = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btn_ok = self.btns.button(QDialogButtonBox.Ok)
         self.btn_ok.setText("Appliquer")
         self.btns.accepted.connect(self.accept)
@@ -744,25 +758,28 @@ class SettingsDialog(QDialog):
             explication.setStyleSheet("color:#555")
             layout.addRow(explication)
             ligne = QHBoxLayout()
-            self.btn_exporter_json = QPushButton("💾 Exporter (JSON)…")
+            # Les boutons disent à quoi ils servent, pas le format du fichier
+            # (« Exporter (JSON)… » jusqu'au 30/09/2026).
+            self.btn_exporter_json = QPushButton(BOUTON_EXPORTER)
             self.btn_exporter_json.setToolTip(
-                "Export complet : opérations, règles, budgets, récurrences "
-                "et réglages")
+                "Écrit un fichier qui contient tout : opérations, règles, "
+                "budgets, récurrences et réglages, à réimporter dans une "
+                "autre installation de Pécule")
             self.btn_exporter_json.clicked.connect(
                 lambda: self._choisir_avance("exporter"))
             ligne.addWidget(self.btn_exporter_json)
-            self.btn_restaurer_json = QPushButton("♻️ Restaurer (JSON)…")
+            self.btn_restaurer_json = QPushButton(BOUTON_FUSIONNER)
             self.btn_restaurer_json.setToolTip(
-                "Réimporte un export JSON en le fusionnant : pour chaque "
-                "enregistrement, la version la plus récente est conservée")
+                "Réimporte un fichier écrit par « Exporter vers une autre "
+                "installation », en le fusionnant : pour chaque opération, "
+                "règle ou récurrence, la version la plus récente est conservée")
             self.btn_restaurer_json.clicked.connect(
                 lambda: self._choisir_avance("restaurer"))
             ligne.addWidget(self.btn_restaurer_json)
             ligne.addStretch()
             layout.addRow(ligne)
 
-        self.btns = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
@@ -1168,8 +1185,7 @@ class RuleDialog(QDialog):
         self.lbl_info.setStyleSheet("color:#666; font-size:10pt")
         layout.addRow("", self.lbl_info)
 
-        self.btns = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
@@ -1301,7 +1317,7 @@ class RecurringDialog(QDialog):
         self.actif.setChecked(True)
         layout.addRow("", self.actif)
 
-        self.btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btns.accepted.connect(self._validate_and_accept)
         self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
@@ -1332,7 +1348,8 @@ class RecurringDialog(QDialog):
         """Libellé obligatoire — vérifié ici pour valoir à l'ajout ET à la
         modification."""
         if not self.libelle.text().strip():
-            QMessageBox.warning(self, "Récurrent", "Le libellé est obligatoire.")
+            QMessageBox.warning(self, "Libellé manquant", LIBELLE_RECURRENCE_MANQUANT)
+            self.libelle.setFocus()
             return
         self.accept()
 
@@ -1442,8 +1459,7 @@ class CategoriesMasqueesDialog(QDialog):
         defilement.setMinimumHeight(320)
         layout.addWidget(defilement)
 
-        self.btns = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.btns = boutons_enregistrer_annuler()
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         layout.addWidget(self.btns)

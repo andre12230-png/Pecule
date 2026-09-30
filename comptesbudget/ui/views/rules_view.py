@@ -16,12 +16,12 @@ from PySide6.QtWidgets import (
 
 from ...accords import accorde, pluriel
 from ...utils import (
-    fmt_euro,
+    fmt_date_fr, fmt_euro,
 )
 from ...database import Database
 from ...rules import apply_rules_to_tx
 
-from ..dialogs import RuleDialog
+from ..dialogs import MOTIF_TROP_COURT, RuleDialog
 from ..widgets import confirmer
 
 class RulesView(QWidget):
@@ -106,7 +106,7 @@ class RulesView(QWidget):
                 it_sens,
                 QStandardItem(r["categorie"]),
                 QStandardItem(r["sous_cat"]),
-                QStandardItem(r["created_at"]),
+                QStandardItem(fmt_date_fr(r["created_at"] or "")),
             ]
             for it in items:
                 it.setData(r["id"], Qt.UserRole)
@@ -125,7 +125,7 @@ class RulesView(QWidget):
             return
         v = dlg.values()
         if len(v["pattern"]) < 2:
-            QMessageBox.warning(self, "Règle", "Le motif doit faire au moins 2 caractères.")
+            QMessageBox.warning(self, "Motif trop court", MOTIF_TROP_COURT)
             return
         v["id"] = str(uuid.uuid4())
         v["created_at"] = date.today().isoformat()
@@ -146,7 +146,7 @@ class RulesView(QWidget):
             return
         v = dlg.values()
         if len(v["pattern"]) < 2:
-            QMessageBox.warning(self, "Règle", "Le motif doit faire au moins 2 caractères.")
+            QMessageBox.warning(self, "Motif trop court", MOTIF_TROP_COURT)
             return
         self.db.update_rule(rid, v)
         self.refresh()
@@ -174,7 +174,7 @@ class RulesView(QWidget):
     def apply_all(self):
         rules = [dict(r) for r in self.db.list_rules()]
         if not rules:
-            QMessageBox.information(self, "Règles", "Aucune règle à appliquer.")
+            QMessageBox.information(self, "Appliquer les règles", "Aucune règle à appliquer : créez-en une avec « ➕ Nouvelle règle ».")
             return
         txs = [dict(r) for r in self.db.list_tx()]
         modified = 0
@@ -185,7 +185,7 @@ class RulesView(QWidget):
                            or fields.get("sous_cat") != tx.get("sous_cat")):
                     self.db.update_tx(tx["id"], fields)
                     modified += 1
-        QMessageBox.information(self, "Règles",
+        QMessageBox.information(self, "Appliquer les règles",
             f"{pluriel(modified, 'opération', 'opérations')} "
             f"{accorde(modified, 'mise', 'mises')} à jour.")
         self.rules_changed.emit()

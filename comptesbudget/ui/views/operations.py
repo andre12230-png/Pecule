@@ -31,7 +31,9 @@ from ..flow_layout import FlowLayout
 from ..models import (
     TxTableModel, charger_en_conservant_le_tri, colonnes_des_operations,
 )
-from ..dialogs import TxDialog, CategorieEnMasseDialog
+from ..dialogs import (
+    LIBELLE_MANQUANT, MONTANT_MANQUANT, CategorieEnMasseDialog, TxDialog,
+)
 from ..widgets import confirmer
 
 class OperationsView(QWidget):
@@ -505,8 +507,9 @@ class OperationsView(QWidget):
         r = v.get("_rule") or {}
         pattern = (r.get("pattern") or "").strip()
         if len(pattern) < 2:
-            QMessageBox.warning(self, "Règle",
-                "Motif trop court : la règle n'a pas été créée.")
+            QMessageBox.warning(self, "Motif trop court",
+                "La règle n'a pas été créée : son motif doit faire au moins "
+                "2 caractères. L'opération, elle, est bien enregistrée.")
             return
         # Si une règle au même motif (et même filtre montant) existe : on met à jour
         amt = r.get("amount")
@@ -531,14 +534,15 @@ class OperationsView(QWidget):
         }
         if existing:
             self.db.update_rule(existing["id"], rule_data)
-            QMessageBox.information(self, "Règle",
-                f"Règle existante mise à jour pour « {pattern} » → {v.get('categorie')}.")
+            QMessageBox.information(self, "Règle mise à jour",
+                f"La règle « {pattern} » classe désormais en « {v.get('categorie')} ».")
         else:
             rule_data["id"] = str(uuid.uuid4())
             rule_data["created_at"] = date.today().isoformat()
             self.db.insert_rule(rule_data)
-            QMessageBox.information(self, "Règle",
-                f"Nouvelle règle créée : « {pattern} » → {v.get('categorie')}.")
+            QMessageBox.information(self, "Règle créée",
+                f"Nouvelle règle : les libellés qui contiennent « {pattern} » "
+                f"seront classés en « {v.get('categorie')} ».")
         # Appliquer SEULEMENT cette règle aux opérations de l'historique qui
         # lui correspondent (avant : toutes les règles étaient rejouées sur
         # toute la base, ce qui pouvait défaire des catégories corrigées à la
@@ -598,10 +602,10 @@ class OperationsView(QWidget):
             return False
         v = dlg.values()
         if not v["libelle"]:
-            QMessageBox.warning(self, "Saisie", "Le libellé est obligatoire.")
+            QMessageBox.warning(self, "Libellé manquant", LIBELLE_MANQUANT)
             return False
         if abs(v["montant"]) < 0.005:
-            QMessageBox.warning(self, "Saisie", "Le montant doit être supérieur à zéro.")
+            QMessageBox.warning(self, "Montant manquant", MONTANT_MANQUANT)
             return False
         # Préserver les champs règle pour _maybe_create_rule
         rule_request = v.get("_create_rule")
@@ -663,7 +667,9 @@ class OperationsView(QWidget):
         # « Oui » par défaut, choisi exprès : cette suppression s'annule d'un
         # clic (bandeau « ↩ Annuler »), contrairement à celles qui passent
         # par confirmer().
-        if QMessageBox.question(self, "Supprimer", question,
+        titre = ("Supprimer l'opération" if len(ids) == 1
+                 else "Supprimer les opérations")
+        if QMessageBox.question(self, titre, question,
                                 QMessageBox.Yes | QMessageBox.No,
                                 QMessageBox.Yes) != QMessageBox.Yes:
             return

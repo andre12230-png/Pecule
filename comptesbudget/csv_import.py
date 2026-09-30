@@ -698,7 +698,7 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         # ferait disparaître une vraie dépense du relevé (incident du
         # 31/07/2026 : une saisie « Café » -4,50 € masquait la boulangerie du
         # même jour au même montant). En cas d'ambiguïté on importe tout : un
-        # doublon visible se corrige avec « 🔍 Doublons », une opération perdue
+        # doublon visible se corrige avec « 🔍 Chercher doublons », une opération perdue
         # ne se voit pas.
         filet_manuel = (occ_dm < existing_by_dm[k_dm]
                         and csv_par_dm[k_dm] <= existing_by_dm[k_dm])
