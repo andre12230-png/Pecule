@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (7) — Tris de A à Z, catégorie vide à la saisie
+
+**Fait.** (commit b49848e) Point 2 de la relecture de design. Catégories,
+Sous-catégories et les récurrences du Prévisionnel s'ouvrent triés de A à Z
+(l'indicateur de tri de Qt est décroissant tant qu'on ne lui dit rien ; le
+tableau des prévisions avait déjà la parade). Les formulaires de nouvelle
+opération, nouvelle règle et nouvelle récurrence ouvrent la case Catégorie
+vide au lieu de « Abonnements ». En conséquence, une règle sans catégorie est
+refusée (« Catégorie manquante »), y compris par « Mémoriser » dans la saisie,
+l'opération restant enregistrée. Notice : un paragraphe sous « Règles auto ».
+Cinq tests écrits avant et vus en échec. 620/620. Captures vérifiées.
+
+**Pourquoi.** Une saisie validée sans toucher à la catégorie était classée
+« Abonnements » sans raison ; trois tableaux commençaient par la fin de
+l'alphabet, Budget par le début.
+
+**Reste.** Pas d'exe. Suite de la relecture : types sans accents à
+l'affichage, vocabulaire des entrées d'argent, tableaux pleine largeur, place
+des boutons, axe du solde, Règles auto sans pastille. Hors relecture : un
+motif trop court dans « Nouvelle règle » ferme la fenêtre et perd la saisie.
+
 ## 2026-10-01 (6) — Relecture de design ; haut du Bilan allégé
 
 **Fait.** Relecture de tous les onglets avec le plugin Design (captures sur
