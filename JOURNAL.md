@@ -26,7 +26,12 @@ La date la plus récente est en haut.
 **Fait.** Numéro 1.40.4 (constants.py et son historique, Lisez-moi.txt) :
 l'import qui reconnaît une opération renommée, et les corrections des tests
 (fenêtres détruites, invite rattachée à sa fenêtre). Notice : le passage sur
-les doublons du CSV le dit. Construction et installation : voir la suite.
+les doublons du CSV le dit. Contrôle de livraison vert (611/611). Exe
+construit sans le .bat, `_cles_libelle` lu dans son archive ; lancé sur une
+base inventée : « Pécule — v1.40.4 », fermeture normale. Installé : la 1.40.3
+devient `Pecule.exe.avant-1.40.4` (seul filet), `_internal` remis à jour
+(robocopy code 1), empreinte de `comptes.db` identique avant et après. L'exe
+1.40.2 (`Pecule.exe.avant-1.40.3`) est à la Corbeille, vérifié.
 
 **Pourquoi.** Demande de l'auteur : « construis la 1.40.4, installe-la chez
 moi, mets l'ancien à la corbeille ».
