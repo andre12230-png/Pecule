@@ -12,7 +12,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
     QPushButton, QStatusBar, QDialog, QMessageBox, QFileDialog,
-    QLabel, QComboBox, QScrollArea, QFrame,
+    QLabel, QComboBox, QScrollArea, QFrame, QMenu,
 )
 
 from ..constants import (
@@ -116,22 +116,30 @@ class MainWindow(QMainWindow):
             return espace, lbl
 
         # ── Compte affiché ──
-        # Le compte choisi ici commande TOUT l'écran : bilan, opérations,
-        # budget, prévisionnel. Le groupe entier disparaît quand il n'y a
-        # qu'un seul compte : rien d'inutile à l'écran.
-        self.compte_espace, self.compte_label = add_section("Compte")
+        # Le compte choisi commande TOUT l'écran : bilan, opérations, budget,
+        # prévisionnel. Il est au bout de la rangée d'onglets (posé plus bas,
+        # setCornerWidget) : dans le menu, il le faisait déborder sur un
+        # portable 1366 × 768 (choix de l'auteur du 01/10/2026). Le tout
+        # disparaît quand il n'y a qu'un seul compte.
+        self.compte_espace = QWidget()
+        coin = QHBoxLayout(self.compte_espace)
+        coin.setContentsMargins(8, 2, 4, 2)
+        coin.setSpacing(6)
+        self.compte_label = QLabel("Compte :")
+        coin.addWidget(self.compte_label)
         self.compte_combo = QComboBox()
-        self.compte_combo.setMinimumHeight(26)
         self.compte_combo.setToolTip(
             "Compte bancaire affiché. Chaque compte a ses propres "
             "opérations, budgets et prévisionnel.")
         self.compte_combo.currentIndexChanged.connect(self.on_compte_changed)
-        mv.addWidget(self.compte_combo)
-        # Les soldes de tous les comptes et leur total : caché lui aussi
-        # quand il n'y a qu'un compte.
-        self.btn_recap = add_btn(
-            "📊 Tous les comptes", self.action_recap_comptes,
-            "Soldes de tous vos comptes côte à côte, et leur total")
+        coin.addWidget(self.compte_combo)
+        # Les soldes de tous les comptes et leur total.
+        self.btn_recap = QPushButton("📊 Tous")
+        self.btn_recap.setToolTip(
+            "Tous les comptes : leurs soldes côte à côte, et leur total")
+        self.btn_recap.setAutoDefault(False)
+        self.btn_recap.clicked.connect(self.action_recap_comptes)
+        coin.addWidget(self.btn_recap)
 
         add_section("Saisie")
         add_btn("➕ Nouvelle opération", self.action_new_tx)
@@ -148,18 +156,31 @@ class MainWindow(QMainWindow):
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
 
         add_section("Mettre au propre")
-        add_btn("🧹 Nettoyer catégories", self.action_clean_cats)
-        # Libellés courts, qui disent ce qu'on obtient : le menu fait 184 px
-        # de large (« Harmoniser » seul ne disait pas quoi, « Doublons »
-        # n'avait pas de verbe — relecture du 30/09/2026).
-        add_btn("🔧 Suggérer catégories", self.action_harmonize,
-                "Suggère une catégorie d'après le libellé (motifs prédéfinis)")
-        add_btn("🔠 Harmoniser libellés", self.action_harmonize_labels,
-                "Normalise la casse et regroupe les variantes des libellés "
-                "(opérations et récurrences)")
-        add_btn("🔍 Chercher doublons", self.action_find_duplicates,
-                "Repère les opérations en double (même date, même montant, "
-                "même libellé) et vous laisse choisir lesquelles supprimer")
+        # Un seul bouton, qui ouvre les quatre outils : quatre boutons
+        # d'affilée faisaient déborder le menu sur un portable (choix de
+        # l'auteur du 01/10/2026). Libellés courts, qui disent ce qu'on
+        # obtient (relecture du 30/09/2026).
+        self.menu_propre = QMenu(self)
+        self.menu_propre.setToolTipsVisible(True)
+        for texte, action, aide in (
+                ("🧹 Nettoyer catégories", self.action_clean_cats,
+                 "Ramène les catégories venues des banques aux noms de Pécule"),
+                ("🔧 Suggérer catégories", self.action_harmonize,
+                 "Suggère une catégorie d'après le libellé (motifs prédéfinis)"),
+                ("🔠 Harmoniser libellés", self.action_harmonize_labels,
+                 "Normalise la casse et regroupe les variantes des libellés "
+                 "(opérations et récurrences)"),
+                ("🔍 Chercher doublons", self.action_find_duplicates,
+                 "Repère les opérations en double (même date, même montant, "
+                 "même libellé) et vous laisse choisir lesquelles supprimer")):
+            act = self.menu_propre.addAction(texte)
+            act.setToolTip(aide)
+            act.triggered.connect(action)
+        self.btn_propre = add_btn(
+            "🧹 Mettre au propre…", lambda: None,
+            "Nettoyer les catégories, suggérer des catégories, harmoniser "
+            "les libellés, chercher les doublons")
+        self.btn_propre.setMenu(self.menu_propre)
 
         add_section("Mes données")
         # Les sauvegardes automatiques restent sur le même disque que la
@@ -229,6 +250,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.subs_view, "🔖 Sous-catégories")
         self.tabs.addTab(self.rules_view, "🧠 Règles auto")
         self.tabs.addTab(self.prev_view, "🔮 Prévisionnel")
+        self.tabs.setCornerWidget(self.compte_espace, Qt.TopRightCorner)
 
         cv.addWidget(self.tabs)
 

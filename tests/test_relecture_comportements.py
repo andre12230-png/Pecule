@@ -212,6 +212,64 @@ def test_pre_remplir_garde_accents_et_sigles():
     assert libelles == ["EDF Électricité"], libelles
 
 
+# ── Menu de gauche et bandeau Encours carte (choix de l'auteur, 01/10) ──
+
+def test_mettre_au_propre_tient_dans_un_bouton(qapp, db):
+    """Quatre boutons d'affilée faisaient déborder le menu sur un portable :
+    un seul bouton « Mettre au propre… » ouvre les quatre outils."""
+    from PySide6.QtWidgets import QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    textes = [b.text() for b in menu.findChildren(QPushButton)]
+    assert "🧹 Mettre au propre…" in textes
+    for ancien in ("🧹 Nettoyer catégories", "🔧 Suggérer catégories",
+                   "🔠 Harmoniser libellés", "🔍 Chercher doublons"):
+        assert ancien not in textes, ancien
+    bouton = next(b for b in menu.findChildren(QPushButton)
+                  if b.text() == "🧹 Mettre au propre…")
+    actions = [a.text() for a in bouton.menu().actions()]
+    assert actions == ["🧹 Nettoyer catégories", "🔧 Suggérer catégories",
+                       "🔠 Harmoniser libellés", "🔍 Chercher doublons"]
+
+
+def test_choix_du_compte_au_bout_des_onglets(qapp, db):
+    """Le choix du compte prenait trois lignes du menu : il passe au bout de
+    la rangée d'onglets, et ne s'y montre qu'avec plusieurs comptes."""
+    from PySide6.QtWidgets import QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    coin = w.tabs.cornerWidget(Qt.TopRightCorner)
+    assert coin is not None and coin.isAncestorOf(w.compte_combo)
+    assert not menu.isAncestorOf(w.compte_combo)
+    assert coin.isHidden()                       # un seul compte
+    db.add_compte("Livret", 0.0, "2026-01-01")
+    w.refresh_all()
+    assert not coin.isHidden()
+
+
+def test_bandeau_carte_allege(qapp, tmp_path):
+    """Le bandeau Encours carte alignait cinq lignes de détail : il garde la
+    phrase « il reste… » ; le reste passe au survol."""
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.utils import date_debit_differe
+    d = Database(str(tmp_path / "carte.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    jour = date.today().isoformat()
+    d.insert_tx(_tx(id="cb", date=jour, date_valeur=date_debit_differe(jour),
+                    type="Carte bancaire", libelle="Achat", montant=-200.0,
+                    pointee=0))
+    vue = BilanView(d)
+    vue.refresh()
+    visible = vue.cb_detail.text()
+    assert "il reste" in visible or "il MANQUE" in visible
+    assert "Mois précédent" not in visible
+    assert "survol" in visible
+    assert "Mois précédent" in vue.cb_banner.toolTip()
+
+
 # ── Un nom par chose ────────────────────────────────────────────────────
 
 def test_operations_parlent_de_mouvement_pas_de_solde(qapp, db):

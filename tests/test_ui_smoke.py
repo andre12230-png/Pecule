@@ -119,13 +119,13 @@ def test_reste_carte_suit_une_depense_saisie(qapp, tmp_path):
                     libelle="HYPERMARCHE", type="Carte bancaire",
                     montant=-200.0, pointee=1))
     w = MainWindow(d)
-    assert "il reste " + fmt_euro(800.0) in w.bilan_view.cb_detail.text()
+    assert "il reste " + fmt_euro(800.0) in w.bilan_view.cb_detail_complet
 
     d.insert_tx(_tx(id="cb2", date=today, date_valeur=date_debit_differe(today),
                     libelle="OMNISHOP", type="Carte bancaire",
                     montant=-62.0, pointee=0))
     w.ops_view.tx_changed.emit()          # ce que fait toute saisie
-    assert "il reste " + fmt_euro(738.0) in w.bilan_view.cb_detail.text()
+    assert "il reste " + fmt_euro(738.0) in w.bilan_view.cb_detail_complet
 
 
 def test_bandeau_carte_suit_la_periode_choisie(qapp, tmp_path):
@@ -156,11 +156,11 @@ def test_bandeau_carte_suit_la_periode_choisie(qapp, tmp_path):
     w = MainWindow(d)
     # 1 000 - 30 de prélèvement - 600 de lot carte prélevé le 4 = 370 au
     # compte, moins 100 déjà passés à la carte ce mois-ci.
-    assert "il reste " + fmt_euro(270.0) in w.bilan_view.cb_detail.text()
+    assert "il reste " + fmt_euro(270.0) in w.bilan_view.cb_detail_complet
 
     w.period_bar._appliquer(mois_dernier.strftime("%Y-%m"))
     # 970 - 600
-    assert "il restait " + fmt_euro(370.0) in w.bilan_view.cb_detail.text()
+    assert "il restait " + fmt_euro(370.0) in w.bilan_view.cb_detail_complet
     assert period_label(mois_dernier.strftime("%Y-%m")).upper() in \
         w.bilan_view.cb_title.text()
 
@@ -779,7 +779,7 @@ def test_encours_carte_reste_ce_que_le_compte_laisse(qapp, tmp_path):
     phrase du détail."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
     # 1 000 € au compte, aucune autre échéance, 200 € déjà passés à la carte.
-    assert "il reste " + fmt_euro(800.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(800.0) in v.cb_detail_complet
     # Et plus aucun bloc « Reste pour la carte » dans le bandeau.
     assert not hasattr(v, "cb_dispo")
 
@@ -789,8 +789,8 @@ def test_encours_carte_reste_ne_descend_pas_sous_zero(qapp, tmp_path):
     ce qui MANQUE. C'est la seule lecture honnête : un mois qui finit dans le
     rouge ne laisse rien pour aucune dépense."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -1200.0)])
-    assert "il MANQUE " + fmt_euro(200.0) in v.cb_detail.text()
-    assert "il reste " not in v.cb_detail.text()
+    assert "il MANQUE " + fmt_euro(200.0) in v.cb_detail_complet
+    assert "il reste " not in v.cb_detail_complet
 
 
 def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):
@@ -802,20 +802,20 @@ def test_encours_carte_reste_tient_compte_des_echeances_a_venir(qapp, tmp_path):
     v = _bilan_carte(tmp_path, [(today.isoformat(), -200.0)],
                      autres=[(fin_mois, -500.0)], nom="echeance.db")
     # 1 000 - 500 d'échéance à venir = 500 en fin de mois, moins 200 de carte.
-    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail_complet
 
 
 def test_encours_carte_reste_suit_une_nouvelle_depense(qapp, tmp_path):
     """Une dépense enregistrée, et le chiffre baisse d'autant au
     rafraîchissement suivant : c'est ce qui le rend utilisable."""
     v = _bilan_carte(tmp_path, [(date.today().isoformat(), -200.0)])
-    assert "il reste " + fmt_euro(800.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(800.0) in v.cb_detail_complet
     jour = date.today().isoformat()
     v.db.insert_tx(_tx(id="cb2", date=jour, date_valeur=date_debit_differe(jour),
                        libelle="OMNISHOP", type="Carte bancaire",
                        montant=-62.0, pointee=0))
     v.refresh()
-    assert "il reste " + fmt_euro(738.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(738.0) in v.cb_detail_complet
 
 
 def _bilan_deux_mois(tmp_path):
@@ -836,7 +836,7 @@ def test_encours_carte_suit_le_mois_consulte(qapp, tmp_path):
     v, today, mois_dernier = _bilan_deux_mois(tmp_path)
     # Le lot du mois dernier (600 €) a été prélevé le 4 : le compte est à
     # 400 €, moins les 100 € déjà passés à la carte ce mois-ci.
-    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail_complet
     assert v.cb_bloc1.isVisibleTo(v)
 
     v.period = mois_dernier.strftime("%Y-%m")
@@ -844,10 +844,10 @@ def test_encours_carte_suit_le_mois_consulte(qapp, tmp_path):
     assert v.cb_total.text() == fmt_euro(-600.0)       # les achats du mois passé
     # Fin du mois dernier, le compte était encore à 1 000 € : les 600 € de
     # carte n'en sortent que le 4 du mois suivant.
-    assert "il restait " + fmt_euro(400.0) in v.cb_detail.text()
+    assert "il restait " + fmt_euro(400.0) in v.cb_detail_complet
     assert period_label(v.period).upper() in v.cb_title.text()
     assert fmt_date_fr(date_debit_differe(mois_dernier.isoformat())) in v.cb_title.text()
-    assert "Consultation" in v.cb_detail.text()
+    assert "Consultation" in v.cb_detail_complet
     # Les deux chiffres du prochain prélèvement n'ont aucun sens sur un mois
     # passé, où plus rien n'est en attente : ils s'effacent.
     assert not v.cb_bloc1.isVisibleTo(v)
@@ -860,7 +860,7 @@ def test_encours_carte_annee_reste_sur_le_mois_en_cours(qapp, tmp_path):
     v, today, _ = _bilan_deux_mois(tmp_path)
     v.period = today.strftime("%Y")
     v.refresh()
-    assert "il reste " + fmt_euro(300.0) in v.cb_detail.text()
+    assert "il reste " + fmt_euro(300.0) in v.cb_detail_complet
     assert v.cb_bloc1.isVisibleTo(v)
 
 
@@ -876,11 +876,11 @@ def test_encours_carte_verdict_du_mois_precedent(qapp, tmp_path):
     """Le mois fini, le bandeau dit ce qu'il a laissé — sans qu'on ait à
     changer de période pour aller le chercher."""
     v, today, mois_dernier = _bilan_deux_mois(tmp_path)
-    assert "Mois précédent" in v.cb_detail.text()
-    assert period_label(mois_dernier.strftime("%Y-%m")).lower() in v.cb_detail.text()
-    assert fmt_euro(600.0) in v.cb_detail.text()      # dépensé à la carte
-    assert fmt_euro(400.0) in v.cb_detail.text()      # ce qu'il restait
-    assert "il restait" in v.cb_detail.text()
+    assert "Mois précédent" in v.cb_detail_complet
+    assert period_label(mois_dernier.strftime("%Y-%m")).lower() in v.cb_detail_complet
+    assert fmt_euro(600.0) in v.cb_detail_complet      # dépensé à la carte
+    assert fmt_euro(400.0) in v.cb_detail_complet      # ce qu'il restait
+    assert "il restait" in v.cb_detail_complet
 
 
 def test_encours_carte_verdict_mois_ou_il_a_manque(qapp, tmp_path):
@@ -890,8 +890,8 @@ def test_encours_carte_verdict_mois_ou_il_a_manque(qapp, tmp_path):
     mois_dernier = today.replace(day=1) - timedelta(days=1)
     v = _bilan_carte(tmp_path, [(mois_dernier.isoformat(), -1300.0)],
                      nom="manque.db")
-    assert "il a MANQUÉ" in v.cb_detail.text()
-    assert fmt_euro(300.0) in v.cb_detail.text()      # 1 300 - 1 000
+    assert "il a MANQUÉ" in v.cb_detail_complet
+    assert fmt_euro(300.0) in v.cb_detail_complet      # 1 300 - 1 000
 
 
 def test_encours_carte_tendance_de_fin_de_mois(qapp, tmp_path, monkeypatch):
@@ -911,13 +911,13 @@ def test_encours_carte_tendance_de_fin_de_mois(qapp, tmp_path, monkeypatch):
     v.refresh()
     # 300 € en 20 jours sur un mois de 30 → environ 450 € en fin de mois,
     # sur 1 000 € au compte : il resterait 550 €.
-    assert "À ce rythme" in v.cb_detail.text()
-    assert fmt_euro(450.0) in v.cb_detail.text()
-    assert "il resterait" in v.cb_detail.text()
+    assert "À ce rythme" in v.cb_detail_complet
+    assert fmt_euro(450.0) in v.cb_detail_complet
+    assert "il resterait" in v.cb_detail_complet
 
     _fige_aujourdhui(monkeypatch, date(2026, 6, 3))   # trop tôt : il se tait
     v.refresh()
-    assert "À ce rythme" not in v.cb_detail.text()
+    assert "À ce rythme" not in v.cb_detail_complet
 
 
 # ── Cartes SANS débit différé ───────────────────────────────────────────────
@@ -1094,7 +1094,7 @@ def test_encours_carte_avec_remboursement_en_cours(qapp, tmp_path):
     assert v.cb_total.text() == fmt_euro(-100.0)       # inchangé par le remboursement
     # Le solde du compte (0 €) plus les opérations en cours
     assert "Solde incluant les opérations carte en cours : " + fmt_euro(15.00) \
-        in v.cb_detail.text()
+        in v.cb_detail_complet
 
 
 def test_bandeau_ce_mois_ci(qapp, tmp_path, monkeypatch):
@@ -2172,7 +2172,7 @@ def test_bandeau_carte_releve_credit_agricole(qapp, tmp_path, monkeypatch):
     assert _euros(vue.cb_total.text()) == -764.10
     assert "30/09/2026" in vue.cb_title.text()
     # Le lot part le 30 : il pèse sur le solde de fin de mois, une seule fois.
-    detail = vue.cb_detail.text()
+    detail = vue.cb_detail_complet
     assert "764,10" in detail
     assert "déjà passés à la carte" in detail
 

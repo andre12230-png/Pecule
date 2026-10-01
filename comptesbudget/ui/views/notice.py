@@ -170,13 +170,14 @@ Tant que vous n'en avez qu'un, rien ne change à l'écran.</p>
   <li><b>Créer un compte</b> : bouton <code>🏦 Mes comptes</code> du menu de
       gauche, puis <code>➕ Ajouter</code>. Donnez-lui un nom et le solde qu'il
       avait à votre date de départ.</li>
-  <li><b>Changer de compte</b> : la liste <b>Compte affiché</b>, en haut du menu
-      de gauche, apparaît dès qu'il y a deux comptes. Le compte choisi commande
+  <li><b>Changer de compte</b> : la liste <b>Compte :</b>, au bout de la rangée
+      d'onglets (à droite de « 🔮 Prévisionnel »), apparaît dès qu'il y a deux
+      comptes. Le compte choisi commande
       <b>tout l'écran</b> : bilan, opérations, budget, prévisionnel, rapport
       mensuel et recherche. Le nom du compte est rappelé dans le titre de la
       fenêtre, pour ne jamais s'y tromper.</li>
   <li><b>Voir tous les comptes d'un coup</b> : bouton
-      <code>📊 Tous les comptes</code>, juste sous la liste. Il donne, pour
+      <code>📊 Tous</code>, juste à droite de la liste. Il donne, pour
       chaque compte, le solde <b>en banque</b> (opérations pointées, comme le
       Bilan), ce qui n'est <b>pas encore pointé</b>, et le <b>solde
       comptable</b> qui réunit les deux — puis le <b>total</b> de tous les
@@ -344,7 +345,7 @@ Trois façons d'en créer :</p>
 <ul>
   <li>Cocher <b>« Mémoriser »</b> dans le formulaire d'une opération</li>
   <li>Bouton <b>➕ Nouvelle règle</b> dans l'onglet</li>
-  <li>Bouton <b>🔧 Suggérer catégories</b> du menu de gauche (suggestions automatiques)</li>
+  <li><b>🔧 Suggérer catégories</b>, sous le bouton <b>🧹 Mettre au propre…</b> du menu de gauche (suggestions automatiques)</li>
 </ul>
 <p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
 la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
@@ -524,11 +525,14 @@ chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
   <li><b>Total des achats à débiter</b> — ce qu'il reste à payer par la carte,
       toutes échéances confondues.</li>
 </ul>
-<p><b>Ce que le mois laisse, en toutes lettres.</b> À droite des chiffres, le
-détail dit ce que votre compte aura en fin de mois une fois tout payé, moins
+<p><b>Ce que le mois laisse, en toutes lettres.</b> À droite des chiffres, une
+phrase dit ce que votre compte aura en fin de mois une fois tout payé, moins
 les achats déjà passés à la carte : « Solde prévu fin de mois 250,00 € moins
 200,00 € déjà passés à la carte — il reste 50,00 € », ou « il MANQUE 400,00 € ».
-Il se met à jour dès qu'une dépense est enregistrée, modifiée ou supprimée.</p>
+Elle se met à jour dès qu'une dépense est enregistrée, modifiée ou supprimée.
+<b>Le reste du détail apparaît au survol du bandeau</b> : nombre d'opérations
+du prélèvement, tendance « à ce rythme » (à partir du 10 du mois), bilan du
+mois précédent, solde incluant les opérations carte en cours.</p>
 <p><b>Pourquoi une phrase et non un chiffre.</b> Un quatrième bloc, « Reste
 pour la carte », affichait ce montant jusqu'à la version 1.30.7. Il ne
 descendait jamais sous zéro : un mois qui finissait dans le rouge montrait
@@ -682,16 +686,18 @@ le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
 
 <h2>6. Outils du menu de gauche</h2>
 <p>Les actions sont rangées par intention, chaque groupe annoncé par son
-intitulé : <b>Compte</b> (le compte affiché), <b>Saisie</b>, <b>Consulter</b>,
-<b>Mettre au propre</b>, <b>Mes données</b>, <b>Réglages</b> et <b>Aide</b>.</p>
+intitulé : <b>Saisie</b>, <b>Consulter</b>, <b>Mettre au propre</b>,
+<b>Mes données</b>, <b>Réglages</b> et <b>Aide</b>. Le compte affiché se
+choisit au bout de la rangée d'onglets, dès qu'il y a deux comptes.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
-  <tr><td>🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
-  <tr><td>🔧 Suggérer catégories</td><td>Suggère des catégorisations d'après les libellés</td></tr>
-  <tr><td>🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
-  <tr><td>🔍 Chercher doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
+  <tr><td>🧹 Mettre au propre…</td><td>Ouvre les quatre outils ci-dessous</td></tr>
+  <tr><td>&nbsp;&nbsp;🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
+  <tr><td>&nbsp;&nbsp;🔧 Suggérer catégories</td><td>Suggère des catégorisations d'après les libellés</td></tr>
+  <tr><td>&nbsp;&nbsp;🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
+  <tr><td>&nbsp;&nbsp;🔍 Chercher doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
   <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
@@ -858,7 +864,7 @@ une catégorie. Les catégories sont <b>communes à tous vos comptes</b>.</dd>
 
 <dt>Compte</dt>
 <dd>Un compte bancaire suivi par l'application : compte courant, livret,
-compte joint… Le compte affiché, choisi en haut du menu de gauche, commande
+compte joint… Le compte affiché, choisi au bout de la rangée d'onglets, commande
 tout l'écran. Chaque compte a ses propres <b>opérations, budgets,
 prévisionnel et solde de départ</b> ; les <b>règles automatiques, catégories,
 sous-catégories et libellés harmonisés</b> sont au contraire communs à tous,

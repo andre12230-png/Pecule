@@ -336,6 +336,7 @@ class BilanView(QWidget):
         cb_lay.addWidget(self.cb_bloc3)
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
+        self.cb_detail_complet = ""      # tout le détail (infobulle)
         self.cb_detail.setStyleSheet("color:#7E5109; font-size:9pt")
         self.cb_detail.setWordWrap(True)
         cb_lay.addWidget(self.cb_detail)
@@ -815,6 +816,16 @@ class BilanView(QWidget):
                 creux = (d, solde)
         return creux
 
+    def _poser_detail_carte(self, principal: str, complet: str):
+        """Détail du bandeau Encours carte : à l'écran, la phrase qui compte
+        (« il reste… ») ; le reste au survol du bandeau. Cinq lignes en
+        petits caractères en faisaient l'élément le plus dense de l'écran
+        (choix de l'auteur du 01/10/2026). `cb_detail_complet` garde le tout."""
+        self.cb_detail_complet = complet
+        self.cb_detail.setText(principal + "\nDétail au survol du bandeau.")
+        self.cb_banner.setToolTip(complet)
+        self.cb_detail.setToolTip(complet)
+
     def _poser_verdict(self, texte: str, ok: bool):
         """Écrit le verdict et le colore : vert quand le compte tient."""
         style = (("background:#EAF6EC; border:1px solid #229954; color:#1A5E32;")
@@ -1018,9 +1029,10 @@ class BilanView(QWidget):
                       + (f"il a MANQUÉ {fmt_euro(-disponible)}" if disponible < 0
                          else f"il restait {fmt_euro(disponible)}")
                       + " une fois tout payé")
+            principal = detail
             detail += verdict
             detail += "\nConsultation : le bandeau suit la période choisie."
-            self.cb_detail.setText(detail)
+            self._poser_detail_carte(principal, detail)
             # Un mois sans un seul achat par carte n'a pas de bandeau à montrer.
             self.cb_banner.setVisible(bool(achats_mois))
             return
@@ -1037,10 +1049,11 @@ class BilanView(QWidget):
         # que le mois laisse : le solde qu'aura le compte à la fin du mois
         # une fois tout passé, moins ce qui est déjà engagé sur la carte.
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_ref)
-        detail += (f"\nSolde prévu fin de mois {fmt_euro(solde_fin)} moins "
-                   f"{fmt_euro(abs(engage_mois))} déjà passés à la carte — "
-                   + (f"il MANQUE {fmt_euro(-disponible)}" if disponible < 0
-                      else f"il reste {fmt_euro(disponible)}"))
+        principal = (f"Solde prévu fin de mois {fmt_euro(solde_fin)} moins "
+                     f"{fmt_euro(abs(engage_mois))} déjà passés à la carte — "
+                     + (f"il MANQUE {fmt_euro(-disponible)}" if disponible < 0
+                        else f"il reste {fmt_euro(disponible)}"))
+        detail += "\n" + principal
         # Tendance : à ce rythme, où finira le mois ? Annoncée seulement à
         # partir du 10 — plus tôt, une seule grosse course fait dire n'importe
         # quoi — et présentée comme une estimation, jamais comme un fait.
@@ -1068,7 +1081,7 @@ class BilanView(QWidget):
             # cours » : il permet de rapprocher les deux écrans d'un coup d'œil.
             detail += ("\nSolde incluant les opérations carte en cours : "
                        + fmt_euro(solde_compte + somme_en_cours))
-        self.cb_detail.setText(detail)
+        self._poser_detail_carte(principal, detail)
 
         # Masquer le bandeau s'il n'y a rien à montrer
         self.cb_banner.setVisible(bool(pending) or bool(achats_mois))
