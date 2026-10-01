@@ -903,7 +903,10 @@ SYNC_VERSION = 3
 #          Categorie vide a la saisie (elle proposait << Abonnements >>) ;
 #          une regle sans categorie est refusee. << Entrees / Sorties >> pour
 #          l'argent qui bouge, << Revenus / Depenses >> pour les analyses.
-APP_VERSION = "1.41.0"
+# 1.41.1 : Infobulles lisibles : fond jaune pale et texte noir partout. Elles
+#          prenaient les couleurs sombres de Windows, et celle du bandeau
+#          Encours carte perdait son fond (texte gris clair sur beige).
+APP_VERSION = "1.41.1"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (10) — Infobulles lisibles ; version 1.41.1
+
+**Fait.** (commit 1219448) En essayant la 1.41.0, l'auteur a montré
+l'infobulle de l'Encours carte : texte gris clair sur le beige de la page.
+Deux causes, mesurées : la palette des infobulles venait du système (fond
+#3C3C3C, texte #D4D4D4 sur ce poste ; `QToolTip.setPalette` manquait dans
+`appliquer_theme_clair`), et la règle « fond transparent » des bandeaux
+atteignait aussi leur infobulle (une infobulle reçoit les styles du widget
+qui la montre et de ses parents). Correction : palette posée sur les
+infobulles, règle `_bulle()` dans les bandeaux et tuiles du Bilan, infobulles
+retirées des deux phrases de bandeau (elles prenaient la couleur de leur
+texte ; le survol remonte au bandeau). Nouveau `tests/test_infobulles.py` :
+il imite ce poste et passe en revue toutes les infobulles de la fenêtre ; vu
+en échec sur l'ancien code (git stash), vert ensuite. 629/629. Numéro 1.41.1.
+
+**Pourquoi.** Défaut présent depuis la 1.40.3 (détail de l'Encours carte au
+survol), aggravé par le nouveau bandeau du mois.
+
+**Reste.** Le Photovoltaïque et Recharges VE ne règlent pas non plus leurs
+infobulles : probablement sombres chez l'auteur, à mesurer.
+
 ## 2026-10-01 (9) — Version 1.41.0 installée chez l'auteur pour essai
 
 **Fait.** Numéro 1.41.0 (constants.py et son historique, Lisez-moi.txt) :
