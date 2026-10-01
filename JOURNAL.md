@@ -21,6 +21,29 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (6) — Relecture de design ; haut du Bilan allégé
+
+**Fait.** Relecture de tous les onglets avec le plugin Design (captures sur
+données inventées, 1280 × 720 et 1668 × 1000, octobre et septembre) : liste
+d'écarts remise à l'auteur. Premier point corrigé (commit bfe826c) : le verdict
+devient la première ligne du bandeau « Ce mois-ci », qui prend sa couleur
+(vert ou rouge) ; le bloc « Solde au … », qui répétait le chiffre du verdict,
+est retiré ; le détail du bandeau du mois passe au survol (seule la ligne
+« Prochaines », ou le résumé d'un mois clos, reste) ; l'Encours carte ne dit
+plus « moins 0,00 € ». Notice et README à jour. Quatre tests écrits avant et
+vus en échec ; huit anciens tests adaptés (le solde de fin se lit dans le
+verdict). 615/615. Graphiques remontés d'environ 50 px à 1280 × 720 ; largeur
+minimale inchangée (1082 px).
+
+**Pourquoi.** À 1280 × 720, le haut du Bilan n'était que texte, et le solde de
+fin de mois s'y lisait jusqu'à quatre fois.
+
+**Reste.** Pas d'exe construit. Points suivants de la relecture : tris Z → A
+au démarrage (Catégories, Sous-catégories, récurrences), catégorie
+« Abonnements » proposée par défaut à la saisie, types sans accents à
+l'affichage, vocabulaire des entrées d'argent, tableaux pleine largeur, place
+des boutons, axe du solde (pas de 4 000), Règles auto sans pastille.
+
 ## 2026-10-01 (5) — Version 1.40.4 installée chez l'auteur
 
 **Fait.** Numéro 1.40.4 (constants.py et son historique, Lisez-moi.txt) :
