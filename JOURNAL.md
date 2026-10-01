@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (3) — Écarts vus en route : fenêtres des tests, captures du site
+
+**Fait.** (commit a75d38e) L'invite de premier lancement est rattachée à sa
+fenêtre (`QTimer.singleShot(0, self, …)`) : elle mourait sans elle, et
+c'est ce qui avait bloqué la suite de tests le 30/09. `conftest.py` détruit
+après chaque test les fenêtres laissées ouvertes. `outils/captures_promo.py`
+prend le thème et la traduction de l'appli (plus la palette du système) et
+ne montre plus de fenêtre. Import inutile retiré d'un test. 607/607.
+Vérifié : les en-têtes de colonnes que la mesure disait « un peu étroits »
+s'affichent en entier (place réservée à la flèche de tri) — rien à corriger.
+
+**Pourquoi.** Écarts notés pendant la relecture de design, hors de ses 23
+points.
+
+**Reste.** Diagnostic sur une copie de la base réelle (lecture seule) : 23
+opérations ont une clé anti-doublon d'import qui diffère, entre le libellé
+de la banque et le libellé enregistré, seulement par les majuscules (règle
+des sigles courts, antérieure au 01/10) ; 16 sans référence bancaire. Une
+réimportation de leur relevé pourrait les doubler. Correction proposée à
+l'auteur (clé de détection insensible à la casse), pas faite.
+
 ## 2026-10-01 (2) — Version 1.40.3 installée chez l'auteur
 
 **Fait.** Numéro 1.40.3 (constants.py et son historique, Lisez-moi.txt, dont

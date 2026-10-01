@@ -174,9 +174,8 @@ def test_colonnes_de_chiffres_jamais_coupees(qapp, db):
     for ecran, colonnes in COLONNES_CHIFFREES.items():
         widget = ecrans[ecran]
         widget.resize(largeurs[ecran], 600)
-        # Pas de processEvents() : il réveillerait les invites de premier
-        # lancement laissées en attente par d'autres tests, qui attendent un
-        # clic. On demande directement au tableau de placer ses colonnes.
+        # On demande directement au tableau de placer ses colonnes, sans
+        # faire tourner toute la boucle d'événements.
         for table in _tables(widget):
             table.doItemsLayout()
         for table in _tables(widget):
