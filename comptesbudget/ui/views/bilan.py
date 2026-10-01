@@ -165,6 +165,19 @@ def _mois_court(m: str) -> str:
         return m
 
 
+def _bulle(cadre: str) -> str:
+    """Règle de style qui rend leurs couleurs aux infobulles d'un cadre.
+
+    Une infobulle reçoit les règles de style du widget qui la montre et de
+    ses parents : « QFrame#bandeauCarte QWidget { background: transparent } »
+    effaçait son fond, et son texte restait sur le beige de la page (défaut
+    vu chez l'auteur le 01/10/2026). Cette règle vise l'infobulle aussi
+    précisément que la règle fautive, et vient après elle : elle l'emporte.
+    Couleurs de la charte : fond #FFFFDC, texte noir."""
+    return (f"QFrame#{cadre} QToolTip {{ background: #FFFFDC; color: #000000; "
+            "border: 1px solid #808080; padding: 2px; }")
+
+
 def _make_panel(title: str, body: QWidget) -> QFrame:
     """Carte stylée avec en-tête bleu + corps."""
     f = QFrame()
@@ -335,7 +348,7 @@ class BilanView(QWidget):
                      background: #FFFBE6;
                      border: 1px solid #E8D77B; border-radius: 4px; }
             QFrame#bandeauCarte QWidget { background: transparent; }
-        """)
+        """ + _bulle("bandeauCarte"))
         cb_lay = QHBoxLayout(self.cb_banner)
         cb_lay.setContentsMargins(12, 4, 12, 4); cb_lay.setSpacing(18)
 
@@ -537,7 +550,7 @@ class BilanView(QWidget):
                 border-top: 3px solid {color}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
-        """)
+        """ + _bulle("tuileKpi"))
         lay = QVBoxLayout(f); lay.setContentsMargins(10, 8, 10, 8); lay.setSpacing(2)
         l_label = QLabel(label)
         l_label.setStyleSheet("color:#666; font-size:9pt; font-weight:600; text-transform:uppercase")
@@ -619,7 +632,7 @@ class BilanView(QWidget):
                 border-top: 3px solid {trait}; border-radius: 4px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
-        """)
+        """ + _bulle("tuileKpi"))
         carte._value.setStyleSheet(f"color:{texte}; font-size:16pt; font-weight:bold")
 
     def _eff_date(self, t: dict) -> str:
@@ -838,8 +851,10 @@ class BilanView(QWidget):
         (choix de l'auteur du 01/10/2026). `cb_detail_complet` garde le tout."""
         self.cb_detail_complet = complet
         self.cb_detail.setText(principal + "\nDétail au survol du bandeau.")
+        # L'infobulle est portée par le bandeau seul : au survol de la phrase,
+        # Qt remonte au bandeau. Posée aussi sur la phrase, elle prenait la
+        # couleur orange de son texte (règle de style sans cible, 01/10/2026).
         self.cb_banner.setToolTip(complet)
-        self.cb_detail.setToolTip(complet)
 
     def _colorer_bandeau_mois(self, ok: bool):
         """Couleurs du bandeau du mois : vert quand le compte tient, rouge
@@ -853,7 +868,7 @@ class BilanView(QWidget):
                      border: 1px solid {cadre}; border-radius: 4px; }}
             QFrame#bandeauMois QWidget {{ background: transparent; }}
             QFrame#bandeauMois QLabel {{ color: {texte}; }}
-        """)
+        """ + _bulle("bandeauMois"))
 
     def _poser_verdict(self, texte: str, ok: bool):
         """Écrit le verdict et colore son bandeau : vert quand le compte
@@ -871,8 +886,8 @@ class BilanView(QWidget):
         if complet.strip() != principal.strip():
             texte += "\nDétail au survol du bandeau."
         self.mois_detail.setText(texte)
+        # Portée par le bandeau seul, comme pour l'Encours carte.
         self.mois_banner.setToolTip(complet)
-        self.mois_detail.setToolTip(complet)
 
     def _refresh_verdict_banner(self, txs: list[dict], solde_compte: float):
         """La réponse en une phrase : où le mois finit, et quand le compte

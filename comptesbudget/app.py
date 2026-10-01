@@ -5,7 +5,7 @@ import sys
 from PySide6.QtCore import QLibraryInfo, QLockFile, Qt, QTranslator
 from PySide6.QtGui import QColor, QIcon, QPalette, QPen
 from PySide6.QtWidgets import (
-    QApplication, QMessageBox, QProxyStyle, QStyle, QStyleFactory,
+    QApplication, QMessageBox, QProxyStyle, QStyle, QStyleFactory, QToolTip,
 )
 
 from .erreurs import erreur_en_clair
@@ -182,6 +182,11 @@ def appliquer_theme_clair(app: QApplication) -> None:
     posé à travers StyleClair, qui ajoute un contour lisible aux cases."""
     app.setStyle(StyleClair())
     app.setPalette(palette_claire())
+    # Les infobulles ont leur palette à elles, prise au système, que
+    # setPalette() ne touche pas : chez l'auteur, fond #3C3C3C et texte
+    # #D4D4D4 au lieu du jaune pâle et du noir de la charte (01/10/2026,
+    # tests/test_infobulles.py).
+    QToolTip.setPalette(palette_claire())
 
 
 def main():
