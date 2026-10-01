@@ -29,7 +29,7 @@ from ...recurring import (
     candidats_non_couverts, _recurring_aligned_start,
 )
 
-from ..models import SORT_ROLE, EtatVide, cellule_categorie
+from ..models import SORT_ROLE, EtatVide, cellule_categorie, colonnes_sans_coupure
 from ..dialogs import LIBELLE_RECURRENCE_MANQUANT, RecurringDialog
 from ..assistants import GenererEcheancesDialog, PrefillRecurringDialog
 from ..widgets import confirmer
@@ -83,8 +83,11 @@ class PrevisionnelView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.doubleClicked.connect(self._edit)
-        for i, w in enumerate([240, 110, 180, 140, 120, 180, 60]):
-            self.table.setColumnWidth(i, w)
+        # Une colonne de texte prend la place restante, les chiffres la
+        # largeur de leur contenu : réglées toutes à la main, l'en-tête
+        # s'arrêtait avant le bord (relecture de design du 01/10/2026).
+        colonnes_sans_coupure(self.table, au_contenu=(1, 5, 6), etirable=0,
+                              largeurs={2: 180, 3: 140, 4: 120})
         self.model.setSortRole(SORT_ROLE)
         # Tri de départ de A à Z. L'indicateur de Qt est décroissant par
         # défaut : le tableau s'ouvrait de Z à A (relecture de design du
@@ -111,8 +114,8 @@ class PrevisionnelView(QWidget):
         self.forecast_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.forecast_table.verticalHeader().setVisible(False)
         self.forecast_table.setAlternatingRowColors(True)
-        for i, w in enumerate([100, 280, 110, 180]):
-            self.forecast_table.setColumnWidth(i, w)
+        colonnes_sans_coupure(self.forecast_table, au_contenu=(0, 2), etirable=1,
+                              largeurs={3: 180})
         self.forecast_model.setSortRole(SORT_ROLE)
         # Tri de départ : de la plus proche échéance à la plus lointaine.
         # L'indicateur de Qt est décroissant par défaut : la liste commençait

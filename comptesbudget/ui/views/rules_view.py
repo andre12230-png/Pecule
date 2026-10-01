@@ -22,7 +22,7 @@ from ...database import Database
 from ...rules import apply_rules_to_tx
 
 from ..dialogs import CATEGORIE_MANQUANTE, MOTIF_TROP_COURT, RuleDialog
-from ..models import EtatVide
+from ..models import EtatVide, colonnes_sans_coupure
 from ..widgets import confirmer
 
 class RulesView(QWidget):
@@ -53,12 +53,11 @@ class RulesView(QWidget):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.verticalHeader().setVisible(False)
         self.table.doubleClicked.connect(self.edit_selected)
-        self.table.setColumnWidth(0, 220)
-        self.table.setColumnWidth(1, 100)
-        self.table.setColumnWidth(2, 90)
-        self.table.setColumnWidth(3, 180)
-        self.table.setColumnWidth(4, 180)
-        self.table.setColumnWidth(5, 100)
+        # Une colonne de texte prend la place restante, les chiffres la
+        # largeur de leur contenu : réglées toutes à la main, l'en-tête
+        # s'arrêtait avant le bord (relecture de design du 01/10/2026).
+        colonnes_sans_coupure(self.table, au_contenu=(1, 2, 5), etirable=0,
+                              largeurs={3: 180, 4: 180})
         v.addWidget(self.table)
         self.etat_vide = EtatVide(
             self.table,

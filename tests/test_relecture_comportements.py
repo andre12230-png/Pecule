@@ -480,3 +480,31 @@ def test_memoriser_sans_categorie_ne_cree_pas_de_regle(qapp, db, monkeypatch):
                             "sous_cat": ""})
     assert not db.list_rules()
     assert titres and "bien enregistrée" in titres[0]
+
+
+# ── Tableaux pleine largeur (relecture de design du 01/10/2026) ─────────
+
+def test_tableaux_occupent_toute_la_largeur(qapp, db):
+    """Budget, Sous-catégories, Règles auto et les deux tableaux du
+    Prévisionnel avaient toutes leurs colonnes réglées à la main : l'en-tête
+    s'arrêtait avant le bord, un bloc blanc à sa droite. Comme Opérations,
+    une colonne de texte prend la place restante, et les colonnes de
+    chiffres gardent la largeur de leur contenu."""
+    from PySide6.QtWidgets import QHeaderView
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    tableaux = {
+        "budget": (w.budget_view.table, 3, (1, 2, 4)),   # la barre s'élargit
+        "sous-catégories": (w.subs_view.table, 0, (2, 3)),
+        "règles": (w.rules_view.table, 0, (1, 2, 5)),
+        "récurrences": (w.prev_view.table, 0, (1, 5, 6)),
+        "prévisions": (w.prev_view.forecast_table, 1, (0, 2)),
+    }
+    for vue in (w.budget_view, w.subs_view, w.rules_view, w.prev_view):
+        vue.refresh()        # Budget et Sous-catégories réglaient au remplissage
+    for nom, (table, etirable, chiffres) in tableaux.items():
+        entete = table.horizontalHeader()
+        assert entete.sectionResizeMode(etirable) == QHeaderView.Stretch, nom
+        for col in chiffres:
+            assert (entete.sectionResizeMode(col)
+                    == QHeaderView.ResizeToContents), (nom, col)

@@ -15,7 +15,7 @@ from ...utils import (
     deaccent, depense_nette_par_categorie, fmt_euro, in_period,
 )
 from ...database import Database
-from ..models import EtatVide, cellule_categorie
+from ..models import EtatVide, cellule_categorie, colonnes_sans_coupure
 from ..widgets import demander_montant
 
 class BudgetView(QWidget):
@@ -58,6 +58,13 @@ class BudgetView(QWidget):
         entete.setSortIndicatorShown(True)
         entete.setSortIndicator(0, Qt.AscendingOrder)
         entete.sortIndicatorChanged.connect(lambda *_: self.refresh())
+        # Une colonne de texte prend la place restante, les chiffres la
+        # largeur de leur contenu : réglées toutes à la main, l'en-tête
+        # s'arrêtait avant le bord (relecture de design du 01/10/2026).
+        # Ici, c'est la barre de progression qui s'élargit : une colonne
+        # Catégorie étirée éloignait les noms de leurs montants.
+        colonnes_sans_coupure(self.table, au_contenu=(1, 2, 4), etirable=3,
+                              largeurs={0: 220})
         v.addWidget(self.table)
         self.etat_vide = EtatVide(
             self.table,
@@ -176,12 +183,6 @@ class BudgetView(QWidget):
             """)
             self.table.setIndexWidget(self.model.index(i, 3), bar)
 
-        # Largeurs
-        self.table.setColumnWidth(0, 220)
-        self.table.setColumnWidth(1, 130)
-        self.table.setColumnWidth(2, 130)
-        self.table.setColumnWidth(3, 240)
-        self.table.setColumnWidth(4, 160)
 
     def _edit_budget(self):
         idx = self.table.currentIndex()

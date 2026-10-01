@@ -17,7 +17,7 @@ from ...utils import (
     deaccent, fmt_euro,
 )
 from ...database import Database
-from ..models import EtatVide, cellule_categorie
+from ..models import EtatVide, cellule_categorie, colonnes_sans_coupure
 from ..widgets import confirmer
 
 class SubcategoriesView(QWidget):
@@ -91,6 +91,11 @@ class SubcategoriesView(QWidget):
         self.table.setSortingEnabled(True)
         self.table.verticalHeader().setVisible(False)
         self.table.doubleClicked.connect(lambda _i: self._rename_or_merge())
+        # Une colonne de texte prend la place restante, les chiffres la
+        # largeur de leur contenu : réglées toutes à la main, l'en-tête
+        # s'arrêtait avant le bord (relecture de design du 01/10/2026).
+        colonnes_sans_coupure(self.table, au_contenu=(2, 3), etirable=0,
+                              largeurs={1: 200})
         v.addWidget(self.table, 1)
         self.etat_vide = EtatVide(
             self.table,
@@ -198,10 +203,6 @@ class SubcategoriesView(QWidget):
             self.model.appendRow([it_sub, it_cat, it_n, it_t])
 
         self.table.setSortingEnabled(True)
-        self.table.setColumnWidth(0, 260)
-        self.table.setColumnWidth(1, 200)
-        self.table.setColumnWidth(2, 110)
-        self.table.setColumnWidth(3, 130)
 
         total_tx = sum(len(ids) for ids in self._index.values())
         n_affichees = self.model.rowCount()
