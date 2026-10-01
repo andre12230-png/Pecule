@@ -25,8 +25,14 @@ La date la plus récente est en haut.
 
 **Fait.** Numéro 1.40.3 (constants.py et son historique, Lisez-moi.txt, dont
 le passage multicomptes aligné sur le nouveau menu) : la relecture de design
-des 30/09 et 01/10. Construction et installation : voir la suite de cette
-entrée.
+des 30/09 et 01/10. Contrôle de livraison vert (603/603). Exe construit sans
+le .bat ; six marqueurs des nouveautés lus dans son archive sans le lancer ;
+lancé sur une base inventée (LOCALAPPDATA du brouillon) : titre
+« Pécule — v1.40.3 — Compte courant », fermeture normale. Installé : ancien
+exe renommé `Pecule.exe.avant-1.40.3` (la 1.40.2, seul filet), programme
+copié, `_internal` remis à jour (robocopy code 3) ; empreinte SHA-256 de
+`comptes.db` identique avant et après. L'exe 1.40.1
+(`Pecule.exe.avant-1.40.2`) est à la Corbeille, vérifié.
 
 **Pourquoi.** Demande de l'auteur : « construis la 1.40.3 et installe-la
 chez moi, supprime l'ancien exe ».
