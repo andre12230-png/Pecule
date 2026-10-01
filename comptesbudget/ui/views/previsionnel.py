@@ -55,8 +55,8 @@ class PrevisionnelView(QWidget):
         toolbar.addStretch()
         self.btn_mois = QPushButton("📅 Générer les échéances du mois")
         self.btn_mois.setToolTip(
-            "Crée en une fois, dans les opérations, tout ce qui doit être "
-            "débité ou encaissé pendant le mois — en non pointé, à pointer "
+            "Crée en une fois, dans les opérations, tout ce qui doit entrer "
+            "sur le compte ou en sortir pendant le mois — en non pointé, à pointer "
             "au fur et à mesure des passages en banque.")
         self.btn_mois.clicked.connect(self._generer_mois)
         toolbar.addWidget(self.btn_mois)
@@ -209,7 +209,7 @@ class PrevisionnelView(QWidget):
         self.summary.setText(
             f"📊 {pluriel(n, 'occurrence', 'occurrences')} "
             f"{accorde(n, 'prévue', 'prévues')} jusqu'au {fmt_date_fr(until.isoformat())}  —  "
-            f"Recettes : {fmt_euro(total_pos)}  •  Dépenses : {fmt_euro(total_neg)}  •  "
+            f"Entrées : {fmt_euro(total_pos)}  ·  Sorties : {fmt_euro(total_neg)}  ·  "
             f"Net : {fmt_euro(total_pos + total_neg)}"
         )
 

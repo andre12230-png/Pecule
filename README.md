@@ -249,8 +249,8 @@ montant, ou libellé concordant (pour les factures à montant variable). Votre
 libellé et votre catégorie sont conservés.
 
 Le Bilan résume tout cela dans son bandeau du mois : **où le compte finira le
-mois** (le verdict), puis, sous **🗓 Ce mois-ci**, le reste à débiter et le reste
-à encaisser.
+mois** (le verdict), puis, sous **🗓 Ce mois-ci**, les sorties et les entrées
+encore à venir.
 
 ### Exporter et restaurer vos données
 

@@ -308,12 +308,13 @@ class BilanView(QWidget):
             l.addWidget(lbl); l.addWidget(val)
             return w, val, lbl
 
-        # Les deux libellés sont conservés : ils se mettent au passé quand on
-        # consulte un mois clos (« Débité » plutôt que « À débiter »).
+        # « Entrées / Sorties » : les mots de l'argent qui bouge sur le compte
+        # (choix de l'auteur du 01/10/2026, tests/test_vocabulaire.py). Les
+        # libellés perdent « à venir » sur un mois clos.
         # Un troisième bloc, « Solde au 31/10 », a été retiré le 01/10/2026 :
         # le verdict, juste au-dessus, donne ce chiffre en gras.
-        m1, self.mois_sorties, self.mois_sorties_lbl = _mini_vert("À débiter (hors carte)")
-        m2, self.mois_entrees, self.mois_entrees_lbl = _mini_vert("À encaisser")
+        m1, self.mois_sorties, self.mois_sorties_lbl = _mini_vert("Sorties à venir (hors carte)")
+        m2, self.mois_entrees, self.mois_entrees_lbl = _mini_vert("Entrées à venir")
         mo_lay.addWidget(m1); mo_lay.addWidget(m2)
         mo_lay.addStretch()
         self.mois_detail = QLabel("")
@@ -1267,8 +1268,8 @@ class BilanView(QWidget):
         self.mois_entrees.setText(fmt_euro(entrees))
         # Les libellés se mettent au passé sur un mois fini.
         self.mois_sorties_lbl.setText(
-            "Débité (hors carte)" if clos else "À débiter (hors carte)")
-        self.mois_entrees_lbl.setText("Encaissé" if clos else "À encaisser")
+            "Sorties (hors carte)" if clos else "Sorties à venir (hors carte)")
+        self.mois_entrees_lbl.setText("Entrées" if clos else "Entrées à venir")
 
         if clos:
             self.mois_title.setText(
@@ -1283,7 +1284,8 @@ class BilanView(QWidget):
 
         n_sorties = sum(1 for _d, _l, m_, c in lignes if not c and m_ < 0)
         n_entrees = sum(1 for _d, _l, m_, c in lignes if not c and m_ > 0)
-        detail = f"{pluriel(n_sorties, 'prélèvement', 'prélèvements')}  ·  {pluriel(n_entrees, 'rentrée', 'rentrées')}"
+        detail = (f"{pluriel(n_sorties, 'sortie', 'sorties') if n_sorties else 'aucune sortie'}"
+                  f"  ·  {pluriel(n_entrees, 'entrée', 'entrées') if n_entrees else 'aucune entrée'}")
         if carte:
             jour_carte = min((d for d, _l, _m, c in lignes if c), default="")
             detail += (f"  ·  débit carte {fmt_euro(carte)}"

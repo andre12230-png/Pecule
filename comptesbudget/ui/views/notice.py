@@ -255,7 +255,7 @@ colonne <b>Type</b> (« Cheque n° 1234567 ») et se retrouve par la recherche.
 Pour un chèque importé, Pécule reprend le numéro que la banque a écrit dans son
 libellé — parfois tronqué (« ...0132 »), vous pouvez alors le compléter.</p>
 <p><b>Sens de l'opération</b> : si vous enregistrez en <b>dépense</b> quelque
-chose qui ressemble à une rentrée d'argent — type <b>Virement recu</b> ou
+chose qui ressemble à une entrée d'argent — type <b>Virement recu</b> ou
 <b>Depot d'especes</b>, ou catégorie <b>Revenus</b> — Pécule vous le signale et
 vous demande de confirmer. Une recette saisie du mauvais côté fausse le solde de
 <b>deux fois</b> son montant : c'est l'erreur la plus difficile à retrouver
@@ -366,8 +366,8 @@ prévisions avec totaux recettes / dépenses / net.</p>
 <h3>📅 Générer les échéances du mois</h3>
 <p>Le bouton <b>📅 Générer les échéances du mois</b> (onglet Prévisionnel)
 transforme ces prévisions en <b>vraies opérations</b> pour le mois de votre
-choix : vous voyez d'un coup d'œil tout ce qui doit encore être débité ou
-encaissé, sans le saisir ligne par ligne.</p>
+choix : vous voyez d'un coup d'œil tout ce qui doit encore entrer sur le compte
+ou en sortir, sans le saisir ligne par ligne.</p>
 <p>Les opérations ainsi créées sont <b>non pointées</b> : elles apparaissent
 dans la liste et dans « ce qui est prévu », mais <b>ne comptent pas dans le
 solde en banque</b> tant que vous ne les avez pas pointées (clic sur la colonne
@@ -590,13 +590,17 @@ encore tomber de l'autre. Il additionne les opérations déjà enregistrées don
 débit est à venir et les échéances de votre onglet <b>🔮 Prévisionnel</b> qui
 n'ont pas encore d'opération correspondante. Rien n'est compté deux fois.</p>
 <ul>
-  <li><b>À débiter (hors carte)</b> — prélèvements et dépenses attendus
+  <li><b>Sorties à venir (hors carte)</b> — prélèvements et dépenses attendus
       jusqu'au dernier jour du mois.</li>
-  <li><b>À encaisser</b> — salaires, pensions, virements et remboursements attendus
-      d'ici là.</li>
+  <li><b>Entrées à venir</b> — salaires, pensions, virements et remboursements
+      attendus d'ici là.</li>
 </ul>
-<p>Le solde du dernier jour — solde en banque aujourd'hui, moins ce qui reste à
-débiter, plus ce qui reste à encaisser — n'a plus de case à lui : le verdict le
+<p>« Entrées » et « Sorties » désignent l'argent qui arrive sur le compte ou
+en part, quel qu'il soit (un remboursement est une entrée). « Revenus » et
+« Dépenses », dans les graphiques et le taux d'épargne, sont réservés à
+l'analyse de votre budget.</p>
+<p>Le solde du dernier jour — solde en banque aujourd'hui, moins les sorties à
+venir, plus les entrées à venir — n'a plus de case à lui : le verdict le
 donne en gras, juste au-dessus. Il figurait aux deux endroits jusqu'à la
 version 1.40.4.</p>
 <p>La fenêtre <b>commence au 1er</b> du mois et s'arrête à son dernier jour.
@@ -609,14 +613,14 @@ banque, le compter ici le compterait deux fois.</p>
 <p>Comme les autres bandeaux, il <b>suit la période choisie</b>. Sur un mois
 clos, il ne montre plus ce qui « reste à passer » — il n'y a plus rien à
 attendre — mais <b>ce qui est passé</b> : le titre le dit (« AOÛT 2026 — ce qui
-est passé »), les deux chiffres se mettent au passé (« Débité »,
-« Encaissé ») et le verdict donne le solde réellement constaté le dernier jour. Sur un
+est passé »), les deux chiffres perdent leur « à venir » (« Sorties »,
+« Entrées ») et le verdict donne le solde réellement constaté le dernier jour. Sur un
 mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année ou
 « Toutes périodes » le ramènent au mois en cours.</p>
 <p>La ligne <b>« Prochaines : »</b> nomme les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
 Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
-au survol du bandeau</b> : nombre de prélèvements et de rentrées, débit carte,
+au survol du bandeau</b> : nombre de sorties et d'entrées, débit carte,
 solde en banque du jour.</p>
 <p>Le <b>débit carte</b> annoncé au survol est celui de votre relevé : il ne compte que les
 achats que la banque a déjà rattachés au prélèvement (vos opérations

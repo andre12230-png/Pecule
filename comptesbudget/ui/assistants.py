@@ -478,8 +478,8 @@ class GenererEcheancesDialog(QDialog):
         if deja:
             txt += f" ({nombre(deja)} déjà {accorde(deja, 'enregistrée', 'enregistrées')})"
         if choisies:
-            txt += (f"  —  à débiter : {fmt_euro(sorties)}"
-                    f"  •  à encaisser : {fmt_euro(entrees)}")
+            txt += (f"  —  sorties : {fmt_euro(sorties)}"
+                    f"  ·  entrées : {fmt_euro(entrees)}")
         self.lbl_summary.setText(txt)
 
     def selected(self) -> list[dict]:
