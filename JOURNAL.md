@@ -21,6 +21,34 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (8) — Onglets harmonisés : largeur, boutons, vocabulaire
+
+**Fait.** Point 3 de la relecture de design, en trois commits :
+- 43911e0 — Budget, Sous-catégories, Règles auto et les deux tableaux du
+  Prévisionnel occupent toute la largeur (`colonnes_sans_coupure`) : une
+  colonne s'élargit (le libellé ; dans le Budget, la barre de progression),
+  les chiffres prennent la largeur de leur contenu. Mesuré à 1280 px :
+  aucune colonne plus étroite que son contenu ;
+- b39951d — tous les boutons au-dessus du tableau (ils étaient en bas dans
+  Budget et Sous-catégories, des deux côtés dans Règles auto) : actions sur
+  la sélection à gauche, outil d'ensemble à droite, comme le Prévisionnel ;
+- 8719526 — vocabulaire choisi par l'auteur : « Entrées / Sorties » pour
+  l'argent qui bouge (bandeau du mois, Prévisionnel, Générer les échéances),
+  « Revenus / Dépenses » pour les analyses ; « à débiter » reste à l'Encours
+  carte. Nouveau `tests/test_vocabulaire.py`, qui relit tous les textes de
+  l'interface. Choix inscrit dans la charte des applis.
+Notice et README à jour. Chaque test écrit avant, vu en échec. 625/625.
+
+**Pourquoi.** Les onglets ne se ressemblaient pas, et le même argent
+s'appelait « Recettes », « rentrée », « À encaisser » ou « Encaissé » selon
+l'écran.
+
+**Reste.** Pas d'exe. Suite de la relecture : types sans accents à
+l'affichage, axe du solde (pas de 4 000), Règles auto sans pastille ni phrase
+d'explication, colonne « Actif » en ✔ écrit, petits textes (recherche coupée,
+« Tous », « Règles auto », « Supprimer (vider) »), séparateurs « • » ailleurs
+que dans le bandeau du mois.
+
 ## 2026-10-01 (7) — Tris de A à Z, catégorie vide à la saisie
 
 **Fait.** (commit b49848e) Point 2 de la relecture de design. Catégories,
