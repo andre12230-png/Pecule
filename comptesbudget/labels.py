@@ -23,8 +23,13 @@ LIBELLE_ACRONYMS = {
     "BTP", "SAS", "SARL", "SNCF", "RATP", "CAF", "CIC", "LCL", "BNP", "SG",
     "GMF", "MAAF", "MAIF", "AXA", "CB", "DAB", "SIV", "QPF", "BDA", "TI",
     "GC", "RE", "EI", "KFC", "TGV", "VTC", "SAV", "RSI", "URSSAF", "CMU",
-    "RIB", "CCP", "SAUR", "APRR", "EI", "SA",
+    "RIB", "CCP", "SAUR", "APRR", "EI", "SA", "SEPA", "TVA",
 }
+
+# Petits mots laissés en minuscules, sauf en tête du libellé : « Pharmacie
+# du Centre » et non « Pharmacie Du Centre » (relecture du 30/09/2026).
+PETITS_MOTS = {"de", "du", "des", "la", "le", "les", "et", "à", "a", "au",
+               "aux", "en", "sur", "sous", "par", "pour", "chez"}
 
 
 # Correspondances « ce qu'écrit la banque » → « le nom que je veux voir ».
@@ -50,13 +55,23 @@ def charger_alias(alias: Optional[dict]) -> None:
 
 def _smart_titlecase(s: str) -> str:
     """Met un libellé en casse « propre » (Titre) tout en conservant les
-    sigles connus ou les courtes suites de consonnes (SFR, EDF, BPCE…)."""
+    sigles connus ou les courtes suites de consonnes (SFR, EDF, BPCE…), et
+    en laissant les petits mots en minuscules hors de la tête (« du »,
+    « d'Artois »).
+
+    Le résultat ne dépend pas de la casse d'origine : les clés anti-doublon
+    de l'import le recalculent des deux côtés (relevé et base)."""
     out = []
-    for w in s.split():
+    for i, w in enumerate(s.split()):
         wu = w.upper()
+        wl = w.lower()
         core = re.sub(r"[^A-Za-zÀ-ÿ]", "", w)
         if wu in LIBELLE_ACRONYMS:
             out.append(wu)
+        elif i > 0 and wl in PETITS_MOTS:
+            out.append(wl)
+        elif i > 0 and len(w) > 2 and wl[:2] in ("d'", "l'"):
+            out.append(wl[:2] + w[2:3].upper() + w[3:].lower())
         elif w.isupper() and len(core) <= 3 and not re.search(r"[AEIOUYaeiouy]", core):
             out.append(wu)
         else:

@@ -55,7 +55,32 @@ def test_clean_libelle_conserve_les_libelles_sans_commercant():
     assert clean_libelle("VIR 123456") != clean_libelle("VIR 789012")
     # Les enseignes continuent de fusionner normalement
     assert clean_libelle("SUPERETTE 3193") == clean_libelle("superette 3852") == "Superette"
-    assert clean_libelle("PRLV SEPA 20260715 EDF") == "Prlv Sepa EDF"
+    assert clean_libelle("PRLV SEPA 20260715 EDF") == "Prlv SEPA EDF"
+
+
+def test_petits_mots_en_minuscules():
+    """« Pharmacie Du Centre » : les petits mots restent en minuscules, sauf
+    en tête (relecture de design du 30/09/2026)."""
+    assert clean_libelle("PHARMACIE DU CENTRE") == "Pharmacie du Centre"
+    assert clean_libelle("BOULANGERIE DE LA GARE") == "Boulangerie de la Gare"
+    assert clean_libelle("LA POSTE") == "La Poste"
+    assert clean_libelle("CAVE D'ARTOIS") == "Cave d'Artois"
+    assert clean_libelle("VIR SEPA SALAIRE") == "Vir SEPA Salaire"
+
+
+@pytest.mark.parametrize("brut", [
+    "PHARMACIE DU CENTRE", "Pharmacie Du Centre", "pharmacie du centre",
+    "VIR SEPA SALAIRE 123", "Boulangerie De La Gare", "CAVE D'ARTOIS",
+    "EDF Electricite", "PRLV SEPA EDF 20260715",
+])
+def test_nettoyage_independant_de_la_casse(brut):
+    """Les clés anti-doublon de l'import recalculent clean_libelle des deux
+    côtés (relevé et base) : le résultat ne doit dépendre ni de la casse
+    d'origine, ni d'un premier nettoyage."""
+    propre = clean_libelle(brut)
+    assert clean_libelle(propre) == propre
+    assert clean_libelle(brut.upper()) == propre
+    assert clean_libelle(brut.lower()) == propre
 
 
 def test_alias_remplace_la_raison_sociale_par_l_enseigne(alias):

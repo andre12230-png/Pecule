@@ -188,6 +188,30 @@ def test_case_decochee_a_un_contour_visible(qapp):
         assert _pixels_de_contour(widget) >= 12, type(widget).__name__
 
 
+def test_notice_limitee_a_110_signes_par_ligne(qapp):
+    """Charte : un long texte ne dépasse pas ~110 signes par ligne (780 px).
+    La notice en faisait ~150 dans sa fenêtre de 900 px."""
+    from PySide6.QtWidgets import QTextBrowser, QTextEdit
+    from comptesbudget.ui.views.notice import NoticeView
+    vue = NoticeView()
+    for texte in vue.findChildren(QTextBrowser):
+        assert texte.lineWrapMode() == QTextEdit.FixedPixelWidth
+        assert texte.lineWrapColumnOrWidth() <= 780
+
+
+def test_pre_remplir_garde_accents_et_sigles():
+    """Pré-remplir affichait « Edf Electricite » et « Sncf » : le libellé
+    était refait depuis une forme sans accents ni majuscules."""
+    from comptesbudget.recurring import detect_recurring_candidates
+    ops = []
+    for i, mois in enumerate(range(1, 7)):
+        jour = f"2026-{mois:02d}-05"
+        ops.append(_tx(id=f"e{i}", date=jour, date_valeur=jour,
+                       libelle="EDF ÉLECTRICITÉ", montant=-84.0))
+    libelles = [c["libelle"] for c in detect_recurring_candidates(ops, min_months=3)]
+    assert libelles == ["EDF Électricité"], libelles
+
+
 # ── Un nom par chose ────────────────────────────────────────────────────
 
 def test_operations_parlent_de_mouvement_pas_de_solde(qapp, db):

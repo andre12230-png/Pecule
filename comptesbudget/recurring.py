@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from datetime import date, timedelta
 from statistics import median
 
+from .labels import clean_libelle
 from .utils import deaccent, est_paiement_carte
 
 def next_occurrence(rec: dict, current: date, ref_day: int = None) -> date:
@@ -403,8 +404,16 @@ def detect_recurring_candidates(txs: list[dict], min_months: int = 4) -> list[di
         lo, hi = _ECART_REGULIER[freq]
         regulier = len(gaps) >= 3 and all(lo <= g <= hi for g in gaps[-3:])
 
+        # Libellé montré : le vrai, nettoyé (accents et sigles gardés), et non
+        # la clé de regroupement remise en majuscules (« Edf Electricite »).
+        # Repli sur la clé si le libellé nettoyé ne s'y ramène pas : la
+        # vérification « déjà au prévisionnel » compare ces clés.
+        affiche = clean_libelle(items[-1].get("libelle", ""))
+        if _recurring_norm_label(affiche) != key:
+            affiche = key.title()
+
         cands.append({
-            "libelle":      key.title(),
+            "libelle":      affiche,
             "montant":      med,
             "categorie":    cat or "Non classé",
             "sous_cat":     sub,

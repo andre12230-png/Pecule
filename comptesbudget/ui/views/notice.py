@@ -3,8 +3,27 @@
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QTabWidget,
-    QTextBrowser,
+    QTextBrowser, QTextEdit,
 )
+
+
+class TexteALire(QTextBrowser):
+    """Texte long (notice, glossaire) qui ne dépasse pas ~110 signes par
+    ligne : au-delà, l'œil perd la ligne suivante (charte, 780 px). La
+    largeur suit la fenêtre quand elle est plus étroite : jamais de
+    défilement horizontal (relecture du 30/09/2026)."""
+
+    LARGEUR_MAX = 780
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setLineWrapMode(QTextEdit.FixedPixelWidth)
+        self.setLineWrapColumnOrWidth(self.LARGEUR_MAX)
+
+    def resizeEvent(self, evenement):
+        super().resizeEvent(evenement)
+        dispo = max(200, self.viewport().width() - 8)
+        self.setLineWrapColumnOrWidth(min(self.LARGEUR_MAX, dispo))
 
 from ...constants import _data_dir
 
@@ -1005,7 +1024,7 @@ class NoticeView(QWidget):
         sub_tabs.setDocumentMode(True)
 
         # Notice
-        notice = QTextBrowser()
+        notice = TexteALire()
         notice.setOpenExternalLinks(True)
         notice.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
         # Le dossier des données varie selon le type d'installation : on affiche
@@ -1015,7 +1034,7 @@ class NoticeView(QWidget):
         sub_tabs.addTab(notice, "📖 Notice d'utilisation")
 
         # Glossaire
-        gloss = QTextBrowser()
+        gloss = TexteALire()
         gloss.setOpenExternalLinks(True)
         gloss.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
         gloss.setHtml(GLOSSAIRE_HTML)
