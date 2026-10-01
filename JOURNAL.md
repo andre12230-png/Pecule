@@ -21,6 +21,55 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 — Relecture de design, fin : lots 3 et 4
+
+**Fait.**
+- Lot 3 (commits 44edc0c, fc5d756, 228cf6b, 759da1b) : période et date
+  grisées, avec une infobulle qui dit pourquoi, sur Sous-catégories, Règles
+  auto et Prévisionnel (date seule sur le Budget), raccourcis inactifs ;
+  « mouvement » au lieu de « solde » dans Opérations ; le Rapport mensuel
+  dit qu'il compte à la date d'achat ; états vides qui disent pourquoi et
+  comment commencer (`models.EtatVide`), graphiques vides masqués ; vraies
+  cases à cocher dans les cinq assistants (clic, barre d'espace) et contour
+  lisible des cases dans toute l'appli (`app.StyleClair`) ; notice à 780 px
+  de large ; petits mots en minuscules dans les libellés harmonisés, et
+  Pré-remplir qui garde accents et sigles.
+- Lot 4 (commit d8e2772) : axes des montants en euros, graduations rondes,
+  jamais tronqués ; mois de l'axe en 8 pt ; légende du camembert à la
+  hauteur de ses lignes.
+- 600/600. Vérifié en image à 1280 px sur une base inventée (pleine et
+  vide). Majuscules des libellés vérifiées sur une copie de la base réelle,
+  lue sans écriture puis effacée : 47 libellés changent, seulement de casse ;
+  les regroupements anti-doublon de l'import sont identiques.
+
+**Pourquoi.** Fin des 23 points de la relecture de design ; les règles
+retenues sont passées dans la charte des applis.
+
+**Reste.** Deux choix soumis à l'auteur sur maquettes : le menu de gauche
+(856 px avec deux comptes ; proposition à 662 px : un seul bouton « Mettre
+au propre », choix du compte au bout des onglets) et l'allègement du bandeau
+Encours carte. Aucun exe construit : nouvelle version (1.40.3) à faire pour
+l'installer.
+
+## 2026-09-30 (2) — Relecture de design, suite : lots 1 et 2
+
+**Fait.** Lot 1, textes et formats (commit 26cfa13) : espaces insécables
+dans les montants, zéro sans couleur, verdict « aucun découvert prévu d'ici
+le », « du … au … », Règles datées JJ/MM/AAAA, « 89 % », prévisions dans
+l'ordre, « Enregistrer » au lieu de « OK », titres de boîtes précis,
+« Suggérer catégories », « Chercher doublons », plus de « JSON » à l'écran.
+Lot 2, couleurs (commit c9b38ac) : textes pâles passés à l'encre, bandeaux
+ramenés à la palette, barres « Dépenses » en orange foncé. 573/573.
+**Pourquoi.** Suite des 20 points de la relecture, demandée par l'auteur.
+L'alerte « Budget dépassé » garde son rouge : c'est la couleur du danger,
+comme le verdict de découvert.
+**Reste.** Lot 3 (période grisée sur Sous-catégories, Règles et
+Prévisionnel ; Rapport qui dit sa date ; « mouvement » dans Opérations ;
+états vides ; vraies cases à cocher ; largeur de la notice ; majuscules de
+l'harmonisation) et lot 4 (axes des graphiques en euros, mois abrégés,
+légende rognée). Menu trop haut et bandeau Encours carte : à choisir par
+l'auteur sur captures. Charte à compléter (bandeau vert, rouge du danger).
+
 ## 2026-09-30 — Relecture de design : catégories lisibles, chiffres entiers, confirmations
 
 **Fait.** Relecture de toutes les pages et fenêtres avec les grilles du
