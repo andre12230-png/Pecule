@@ -395,8 +395,28 @@ class MainWindow(QMainWindow):
             self.period_bar.reset_selection()
         self.refresh_all()
 
+    def _raisons_du_selecteur(self, vue):
+        """(période, date) : pourquoi l'onglet `vue` ignore l'une ou l'autre,
+        ou None quand elle sert. La barre se grise en le disant (charte)."""
+        periode = {
+            self.subs_view: "Les sous-catégories se gèrent sur tout "
+                            "l'historique : la période n'a pas d'effet sur cet onglet.",
+            self.rules_view: "Les règles valent pour toutes les opérations : "
+                             "la période n'a pas d'effet sur cet onglet.",
+            self.prev_view: "Le prévisionnel regarde les 12 prochains mois : "
+                            "la période n'a pas d'effet sur cet onglet.",
+        }.get(vue)
+        date = None
+        if periode:
+            date = "Cet onglet ne dépend d'aucune date."
+        elif vue is self.budget_view:
+            date = ("Le Budget compte toujours à la date d'achat : un achat "
+                    "par carte reste dans le mois où il a été fait.")
+        return periode, date
+
     def refresh_current(self, idx: int):
         w = self.tabs.widget(idx)
+        self.period_bar.griser(*self._raisons_du_selecteur(w))
         if hasattr(w, "refresh"):
             w.refresh()
         if hasattr(w, "reload_from_db"):

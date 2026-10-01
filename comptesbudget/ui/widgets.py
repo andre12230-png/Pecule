@@ -165,7 +165,8 @@ class PeriodBar(QWidget):
         self.mois_seulement = mois_seulement
         h = QHBoxLayout(self); h.setContentsMargins(8, 4, 8, 4)
 
-        h.addWidget(QLabel("Mois :" if mois_seulement else "Période :"))
+        self.lbl_periode = QLabel("Mois :" if mois_seulement else "Période :")
+        h.addWidget(self.lbl_periode)
 
         # Les deux flèches font le geste le plus fréquent — « et le mois
         # d'avant ? » — en un clic, sans ouvrir de liste.
@@ -212,6 +213,7 @@ class PeriodBar(QWidget):
 
         h.addSpacing(20)
         lbl_date = QLabel("Date :")
+        self.lbl_date = lbl_date
         h.addWidget(lbl_date)
         self.date_mode_combo = QComboBox()
         self.date_mode_combo.addItem("Date d'opération (vision budget)", "operation")
@@ -247,6 +249,12 @@ class PeriodBar(QWidget):
             self.archives_check.setEnabled(False)
 
         h.addStretch()
+        # Raisons pour lesquelles l'onglet affiché ignore la période ou la
+        # date (None : elles servent). Voir griser().
+        self._raison_periode = None
+        self._raison_date = None
+        self._infobulles = {w: w.toolTip() for w in self._controles_periode()}
+        self._infobulles[self.date_mode_combo] = self.date_mode_combo.toolTip()
         self._transactions: list[dict] = []
         self._current = (date.today().strftime("%Y-%m") if mois_seulement
                          else "all")
@@ -359,9 +367,35 @@ class PeriodBar(QWidget):
         return next((i for i in range(combo.count())
                      if combo.itemData(i) == valeur), 0)
 
+    def _controles_periode(self):
+        return (self.lbl_periode, self.prev_btn, self.annee_combo,
+                self.mois_combo, self.next_btn, self.btn_ce_mois)
+
+    def griser(self, raison_periode=None, raison_date=None):
+        """Grise la période et/ou le choix de la date quand l'onglet affiché
+        n'en tient pas compte, avec une infobulle qui dit pourquoi (charte :
+        sans cela, on croit voir les chiffres de la période choisie).
+        Appelée à chaque changement d'onglet ; None remet en service."""
+        self._raison_periode = raison_periode
+        self._raison_date = raison_date
+        for w in self._controles_periode():
+            w.setToolTip(raison_periode or self._infobulles[w])
+        self.lbl_date.setEnabled(raison_date is None)
+        self.date_mode_combo.setEnabled(raison_date is None)
+        self.date_mode_combo.setToolTip(
+            raison_date or self._infobulles[self.date_mode_combo])
+        self._maj_etat()
+
     def _maj_etat(self):
         """Active ou grise le menu des mois, les deux flèches et le bouton
-        « Ce mois-ci »."""
+        « Ce mois-ci » (tous grisés si l'onglet ignore la période)."""
+        actif = self._raison_periode is None
+        self.lbl_periode.setEnabled(actif)
+        self.annee_combo.setEnabled(actif)
+        if not actif:
+            for w in (self.mois_combo, self.prev_btn, self.next_btn, self.btn_ce_mois):
+                w.setEnabled(False)
+            return
         mode = self.current_date_mode()
         self.mois_combo.setEnabled(annee_de_periode(self._current) is not None)
         for bouton, sens in ((self.prev_btn, -1), (self.next_btn, +1)):
@@ -410,6 +444,8 @@ class PeriodBar(QWidget):
     def _decaler(self, sens: int):
         """Un cran en arrière (sens=-1) ou en avant (+1), à échelle constante :
         un mois reste un mois, une année reste une année."""
+        if self._raison_periode:        # grisée : les raccourcis aussi
+            return
         voisine = periode_voisine(self._transactions, self._current, sens,
                                   self.current_date_mode())
         if voisine is not None:
@@ -418,6 +454,8 @@ class PeriodBar(QWidget):
     def _aller_au_mois_en_cours(self):
         """Bouton « Ce mois-ci » et Ctrl+Origine. Le mois en cours figure
         toujours dans les menus, même sans opération."""
+        if self._raison_periode:
+            return
         self._appliquer(date.today().strftime("%Y-%m"))
 
     def choisir_periode(self, period: str):

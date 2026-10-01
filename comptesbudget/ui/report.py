@@ -79,8 +79,12 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     if len(db.list_comptes()) > 1:
         suffixe = f" — {db.nom_compte()}"
     H.append(f"<h1>📒 Pécule — Rapport {MOIS_FR[m]} {y}{suffixe}</h1>")
+    # La date utilisée est dite : le Bilan compte par défaut à la date de
+    # valeur, et ses chiffres du même mois diffèrent (relecture du 30/09/2026).
     H.append(f"<p><i>Généré le {fmt_date_fr(date.today().isoformat())} — "
-             f"{pluriel(len(act), 'opération', 'opérations')} sur le mois.</i></p><hr>")
+             f"{pluriel(len(act), 'opération', 'opérations')} sur le mois, "
+             "comptées à la date d'achat, comme l'onglet Budget : un achat par "
+             "carte compte dans le mois où il a été fait.</i></p><hr>")
 
     # — KPI —
     H.append("<h2>Synthèse</h2>")
@@ -92,7 +96,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     if mis_de_cote:
         kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#18733A"))
     kpis += [
-        ("Mouvement net", euro(net), "#18733A" if net >= 0 else "#C0392B"),
+        ("Mouvement du mois", euro(net), "#18733A" if net >= 0 else "#C0392B"),
         # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
         ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
          "#18733A" if taux >= 0 else "#C0392B"),

@@ -911,10 +911,13 @@ s'applique. Sensible à la longueur : <code>CARREFOUR</code> matche toutes
 les opérations Carrefour ; <code>CARREFOUR MARKET 5012</code> ne matche
 que ce magasin précis.</dd>
 
-<dt>Mouvement net</dt>
+<dt>Mouvement du mois (ou de la période)</dt>
 <dd>Somme algébrique des opérations sur la période : revenus moins dépenses.
 S'il est positif vous avez épargné, s'il est négatif vous avez puisé dans
-le solde.</dd>
+le solde. Le Bilan et les Opérations le comptent à la date choisie dans le
+menu « Date » (date de valeur par défaut) ; le Rapport mensuel et le Budget,
+toujours à la date d'achat : pour un même mois, les chiffres peuvent donc
+différer des achats par carte à débit différé.</dd>
 
 <dt>Opération récurrente</dt>
 <dd>Opération qui se répète automatiquement à intervalle fixe (loyer mensuel,

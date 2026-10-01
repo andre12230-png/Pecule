@@ -295,9 +295,11 @@ class OperationsView(QWidget):
         solde = sum(t.get("montant", 0) for t in self.filtered)
         pointed = [t for t in self.filtered if t.get("pointee")]
         solde_p = sum(t.get("montant", 0) for t in pointed)
-        mode_lbl = "valeur (banque)" if self.date_mode == "valeur" else "opération"
-        txt = (f"{len(self.filtered)} opération{'s' if len(self.filtered)>1 else ''} "
-               f"— solde {mode_lbl} : {fmt_euro(solde)}")
+        # « Mouvement », comme la tuile du Bilan : la somme des lignes
+        # affichées n'est pas un solde (relecture du 30/09/2026).
+        mode_lbl = "date de valeur" if self.date_mode == "valeur" else "date d'opération"
+        txt = (f"{pluriel(len(self.filtered), 'opération', 'opérations')} "
+               f"— mouvement ({mode_lbl}) : {fmt_euro(solde)}")
         if toutes_periodes:
             # Sinon on croirait que le mois choisi contient toutes ces lignes.
             txt = "toutes périodes — " + txt
