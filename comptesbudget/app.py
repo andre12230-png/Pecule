@@ -2,9 +2,11 @@
 import os
 import sys
 
-from PySide6.QtCore import QLibraryInfo, QLockFile, QTranslator
-from PySide6.QtGui import QColor, QIcon, QPalette
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtCore import QLibraryInfo, QLockFile, Qt, QTranslator
+from PySide6.QtGui import QColor, QIcon, QPalette, QPen
+from PySide6.QtWidgets import (
+    QApplication, QMessageBox, QProxyStyle, QStyle, QStyleFactory,
+)
 
 from .erreurs import erreur_en_clair
 from .utils import _app_dir, _data_dir, backup_db, SauvegardeImpossible
@@ -140,12 +142,45 @@ def palette_claire() -> QPalette:
     return pal
 
 
+class StyleClair(QProxyStyle):
+    """Le style « Fusion », plus un contour lisible aux cases à cocher et aux
+    boutons radio.
+
+    Avec la palette claire, Fusion ne leur donnait qu'un contour pâle : une
+    case décochée disparaissait dans les listes des assistants. La charte
+    veut 3 pour 1 pour ce qu'on clique : contour #6F7885 (relecture du
+    30/09/2026)."""
+
+    CONTOUR = QColor("#6F7885")
+
+    def __init__(self):
+        super().__init__(QStyleFactory.create("Fusion"))
+
+    def drawPrimitive(self, element, option, painter, widget=None):
+        super().drawPrimitive(element, option, painter, widget)
+        if element in (QStyle.PE_IndicatorCheckBox,
+                       QStyle.PE_IndicatorItemViewItemCheck,
+                       QStyle.PE_IndicatorRadioButton):
+            painter.save()
+            painter.setRenderHint(painter.RenderHint.Antialiasing,
+                                  element == QStyle.PE_IndicatorRadioButton)
+            painter.setPen(QPen(self.CONTOUR, 1))
+            painter.setBrush(Qt.NoBrush)
+            cadre = option.rect.adjusted(0, 0, -1, -1)
+            if element == QStyle.PE_IndicatorRadioButton:
+                painter.drawEllipse(cadre)
+            else:
+                painter.drawRect(cadre)
+            painter.restore()
+
+
 def appliquer_theme_clair(app: QApplication) -> None:
     """Impose à l'application son apparence claire.
 
     Le style « Fusion » est indispensable : les styles natifs de Windows
-    peignent certains textes eux-mêmes, sans consulter la palette."""
-    app.setStyle("Fusion")
+    peignent certains textes eux-mêmes, sans consulter la palette. Il est
+    posé à travers StyleClair, qui ajoute un contour lisible aux cases."""
+    app.setStyle(StyleClair())
     app.setPalette(palette_claire())
 
 

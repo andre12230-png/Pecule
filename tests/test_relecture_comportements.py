@@ -112,6 +112,82 @@ def test_etats_vides_disparaissent_avec_les_donnees(qapp, db):
         assert not _phrases_visibles(vues[nom]), nom
 
 
+# ── Cases à cocher des assistants ───────────────────────────────────────
+
+def _assistants(db):
+    from comptesbudget.ui.assistants import (
+        DuplicatesDialog, GenererEcheancesDialog, HarmonizeDialog,
+        HarmonizeLabelsDialog, PrefillRecurringDialog,
+    )
+    txs = [dict(r) for r in db.list_tx()]
+    candidat = {"libelle": "Loyer", "categorie": "Logement - maison",
+                "montant": -800.0, "frequency": "monthly", "day_of_month": 5,
+                "_months": 6, "_min": -800.0, "_max": -800.0, "_stable": True,
+                "_default": True, "sous_cat": "", "type": ""}
+    echeance = {"date": date.today().isoformat(), "libelle": "Loyer",
+                "montant": -800.0, "categorie": "Logement - maison",
+                "sous_cat": "", "type": "", "_deja": False, "_default": True,
+                "_passee": False}
+    libelle = {"old": "COURSES 123", "new": "Courses", "n": 1,
+               "tx_ids": ["a"], "rec_ids": []}
+    mois = date.today().strftime("%Y-%m")
+    return {
+        "Suggérer catégories": HarmonizeDialog(None, [(txs[0], "Shopping")]),
+        "Doublons": DuplicatesDialog(None, txs),
+        "Pré-remplir": PrefillRecurringDialog(None, [candidat]),
+        "Échéances": GenererEcheancesDialog(None, lambda _m: [echeance], mois, [mois]),
+        "Harmoniser libellés": HarmonizeLabelsDialog(None, [libelle]),
+    }
+
+
+def test_assistants_ont_de_vraies_cases_a_cocher(qapp, db):
+    """Un ✔ écrit dans une cellule, et une cellule vide une fois décochée :
+    rien ne montrait qu'on pouvait cliquer, et le clavier ne cochait rien.
+    Ce sont maintenant des cases de Qt (clic, barre d'espace)."""
+    from PySide6.QtTest import QTest
+    for nom, dlg in _assistants(db).items():
+        it = dlg.model.item(0, 0)
+        assert it.isCheckable(), nom
+        assert it.text() != "✔", nom
+        assert it.checkState() == Qt.Checked, nom
+        assert dlg.selected(), nom
+        # Au clavier : la barre d'espace décoche la ligne courante.
+        dlg.table.setCurrentIndex(dlg.model.index(0, 0))
+        QTest.keyClick(dlg.table, Qt.Key_Space)
+        assert it.checkState() == Qt.Unchecked, f"{nom} : Espace sans effet"
+        assert not dlg.selected(), nom
+        dlg._set_all(True)
+        assert dlg.selected(), nom
+
+
+def _pixels_de_contour(widget) -> int:
+    """Nombre de pixels de la couleur de contour de la charte (#6F7885)
+    dans le rendu du widget."""
+    from PySide6.QtGui import QColor
+    img = widget.grab().toImage()
+    cible = QColor("#6F7885")
+    n = 0
+    for x in range(img.width()):
+        for y in range(img.height()):
+            c = img.pixelColor(x, y)
+            if (abs(c.red() - cible.red()) < 12 and abs(c.green() - cible.green()) < 12
+                    and abs(c.blue() - cible.blue()) < 12):
+                n += 1
+    return n
+
+
+def test_case_decochee_a_un_contour_visible(qapp):
+    """Sous le style Fusion, une case décochée n'avait qu'un contour pâle,
+    invisible dans les listes. Charte : ce qu'on clique tient 3 pour 1 —
+    contour #6F7885."""
+    from PySide6.QtWidgets import QCheckBox, QRadioButton
+    from comptesbudget.app import appliquer_theme_clair
+    appliquer_theme_clair(qapp)
+    for widget in (QCheckBox(), QRadioButton()):
+        widget.resize(20, 20)
+        assert _pixels_de_contour(widget) >= 12, type(widget).__name__
+
+
 # ── Un nom par chose ────────────────────────────────────────────────────
 
 def test_operations_parlent_de_mouvement_pas_de_solde(qapp, db):

@@ -18,7 +18,10 @@ from ..accords import accorde, nombre, pluriel
 from ..utils import (
     fmt_euro, fmt_date_fr, period_label,
 )
-from .models import cellule_categorie, colonnes_sans_coupure
+from .models import (
+    case_a_cocher, cellule_categorie, cocher_tout, colonnes_sans_coupure,
+    est_cochee,
+)
 
 class HarmonizeDialog(QDialog):
     """Affiche un aperçu des changements suggérés et applique sur sélection."""
@@ -47,13 +50,10 @@ class HarmonizeDialog(QDialog):
         self.table.verticalHeader().setVisible(False)
         for i, w in enumerate([34, 90, 280, 160, 160]):
             self.table.setColumnWidth(i, w)
-        # On utilise un clic pour basculer la check
-        self.table.clicked.connect(self._toggle)
         v.addWidget(self.table)
 
         for tx, suggested in suggestions:
-            it_check = QStandardItem("✔")
-            it_check.setData(True, Qt.UserRole + 1)
+            it_check = case_a_cocher(True)
             it_check.setTextAlignment(Qt.AlignCenter)
             it_check.setForeground(QBrush(QColor("#18733A")))
             row = [
@@ -85,26 +85,15 @@ class HarmonizeDialog(QDialog):
         btn_row.addWidget(self.btn_cancel)
         v.addLayout(btn_row)
 
-    def _toggle(self, index):
-        if index.column() != 0:
-            return
-        it = self.model.item(index.row(), 0)
-        checked = not bool(it.data(Qt.UserRole + 1))
-        it.setData(checked, Qt.UserRole + 1)
-        it.setText("✔" if checked else "")
-
     def _set_all(self, val: bool):
-        for r in range(self.model.rowCount()):
-            it = self.model.item(r, 0)
-            it.setData(val, Qt.UserRole + 1)
-            it.setText("✔" if val else "")
+        cocher_tout(self.model, val)
 
     def selected(self) -> list[tuple[str, str]]:
         """Retourne la liste (tx_id, new_cat) des lignes cochées."""
         out = []
         for r in range(self.model.rowCount()):
             it = self.model.item(r, 0)
-            if it.data(Qt.UserRole + 1):
+            if est_cochee(it):
                 out.append((it.data(Qt.UserRole),
                             self.model.item(r, 4).text()))
         return out
@@ -148,12 +137,12 @@ class DuplicatesDialog(QDialog):
         self.table.setAlternatingRowColors(True)
         for i, w in enumerate([34, 90, 300, 110, 160]):
             self.table.setColumnWidth(i, w)
-        self.table.clicked.connect(self._toggle)
+        # Vraies cases : Qt les coche au clic et à la barre d'espace.
+        self.model.itemChanged.connect(lambda *_: self._update_summary())
         v.addWidget(self.table)
 
         for t in dups:
-            it_check = QStandardItem("✔")
-            it_check.setData(True, Qt.UserRole + 1)
+            it_check = case_a_cocher(True)
             it_check.setData(t["id"], Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
             it_check.setForeground(QBrush(QColor("#C0392B")))
@@ -197,25 +186,12 @@ class DuplicatesDialog(QDialog):
 
         self._update_summary()
 
-    def _toggle(self, index):
-        if index.column() != 0:
-            return
-        it = self.model.item(index.row(), 0)
-        checked = not bool(it.data(Qt.UserRole + 1))
-        it.setData(checked, Qt.UserRole + 1)
-        it.setText("✔" if checked else "")
-        self._update_summary()
-
     def _set_all(self, val: bool):
-        for r in range(self.model.rowCount()):
-            it = self.model.item(r, 0)
-            it.setData(val, Qt.UserRole + 1)
-            it.setText("✔" if val else "")
-        self._update_summary()
+        cocher_tout(self.model, val)
 
     def _update_summary(self):
         n = sum(1 for r in range(self.model.rowCount())
-                if self.model.item(r, 0).data(Qt.UserRole + 1))
+                if est_cochee(self.model.item(r, 0)))
         total = self.model.rowCount()
         self.lbl_summary.setText(
             f"{nombre(n)} à supprimer sur {nombre(total)} "
@@ -225,7 +201,7 @@ class DuplicatesDialog(QDialog):
         """Ids des opérations cochées (à supprimer)."""
         return [self.model.item(r, 0).data(Qt.UserRole)
                 for r in range(self.model.rowCount())
-                if self.model.item(r, 0).data(Qt.UserRole + 1)]
+                if est_cochee(self.model.item(r, 0))]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -270,7 +246,8 @@ class PrefillRecurringDialog(QDialog):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
-        self.table.clicked.connect(self._toggle)
+        # Vraies cases : Qt les coche au clic et à la barre d'espace.
+        self.model.itemChanged.connect(lambda *_: self._update_summary())
         # Chiffres et fréquence à la largeur de leur contenu, le libellé prend
         # le reste : la fourchette était coupée à 900 px.
         colonnes_sans_coupure(self.table, au_contenu=(3, 4, 5, 6, 7),
@@ -279,8 +256,7 @@ class PrefillRecurringDialog(QDialog):
 
         for c in candidates:
             checked = bool(c["_default"])
-            it_check = QStandardItem("✔" if checked else "")
-            it_check.setData(checked, Qt.UserRole + 1)
+            it_check = case_a_cocher(checked)
             it_check.setData(c, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
             it_check.setForeground(QBrush(QColor("#18733A")))
@@ -334,25 +310,12 @@ class PrefillRecurringDialog(QDialog):
 
         self._update_summary()
 
-    def _toggle(self, index):
-        if index.column() != 0:
-            return
-        it = self.model.item(index.row(), 0)
-        checked = not bool(it.data(Qt.UserRole + 1))
-        it.setData(checked, Qt.UserRole + 1)
-        it.setText("✔" if checked else "")
-        self._update_summary()
-
     def _set_all(self, val: bool):
-        for r in range(self.model.rowCount()):
-            it = self.model.item(r, 0)
-            it.setData(val, Qt.UserRole + 1)
-            it.setText("✔" if val else "")
-        self._update_summary()
+        cocher_tout(self.model, val)
 
     def _update_summary(self):
         n = sum(1 for r in range(self.model.rowCount())
-                if self.model.item(r, 0).data(Qt.UserRole + 1))
+                if est_cochee(self.model.item(r, 0)))
         total = self.model.rowCount()
         self.lbl_summary.setText(
             f"{nombre(n)} {accorde(n, 'sélectionnée', 'sélectionnées')} sur "
@@ -363,7 +326,7 @@ class PrefillRecurringDialog(QDialog):
         out = []
         for r in range(self.model.rowCount()):
             it = self.model.item(r, 0)
-            if it.data(Qt.UserRole + 1):
+            if est_cochee(it):
                 out.append(it.data(Qt.UserRole))
         return out
 
@@ -424,7 +387,8 @@ class GenererEcheancesDialog(QDialog):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
-        self.table.clicked.connect(self._toggle)
+        # Vraies cases : Qt les coche au clic et à la barre d'espace.
+        self.model.itemChanged.connect(lambda *_: self._update_summary())
         for i, w in enumerate([34, 100, 260, 110, 170, 180]):
             self.table.setColumnWidth(i, w)
         v.addWidget(self.table)
@@ -460,8 +424,8 @@ class GenererEcheancesDialog(QDialog):
             verrou = bool(e["_deja"])
             checked = bool(e["_default"])
 
-            it_check = QStandardItem("✔" if checked else "")
-            it_check.setData(checked, Qt.UserRole + 1)
+            # Déjà enregistrée : case grisée, qu'on ne peut pas cocher.
+            it_check = case_a_cocher(checked, verrouillee=verrou)
             it_check.setData(e, Qt.UserRole)
             it_check.setData(verrou, self.VERROU)
             it_check.setTextAlignment(Qt.AlignCenter)
@@ -500,25 +464,8 @@ class GenererEcheancesDialog(QDialog):
         self._update_summary()
 
     # ── Cases à cocher ─────────────────────────────────────────────
-    def _toggle(self, index):
-        if index.column() != 0:
-            return
-        it = self.model.item(index.row(), 0)
-        if it.data(self.VERROU):
-            return
-        checked = not bool(it.data(Qt.UserRole + 1))
-        it.setData(checked, Qt.UserRole + 1)
-        it.setText("✔" if checked else "")
-        self._update_summary()
-
     def _set_all(self, val: bool):
-        for r in range(self.model.rowCount()):
-            it = self.model.item(r, 0)
-            if it.data(self.VERROU):
-                continue
-            it.setData(val, Qt.UserRole + 1)
-            it.setText("✔" if val else "")
-        self._update_summary()
+        cocher_tout(self.model, val)
 
     def _update_summary(self):
         choisies = self.selected()
@@ -539,7 +486,7 @@ class GenererEcheancesDialog(QDialog):
         """Échéances cochées (dicts issus de echeances_du_mois)."""
         return [self.model.item(r, 0).data(Qt.UserRole)
                 for r in range(self.model.rowCount())
-                if self.model.item(r, 0).data(Qt.UserRole + 1)
+                if est_cochee(self.model.item(r, 0))
                 and not self.model.item(r, 0).data(self.VERROU)]
 
 
@@ -578,14 +525,14 @@ class HarmonizeLabelsDialog(QDialog):
             QAbstractItemView.DoubleClicked | QAbstractItemView.EditKeyPressed)
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
-        self.table.clicked.connect(self._toggle)
+        # Vraies cases : Qt les coche au clic et à la barre d'espace.
+        self.model.itemChanged.connect(lambda *_: self._update_summary())
         for i, w in enumerate([34, 330, 50, 360]):
             self.table.setColumnWidth(i, w)
         v.addWidget(self.table)
 
         for row in rows:
-            it_check = QStandardItem("✔")
-            it_check.setData(True, Qt.UserRole + 1)
+            it_check = case_a_cocher(True)
             it_check.setData(row, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
             it_check.setForeground(QBrush(QColor("#18733A")))
@@ -626,25 +573,12 @@ class HarmonizeLabelsDialog(QDialog):
 
         self._update_summary()
 
-    def _toggle(self, index):
-        if index.column() != 0:
-            return
-        it = self.model.item(index.row(), 0)
-        checked = not bool(it.data(Qt.UserRole + 1))
-        it.setData(checked, Qt.UserRole + 1)
-        it.setText("✔" if checked else "")
-        self._update_summary()
-
     def _set_all(self, val: bool):
-        for r in range(self.model.rowCount()):
-            it = self.model.item(r, 0)
-            it.setData(val, Qt.UserRole + 1)
-            it.setText("✔" if val else "")
-        self._update_summary()
+        cocher_tout(self.model, val)
 
     def _update_summary(self):
         n = sum(1 for r in range(self.model.rowCount())
-                if self.model.item(r, 0).data(Qt.UserRole + 1))
+                if est_cochee(self.model.item(r, 0)))
         self.lbl_summary.setText(
             pluriel(n, "libellé", "libellés") + f" à harmoniser sur {self.model.rowCount()}")
 
@@ -654,7 +588,7 @@ class HarmonizeLabelsDialog(QDialog):
         out = []
         for r in range(self.model.rowCount()):
             it = self.model.item(r, 0)
-            if not it.data(Qt.UserRole + 1):
+            if not est_cochee(it):
                 continue
             row = dict(it.data(Qt.UserRole))
             new_text = self.model.item(r, 3).text().strip()

@@ -62,6 +62,34 @@ AIDE_POINTAGE = (
     "sélectionnées (Ctrl+clic ou Maj+clic).")
 
 
+def case_a_cocher(cochee: bool, verrouillee: bool = False) -> QStandardItem:
+    """Cellule « à cocher » d'un assistant : une vraie case de Qt, qui se
+    voit même décochée, se coche au clic et à la barre d'espace. Un ✔ écrit
+    dans la cellule ne montrait rien une fois décoché, et le clavier ne
+    cochait pas (relecture du 30/09/2026). `verrouillee` : case grisée, que
+    l'on ne peut pas changer (ligne seulement informative)."""
+    it = QStandardItem()
+    it.setEditable(False)
+    it.setCheckable(True)
+    it.setCheckState(Qt.Checked if cochee else Qt.Unchecked)
+    if verrouillee:
+        it.setFlags(it.flags() & ~Qt.ItemIsUserCheckable & ~Qt.ItemIsEnabled)
+    return it
+
+
+def est_cochee(it: QStandardItem) -> bool:
+    return it is not None and it.checkState() == Qt.Checked
+
+
+def cocher_tout(modele, cochee: bool, colonne: int = 0):
+    """« Tout cocher » / « Tout décocher », sans toucher aux cases
+    verrouillées."""
+    for r in range(modele.rowCount()):
+        it = modele.item(r, colonne)
+        if it is not None and it.flags() & Qt.ItemIsUserCheckable:
+            it.setCheckState(Qt.Checked if cochee else Qt.Unchecked)
+
+
 class EtatVide(QObject):
     """Phrase centrée, en gris discret, posée sur un tableau (ou un graphique)
     vide : elle dit pourquoi il est vide et comment commencer, au lieu d'une
