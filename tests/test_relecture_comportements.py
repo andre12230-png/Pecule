@@ -508,3 +508,35 @@ def test_tableaux_occupent_toute_la_largeur(qapp, db):
         for col in chiffres:
             assert (entete.sectionResizeMode(col)
                     == QHeaderView.ResizeToContents), (nom, col)
+
+
+def _rang_dans_la_page(vue, widget):
+    """Rang, dans la colonne principale de la page, de la rangée qui contient
+    le widget : plus petit = plus haut à l'écran."""
+    lay = vue.layout()
+    for i in range(lay.count()):
+        item = lay.itemAt(i)
+        if item.widget() is widget:
+            return i
+        if item.layout() is not None and item.layout().indexOf(widget) >= 0:
+            return i
+    raise AssertionError(f"{widget} absent de la page")
+
+
+def test_boutons_au_dessus_du_tableau(qapp, db):
+    """Les boutons étaient en haut dans Opérations et Prévisionnel, en bas
+    dans Budget et Sous-catégories, des deux côtés dans Règles auto."""
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    pages = {
+        "budget": (w.budget_view, [w.budget_view.btn_edit]),
+        "sous-catégories": (w.subs_view, [w.subs_view.btn_rename,
+                                          w.subs_view.btn_clear,
+                                          w.subs_view.btn_clean]),
+        "règles": (w.rules_view, [w.rules_view.btn_new, w.rules_view.btn_edit,
+                                  w.rules_view.btn_del, w.rules_view.btn_apply]),
+    }
+    for nom, (vue, boutons) in pages.items():
+        tableau = _rang_dans_la_page(vue, vue.table)
+        for b in boutons:
+            assert _rang_dans_la_page(vue, b) < tableau, (nom, b.text())

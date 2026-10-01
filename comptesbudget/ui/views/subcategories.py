@@ -48,6 +48,37 @@ class SubcategoriesView(QWidget):
         )
         v.addWidget(help_lbl)
 
+        # Tous les boutons au-dessus du tableau, comme dans le Prévisionnel :
+        # les actions sur la sélection à gauche, l'outil d'ensemble à droite
+        # (relecture de design du 01/10/2026 : Renommer et Supprimer étaient
+        # en bas).
+        action_row = QHBoxLayout()
+        self.btn_rename = QPushButton("✏️ Renommer / Fusionner…")
+        self.btn_rename.setToolTip(
+            "Renomme la sous-catégorie sélectionnée. Si plusieurs lignes sont "
+            "cochées ou si le nouveau nom existe déjà, les opérations sont "
+            "fusionnées sous un seul libellé."
+        )
+        self.btn_rename.clicked.connect(self._rename_or_merge)
+        action_row.addWidget(self.btn_rename)
+
+        self.btn_clear = QPushButton("🗑️ Supprimer (vider)")
+        self.btn_clear.setToolTip(
+            "Vide la sous-catégorie sur les opérations concernées. Les "
+            "opérations elles-mêmes ne sont pas supprimées."
+        )
+        self.btn_clear.clicked.connect(self._clear_subcat)
+        action_row.addWidget(self.btn_clear)
+        action_row.addStretch()
+        self.btn_clean = QPushButton("🧹 Nettoyer les doublons proches…")
+        self.btn_clean.setToolTip(
+            "Détecte les variantes (casse, accents, espaces) au sein d'une même "
+            "catégorie et propose une forme unique pour chaque groupe."
+        )
+        self.btn_clean.clicked.connect(self._clean_duplicates)
+        action_row.addWidget(self.btn_clean)
+        v.addLayout(action_row)
+
         filter_row = QHBoxLayout()
         filter_row.addWidget(QLabel("Catégorie :"))
         self.cat_filter = QComboBox()
@@ -64,14 +95,6 @@ class SubcategoriesView(QWidget):
         filter_row.addWidget(self.search)
 
         filter_row.addStretch()
-
-        self.btn_clean = QPushButton("🧹 Nettoyer les doublons proches…")
-        self.btn_clean.setToolTip(
-            "Détecte les variantes (casse, accents, espaces) au sein d'une même "
-            "catégorie et propose une forme unique pour chaque groupe."
-        )
-        self.btn_clean.clicked.connect(self._clean_duplicates)
-        filter_row.addWidget(self.btn_clean)
         v.addLayout(filter_row)
 
         self.model = QStandardItemModel(0, 4, self)
@@ -103,29 +126,13 @@ class SubcategoriesView(QWidget):
             "en donnez une à vos opérations ; vérifiez aussi le filtre de "
             "catégorie et la recherche, en haut.")
 
-        action_row = QHBoxLayout()
+        # Sous le tableau, seulement le compte : une information, pas une action.
+        bas = QHBoxLayout()
         self.lbl_count = QLabel("")
         self.lbl_count.setStyleSheet("color:#666")
-        action_row.addWidget(self.lbl_count)
-        action_row.addStretch()
-
-        self.btn_rename = QPushButton("✏️ Renommer / Fusionner…")
-        self.btn_rename.setToolTip(
-            "Renomme la sous-catégorie sélectionnée. Si plusieurs lignes sont "
-            "cochées ou si le nouveau nom existe déjà, les opérations sont "
-            "fusionnées sous un seul libellé."
-        )
-        self.btn_rename.clicked.connect(self._rename_or_merge)
-        action_row.addWidget(self.btn_rename)
-
-        self.btn_clear = QPushButton("🗑️ Supprimer (vider)")
-        self.btn_clear.setToolTip(
-            "Vide la sous-catégorie sur les opérations concernées. Les "
-            "opérations elles-mêmes ne sont pas supprimées."
-        )
-        self.btn_clear.clicked.connect(self._clear_subcat)
-        action_row.addWidget(self.btn_clear)
-        v.addLayout(action_row)
+        bas.addWidget(self.lbl_count)
+        bas.addStretch()
+        v.addLayout(bas)
 
         # Index courant : { (cat, sub): [tx_id, ...] }
         self._index: dict[tuple[str, str], list[str]] = {}

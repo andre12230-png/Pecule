@@ -39,6 +39,15 @@ class BudgetView(QWidget):
         info.setWordWrap(True); info.setStyleSheet("color:#555; padding:6px")
         v.addWidget(info)
 
+        # Bouton au-dessus du tableau, comme dans les autres onglets
+        # (relecture de design du 01/10/2026 : il était en bas).
+        h = QHBoxLayout()
+        self.btn_edit = QPushButton("✏️ Définir / modifier le budget")
+        self.btn_edit.clicked.connect(self._edit_budget)
+        h.addWidget(self.btn_edit)
+        h.addStretch()
+        v.addLayout(h)
+
         self.table = QTableView()
         self.model = QStandardItemModel(0, 5, self)
         self.model.setHorizontalHeaderLabels(
@@ -70,14 +79,8 @@ class BudgetView(QWidget):
             self.table,
             "Aucun budget ni dépense sur cette période.\nPour fixer un budget "
             "mensuel à une catégorie : « ✏️ Définir / modifier le budget », "
-            "en bas.")
+            "en haut.")
 
-        h = QHBoxLayout()
-        self.btn_edit = QPushButton("✏️ Définir / modifier le budget")
-        self.btn_edit.clicked.connect(self._edit_budget)
-        h.addWidget(self.btn_edit)
-        h.addStretch()
-        v.addLayout(h)
 
     def _eff_date(self, t: dict) -> str:
         """Date utilisée pour la période affichée : TOUJOURS la date d'achat,

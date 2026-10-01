@@ -38,10 +38,20 @@ class RulesView(QWidget):
         self.btn_new = QPushButton("➕ Nouvelle règle")
         self.btn_new.clicked.connect(self.new_rule)
         toolbar.addWidget(self.btn_new)
+        # Tous les boutons au-dessus du tableau, comme dans le Prévisionnel :
+        # les actions sur une règle à gauche, l'outil d'ensemble à droite
+        # (relecture de design du 01/10/2026 : Modifier et Supprimer étaient
+        # en bas).
+        self.btn_edit = QPushButton("✏️ Modifier la règle")
+        self.btn_edit.clicked.connect(self.edit_selected)
+        toolbar.addWidget(self.btn_edit)
+        self.btn_del = QPushButton("🗑 Supprimer la règle")
+        self.btn_del.clicked.connect(self.delete_selected)
+        toolbar.addWidget(self.btn_del)
+        toolbar.addStretch()
         self.btn_apply = QPushButton("🔄 Appliquer aux opérations existantes")
         self.btn_apply.clicked.connect(self.apply_all)
         toolbar.addWidget(self.btn_apply)
-        toolbar.addStretch()
         v.addLayout(toolbar)
 
         self.model = QStandardItemModel(0, 6, self)
@@ -64,16 +74,6 @@ class RulesView(QWidget):
             "Aucune règle pour l'instant.\nUne règle classe d'elle-même les "
             "opérations dont le libellé contient un mot : « ➕ Nouvelle "
             "règle », ou cochez « Mémoriser » en modifiant une opération.")
-
-        btn_row = QHBoxLayout()
-        self.btn_edit = QPushButton("✏️ Modifier la règle")
-        self.btn_edit.clicked.connect(self.edit_selected)
-        btn_row.addWidget(self.btn_edit)
-        self.btn_del = QPushButton("🗑 Supprimer la règle")
-        self.btn_del.clicked.connect(self.delete_selected)
-        btn_row.addWidget(self.btn_del)
-        btn_row.addStretch()
-        v.addLayout(btn_row)
 
         # Raccourci clavier Suppr (limité à cette vue) + menu contextuel (clic droit)
         sc_del = QShortcut(QKeySequence("Delete"), self.table, activated=self.delete_selected)
