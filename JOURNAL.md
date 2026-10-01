@@ -45,11 +45,17 @@ La date la plus récente est en haut.
 **Pourquoi.** Fin des 23 points de la relecture de design ; les règles
 retenues sont passées dans la charte des applis.
 
-**Reste.** Deux choix soumis à l'auteur sur maquettes : le menu de gauche
-(856 px avec deux comptes ; proposition à 662 px : un seul bouton « Mettre
-au propre », choix du compte au bout des onglets) et l'allègement du bandeau
-Encours carte. Aucun exe construit : nouvelle version (1.40.3) à faire pour
-l'installer.
+Puis, sur maquettes, l'auteur a choisi (commit c07d856) : un seul bouton
+« 🧹 Mettre au propre… » qui ouvre les quatre outils, et le choix du compte
+au bout de la rangée d'onglets — le menu passe de 856 à 649 px avec deux
+comptes, la fenêtre descend toujours à 1 082 px ; le bandeau Encours carte
+garde sa phrase « il reste… », le reste au survol. 603/603, vérifié en image
+à 1280 × 800.
+
+**Reste.** Aucun exe construit : nouvelle version (1.40.3) à faire pour
+l'installer chez l'auteur. README, Lisez-moi et une page du site décrivent
+encore l'ancien menu et « Exporter (JSON) » : à aligner à la sortie de
+mi-octobre (noté dans la liste de contrôle de la publication).
 
 ## 2026-09-30 (2) — Relecture de design, suite : lots 1 et 2
 
