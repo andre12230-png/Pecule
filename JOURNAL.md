@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (4) — Import : plus de doublon pour une opération renommée
+
+**Fait.** (commit 6d3e9c7) La clé anti-doublon par libellé ignore majuscules
+et accents, et une opération déjà en base est reconnue par son libellé actuel
+OU par le libellé d'origine de la banque (`libelle_op`) : `csv_import.
+_cles_libelle`. Vaut pour CSV, OFX et QIF (même chemin). L'identifiant des
+opérations ne change pas. Quatre tests, écrits avant et vus en échec (dont
+l'import qui s'arrêtait sur « UNIQUE constraint failed » et le doublon
+silencieux d'une opération importée avant le 16/09). 611/611 ; tests de
+`outils-import` : 20/20.
+
+**Pourquoi.** L'auteur a accepté la correction proposée. Le diagnostic,
+parti des 23 opérations qui ne différaient que par la casse, a montré la
+vraie racine : sur une copie de la base réelle (lecture seule), 673
+opérations renommées n'auraient pas été reconnues en réimportant leur
+relevé ; après correction, 0, et aucune clé « gonflée » qui ferait écarter
+une opération neuve.
+
+**Reste.** Pas d'exe : la 1.40.3 installée n'a pas encore cette correction.
+Fiche mémoire « Import des relevés » corrigée (elle disait l'inverse).
+
 ## 2026-10-01 (3) — Écarts vus en route : fenêtres des tests, captures du site
 
 **Fait.** (commit a75d38e) L'invite de premier lancement est rattachée à sa
