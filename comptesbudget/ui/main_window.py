@@ -306,8 +306,11 @@ class MainWindow(QMainWindow):
         # Départ du compte à rebours de l'invitation « Votre avis ».
         noter_premiere_utilisation(self.db, date.today())
 
-        # Premier lancement : inviter à renseigner le solde de départ
-        QTimer.singleShot(0, self._premier_lancement)
+        # Premier lancement : inviter à renseigner le solde de départ. La
+        # fenêtre est passée en 2e argument : l'appel meurt avec elle (charte).
+        # Sans elle, une fenêtre détruite laissait son invite en attente — ce
+        # qui a bloqué la suite de tests le 30/09/2026.
+        QTimer.singleShot(0, self, self._premier_lancement)
 
     def _period_aware_views(self):
         return [self.bilan_view, self.ops_view, self.budget_view, self.cats_view]

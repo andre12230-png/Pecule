@@ -6,8 +6,6 @@ prélèvements arrêtés depuis longtemps (abonnement résilié, crédit rembour
 d'anciens noms de récurrences déjà déclarées sous un autre libellé, avec des
 montants moyennés sur des années. Le prévisionnel en était lourdement faussé.
 """
-from datetime import date
-
 from comptesbudget.recurring import (
     candidats_non_couverts, detect_recurring_candidates,
 )

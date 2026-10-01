@@ -27,9 +27,12 @@ from datetime import date
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
-from PySide6.QtGui import QColor, QPalette                # noqa: E402
+from PySide6.QtCore import Qt                             # noqa: E402
 from PySide6.QtWidgets import QApplication                # noqa: E402
 
+from comptesbudget.app import (                           # noqa: E402
+    appliquer_theme_clair, installer_traduction_qt,
+)
 from comptesbudget.database import Database               # noqa: E402
 from comptesbudget.ui.main_window import MainWindow       # noqa: E402
 
@@ -203,20 +206,23 @@ def _laisser_dessiner(app, secondes):
 def photographier(db, dossier):
     """Ouvre la fenêtre et enregistre un PNG par onglet de la vitrine."""
     app = QApplication.instance() or QApplication(sys.argv)
-    app.setStyle("Fusion")
-    # Même palette que l'application (cf. comptesbudget/app.py) : sans elle,
-    # les captures n'auraient pas les couleurs que voit l'utilisateur.
-    pal = app.palette()
-    pal.setColor(QPalette.Window, QColor("#ECE9D8"))
-    pal.setColor(QPalette.Base, QColor("#FFFFFF"))
-    pal.setColor(QPalette.AlternateBase, QColor("#F5F5F0"))
-    pal.setColor(QPalette.Highlight, QColor("#316AC5"))
-    pal.setColor(QPalette.HighlightedText, QColor("#FFFFFF"))
-    app.setPalette(pal)
+    # Le thème et la traduction de l'application elle-même (comptesbudget/
+    # app.py). Partir de app.palette(), comme avant le 01/10/2026, prenait
+    # la palette du système : sur un PC réglé en sombre, le texte des
+    # captures sortait blanc (charte des applis, section 1).
+    appliquer_theme_clair(app)
+    installer_traduction_qt(app)
 
+    # La base de démonstration a son solde de départ : aucune invite de
+    # premier lancement n'est attendue. Par prudence, on les neutralise —
+    # une boîte modale attendrait un clic.
+    MainWindow._premier_lancement = lambda self: None
     w = MainWindow(db)
     w.resize(LARGEUR, HAUTEUR_BILAN)
     w.statusBar().showMessage("Base : demo.db   —   données de démonstration")
+    # Rendue sans apparaître à l'écran : show() ouvrait une vraie fenêtre
+    # pendant qu'on travaille (charte, section 7).
+    w.setAttribute(Qt.WA_DontShowOnScreen, True)
     w.show()
     _laisser_dessiner(app, 1.5)
 
