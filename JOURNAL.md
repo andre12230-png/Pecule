@@ -39,8 +39,16 @@ en échec sur l'ancien code (git stash), vert ensuite. 629/629. Numéro 1.41.1.
 **Pourquoi.** Défaut présent depuis la 1.40.3 (détail de l'Encours carte au
 survol), aggravé par le nouveau bandeau du mois.
 
+Contrôle de livraison vert (629/629 ; notice relue : elle ne parle pas des
+couleurs). Exe construit sans le .bat, correction lue dans son archive, lancé
+sur une base inventée : « Pécule — v1.41.1 », fermeture normale. Installé :
+la 1.41.0 devient `Pecule.exe.avant-1.41.1`, empreinte de `comptes.db`
+identique avant et après.
+
 **Reste.** Le Photovoltaïque et Recharges VE ne règlent pas non plus leurs
-infobulles : probablement sombres chez l'auteur, à mesurer.
+infobulles : probablement sombres chez l'auteur, à mesurer. Trois anciens exe
+dans le dossier d'installation (1.41.0, 1.40.4, 1.40.3) : proposer les deux
+plus anciens à la Corbeille.
 
 ## 2026-10-01 (9) — Version 1.41.0 installée chez l'auteur pour essai
 
