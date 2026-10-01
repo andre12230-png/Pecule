@@ -29,7 +29,8 @@ from ...rules import apply_rules_to_tx
 
 from ..flow_layout import FlowLayout
 from ..models import (
-    TxTableModel, charger_en_conservant_le_tri, colonnes_des_operations,
+    EtatVide, TxTableModel, charger_en_conservant_le_tri,
+    colonnes_des_operations,
 )
 from ..dialogs import (
     LIBELLE_MANQUANT, MONTANT_MANQUANT, CategorieEnMasseDialog, TxDialog,
@@ -176,6 +177,7 @@ class OperationsView(QWidget):
         self.table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
 
         v.addWidget(self.table)
+        self.etat_vide = EtatVide(self.table)   # texte posé à chaque refresh
 
         # Raccourcis — portée limitée à cette vue : sans cela, ils resteraient
         # actifs depuis les autres onglets (la vue est masquée, pas détruite)
@@ -291,6 +293,21 @@ class OperationsView(QWidget):
         # autre colonne en cliquant sur un en-tête, ce tri-là reprend la main.
         self.filtered.sort(key=self._eff_date, reverse=True)
         charger_en_conservant_le_tri(self.table, self.model, self.filtered)
+        # Tableau vide : dire pourquoi, et comment commencer.
+        filtres = (words or cat not in ("", "Toutes") or opt not in ("", "Tous")
+                   or tp not in ("", "Tous") or pt not in ("", "Toutes"))
+        if not self.transactions:
+            vide = ("Aucune opération pour l'instant.\nImportez le relevé "
+                    "téléchargé chez votre banque (📥 Importer un relevé, à "
+                    "gauche), ou saisissez une opération (➕ Nouvelle).")
+        elif filtres:
+            vide = ("Aucune opération ne correspond aux filtres choisis.\n"
+                    "Remettez « Toutes » ou « Tous » dans les menus, ou "
+                    "videz la recherche.")
+        else:
+            vide = ("Aucune opération sur cette période.\nChoisissez une "
+                    "autre période en haut, ou « Toutes périodes ».")
+        self.etat_vide.changer_texte(vide)
 
         solde = sum(t.get("montant", 0) for t in self.filtered)
         pointed = [t for t in self.filtered if t.get("pointee")]

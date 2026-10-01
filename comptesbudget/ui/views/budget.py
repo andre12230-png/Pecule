@@ -15,7 +15,7 @@ from ...utils import (
     deaccent, depense_nette_par_categorie, fmt_euro, in_period,
 )
 from ...database import Database
-from ..models import cellule_categorie
+from ..models import EtatVide, cellule_categorie
 from ..widgets import demander_montant
 
 class BudgetView(QWidget):
@@ -59,6 +59,11 @@ class BudgetView(QWidget):
         entete.setSortIndicator(0, Qt.AscendingOrder)
         entete.sortIndicatorChanged.connect(lambda *_: self.refresh())
         v.addWidget(self.table)
+        self.etat_vide = EtatVide(
+            self.table,
+            "Aucun budget ni dépense sur cette période.\nPour fixer un budget "
+            "mensuel à une catégorie : « ✏️ Définir / modifier le budget », "
+            "en bas.")
 
         h = QHBoxLayout()
         self.btn_edit = QPushButton("✏️ Définir / modifier le budget")

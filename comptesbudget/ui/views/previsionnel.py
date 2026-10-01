@@ -29,7 +29,7 @@ from ...recurring import (
     candidats_non_couverts, _recurring_aligned_start,
 )
 
-from ..models import SORT_ROLE, cellule_categorie
+from ..models import SORT_ROLE, EtatVide, cellule_categorie
 from ..dialogs import LIBELLE_RECURRENCE_MANQUANT, RecurringDialog
 from ..assistants import GenererEcheancesDialog, PrefillRecurringDialog
 from ..widgets import confirmer
@@ -89,6 +89,11 @@ class PrevisionnelView(QWidget):
         self.table.setSortingEnabled(True)
         self.table.horizontalHeader().setSortIndicatorShown(True)
         tlay.addWidget(self.table)
+        self.etat_vide = EtatVide(
+            self.table,
+            "Aucune opération récurrente pour l'instant.\n« ✨ Pré-remplir "
+            "depuis l'historique » les trouve dans vos relevés ; « ➕ Nouvelle "
+            "opération récurrente » en ajoute une à la main.")
         splitter.addWidget(top)
 
         # Prévisions sur les 12 prochains mois
@@ -112,6 +117,10 @@ class PrevisionnelView(QWidget):
         self.forecast_table.setSortingEnabled(True)
         self.forecast_table.horizontalHeader().setSortIndicatorShown(True)
         blay.addWidget(self.forecast_table)
+        self.etat_vide_prevision = EtatVide(
+            self.forecast_table,
+            "Rien de prévu : les prévisions viennent des opérations "
+            "récurrentes, ci-dessus.")
 
         self.summary = QLabel("")
         self.summary.setStyleSheet("padding:6px; background:#FFFBE6; border:1px solid #E8D77B")

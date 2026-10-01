@@ -69,6 +69,49 @@ def test_choix_de_la_date_grise_sur_le_budget(qapp, db):
     assert w.period_bar.date_mode_combo.isEnabled()
 
 
+# ── États vides ─────────────────────────────────────────────────────────
+
+def _phrases_visibles(vue):
+    from PySide6.QtWidgets import QLabel
+    return [lbl.text() for lbl in vue.findChildren(QLabel, "etatVide")
+            if not lbl.isHidden() and lbl.text()]
+
+
+def _vues_rafraichies(base):
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.ui.views.budget import BudgetView
+    from comptesbudget.ui.views.categories import CategoriesView
+    from comptesbudget.ui.views.operations import OperationsView
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+    from comptesbudget.ui.views.rules_view import RulesView
+    from comptesbudget.ui.views.subcategories import SubcategoriesView
+    vues = {"Bilan": BilanView(base), "Opérations": OperationsView(base),
+            "Budget": BudgetView(base), "Catégories": CategoriesView(base),
+            "Sous-catégories": SubcategoriesView(base),
+            "Règles auto": RulesView(base), "Prévisionnel": PrevisionnelView(base)}
+    for vue in vues.values():
+        (vue.reload_from_db if hasattr(vue, "reload_from_db") else vue.refresh)()
+    return vues
+
+
+def test_etats_vides_disent_pourquoi_et_comment_commencer(qapp, tmp_path):
+    """Charte : « un tableau ou une page sans données affiche une phrase
+    centrée, en gris discret, qui dit pourquoi » ; le plugin Design ajoute :
+    et comment commencer. Les onglets montraient des grilles vides et des
+    graphiques aux axes « … »."""
+    vues = _vues_rafraichies(Database(str(tmp_path / "vide.db")))
+    for nom, vue in vues.items():
+        assert _phrases_visibles(vue), f"{nom} : grille vide sans phrase"
+    assert any("Importez" in p for p in _phrases_visibles(vues["Opérations"]))
+    assert any("Pré-remplir" in p for p in _phrases_visibles(vues["Prévisionnel"]))
+
+
+def test_etats_vides_disparaissent_avec_les_donnees(qapp, db):
+    vues = _vues_rafraichies(db)
+    for nom in ("Opérations", "Sous-catégories"):
+        assert not _phrases_visibles(vues[nom]), nom
+
+
 # ── Un nom par chose ────────────────────────────────────────────────────
 
 def test_operations_parlent_de_mouvement_pas_de_solde(qapp, db):

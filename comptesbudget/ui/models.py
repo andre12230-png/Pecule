@@ -2,12 +2,12 @@
 
 from typing import Optional
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QEvent, QObject, Qt
 from PySide6.QtGui import (
     QColor, QStandardItemModel, QStandardItem, QBrush, QIcon, QPainter,
     QPixmap,
 )
-from PySide6.QtWidgets import QHeaderView
+from PySide6.QtWidgets import QHeaderView, QLabel
 
 from ..utils import (
     cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
@@ -60,6 +60,56 @@ AIDE_POINTAGE = (
     "Cliquer pour pointer ou dépointer.\n"
     "Raccourci : barre d'espace, sur une ou plusieurs lignes\n"
     "sélectionnées (Ctrl+clic ou Maj+clic).")
+
+
+class EtatVide(QObject):
+    """Phrase centrée, en gris discret, posée sur un tableau (ou un graphique)
+    vide : elle dit pourquoi il est vide et comment commencer, au lieu d'une
+    grille muette (charte, « État vide » ; relecture du 30/09/2026).
+
+    `vue` : un QTableView ou un QChartView (tout ce qui a un viewport).
+    Avec `suivre_modele=True`, la phrase apparaît et disparaît d'elle-même
+    selon que le modèle du tableau a des lignes ; sinon, montrer()."""
+
+    def __init__(self, vue, texte: str = "", suivre_modele: bool = True):
+        super().__init__(vue)
+        self.vue = vue
+        self.etiquette = QLabel(texte, vue.viewport())
+        self.etiquette.setObjectName("etatVide")
+        self.etiquette.setAlignment(Qt.AlignCenter)
+        self.etiquette.setWordWrap(True)
+        self.etiquette.setStyleSheet(
+            "color:#666666; background:transparent; font-size:10pt")
+        # Les clics passent au tableau en dessous.
+        self.etiquette.setAttribute(Qt.WA_TransparentForMouseEvents)
+        vue.viewport().installEventFilter(self)
+        self._placer()
+        if suivre_modele:
+            modele = vue.model()
+            for signal in (modele.rowsInserted, modele.rowsRemoved,
+                           modele.modelReset, modele.layoutChanged):
+                signal.connect(self._suivre)
+            self._suivre()
+
+    def montrer(self, visible: bool, texte: Optional[str] = None):
+        if texte is not None:
+            self.etiquette.setText(texte)
+        self.etiquette.setVisible(visible)
+
+    def changer_texte(self, texte: str):
+        self.etiquette.setText(texte)
+
+    def _suivre(self, *_):
+        self.montrer(self.vue.model().rowCount() == 0)
+
+    def _placer(self):
+        zone = self.vue.viewport().rect().adjusted(24, 16, -24, -16)
+        self.etiquette.setGeometry(zone)
+
+    def eventFilter(self, objet, evenement):
+        if evenement.type() == QEvent.Resize:
+            self._placer()
+        return False
 
 
 def colonnes_sans_coupure(table, au_contenu, etirable: int,

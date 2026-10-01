@@ -22,6 +22,7 @@ from ...database import Database
 from ...rules import apply_rules_to_tx
 
 from ..dialogs import MOTIF_TROP_COURT, RuleDialog
+from ..models import EtatVide
 from ..widgets import confirmer
 
 class RulesView(QWidget):
@@ -59,6 +60,11 @@ class RulesView(QWidget):
         self.table.setColumnWidth(4, 180)
         self.table.setColumnWidth(5, 100)
         v.addWidget(self.table)
+        self.etat_vide = EtatVide(
+            self.table,
+            "Aucune règle pour l'instant.\nUne règle classe d'elle-même les "
+            "opérations dont le libellé contient un mot : « ➕ Nouvelle "
+            "règle », ou cochez « Mémoriser » en modifiant une opération.")
 
         btn_row = QHBoxLayout()
         self.btn_edit = QPushButton("✏️ Modifier la règle")

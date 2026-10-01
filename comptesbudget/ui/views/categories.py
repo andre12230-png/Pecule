@@ -21,7 +21,7 @@ from ...utils import (
 from ...database import Database
 
 from ..models import (
-    SORT_ROLE, TxTableModel, cellule_categorie, charger_en_conservant_le_tri,
+    SORT_ROLE, EtatVide, TxTableModel, cellule_categorie, charger_en_conservant_le_tri,
     colonnes_des_operations, colonnes_sans_coupure,
 )
 from ..dialogs import CategoriesMasqueesDialog, TxDialog
@@ -60,6 +60,8 @@ class CategoriesView(QWidget):
         # à 1280 px, le total était coupé (« -16 » pour -161,75 €).
         colonnes_sans_coupure(self.cats_table, au_contenu=(1, 2), etirable=0)
         lv.addWidget(self.cats_table)
+        self.etat_vide_cats = EtatVide(
+            self.cats_table, "Aucune opération sur cette période.")
         # Les 17 catégories livrées d'origine sont proposées même si l'on
         # ne s'en sert jamais. Ce bouton permet d'écarter celles qui ne
         # servent pas — sans rien supprimer.
@@ -104,6 +106,9 @@ class CategoriesView(QWidget):
         self.tx_table.horizontalHeader().setSortIndicatorShown(True)
         self.tx_table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
         rv.addWidget(self.tx_table)
+        self.etat_vide_ops = EtatVide(
+            self.tx_table,
+            "Cliquez une catégorie, à gauche, pour voir ses opérations.")
 
         splitter.addWidget(right)
         splitter.setSizes([320, 700])

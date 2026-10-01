@@ -29,6 +29,7 @@ from ...labels import clean_libelle
 from ...recurring import echeances_du_mois
 from ...sauvegarde_externe import rappel_sauvegarde_externe
 from ..avis import CLE_PREMIERE_UTILISATION
+from ..models import EtatVide
 
 # Jour de la dernière sauvegarde externe réussie (AAAA-MM-JJ), pour le
 # bandeau de rappel (28/09/2026). Le préfixe « _meta_ » la tient à l'écart
@@ -416,6 +417,10 @@ class BilanView(QWidget):
         bar_view.setRenderHint(QPainter.Antialiasing)
         bar_view.setMinimumHeight(240)
         self.bar_panel = _make_panel("Évolution sur 12 mois", bar_view)
+        self.etat_barres = EtatVide(
+            bar_view, "Aucune opération sur ces douze mois.\nImportez un "
+            "relevé (📥 Importer un relevé, à gauche) pour voir vos revenus "
+            "et vos dépenses mois par mois.", suivre_modele=False)
         mid_row.addWidget(self.bar_panel, 2)
 
         # Camembert
@@ -432,6 +437,9 @@ class BilanView(QWidget):
         pie_view.setRenderHint(QPainter.Antialiasing)
         pie_view.setMinimumHeight(240)
         mid_row.addWidget(_make_panel("Répartition des dépenses", pie_view), 2)
+        self.pie_view = pie_view
+        self.etat_camembert = EtatVide(
+            pie_view, "Aucune dépense sur cette période.", suivre_modele=False)
 
         main.addLayout(mid_row, 1)
 
@@ -449,6 +457,9 @@ class BilanView(QWidget):
         solde_view.setRenderHint(QPainter.Antialiasing)
         solde_view.setMinimumHeight(200)
         self.solde_panel = _make_panel("Solde en fin de mois", solde_view)
+        self.etat_courbe = EtatVide(
+            solde_view, "La courbe du solde apparaîtra avec vos premières "
+            "opérations.", suivre_modele=False)
         main.addWidget(self.solde_panel, 1)
         self.soldes_de_la_courbe: list[tuple] = []
 
@@ -1502,6 +1513,13 @@ class BilanView(QWidget):
         self.pie_chart.addSeries(series)
         self.pie_chart.setTitle("")
         self._legende_sans_coupure()
+        # Graphiques vides : une phrase plutôt que des axes « … ».
+        # Le graphique vide est masqué : ses axes passaient sous la phrase.
+        self.etat_camembert.montrer(not by_cat)
+        self.etat_barres.montrer(not all_active)
+        self.etat_courbe.montrer(not all_active)
+        self.bar_chart.setVisible(bool(all_active))
+        self.solde_chart.setVisible(bool(all_active))
 
         # ── Liste : dépenses par catégorie (top 8) ────────────────────
         total_dep = abs(dep_a) or 1

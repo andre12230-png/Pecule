@@ -17,7 +17,7 @@ from ...utils import (
     deaccent, fmt_euro,
 )
 from ...database import Database
-from ..models import cellule_categorie
+from ..models import EtatVide, cellule_categorie
 from ..widgets import confirmer
 
 class SubcategoriesView(QWidget):
@@ -88,6 +88,11 @@ class SubcategoriesView(QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.doubleClicked.connect(lambda _i: self._rename_or_merge())
         v.addWidget(self.table, 1)
+        self.etat_vide = EtatVide(
+            self.table,
+            "Aucune sous-catégorie à afficher.\nElles apparaissent quand vous "
+            "en donnez une à vos opérations ; vérifiez aussi le filtre de "
+            "catégorie et la recherche, en haut.")
 
         action_row = QHBoxLayout()
         self.lbl_count = QLabel("")
