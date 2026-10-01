@@ -884,7 +884,15 @@ SYNC_VERSION = 3
 #          commun aux trois applications.
 # 1.40.2 : Les messages accordent avec le nombre (<< 1 operation importee >>,
 #          << 3 operations importees >>) au lieu de << operation(s) >>.
-APP_VERSION = "1.40.2"
+# 1.40.3 : Relecture de design de tous les ecrans. Categories ecrites en noir
+#          avec une pastille de couleur ; dates et montants jamais coupes a
+#          1280 px ; << Garder >> par defaut avant une suppression et
+#          << Enregistrer >> au lieu de << OK >> ; montants insecables ; periode
+#          grisee la ou elle ne sert pas ; phrases quand un tableau est vide ;
+#          vraies cases a cocher ; couleurs de la charte ; axes des graphiques
+#          en euros ; menu raccourci (<< Mettre au propre... >>, compte au bout
+#          des onglets) ; bandeau Encours carte allege (detail au survol).
+APP_VERSION = "1.40.3"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

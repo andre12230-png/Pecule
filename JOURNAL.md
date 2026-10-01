@@ -21,6 +21,18 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (2) — Version 1.40.3 installée chez l'auteur
+
+**Fait.** Numéro 1.40.3 (constants.py et son historique, Lisez-moi.txt, dont
+le passage multicomptes aligné sur le nouveau menu) : la relecture de design
+des 30/09 et 01/10. Construction et installation : voir la suite de cette
+entrée.
+
+**Pourquoi.** Demande de l'auteur : « construis la 1.40.3 et installe-la
+chez moi, supprime l'ancien exe ».
+
+**Reste.** README et site à aligner à la sortie de mi-octobre.
+
 ## 2026-10-01 — Relecture de design, fin : lots 3 et 4
 
 **Fait.**
