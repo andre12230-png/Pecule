@@ -126,8 +126,32 @@ def _tx_identity(date_iso: str, montant, reference: str, libelle: str) -> str:
 def _identity_libelle(date_iso: str, montant, libelle: str) -> str:
     """Clé d'identité par libellé nettoyé — calculable pour TOUTE opération,
     qu'elle vienne d'un relevé (libellé brut « CAISSE COMP ») ou d'une saisie
-    manuelle / harmonisation (« Caisse Comp ») : clean_libelle unifie les deux."""
-    return f"{date_iso}|{float(montant or 0):.2f}|{clean_libelle(libelle)}"
+    manuelle / harmonisation (« Caisse Comp ») : clean_libelle unifie les deux.
+
+    Sans majuscules ni accents (deaccent) : clean_libelle garde un sigle court
+    en capitales seulement s'il l'était (« SFX » mais « Sfx »), et une
+    harmonisation peut ajouter des accents. Une opération renommée n'était
+    alors plus reconnue : sa réimportation la doublait, ou échouait sur
+    « UNIQUE constraint failed » (01/10/2026). N'influe que sur la détection
+    des doublons : l'identifiant des opérations (_tx_identity) ne change pas."""
+    return f"{date_iso}|{float(montant or 0):.2f}|{deaccent(clean_libelle(libelle))}"
+
+
+def _cles_libelle(t: dict) -> set:
+    """Les clés par libellé d'une opération DÉJÀ en base : celle de son
+    libellé actuel ET celle du libellé d'origine de la banque (libelle_op).
+
+    Une opération importée puis renommée (harmonisation, renommage en masse)
+    ne change que son libellé ; à la réimportation de son relevé, la ligne
+    porte encore le libellé d'origine. Sans cette seconde clé, l'opération
+    n'était plus reconnue : doublée, ou import arrêté sur « UNIQUE
+    constraint failed » (01/10/2026). Un ensemble : une opération jamais
+    renommée ne compte qu'une fois."""
+    d, m = t.get("date", ""), t.get("montant", 0)
+    cles = {_identity_libelle(d, m, t.get("libelle", ""))}
+    if (t.get("libelle_op") or "").strip():
+        cles.add(_identity_libelle(d, m, t.get("libelle_op", "")))
+    return cles
 
 
 # Décalage toléré, en jours, entre une échéance saisie d'avance et son passage
@@ -561,9 +585,7 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
                      t.get("reference", ""), t.get("libelle", ""))
         for t in existing_tx if (t.get("reference") or "").strip())
     existing_by_lbl = Counter(
-        _identity_libelle(t.get("date", ""), t.get("montant", 0),
-                          t.get("libelle", ""))
-        for t in existing_tx)
+        k for t in existing_tx for k in _cles_libelle(t))
     # Troisième filet, réservé aux SAISIES MANUELLES (id sans « | », donc
     # UUID) : même date + même montant suffisent, quel que soit le libellé.
     # L'utilisateur nomme ses saisies à sa façon (« Omnishop ») alors que la
@@ -584,9 +606,8 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             k = _tx_identity(t.get("date", ""), t.get("montant", 0),
                              t.get("reference", ""), t.get("libelle", ""))
             rows_by_ref.setdefault(k, []).append(t)
-        k = _identity_libelle(t.get("date", ""), t.get("montant", 0),
-                              t.get("libelle", ""))
-        rows_by_lbl.setdefault(k, []).append(t)
+        for k in _cles_libelle(t):
+            rows_by_lbl.setdefault(k, []).append(t)
         if "|" not in (t.get("id") or ""):
             k = f"{t.get('date', '')}|{float(t.get('montant', 0) or 0):.2f}"
             rows_by_dm.setdefault(k, []).append(t)

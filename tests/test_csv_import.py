@@ -85,6 +85,72 @@ def _write(tmp_path, name, content):
     return str(p)
 
 
+def test_reimport_apres_changement_de_majuscules(tmp_path):
+    """Le nettoyage des libellés garde en capitales un sigle court SEULEMENT
+    s'il était écrit en capitales (« SFX » mais « Sfx ») : une opération dont
+    le libellé avait été renommé (harmonisation, correction à la main) n'était
+    plus reconnue, et réimporter son relevé la doublait. 23 opérations d'une
+    base réelle étaient dans ce cas, dont 16 sans référence bancaire
+    (diagnostic du 01/10/2026, sur une copie)."""
+    db = Database(str(tmp_path / "t.db"))
+    releve = _write(tmp_path, "sigle.csv",
+                    "Date;Libelle;Montant\n05/09/2026;SFX OUTILLAGE;-42,00\n")
+    assert import_csv(releve, db)[0] == 1
+    tx = next(iter(db.list_tx()))
+    db.update_tx(tx["id"], {"libelle": "Sfx Outillage"})     # renommée
+    imported, skipped, _, _, _, _ = import_csv(releve, db)
+    assert (imported, skipped) == (0, 1)
+    assert len(list(db.list_tx())) == 1
+
+
+def test_reimport_d_une_operation_renommee(tmp_path):
+    """Une opération importée puis RENOMMÉE (harmonisation, renommage en
+    masse) garde le libellé de la banque dans libelle_op. Elle n'était plus
+    reconnue à la réimportation de son relevé (568 opérations d'une base
+    réelle exposées, diagnostic du 01/10/2026) : on la reconnaît aussi par ce
+    libellé d'origine."""
+    db = Database(str(tmp_path / "t.db"))
+    releve = _write(tmp_path, "renommee.csv",
+                    "Date;Libelle;Montant\n05/09/2026;PRLV SEPA SFX OUTILLAGE;-42,00\n")
+    assert import_csv(releve, db)[0] == 1
+    tx = next(iter(db.list_tx()))
+    db.update_tx(tx["id"], {"libelle": "Atelier du coin"})   # renommée
+    imported, skipped, _, _, _, _ = import_csv(releve, db)
+    assert (imported, skipped) == (0, 1)
+    assert len(list(db.list_tx())) == 1
+
+
+def test_reimport_d_une_ancienne_operation_renommee(tmp_path):
+    """Même cas, pour une opération importée par une version d'avant le
+    16/09/2026 (identifiant sans le compte) : là, rien ne bloquait, la
+    réimportation la doublait en silence."""
+    db = Database(str(tmp_path / "t.db"))
+    db.insert_tx({"id": "2026-09-05|-42.00|Prlv SEPA SFX Outillage#0",
+                  "date": "2026-09-05", "date_valeur": "2026-09-05",
+                  "libelle": "Atelier du coin", "libelle_op": "PRLV SEPA SFX OUTILLAGE",
+                  "reference": "", "type": "", "categorie": "Non classé",
+                  "sous_cat": "", "info": "", "montant": -42.0, "pointee": 1})
+    releve = _write(tmp_path, "ancienne.csv",
+                    "Date;Libelle;Montant\n05/09/2026;PRLV SEPA SFX OUTILLAGE;-42,00\n")
+    imported, skipped, _, _, _, _ = import_csv(releve, db)
+    assert (imported, skipped) == (0, 1)
+    assert len(list(db.list_tx())) == 1
+
+
+def test_libelles_differents_restent_distincts(tmp_path):
+    """La comparaison ignore les majuscules, pas les lettres : deux
+    commerçants différents le même jour au même montant restent deux
+    opérations."""
+    db = Database(str(tmp_path / "t.db"))
+    releve = _write(tmp_path, "deux.csv",
+                    "Date;Libelle;Montant\n05/09/2026;SFX OUTILLAGE;-42,00\n"
+                    "05/09/2026;SFY OUTILLAGE;-42,00\n")
+    assert import_csv(releve, db)[0] == 2
+    imported, skipped, _, _, _, _ = import_csv(releve, db)
+    assert (imported, skipped) == (0, 2)
+    assert len(list(db.list_tx())) == 2
+
+
 def test_import_csv_dedup_plages_qui_se_chevauchent(tmp_path):
     # Régression : avec l'ancien ID basé sur la position de ligne, une opération
     # présente dans deux relevés à des positions différentes était réimportée.
