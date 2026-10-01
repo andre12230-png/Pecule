@@ -84,6 +84,10 @@ class SubcategoriesView(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # Tri de départ de A à Z. L'indicateur de Qt est décroissant par
+        # défaut : le tableau s'ouvrait de Z à A (relecture de design du
+        # 01/10/2026). Un tri choisi ensuite d'un clic sur l'en-tête est gardé.
+        self.table.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         self.table.setSortingEnabled(True)
         self.table.verticalHeader().setVisible(False)
         self.table.doubleClicked.connect(lambda _i: self._rename_or_merge())

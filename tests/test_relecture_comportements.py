@@ -371,3 +371,112 @@ def test_rapport_dit_a_quelle_date_il_compte(qapp, db):
     assert "date d'achat" in html
     assert "Mouvement du mois" in html
     assert "Mouvement net" not in html
+
+
+# ── Tris et catégorie par défaut (relecture de design du 01/10/2026) ────
+
+def _base_a_trier(tmp_path):
+    """Deux catégories, deux sous-catégories et deux récurrences, insérées de
+    Z à A pour que l'ordre d'insertion ne fasse pas le tri à leur place."""
+    d = Database(str(tmp_path / "tris.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    jour = date.today().replace(day=1).isoformat()
+    d.insert_tx(_tx(id="t", date=jour, date_valeur=jour, categorie="Transports",
+                    sous_cat="Train", libelle="SNCF", montant=-30.0))
+    d.insert_tx(_tx(id="a", date=jour, date_valeur=jour, categorie="Alimentation",
+                    sous_cat="Courses", libelle="Marché", montant=-20.0))
+    for i, libelle in enumerate(("Zinc", "Assurance")):
+        d.insert_recurring({
+            "id": f"r{i}", "libelle": libelle, "montant": -10.0,
+            "categorie": "Alimentation", "sous_cat": "", "type": "",
+            "frequency": "monthly", "day_of_month": 5,
+            "start_date": jour, "end_date": None, "actif": 1})
+    return d
+
+
+def test_tableaux_ouverts_de_a_a_z(qapp, tmp_path):
+    """Catégories, Sous-catégories et les récurrences du Prévisionnel
+    s'ouvraient triés de Z à A : l'indicateur de tri de Qt est décroissant
+    tant qu'on ne lui dit rien. Budget, lui, partait de A."""
+    from comptesbudget.ui.views.categories import CategoriesView
+    from comptesbudget.ui.views.previsionnel import PrevisionnelView
+    from comptesbudget.ui.views.subcategories import SubcategoriesView
+    d = _base_a_trier(tmp_path)
+
+    cats = CategoriesView(d); cats.refresh()
+    sous = SubcategoriesView(d); sous.refresh()
+    prev = PrevisionnelView(d); prev.refresh()
+    premiers = {
+        "catégories": cats.cats_table.model().index(0, 0).data(),
+        "sous-catégories": sous.table.model().index(0, 0).data(),
+        "récurrences": prev.table.model().index(0, 0).data(),
+    }
+    assert premiers == {"catégories": "Alimentation",
+                        "sous-catégories": "Courses",
+                        "récurrences": "Assurance"}
+    for table in (cats.cats_table, sous.table, prev.table):
+        assert table.horizontalHeader().sortIndicatorOrder() == Qt.AscendingOrder
+
+
+CATEGORIES = ["Abonnements", "Alimentation", "Transports"]
+
+
+def test_nouvelle_saisie_sans_categorie_imposee(qapp):
+    """« Nouvelle opération », « Nouvelle règle » et « Nouvelle opération
+    récurrente » proposaient « Abonnements », la première de la liste : une
+    saisie validée sans y toucher était classée là sans raison."""
+    from comptesbudget.ui.dialogs import RecurringDialog, RuleDialog, TxDialog
+    for dlg in (TxDialog(None, None, CATEGORIES, []),
+                RuleDialog(None, None, CATEGORIES),
+                RecurringDialog(None, None, CATEGORIES, [])):
+        assert dlg.cat.currentText() == "", type(dlg).__name__
+        assert dlg.cat.count() == len(CATEGORIES)     # la liste reste là
+        dlg.deleteLater()
+
+
+def test_modifier_garde_sa_categorie(qapp):
+    """Une modification, elle, rouvre sur la catégorie enregistrée."""
+    from comptesbudget.ui.dialogs import RuleDialog
+    dlg = RuleDialog(None, {"pattern": "sncf", "categorie": "Transports"},
+                     CATEGORIES)
+    assert dlg.cat.currentText() == "Transports"
+    dlg.deleteLater()
+
+
+def test_regle_sans_categorie_refusee(qapp, db, monkeypatch):
+    """Une règle sans catégorie ne classerait rien : elle est refusée, comme
+    un motif trop court."""
+    from PySide6.QtWidgets import QDialog, QMessageBox
+    from comptesbudget.ui import dialogs
+    from comptesbudget.ui.views.rules_view import RulesView
+    monkeypatch.setattr(dialogs.RuleDialog, "exec", lambda self: QDialog.Accepted)
+    monkeypatch.setattr(dialogs.RuleDialog, "values", lambda self: {
+        "pattern": "sncf", "amount": None, "sens": "", "categorie": "",
+        "sous_cat": "", "no_overwrite": 0})
+    titres = []
+    monkeypatch.setattr(QMessageBox, "warning",
+                        lambda parent, titre, texte, *a: titres.append(titre))
+    vue = RulesView(db)
+    vue.new_rule()
+    assert titres == ["Catégorie manquante"]
+    assert not db.list_rules()
+
+
+def test_memoriser_sans_categorie_ne_cree_pas_de_regle(qapp, db, monkeypatch):
+    """La case Catégorie de la saisie s'ouvre vide : « Mémoriser » cochée sans
+    catégorie aurait créé une règle qui classe en « Non classé »."""
+    from PySide6.QtWidgets import QMessageBox
+    from comptesbudget.ui.views.operations import OperationsView
+    titres = []
+    monkeypatch.setattr(QMessageBox, "warning",
+                        lambda parent, titre, texte, *a: titres.append(texte))
+    # La boîte « Règle créée » attendrait un clic : on la neutralise aussi.
+    monkeypatch.setattr(QMessageBox, "information", lambda *a, **k: None)
+    vue = OperationsView(db)
+    vue._maybe_create_rule({"_create_rule": True,
+                            "_rule": {"pattern": "sncf", "amount": None},
+                            "montant": -30.0, "categorie": "Non classé",
+                            "sous_cat": ""})
+    assert not db.list_rules()
+    assert titres and "bien enregistrée" in titres[0]

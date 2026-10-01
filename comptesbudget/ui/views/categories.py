@@ -54,6 +54,10 @@ class CategoriesView(QWidget):
         self.cats_table.clicked.connect(self._on_cat_clicked)
         # Tri par clic : par nom, par nombre d'opérations ou par total
         self.cats_model.setSortRole(SORT_ROLE)
+        # Tri de départ de A à Z. L'indicateur de Qt est décroissant par
+        # défaut : le tableau s'ouvrait de Z à A (relecture de design du
+        # 01/10/2026). Un tri choisi ensuite d'un clic sur l'en-tête est gardé.
+        self.cats_table.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         self.cats_table.setSortingEnabled(True)
         self.cats_table.horizontalHeader().setSortIndicatorShown(True)
         # Nb et Total à la largeur de leur contenu, le nom prend le reste :

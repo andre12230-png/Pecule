@@ -530,6 +530,13 @@ class OperationsView(QWidget):
                 "La règle n'a pas été créée : son motif doit faire au moins "
                 "2 caractères. L'opération, elle, est bien enregistrée.")
             return
+        # La case Catégorie de la saisie s'ouvre vide depuis le 01/10/2026 :
+        # une règle qui classerait en « Non classé » ne servirait à rien.
+        if v.get("categorie", "") in ("", "Non classé"):
+            QMessageBox.warning(self, "Catégorie manquante",
+                "La règle n'a pas été créée : choisissez la catégorie qu'elle "
+                "doit donner. L'opération, elle, est bien enregistrée.")
+            return
         # Si une règle au même motif (et même filtre montant) existe : on met à jour
         amt = r.get("amount")
         existing = None

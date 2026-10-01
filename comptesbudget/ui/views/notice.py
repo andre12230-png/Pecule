@@ -348,6 +348,11 @@ Trois façons d'en créer :</p>
   <li>Bouton <b>➕ Nouvelle règle</b> dans l'onglet</li>
   <li><b>🔧 Suggérer catégories</b>, sous le bouton <b>🧹 Mettre au propre…</b> du menu de gauche (suggestions automatiques)</li>
 </ul>
+<p>Une règle doit avoir une <b>catégorie</b> : c'est celle qu'elle donnera aux
+opérations reconnues. Dans les formulaires, la case Catégorie s'ouvre vide
+— rien n'est choisi à votre place. Une opération enregistrée sans catégorie
+est rangée dans « Non classé » ; une règle sans catégorie, elle, n'est pas
+créée.</p>
 <p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
 la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
 ou bouton ✏️.</p>

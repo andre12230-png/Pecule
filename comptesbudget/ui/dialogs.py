@@ -36,6 +36,8 @@ BOUTON_EXPORTER = "📤 Exporter vers une autre installation…"
 BOUTON_FUSIONNER = "♻️ Fusionner un export…"
 MOTIF_TROP_COURT = ("Le motif doit faire au moins 2 caractères : c'est le mot "
                     "que le libellé doit contenir (par exemple « carrefour »).")
+CATEGORIE_MANQUANTE = ("Choisissez la catégorie que la règle donnera aux "
+                       "opérations reconnues (par exemple « Alimentation »).")
 
 
 class TxDialog(QDialog):
@@ -124,6 +126,11 @@ class TxDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Case vide au départ : elle proposait la première de la liste
+        # (« Abonnements »), et une saisie validée sans y toucher était
+        # classée là sans raison (relecture de design du 01/10/2026). Une
+        # modification rouvre, plus bas, sur la catégorie enregistrée.
+        self.cat.setCurrentIndex(-1)
         # Le champ est libre : rien ne le disait, et les 17 catégories
         # livrées avaient l'air imposées.
         self.cat.setToolTip(
@@ -1167,6 +1174,11 @@ class RuleDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Case vide au départ : elle proposait la première de la liste
+        # (« Abonnements »), et une saisie validée sans y toucher était
+        # classée là sans raison (relecture de design du 01/10/2026). Une
+        # modification rouvre, plus bas, sur la catégorie enregistrée.
+        self.cat.setCurrentIndex(-1)
         # Le champ est libre : rien ne le disait, et les 17 catégories
         # livrées avaient l'air imposées.
         self.cat.setToolTip(
@@ -1266,6 +1278,11 @@ class RecurringDialog(QDialog):
         # aucun effet ici.
         all_cats = sorted(set(categories)) if categories else sorted(CATEGORIES_DEFAUT)
         self.cat.addItems(all_cats)
+        # Case vide au départ : elle proposait la première de la liste
+        # (« Abonnements »), et une saisie validée sans y toucher était
+        # classée là sans raison (relecture de design du 01/10/2026). Une
+        # modification rouvre, plus bas, sur la catégorie enregistrée.
+        self.cat.setCurrentIndex(-1)
         # Le champ est libre : rien ne le disait, et les 17 catégories
         # livrées avaient l'air imposées.
         self.cat.setToolTip(

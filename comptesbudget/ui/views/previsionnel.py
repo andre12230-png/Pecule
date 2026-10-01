@@ -86,6 +86,10 @@ class PrevisionnelView(QWidget):
         for i, w in enumerate([240, 110, 180, 140, 120, 180, 60]):
             self.table.setColumnWidth(i, w)
         self.model.setSortRole(SORT_ROLE)
+        # Tri de départ de A à Z. L'indicateur de Qt est décroissant par
+        # défaut : le tableau s'ouvrait de Z à A (relecture de design du
+        # 01/10/2026). Un tri choisi ensuite d'un clic sur l'en-tête est gardé.
+        self.table.horizontalHeader().setSortIndicator(0, Qt.AscendingOrder)
         self.table.setSortingEnabled(True)
         self.table.horizontalHeader().setSortIndicatorShown(True)
         tlay.addWidget(self.table)

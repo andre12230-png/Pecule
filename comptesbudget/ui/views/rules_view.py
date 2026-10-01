@@ -21,7 +21,7 @@ from ...utils import (
 from ...database import Database
 from ...rules import apply_rules_to_tx
 
-from ..dialogs import MOTIF_TROP_COURT, RuleDialog
+from ..dialogs import CATEGORIE_MANQUANTE, MOTIF_TROP_COURT, RuleDialog
 from ..models import EtatVide
 from ..widgets import confirmer
 
@@ -133,6 +133,9 @@ class RulesView(QWidget):
         if len(v["pattern"]) < 2:
             QMessageBox.warning(self, "Motif trop court", MOTIF_TROP_COURT)
             return
+        if not v["categorie"]:
+            QMessageBox.warning(self, "Catégorie manquante", CATEGORIE_MANQUANTE)
+            return
         v["id"] = str(uuid.uuid4())
         v["created_at"] = date.today().isoformat()
         self.db.insert_rule(v)
@@ -153,6 +156,9 @@ class RulesView(QWidget):
         v = dlg.values()
         if len(v["pattern"]) < 2:
             QMessageBox.warning(self, "Motif trop court", MOTIF_TROP_COURT)
+            return
+        if not v["categorie"]:
+            QMessageBox.warning(self, "Catégorie manquante", CATEGORIE_MANQUANTE)
             return
         self.db.update_rule(rid, v)
         self.refresh()
