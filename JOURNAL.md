@@ -21,7 +21,7 @@ La date la plus récente est en haut.
 
 ---
 
-## 2026-10-01 (9) — Version 1.41.0 pour essai chez l'auteur
+## 2026-10-01 (9) — Version 1.41.0 installée chez l'auteur pour essai
 
 **Fait.** Numéro 1.41.0 (constants.py et son historique, Lisez-moi.txt) :
 bandeau du mois réuni, tris de A à Z, case Catégorie vide à la saisie,
@@ -33,7 +33,15 @@ disait « sauf Règles »). Lisez-moi : les deux phrases qui parlaient de
 **Pourquoi.** L'auteur veut essayer chez lui les changements de la relecture
 de design avant de continuer.
 
-**Reste.** Installation et contrôle chez l'auteur (voir l'entrée suivante).
+Contrôle de livraison vert (625/625, ruff, confidentialité). Exe construit
+sans le .bat ; nouveautés lues dans son archive (bandeau du mois, refus de la
+règle sans catégorie, largeurs, numéro) ; lancé sur une base inventée :
+« Pécule — v1.41.0 — Compte courant », fermeture normale. Installé : la 1.40.4
+devient `Pecule.exe.avant-1.41.0`, `_internal` remis à jour (robocopy code 1),
+empreinte de `comptes.db` identique avant et après.
+
+**Reste.** Retour de l'auteur après essai. Deux anciens exe gardés
+(`avant-1.41.0`, `avant-1.40.4`) : proposer le second à la Corbeille.
 
 ## 2026-10-01 (8) — Onglets harmonisés : largeur, boutons, vocabulaire
 
