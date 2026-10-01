@@ -1,5 +1,6 @@
 """Vue Bilan (tableau de bord)."""
 
+import math
 from calendar import monthrange
 from datetime import date, timedelta
 from html import escape as _esc   # noms de catégories insérés dans du HTML
@@ -14,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCharts import (
     QChart, QChartView, QLegend, QPieSeries, QBarSeries, QBarSet, QLineSeries,
-    QAbstractBarSeries, QBarCategoryAxis, QValueAxis,
+    QAbstractBarSeries, QBarCategoryAxis, QCategoryAxis,
 )
 
 from ...accords import accorde, pluriel
@@ -117,6 +118,42 @@ class CatRowsWidget(QWidget):
 
 _MOIS_COURTS = ["", "Jan", "Fév", "Mar", "Avr", "Mai", "Jun",
                 "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
+
+
+def graduations_euros(bas: float, haut: float) -> list[tuple[int, str]]:
+    """Graduations rondes d'un axe de montants, avec leur texte en euros :
+    [(0, "0 €"), (1000, "1 000 €"), …]. Pas de 1, 2 ou 5 × 10ⁿ, environ
+    cinq intervalles. L'axe tombait sur 654, 1309, 1963… sans unité
+    (relecture du 30/09/2026)."""
+    ecart = max(haut - bas, 1.0)
+    brut = ecart / 5
+    puissance = 10 ** math.floor(math.log10(brut))
+    pas = next(c * puissance for c in (1, 2, 5, 10) if c * puissance >= brut)
+    pas = max(int(round(pas)), 1)
+    debut = math.floor(bas / pas) * pas
+    fin = math.ceil(haut / pas) * pas
+    valeurs = range(int(debut), int(fin) + 1, pas)
+    return [(v, f"{v:,}".replace(",", "\xa0") + "\xa0€") for v in valeurs]
+
+
+def axe_euros(bas: float, haut: float) -> QCategoryAxis:
+    """Axe vertical gradué en euros. Un QCategoryAxis, dont chaque étiquette
+    est écrite telle quelle : le format d'étiquette de QtCharts rendait le
+    « € » en « ? »."""
+    grad = graduations_euros(bas, haut)
+    axe = QCategoryAxis()
+    axe.setLabelsPosition(QCategoryAxis.AxisLabelsPositionOnValue)
+    debut, fin = grad[0][0], grad[-1][0]
+    axe.setRange(debut, fin)
+    # La première étiquette porte sur la valeur de départ elle-même : la
+    # catégorie qui la précède doit commencer juste en dessous.
+    axe.setStartValue(debut - 1e-6 * max(fin - debut, 1))
+    for valeur, texte in grad:
+        axe.append(texte, valeur)
+    # Sans cela, Qt remplace les étiquettes par « … » dès que le graphique
+    # manque un peu de hauteur — elles tiennent pourtant (vérifié en image).
+    axe.setTruncateLabels(False)
+    return axe
 
 
 def _mois_court(m: str) -> str:
@@ -518,6 +555,7 @@ class BilanView(QWidget):
         libelles = [m.label() for m in legende.markers()]
         if not libelles:
             legende.setMinimumWidth(0)
+            self.pie_view.setMinimumHeight(240)
             return
         # En plus du texte : le carré de couleur (de la hauteur d'une ligne),
         # l'espace qui le suit et les marges de la légende — mesuré sur
@@ -525,6 +563,11 @@ class BilanView(QWidget):
         legende.setMinimumWidth(
             max(mesure.horizontalAdvance(t) for t in libelles)
             + 2 * mesure.height() + 30)
+        # Et la hauteur de toutes ses lignes : à huit catégories et plus, la
+        # dernière était rognée en bas du cadre (le Bilan défile, il peut
+        # grandir).
+        ligne = mesure.height() + 10
+        self.pie_view.setMinimumHeight(max(240, len(libelles) * ligne + 60))
 
     @staticmethod
     def _titre_mouvement(period: str) -> str:
@@ -1644,15 +1687,13 @@ class BilanView(QWidget):
         ax_x = QBarCategoryAxis()
         ax_x.append([_mois_court(m) for m, _s, _p in points])
         self.solde_chart.addAxis(ax_x, Qt.AlignBottom)
-        ax_y = QValueAxis()
         bas, haut = min(valeurs), max(valeurs)
         marge = max((haut - bas) * 0.1, 50)
         # Un solde toujours positif garde un axe qui commence à 0 au plus bas :
-        # pas de faux « découvert » dessiné par la marge.
-        ax_y.setRange(max(bas - marge, 0) if bas >= 0 else bas - marge,
-                      haut + marge)
-        ax_y.setLabelFormat("%d")   # pas de « € » : QtCharts le rend en « ? »
-        ax_y.applyNiceNumbers()
+        # pas de faux « découvert » dessiné par la marge. Graduations rondes,
+        # en euros (axe_euros).
+        ax_y = axe_euros(max(bas - marge, 0) if bas >= 0 else bas - marge,
+                         haut + marge)
         self.solde_chart.addAxis(ax_y, Qt.AlignLeft)
 
         series = [constate, prevu]
@@ -1766,19 +1807,18 @@ class BilanView(QWidget):
         self.bar_panel._header.setText(
             f"ÉVOLUTION SUR 12 MOIS — {de_mois_a_mois(months[0], months[-1]).upper()}")
         ax_x = QBarCategoryAxis(); ax_x.append(labels)
+        # 8 pt, le minimum de la charte : à 9, « Nov », « Mar » et « Aoû »
+        # se coupaient en « N… » à 1280 px de large.
+        police = ax_x.labelsFont()
+        police.setPointSize(8)
+        ax_x.setLabelsFont(police)
         self.bar_chart.addAxis(ax_x, Qt.AlignBottom)
         series.attachAxis(ax_x)
 
-        ax_y = QValueAxis()
         max_val = max(max(rev_by_month.values(), default=0),
                       max(dep_by_month.values(), default=0))
-        # Au moins 100 : les étiquettes sont des entiers (« %d » ci-dessous),
-        # et un axe de 0 à 1 — base vide — se lisait « 0, 0, 0, 0, 1 »
-        # (audit du 23/09/2026). 0-25-50-75-100 reste lisible.
-        ax_y.setRange(0, max(max_val * 1.1, 100))
-        # Pas de « € » dans le format de l'axe : QtCharts le rend en « ? »
-        # (le symbole € est mal géré par setLabelFormat). L'axe reste en
-        # nombres simples — le contexte (revenus/dépenses) suffit.
-        ax_y.setLabelFormat("%d")
+        # Au moins 100 : un axe de 0 à 1 — base vide — se lisait « 0, 0, 0,
+        # 0, 1 » (audit du 23/09/2026). Graduations rondes, en euros.
+        ax_y = axe_euros(0, max(max_val, 100))
         self.bar_chart.addAxis(ax_y, Qt.AlignLeft)
         series.attachAxis(ax_y)
