@@ -46,9 +46,9 @@ la 1.41.0 devient `Pecule.exe.avant-1.41.1`, empreinte de `comptes.db`
 identique avant et après.
 
 **Reste.** Le Photovoltaïque et Recharges VE ne règlent pas non plus leurs
-infobulles : probablement sombres chez l'auteur, à mesurer. Trois anciens exe
-dans le dossier d'installation (1.41.0, 1.40.4, 1.40.3) : proposer les deux
-plus anciens à la Corbeille.
+infobulles : probablement sombres chez l'auteur, à mesurer. Ménage fait à
+la demande de l'auteur : les exe 1.40.4 et 1.40.3 sont à la Corbeille (vérifié) ;
+seul filet, `Pecule.exe.avant-1.41.1` (l'exe 1.41.0).
 
 ## 2026-10-01 (9) — Version 1.41.0 installée chez l'auteur pour essai
 
