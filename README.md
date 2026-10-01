@@ -248,8 +248,9 @@ doublon, avec une tolérance de 7 jours et deux modes de reconnaissance : même
 montant, ou libellé concordant (pour les factures à montant variable). Votre
 libellé et votre catégorie sont conservés.
 
-Le Bilan résume tout cela dans le bandeau **🗓 Ce mois-ci** : reste à débiter,
-reste à encaisser et **solde prévu au dernier jour du mois**.
+Le Bilan résume tout cela dans son bandeau du mois : **où le compte finira le
+mois** (le verdict), puis, sous **🗓 Ce mois-ci**, le reste à débiter et le reste
+à encaisser.
 
 ### Exporter et restaurer vos données
 

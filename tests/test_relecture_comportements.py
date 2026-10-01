@@ -270,7 +270,87 @@ def test_bandeau_carte_allege(qapp, tmp_path):
     assert "Mois précédent" in vue.cb_banner.toolTip()
 
 
-# ── Un nom par chose ────────────────────────────────────────────────────
+# ── Haut du Bilan allégé (relecture de design du 01/10/2026) ────────────
+
+def _bilan_du_mois(tmp_path):
+    """Un compte avec une échéance encore à passer ce mois-ci : le bandeau
+    « Ce mois-ci » a donc quelque chose à dire."""
+    from comptesbudget.ui.views.bilan import BilanView
+    d = Database(str(tmp_path / "mois.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    jour = date.today().isoformat()
+    d.insert_tx(_tx(id="edf", date=jour, date_valeur=jour, type="Prelevement",
+                    libelle="EDF", montant=-80.0, pointee=0))
+    vue = BilanView(d)
+    vue.refresh()
+    return vue
+
+
+def _textes_visibles(cadre, sauf=None):
+    """Le texte de chaque étiquette visible d'un cadre, sans mise en forme."""
+    import re
+    from PySide6.QtWidgets import QLabel
+    return [re.sub("<[^>]+>", "", l.text()) for l in cadre.findChildren(QLabel)
+            if l is not sauf and l.isVisibleTo(cadre)]
+
+
+def test_verdict_dans_le_bandeau_du_mois(qapp, tmp_path):
+    """Le verdict et le bandeau « Ce mois-ci » parlaient du même mois en
+    deux bandeaux verts superposés : un seul bandeau les porte."""
+    vue = _bilan_du_mois(tmp_path)
+    assert vue.mois_banner.isAncestorOf(vue.verdict_banner)
+    assert vue.verdict_banner.isVisibleTo(vue)
+
+
+def test_solde_de_fin_de_mois_dit_une_seule_fois(qapp, tmp_path):
+    """« Solde au 31/10 » répétait le chiffre que le verdict donne en gras
+    juste au-dessus (charte : un chiffre ne se répète pas)."""
+    from comptesbudget.utils import fmt_euro
+    vue = _bilan_du_mois(tmp_path)
+    fin = fmt_euro(920.0)                      # 1 000 − 80
+    assert fin in vue.verdict_banner.text()
+    autres = _textes_visibles(vue.mois_banner, sauf=vue.verdict_banner)
+    assert not any(fin in t for t in autres), autres
+
+
+def test_detail_du_mois_au_survol(qapp, tmp_path):
+    """Le détail du bandeau « Ce mois-ci » tenait quatre lignes en petits
+    caractères : la phrase utile reste, le reste passe au survol, comme
+    pour l'Encours carte."""
+    vue = _bilan_du_mois(tmp_path)
+    visible = vue.mois_detail.text()
+    assert "Prochaines" in visible
+    assert "survol" in visible
+    assert "Solde en banque aujourd'hui" not in visible   # déjà dans la tuile
+    assert "Solde en banque aujourd'hui" in vue.mois_detail_complet
+    assert "Solde en banque aujourd'hui" in vue.mois_banner.toolTip()
+
+
+def test_encours_carte_sans_moins_zero(qapp, tmp_path):
+    """« Solde prévu fin de mois X moins 0,00 € déjà passés à la carte — il
+    reste X » : une soustraction de zéro qui ne dit rien."""
+    from datetime import timedelta
+    from comptesbudget.ui.views.bilan import BilanView
+    from comptesbudget.utils import fmt_euro
+    d = Database(str(tmp_path / "carte0.db"))
+    d.set_setting("initial_balance", "1000")
+    d.set_setting("initial_date", "2020-01-01")
+    # Un achat du mois dernier, pas encore prélevé ; rien ce mois-ci.
+    achat = (date.today().replace(day=1) - timedelta(days=5)).isoformat()
+    prelevement = (date.today() + timedelta(days=3)).isoformat()
+    d.insert_tx(_tx(id="cb", date=achat, date_valeur=prelevement,
+                    type="Carte bancaire", libelle="Achat", montant=-200.0,
+                    pointee=0))
+    vue = BilanView(d)
+    vue.refresh()
+    assert vue.cb_banner.isVisibleTo(vue)
+    visible = vue.cb_detail.text()
+    assert "moins " + fmt_euro(0) not in visible
+    assert "il reste" in visible
+
+
+# ── Un nom par chose────────────────────────────────────────────────────
 
 def test_operations_parlent_de_mouvement_pas_de_solde(qapp, db):
     """Le compteur des Opérations appelait « solde » la somme des opérations

@@ -264,10 +264,65 @@ class BilanView(QWidget):
         #
         # Il parle TOUJOURS du mois en cours, même quand on consulte un mois
         # passé : c'est un verdict pour agir, pas une fiche de consultation.
+        #
+        # Depuis le 01/10/2026, il est la première ligne du bandeau « Ce
+        # mois-ci » (construit plus bas, posé ici) : deux bandeaux verts
+        # superposés parlaient du même mois, et le solde de fin de mois s'y
+        # lisait deux fois (relecture de design).
         self.verdict_banner = QLabel("")
         self.verdict_banner.setWordWrap(True)
         self.verdict_banner.setVisible(False)
-        main.addWidget(self.verdict_banner)
+        self.verdict_banner.setStyleSheet("font-size:10pt")
+
+        # ── Bandeau du mois : le verdict, puis « Ce mois-ci » ─────────
+        # La lecture du budget mensuel tenu sur papier : où le mois finit
+        # (le verdict), ce qui doit encore tomber, et ce qui doit rentrer.
+        # Le cadre prend la couleur du verdict : vert quand le compte tient,
+        # rouge sinon (voir _poser_verdict).
+        self.mois_banner = QFrame()
+        # Style nommé (voir _make_panel) : sans cela, chaque étiquette du
+        # bandeau se retrouvait encadrée, un QLabel étant lui aussi un QFrame.
+        self.mois_banner.setObjectName("bandeauMois")
+        self._colorer_bandeau_mois(True)
+        mo_vertical = QVBoxLayout(self.mois_banner)
+        mo_vertical.setContentsMargins(14, 6, 12, 6); mo_vertical.setSpacing(4)
+        mo_vertical.addWidget(self.verdict_banner)
+
+        # Seconde ligne : ce qui reste à passer. Masquée quand le mois n'a
+        # aucune opération à montrer ; le verdict, lui, reste toujours.
+        self.mois_ligne = QWidget()
+        mo_lay = QHBoxLayout(self.mois_ligne)
+        mo_lay.setContentsMargins(0, 0, 0, 0); mo_lay.setSpacing(18)
+
+        self.mois_title = QLabel("🗓 CE MOIS-CI")
+        self.mois_title.setStyleSheet("font-weight:bold; font-size:9pt")
+        self.mois_title.setWordWrap(True)
+        mo_lay.addWidget(self.mois_title)
+        mo_lay.addSpacing(10)
+
+        def _mini_vert(label_txt):
+            w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
+            lbl = QLabel(label_txt); lbl.setStyleSheet("font-size:8pt")
+            lbl.setWordWrap(True)
+            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
+            l.addWidget(lbl); l.addWidget(val)
+            return w, val, lbl
+
+        # Les deux libellés sont conservés : ils se mettent au passé quand on
+        # consulte un mois clos (« Débité » plutôt que « À débiter »).
+        # Un troisième bloc, « Solde au 31/10 », a été retiré le 01/10/2026 :
+        # le verdict, juste au-dessus, donne ce chiffre en gras.
+        m1, self.mois_sorties, self.mois_sorties_lbl = _mini_vert("À débiter (hors carte)")
+        m2, self.mois_entrees, self.mois_entrees_lbl = _mini_vert("À encaisser")
+        mo_lay.addWidget(m1); mo_lay.addWidget(m2)
+        mo_lay.addStretch()
+        self.mois_detail = QLabel("")
+        self.mois_detail_complet = ""      # tout le détail (infobulle)
+        self.mois_detail.setStyleSheet("font-size:9pt")
+        self.mois_detail.setWordWrap(True)
+        mo_lay.addWidget(self.mois_detail)
+        mo_vertical.addWidget(self.mois_ligne)
+        main.addWidget(self.mois_banner)
 
         # ── Bandeau Encours Carte Bancaire ────────────────────────────
         self.cb_banner = QFrame()
@@ -350,47 +405,6 @@ class BilanView(QWidget):
         # arbitraire, là où le bandeau de verdict donne le PIRE moment.
         # Ce qu'il apportait d'unique — les prochaines échéances nommées et
         # les opérations carte en cours — est passé dans le bandeau vert.
-
-        # ── Bandeau « Ce mois-ci » (reste à passer jusqu'au dernier jour) ──
-        # La lecture du budget mensuel tenu sur papier : en banque aujourd'hui,
-        # ce qui doit encore tomber, et le solde attendu en fin de mois.
-        self.mois_banner = QFrame()
-        self.mois_banner.setObjectName("bandeauMois")   # même raison
-        self.mois_banner.setStyleSheet("""
-            QFrame#bandeauMois {
-                     background: #EAF6EC;
-                     border: 1px solid #229954; border-radius: 4px; }
-            QFrame#bandeauMois QWidget { background: transparent; }
-        """)
-        mo_lay = QHBoxLayout(self.mois_banner)
-        mo_lay.setContentsMargins(12, 4, 12, 4); mo_lay.setSpacing(18)
-
-        self.mois_title = QLabel("🗓 CE MOIS-CI")
-        self.mois_title.setStyleSheet("font-weight:bold; color:#1A5E32; font-size:9pt")
-        self.mois_title.setWordWrap(True)
-        mo_lay.addWidget(self.mois_title)
-        mo_lay.addSpacing(10)
-
-        def _mini_vert(label_txt):
-            w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
-            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#1A5E32; font-size:8pt")
-            lbl.setWordWrap(True)
-            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
-            l.addWidget(lbl); l.addWidget(val)
-            return w, val, lbl
-
-        # Les deux libellés sont conservés : ils se mettent au passé quand on
-        # consulte un mois clos (« Débité » plutôt que « À débiter »).
-        m1, self.mois_sorties, self.mois_sorties_lbl = _mini_vert("À débiter (hors carte)")
-        m2, self.mois_entrees, self.mois_entrees_lbl = _mini_vert("À encaisser")
-        m3, self.mois_solde, self.mois_solde_lbl = _mini_vert("Solde au terme")
-        mo_lay.addWidget(m1); mo_lay.addWidget(m2); mo_lay.addWidget(m3)
-        mo_lay.addStretch()
-        self.mois_detail = QLabel("")
-        self.mois_detail.setStyleSheet("color:#1A5E32; font-size:9pt")
-        self.mois_detail.setWordWrap(True)
-        mo_lay.addWidget(self.mois_detail)
-        main.addWidget(self.mois_banner)
 
         # ── Bandeau Alertes budget (mois en cours) ────────────────────
         # Masqué tant qu'aucune catégorie n'approche ou ne dépasse son budget.
@@ -826,15 +840,38 @@ class BilanView(QWidget):
         self.cb_banner.setToolTip(complet)
         self.cb_detail.setToolTip(complet)
 
+    def _colorer_bandeau_mois(self, ok: bool):
+        """Couleurs du bandeau du mois : vert quand le compte tient, rouge
+        (bandeau de danger de la charte) sinon. Le texte des étiquettes suit
+        le cadre ; les montants gardent leur noir."""
+        fond, cadre, texte = (("#EAF6EC", "#229954", "#1A5E32") if ok
+                              else ("#FDEDEB", "#E74C3C", "#7B241C"))
+        self.mois_banner.setStyleSheet(f"""
+            QFrame#bandeauMois {{
+                     background: {fond};
+                     border: 1px solid {cadre}; border-radius: 4px; }}
+            QFrame#bandeauMois QWidget {{ background: transparent; }}
+            QFrame#bandeauMois QLabel {{ color: {texte}; }}
+        """)
+
     def _poser_verdict(self, texte: str, ok: bool):
-        """Écrit le verdict et le colore : vert quand le compte tient."""
-        style = (("background:#EAF6EC; border:1px solid #229954; color:#1A5E32;")
-                 if ok else
-                 ("background:#FDEDEB; border:1px solid #E74C3C; color:#7B241C;"))
-        self.verdict_banner.setStyleSheet(
-            f"QLabel {{ {style} border-radius:4px; padding:6px 14px; }}")
+        """Écrit le verdict et colore son bandeau : vert quand le compte
+        tient."""
+        self._colorer_bandeau_mois(ok)
         self.verdict_banner.setText(texte)
         self.verdict_banner.setVisible(True)
+
+    def _poser_detail_mois(self, principal: str, complet: str):
+        """Détail du bandeau du mois : à l'écran, la phrase qui compte ; le
+        reste au survol du bandeau, comme pour l'Encours carte (relecture de
+        design du 01/10/2026). `mois_detail_complet` garde le tout."""
+        self.mois_detail_complet = complet
+        texte = principal
+        if complet.strip() != principal.strip():
+            texte += "\nDétail au survol du bandeau."
+        self.mois_detail.setText(texte)
+        self.mois_banner.setToolTip(complet)
+        self.mois_detail.setToolTip(complet)
 
     def _refresh_verdict_banner(self, txs: list[dict], solde_compte: float):
         """La réponse en une phrase : où le mois finit, et quand le compte
@@ -1049,10 +1086,16 @@ class BilanView(QWidget):
         # que le mois laisse : le solde qu'aura le compte à la fin du mois
         # une fois tout passé, moins ce qui est déjà engagé sur la carte.
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_ref)
-        principal = (f"Solde prévu fin de mois {fmt_euro(solde_fin)} moins "
-                     f"{fmt_euro(abs(engage_mois))} déjà passés à la carte — "
-                     + (f"il MANQUE {fmt_euro(-disponible)}" if disponible < 0
-                        else f"il reste {fmt_euro(disponible)}"))
+        reste = (f"il MANQUE {fmt_euro(-disponible)}" if disponible < 0
+                 else f"il reste {fmt_euro(disponible)}")
+        if engage_mois:
+            principal = (f"Solde prévu fin de mois {fmt_euro(solde_fin)} moins "
+                         f"{fmt_euro(abs(engage_mois))} déjà passés à la carte — "
+                         + reste)
+        else:
+            # « moins 0,00 € » : une soustraction de zéro qui ne disait rien
+            # (relecture de design du 01/10/2026).
+            principal = f"À la fin du mois, {reste}"
         detail += "\n" + principal
         # Tendance : à ce rythme, où finira le mois ? Annoncée seulement à
         # partir du 10 — plus tôt, une seule grosse course fait dire n'importe
@@ -1185,8 +1228,8 @@ class BilanView(QWidget):
         return lignes, en_cours_carte
 
     def _refresh_mois_banner(self, txs: list[dict], solde_compte: float):
-        """Le mois choisi en trois chiffres : ce qui sort, ce qui rentre, et le
-        solde à la fin.
+        """Le mois choisi en deux chiffres : ce qui sort et ce qui rentre. Le
+        solde à la fin est donné par le verdict, en tête du même bandeau.
 
         C'est la lecture du budget mensuel tenu sur papier. Le bandeau suit la
         période choisie (voir _mois_du_bandeau) et change de sens avec elle :
@@ -1197,9 +1240,8 @@ class BilanView(QWidget):
           • mois CLOS — ce qui est passé, tel que la banque l'a enregistré ;
           • mois À VENIR — ce qui est déjà prévu pour ce mois-là.
 
-        Le solde de fin vient dans les trois cas de `_solde_fin_de_mois`, comme
-        le verdict et le bandeau carte : les trois ne peuvent pas se
-        contredire.
+        Le solde de fin du verdict et du bandeau carte vient de
+        `_solde_fin_de_mois` : les deux ne peuvent pas se contredire.
 
         Depuis le 07/09/2026, ce bandeau est le seul de sa sorte : celui des
         15 jours a été retiré, et ses deux apports — les prochaines échéances
@@ -1220,19 +1262,13 @@ class BilanView(QWidget):
         carte = sum(m_ for _d, _l, m_, c in lignes if c)
         sorties = sum(m_ for _d, _l, m_, c in lignes if not c and m_ < 0)
         entrees = sum(m_ for _d, _l, m_, c in lignes if not c and m_ > 0)
-        solde_fin = self._solde_fin_de_mois(txs, mois, solde_compte)
 
         self.mois_sorties.setText(fmt_euro(sorties))
         self.mois_entrees.setText(fmt_euro(entrees))
-        self.mois_solde.setText(fmt_euro(solde_fin))
         # Les libellés se mettent au passé sur un mois fini.
         self.mois_sorties_lbl.setText(
             "Débité (hors carte)" if clos else "À débiter (hors carte)")
         self.mois_entrees_lbl.setText("Encaissé" if clos else "À encaisser")
-        self.mois_solde_lbl.setText(f"Solde au {fmt_date_fr(fin.isoformat())}")
-        self.mois_solde.setStyleSheet(
-            "font-size:12pt; font-weight:bold; color:"
-            + ("#18733A" if solde_fin >= 0 else "#C0392B"))
 
         if clos:
             self.mois_title.setText(
@@ -1247,15 +1283,15 @@ class BilanView(QWidget):
 
         n_sorties = sum(1 for _d, _l, m_, c in lignes if not c and m_ < 0)
         n_entrees = sum(1 for _d, _l, m_, c in lignes if not c and m_ > 0)
-        detail = f"{pluriel(n_sorties, 'prélèvement', 'prélèvements')}  •  {pluriel(n_entrees, 'rentrée', 'rentrées')}"
+        detail = f"{pluriel(n_sorties, 'prélèvement', 'prélèvements')}  ·  {pluriel(n_entrees, 'rentrée', 'rentrées')}"
         if carte:
             jour_carte = min((d for d, _l, _m, c in lignes if c), default="")
-            detail += (f"  •  débit carte {fmt_euro(carte)}"
+            detail += (f"  ·  débit carte {fmt_euro(carte)}"
                        + (f" le {fmt_date_fr(jour_carte)}" if jour_carte else ""))
         if en_cours_carte:
             # Écartées du calcul : elles iront au prélèvement d'après.
             somme = sum(t["montant"] for t in en_cours_carte)
-            detail += (f"  •  {pluriel(len(en_cours_carte), 'opération', 'opérations')} carte en cours "
+            detail += (f"  ·  {pluriel(len(en_cours_carte), 'opération', 'opérations')} carte en cours "
                        f"({fmt_euro(somme)}) au prélèvement suivant")
         if not clos:
             # Part déjà saisie en opérations (⏳) : le reste vient du
@@ -1266,7 +1302,7 @@ class BilanView(QWidget):
                 if t.get("prevue") and not t.get("pointee")
                 and debut_iso <= (t.get("date_valeur") or t.get("date", "")) <= fin_iso)
             if n_prevues:
-                detail += (f"  •  dont {pluriel(n_prevues, 'échéance', 'échéances')} "
+                detail += (f"  ·  dont {pluriel(n_prevues, 'échéance', 'échéances')} "
                           f"déjà {accorde(n_prevues, 'saisie', 'saisies')} ⏳")
             # Les trois prochaines échéances, pour situer. Elles venaient du
             # bandeau des 15 jours : ne comptant que ce qui est ENCORE à venir,
@@ -1274,16 +1310,25 @@ class BilanView(QWidget):
             today_iso = today.isoformat()
             suivantes = sorted((l for l in lignes if not l[3] and l[0] >= today_iso),
                                key=lambda x: x[0])[:3]
+            prochaines = ""
             if suivantes:
-                detail += "\nProchaines : " + "  •  ".join(
+                prochaines = "Prochaines : " + "  ·  ".join(
                     f"{fmt_date_fr(d)[:5]} {lbl[:22]} {fmt_euro(m_)}"
                     for d, lbl, m_, _c in suivantes)
+                detail += "\n" + prochaines
             detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
+            # À l'écran, ce qui arrive : les prochaines échéances. Le compte
+            # des opérations et le solde du jour (déjà dans la tuile) passent
+            # au survol.
+            principal = prochaines or detail.split("\n")[0]
         else:
             detail += "\nConsultation : le bandeau suit la période choisie."
-        self.mois_detail.setText(detail)
+            principal = detail.split("\n")[0]
+        self._poser_detail_mois(principal, detail)
 
-        self.mois_banner.setVisible(bool(lignes))
+        # Le verdict reste toujours ; seule la ligne du mois s'efface quand
+        # le mois n'a aucune opération à montrer.
+        self.mois_ligne.setVisible(bool(lignes))
 
     def _refresh_budget_alert(self, txs: list[dict]):
         """Catégories dont les dépenses dépassent le budget mensuel (rouge) ou

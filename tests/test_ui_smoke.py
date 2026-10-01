@@ -615,8 +615,10 @@ def test_bandeau_du_mois_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert "est passé" in v.mois_title.text()
     assert _euros(v.mois_sorties.text()) == -200.0
     assert _euros(v.mois_entrees.text()) == 500.0
-    assert _euros(v.mois_solde.text()) == 1300.0
-    assert "31/08/2026" in v.mois_solde_lbl.text()
+    # Le solde de fin de mois est dit par le verdict, en tête du même
+    # bandeau (le bloc « Solde au 31/08 » le répétait, retiré le 01/10/2026).
+    assert fmt_euro(1300.0) in _texte(v.verdict_banner)
+    assert "Août 2026" in _texte(v.verdict_banner)
 
     # Mois en cours : le bandeau garde son titre et son sens d'origine.
     v = bandeau("2026-09")
@@ -1019,7 +1021,7 @@ def test_decouvert_annonce_le_jour_et_lorigine(qapp, tmp_path):
     assert fmt_date_fr((today + timedelta(days=5)).isoformat()) in texte
     assert fmt_euro(-50.0) in texte           # 100 - 150
     assert "EDF" in texte                     # l'opération qui fait basculer
-    assert "#E74C3C" in v.verdict_banner.styleSheet()      # bordure rouge
+    assert "#E74C3C" in v.mois_banner.styleSheet()      # bordure rouge
 
 
 def test_decouvert_trouve_le_point_le_plus_bas(qapp, tmp_path):
@@ -1041,7 +1043,7 @@ def test_decouvert_solde_qui_tient(qapp, tmp_path):
     texte = _texte(v.verdict_banner)
     assert "aucun découvert prévu" in texte
     assert fmt_euro(50.0) in texte             # au plus bas : 100 - 50
-    assert "#229954" in v.verdict_banner.styleSheet()      # bordure verte
+    assert "#229954" in v.mois_banner.styleSheet()      # bordure verte
 
 
 def test_decouvert_deja_a_decouvert_aujourdhui(qapp, tmp_path):
@@ -1137,8 +1139,8 @@ def test_bandeau_ce_mois_ci(qapp, tmp_path, monkeypatch):
     assert v.mois_sorties.text() == fmt_euro(-750.0)           # hors carte
     assert v.mois_entrees.text() == fmt_euro(1500.0)
     # 1000 − 200 (carte) − 750 (loyer) + 1500 (pension)
-    assert v.mois_solde.text() == fmt_euro(1550.0)
-    assert "débit carte" in v.mois_detail.text()
+    assert "le mois à " + fmt_euro(1550.0) in _texte(v.verdict_banner)
+    assert "débit carte" in v.mois_detail_complet
     # Les prochaines échéances nommées, reprises du bandeau des 15 jours.
     assert "Prochaines : " in v.mois_detail.text()
 
@@ -1193,9 +1195,9 @@ def test_debit_carte_ignore_les_operations_en_cours(qapp, tmp_path, monkeypatch)
     v = BilanView(d)
     v.refresh()
     # Le débit annoncé est celui du relevé, sans le remboursement en cours
-    assert "débit carte " + fmt_euro(-120.00) in v.mois_detail.text()
-    assert "au prélèvement suivant" in v.mois_detail.text()
-    assert v.mois_solde.text() == fmt_euro(-120.00)
+    assert "débit carte " + fmt_euro(-120.00) in v.mois_detail_complet
+    assert "au prélèvement suivant" in v.mois_detail_complet
+    assert "le mois à " + fmt_euro(-120.00) in _texte(v.verdict_banner)
     # Le bandeau carte, lui, continue d'afficher les deux chiffres
     assert v.cb_courant.text() == fmt_euro(-120.00)
     assert v.cb_precedent.text() == fmt_euro(15.00)
@@ -1579,8 +1581,8 @@ def test_bilan_bandeau_fin_de_mois(qapp, tmp_path):
 
     assert vue.kpis["solde"]._value.text() == fmt_euro(900.0)   # 1000 - 100
     assert vue.mois_sorties.text() == fmt_euro(-250.0)          # 50 + 200
-    assert vue.mois_solde.text() == fmt_euro(650.0)             # 900 - 250
-    assert "2 échéances déjà saisies" in vue.mois_detail.text()
+    assert "le mois à " + fmt_euro(650.0) in _texte(vue.verdict_banner)             # 900 - 250
+    assert "2 échéances déjà saisies" in vue.mois_detail_complet
     assert vue.mois_banner.isVisibleTo(vue)
 
 
@@ -1602,7 +1604,7 @@ def test_bilan_fin_de_mois_ignore_le_mois_suivant(qapp, tmp_path):
     vue = BilanView(d)
     vue.refresh()
     assert vue.mois_sorties.text() == fmt_euro(0)
-    assert vue.mois_solde.text() == fmt_euro(1000.0)
+    assert "le mois à " + fmt_euro(1000.0) in _texte(vue.verdict_banner)
 
 
 def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path,
@@ -1641,7 +1643,7 @@ def test_bilan_ne_recompte_pas_une_echeance_deja_encaissee(qapp, tmp_path,
     # Ni le bandeau des 15 jours ni celui du mois ne doivent l'annoncer encore
     assert vue.mois_entrees.text() == fmt_euro(0)
     assert vue.mois_entrees.text() == fmt_euro(0)
-    assert vue.mois_solde.text() == fmt_euro(900.00)
+    assert "le mois à " + fmt_euro(900.00) in _texte(vue.verdict_banner)
 
 
 def test_non_pointees_ignore_la_periode(qapp, tmp_path):
@@ -2174,7 +2176,7 @@ def test_bandeau_carte_releve_credit_agricole(qapp, tmp_path, monkeypatch):
     # Le lot part le 30 : il pèse sur le solde de fin de mois, une seule fois.
     detail = vue.cb_detail_complet
     assert "764,10" in detail
-    assert "déjà passés à la carte" in detail
+    assert "à la carte" in detail
 
     # En consultant juillet, le titre donne le vrai jour du prélèvement du
     # Crédit Agricole (l'achat du 20/07 est parti le 31/08), pas le 4 août.

@@ -233,8 +233,8 @@ tout l'historique.</p>
 mouvement, le taux d'épargne, et le pointé. Seul le
 <b>solde bancaire réel</b> n'en dépend pas : c'est le solde de votre compte
 <b>aujourd'hui</b>, celui que vous comparez à votre relevé — il porte d'ailleurs
-sa date sous le chiffre. Pour le solde d'un mois passé, lisez le bandeau vert,
-qui donne celui du dernier jour de ce mois-là.</p>
+sa date sous le chiffre. Pour le solde d'un mois passé, lisez le verdict, en
+tête du bandeau du mois : il donne celui du dernier jour de ce mois-là.</p>
 <p><b>Mettre de côté n'est pas dépenser.</b> Un virement vers votre livret,
 classé dans la catégorie <code>Épargne</code>, n'est compté ni comme une
 dépense ni comme un revenu dans le <b>taux d'épargne</b>, les graphiques et
@@ -486,18 +486,18 @@ de valeur d'aplomb, y compris sur une opération déjà enregistrée.</p>
 <div class="tip"><b>Votre carte n'est pas à débit différé ?</b> Alors ce
 bandeau ne s'affiche pas du tout, et c'est normal : sur une carte à débit
 immédiat, l'achat sort du compte le jour même. Il n'y a donc rien « à
-débiter » plus tard, et le « Solde au … » du bandeau vert répond déjà à la
-question. Pécule le reconnaît tout seul, sans réglage : il regarde si vos
+débiter » plus tard, et le verdict, en tête du bandeau du mois, répond déjà à
+la question. Pécule le reconnaît tout seul, sans réglage : il regarde si vos
 opérations par carte portent une date de valeur postérieure à la date d'achat.
 Pour la même raison, la <b>saisie</b> d'un achat par carte ne décale la date de
 valeur que si votre compte montre déjà du débit différé.</div>
 
 <h3>Le verdict, en haut de page</h3>
-<p>Sous les quatre tuiles, une phrase répond à la seule question qu'on se pose en
+<p>Sous les quatre tuiles, la première ligne du bandeau du mois répond à la seule question qu'on se pose en
 ouvrant l'application : <b>est-ce que je passe le mois ?</b> « Septembre 2026 :
 le compte finit le mois à −120,00 €, négatif à partir du 13/09/2026
 (−30,00 € après “Électricité”). Au plus bas : −250,00 € le 05/10/2026. »
-Elle passe au vert quand le compte tient.</p>
+Le bandeau est vert quand le compte tient, rouge sinon.</p>
 <p>Elle <b>suit la période choisie</b> en haut de l'écran, en changeant de
 temps avec elle : sur un mois clos elle se met au passé (« Août 2026 : le compte
 a fini le mois à 100,00 €. Au plus bas : −300,00 € le 01/08/2026 »), sur un mois
@@ -530,6 +530,8 @@ chiffres de votre espace bancaire, pour pouvoir les comparer directement :</p>
 phrase dit ce que votre compte aura en fin de mois une fois tout payé, moins
 les achats déjà passés à la carte : « Solde prévu fin de mois 250,00 € moins
 200,00 € déjà passés à la carte — il reste 50,00 € », ou « il MANQUE 400,00 € ».
+Tant qu'aucun achat du mois n'est passé à la carte, elle dit simplement « À la
+fin du mois, il reste 250,00 € ».
 Elle se met à jour dès qu'une dépense est enregistrée, modifiée ou supprimée.
 <b>Le reste du détail apparaît au survol du bandeau</b> : nombre d'opérations
 du prélèvement, tendance « à ce rythme » (à partir du 10 du mois), bilan du
@@ -575,8 +577,9 @@ compte des opérations carte en cours, les deux doivent être identiques — sin
 il manque une opération dans l'application (ou un pointage).</p>
 
 <h3>Le bandeau « 🗓 Ce mois-ci »</h3>
-<p>Le bandeau vert répond à la question : <b>que reste-t-il à passer avant la
-fin du mois, et où en sera le compte le dernier jour ?</b> C'est la lecture d'un
+<p>Sous le verdict, dans le même bandeau, la ligne « 🗓 Ce mois-ci » répond à la
+question : <b>que reste-t-il à passer avant la fin du mois ?</b> Où en sera le
+compte le dernier jour, c'est le verdict juste au-dessus qui le dit. C'est la lecture d'un
 budget mensuel tenu sur papier — le solde en banque d'un côté, ce qui doit
 encore tomber de l'autre. Il additionne les opérations déjà enregistrées dont le
 débit est à venir et les échéances de votre onglet <b>🔮 Prévisionnel</b> qui
@@ -586,13 +589,14 @@ n'ont pas encore d'opération correspondante. Rien n'est compté deux fois.</p>
       jusqu'au dernier jour du mois.</li>
   <li><b>À encaisser</b> — salaires, pensions, virements et remboursements attendus
       d'ici là.</li>
-  <li><b>Solde au …</b> — la date est celle du dernier jour du mois : solde en
-      banque aujourd'hui, moins ce qui reste à débiter, plus ce qui reste à
-      encaisser.</li>
 </ul>
+<p>Le solde du dernier jour — solde en banque aujourd'hui, moins ce qui reste à
+débiter, plus ce qui reste à encaisser — n'a plus de case à lui : le verdict le
+donne en gras, juste au-dessus. Il figurait aux deux endroits jusqu'à la
+version 1.40.4.</p>
 <p>La fenêtre <b>commence au 1er</b> du mois et s'arrête à son dernier jour.
 Une échéance du 5 qui n'est toujours pas passée reste donc comptée — c'est bien
-ce qu'on veut d'un budget mensuel. En fin de ligne, l'application rappelle combien de ces lignes
+ce qu'on veut d'un budget mensuel. Au survol du bandeau, l'application rappelle combien de ces lignes
 sont des <b>échéances déjà saisies ⏳</b> : les autres viennent du Prévisionnel
 et n'existent pas encore dans vos opérations.</p>
 <p>Ce qui est déjà pointé et passé n'y figure pas : c'est déjà dans le solde en
@@ -600,14 +604,16 @@ banque, le compter ici le compterait deux fois.</p>
 <p>Comme les autres bandeaux, il <b>suit la période choisie</b>. Sur un mois
 clos, il ne montre plus ce qui « reste à passer » — il n'y a plus rien à
 attendre — mais <b>ce qui est passé</b> : le titre le dit (« AOÛT 2026 — ce qui
-est passé »), les deux premières tuiles se mettent au passé (« Débité »,
-« Encaissé ») et le solde est celui réellement constaté le dernier jour. Sur un
+est passé »), les deux chiffres se mettent au passé (« Débité »,
+« Encaissé ») et le verdict donne le solde réellement constaté le dernier jour. Sur un
 mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année ou
 « Toutes périodes » le ramènent au mois en cours.</p>
 <p>La ligne <b>« Prochaines : »</b> nomme les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
-Prévisionnel.</p>
-<p>Le <b>débit carte</b> annoncé est celui de votre relevé : il ne compte que les
+Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
+au survol du bandeau</b> : nombre de prélèvements et de rentrées, débit carte,
+solde en banque du jour.</p>
+<p>Le <b>débit carte</b> annoncé au survol est celui de votre relevé : il ne compte que les
 achats que la banque a déjà rattachés au prélèvement (vos opérations
 <b>pointées</b>). Une opération encore « en cours » — un remboursement, par
 exemple — ne réduit pas ce prélèvement-ci : elle partira au suivant, et elle est
