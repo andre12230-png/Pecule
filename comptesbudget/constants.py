@@ -896,7 +896,14 @@ SYNC_VERSION = 3
 #          en masse) ou dont seules les majuscules ou les accents different
 #          est reconnue en reimportant son releve. Elle etait doublee, ou
 #          l'import s'arretait sur << UNIQUE constraint failed >>.
-APP_VERSION = "1.40.4"
+# 1.41.0 : Suite de la relecture de design. Bilan : le verdict et << Ce
+#          mois-ci >> dans un seul bandeau, vert ou rouge, detail au survol ;
+#          << Solde au ... >> retire (le verdict le donne). Tableaux tries de
+#          A a Z au demarrage, pleine largeur, boutons au-dessus. Case
+#          Categorie vide a la saisie (elle proposait << Abonnements >>) ;
+#          une regle sans categorie est refusee. << Entrees / Sorties >> pour
+#          l'argent qui bouge, << Revenus / Depenses >> pour les analyses.
+APP_VERSION = "1.41.0"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

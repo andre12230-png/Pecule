@@ -21,6 +21,20 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (9) — Version 1.41.0 pour essai chez l'auteur
+
+**Fait.** Numéro 1.41.0 (constants.py et son historique, Lisez-moi.txt) :
+bandeau du mois réuni, tris de A à Z, case Catégorie vide à la saisie,
+onglets harmonisés, vocabulaire « Entrées / Sorties ». Notice relue : la barre
+Période se grise dans Sous-catégories, Règles auto et Prévisionnel (elle
+disait « sauf Règles »). Lisez-moi : les deux phrases qui parlaient de
+« débité ou encaissé » et du bandeau « Ce mois-ci ».
+
+**Pourquoi.** L'auteur veut essayer chez lui les changements de la relecture
+de design avant de continuer.
+
+**Reste.** Installation et contrôle chez l'auteur (voir l'entrée suivante).
+
 ## 2026-10-01 (8) — Onglets harmonisés : largeur, boutons, vocabulaire
 
 **Fait.** Point 3 de la relecture de design, en trois commits :

@@ -435,7 +435,9 @@ petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
 Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 
 <h2>4. Période et mode date</h2>
-<p>La barre <b>Période</b> en haut de l'app filtre toutes les vues (sauf Règles).
+<p>La barre <b>Période</b> en haut de l'app filtre toutes les vues, sauf
+Sous-catégories, Règles auto et Prévisionnel : elle y est grisée, et le dit
+au survol.
 Elle se lit <b>‹ année mois ›</b> : le menu de gauche choisit l'année (ou
 « Toutes périodes », tout l'historique), celui de droite le mois dans cette
 année (ou « Toute l'année »).</p>
