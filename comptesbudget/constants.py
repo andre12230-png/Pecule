@@ -892,7 +892,11 @@ SYNC_VERSION = 3
 #          vraies cases a cocher ; couleurs de la charte ; axes des graphiques
 #          en euros ; menu raccourci (<< Mettre au propre... >>, compte au bout
 #          des onglets) ; bandeau Encours carte allege (detail au survol).
-APP_VERSION = "1.40.3"
+# 1.40.4 : Import plus sur : une operation renommee (harmonisation, renommage
+#          en masse) ou dont seules les majuscules ou les accents different
+#          est reconnue en reimportant son releve. Elle etait doublee, ou
+#          l'import s'arretait sur << UNIQUE constraint failed >>.
+APP_VERSION = "1.40.4"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

@@ -21,6 +21,18 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (5) — Version 1.40.4 installée chez l'auteur
+
+**Fait.** Numéro 1.40.4 (constants.py et son historique, Lisez-moi.txt) :
+l'import qui reconnaît une opération renommée, et les corrections des tests
+(fenêtres détruites, invite rattachée à sa fenêtre). Notice : le passage sur
+les doublons du CSV le dit. Construction et installation : voir la suite.
+
+**Pourquoi.** Demande de l'auteur : « construis la 1.40.4, installe-la chez
+moi, mets l'ancien à la corbeille ».
+
+**Reste.** Sortie de mi-octobre.
+
 ## 2026-10-01 (4) — Import : plus de doublon pour une opération renommée
 
 **Fait.** (commit 6d3e9c7) La clé anti-doublon par libellé ignore majuscules
