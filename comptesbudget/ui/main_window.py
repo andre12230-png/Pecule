@@ -11,7 +11,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget,
-    QPushButton, QStatusBar, QDialog, QMessageBox, QFileDialog,
+    QPushButton, QStatusBar, QDialog, QDialogButtonBox, QMessageBox, QFileDialog,
     QLabel, QComboBox, QScrollArea, QFrame, QMenu,
 )
 
@@ -117,10 +117,11 @@ class MainWindow(QMainWindow):
 
         # ── Compte affiché ──
         # Le compte choisi commande TOUT l'écran : bilan, opérations, budget,
-        # prévisionnel. Il est au bout de la rangée d'onglets (posé plus bas,
-        # setCornerWidget) : dans le menu, il le faisait déborder sur un
-        # portable 1366 × 768 (choix de l'auteur du 01/10/2026). Le tout
-        # disparaît quand il n'y a qu'un seul compte.
+        # prévisionnel. Il ouvre donc la rangée d'onglets, à gauche (posé plus
+        # bas, setCornerWidget) : on lit le compte, puis la vue. Dans le menu,
+        # il le faisait déborder sur un portable 1366 × 768 ; sur la ligne
+        # « Période », il ne tient pas en moitié d'écran (choix de l'auteur
+        # du 01/10/2026). Le tout disparaît quand il n'y a qu'un seul compte.
         self.compte_espace = QWidget()
         coin = QHBoxLayout(self.compte_espace)
         coin.setContentsMargins(8, 2, 4, 2)
@@ -134,7 +135,7 @@ class MainWindow(QMainWindow):
         self.compte_combo.currentIndexChanged.connect(self.on_compte_changed)
         coin.addWidget(self.compte_combo)
         # Les soldes de tous les comptes et leur total.
-        self.btn_recap = QPushButton("📊 Tous")
+        self.btn_recap = QPushButton("📊 Tous les comptes")
         self.btn_recap.setToolTip(
             "Tous les comptes : leurs soldes côte à côte, et leur total")
         self.btn_recap.setAutoDefault(False)
@@ -156,7 +157,7 @@ class MainWindow(QMainWindow):
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
 
         add_section("Mettre au propre")
-        # Un seul bouton, qui ouvre les quatre outils : quatre boutons
+        # Un seul bouton, qui ouvre les outils de rangement : quatre boutons
         # d'affilée faisaient déborder le menu sur un portable (choix de
         # l'auteur du 01/10/2026). Libellés courts, qui disent ce qu'on
         # obtient (relecture du 30/09/2026).
@@ -167,6 +168,10 @@ class MainWindow(QMainWindow):
                  "Ramène les catégories venues des banques aux noms de Pécule"),
                 ("🔧 Suggérer catégories", self.action_harmonize,
                  "Suggère une catégorie d'après le libellé (motifs prédéfinis)"),
+                # Ancien onglet, passé ici le 01/10/2026 : il sert à ranger.
+                ("🔖 Ranger sous-catégories", self.action_sous_categories,
+                 "Renommer, fusionner ou vider les sous-catégories "
+                 "employées dans vos opérations"),
                 ("🔠 Harmoniser libellés", self.action_harmonize_labels,
                  "Normalise la casse et regroupe les variantes des libellés "
                  "(opérations et récurrences)"),
@@ -178,8 +183,8 @@ class MainWindow(QMainWindow):
             act.triggered.connect(action)
         self.btn_propre = add_btn(
             "🧹 Mettre au propre…", lambda: None,
-            "Nettoyer les catégories, suggérer des catégories, harmoniser "
-            "les libellés, chercher les doublons")
+            "Nettoyer les catégories, suggérer des catégories, ranger les "
+            "sous-catégories, harmoniser les libellés, chercher les doublons")
         self.btn_propre.setMenu(self.menu_propre)
 
         add_section("Mes données")
@@ -203,6 +208,11 @@ class MainWindow(QMainWindow):
             "Possible tant que cette installation est vide.")
 
         add_section("Réglages")
+        # Ancien onglet, passé ici le 01/10/2026 : on le règle une fois, puis
+        # il travaille seul à chaque import.
+        add_btn("🧠 Règles auto", self.action_regles,
+                "Les règles qui classent toutes seules les opérations "
+                "importées, d'après leur libellé")
         add_btn("🏦 Mes comptes", self.action_comptes,
                 "Ajouter, renommer ou supprimer un compte bancaire")
         add_btn("⚙️ Paramètres", self.action_settings,
@@ -246,11 +256,17 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.ops_view, "📋 Opérations")
         self.tabs.addTab(self.budget_view, "🎯 Budget")
         self.tabs.addTab(self.cats_view, "🏷️ Catégories")
-        # Icône à elle : Catégories et Sous-catégories portaient la même 🏷️.
-        self.tabs.addTab(self.subs_view, "🔖 Sous-catégories")
-        self.tabs.addTab(self.rules_view, "🧠 Règles auto")
         self.tabs.addTab(self.prev_view, "🔮 Prévisionnel")
-        self.tabs.setCornerWidget(self.compte_espace, Qt.TopRightCorner)
+        self.tabs.setCornerWidget(self.compte_espace, Qt.TopLeftCorner)
+
+        # Sous-catégories et Règles auto ne sont plus des onglets : elles
+        # servent rarement et s'ouvrent depuis le menu de gauche, chacune
+        # dans sa fenêtre (choix de l'auteur du 01/10/2026). Les fenêtres
+        # sont construites une fois pour toutes et rouvertes à la demande.
+        self.fenetre_sous_cats = self._fenetre_de_vue(
+            self.subs_view, "Sous-catégories")
+        self.fenetre_regles = self._fenetre_de_vue(
+            self.rules_view, "Règles automatiques")
 
         cv.addWidget(self.tabs)
 
@@ -424,10 +440,6 @@ class MainWindow(QMainWindow):
         """(période, date) : pourquoi l'onglet `vue` ignore l'une ou l'autre,
         ou None quand elle sert. La barre se grise en le disant (charte)."""
         periode = {
-            self.subs_view: "Les sous-catégories se gèrent sur tout "
-                            "l'historique : la période n'a pas d'effet sur cet onglet.",
-            self.rules_view: "Les règles valent pour toutes les opérations : "
-                             "la période n'a pas d'effet sur cet onglet.",
             self.prev_view: "Le prévisionnel regarde les 12 prochains mois : "
                             "la période n'a pas d'effet sur cet onglet.",
         }.get(vue)
@@ -1233,6 +1245,26 @@ class MainWindow(QMainWindow):
         dlg.exec()
         if dlg.changed:
             self.refresh_all()
+
+    def _fenetre_de_vue(self, vue, titre: str) -> QDialog:
+        """Fenêtre qui porte une ancienne vue d'onglet, avec « Fermer »."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle(titre)
+        dlg.resize(1000, 640)
+        lay = QVBoxLayout(dlg)
+        lay.addWidget(vue)
+        boutons = QDialogButtonBox(QDialogButtonBox.Close)
+        boutons.rejected.connect(dlg.reject)
+        lay.addWidget(boutons)
+        return dlg
+
+    def action_sous_categories(self):
+        self.subs_view.refresh()
+        self.fenetre_sous_cats.exec()
+
+    def action_regles(self):
+        self.rules_view.refresh()
+        self.fenetre_regles.exec()
 
     def action_notice(self):
         """Ouvre la notice (mode d'emploi + glossaire) dans une fenêtre.

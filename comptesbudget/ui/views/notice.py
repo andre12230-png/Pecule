@@ -171,14 +171,14 @@ Tant que vous n'en avez qu'un, rien ne change à l'écran.</p>
   <li><b>Créer un compte</b> : bouton <code>🏦 Mes comptes</code> du menu de
       gauche, puis <code>➕ Ajouter</code>. Donnez-lui un nom et le solde qu'il
       avait à votre date de départ.</li>
-  <li><b>Changer de compte</b> : la liste <b>Compte :</b>, au bout de la rangée
-      d'onglets (à droite de « 🔮 Prévisionnel »), apparaît dès qu'il y a deux
+  <li><b>Changer de compte</b> : la liste <b>Compte :</b>, au début de la rangée
+      d'onglets (à gauche de « 🏠 Bilan »), apparaît dès qu'il y a deux
       comptes. Le compte choisi commande
       <b>tout l'écran</b> : bilan, opérations, budget, prévisionnel, rapport
       mensuel et recherche. Le nom du compte est rappelé dans le titre de la
       fenêtre, pour ne jamais s'y tromper.</li>
   <li><b>Voir tous les comptes d'un coup</b> : bouton
-      <code>📊 Tous</code>, juste à droite de la liste. Il donne, pour
+      <code>📊 Tous les comptes</code>, juste à droite de la liste. Il donne, pour
       chaque compte, le solde <b>en banque</b> (opérations pointées, comme le
       Bilan), ce qui n'est <b>pas encore pointé</b>, et le <b>solde
       comptable</b> qui réunit les deux — puis le <b>total</b> de tous les
@@ -335,28 +335,6 @@ librement. Tapez « Animaux », « Vacances » ou « Travaux » à la place d'un
 de la liste, et la catégorie est créée : elle apparaît ensuite dans tous les
 menus, reçoit sa couleur et peut recevoir un budget mensuel comme les autres.</p>
 
-<h3>🔖 Sous-catégories</h3>
-<p>Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
-<b>fusion</b> de variantes, <b>renommage</b> en masse et nettoyage des
-sous-catégories vides ou rarement utilisées.</p>
-
-<h3>🧠 Règles auto</h3>
-<p>Les règles automatisent la catégorisation des opérations futures.
-Trois façons d'en créer :</p>
-<ul>
-  <li>Cocher <b>« Mémoriser »</b> dans le formulaire d'une opération</li>
-  <li>Bouton <b>➕ Nouvelle règle</b> dans l'onglet</li>
-  <li><b>🔧 Suggérer catégories</b>, sous le bouton <b>🧹 Mettre au propre…</b> du menu de gauche (suggestions automatiques)</li>
-</ul>
-<p>Une règle doit avoir une <b>catégorie</b> : c'est celle qu'elle donnera aux
-opérations reconnues. Dans les formulaires, la case Catégorie s'ouvre vide
-— rien n'est choisi à votre place. Une opération enregistrée sans catégorie
-est rangée dans « Non classé » ; une règle sans catégorie, elle, n'est pas
-créée.</p>
-<p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
-la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
-ou bouton ✏️.</p>
-
 <h3>🔮 Prévisionnel</h3>
 <p>Déclarez vos opérations récurrentes (loyer, abonnements, salaire…) en
 précisant la fréquence (hebdo, mensuelle, trimestrielle, annuelle) et la date
@@ -425,9 +403,9 @@ Avant la date de départ, aucun point n'est tracé : le solde n'y est pas
 connu.</p>
 
 <h3>↕️ Trier les tableaux</h3>
-<p>Dans les onglets <b>Opérations</b>, <b>Catégories</b>, <b>Budget</b>,
-<b>Sous-catégories</b> et <b>Prévisionnel</b> — ainsi que dans la recherche
-globale — <b>cliquez sur le titre d'une colonne</b> pour trier dessus. Un
+<p>Dans les onglets <b>Opérations</b>, <b>Catégories</b>, <b>Budget</b> et
+<b>Prévisionnel</b> — ainsi que dans la fenêtre des sous-catégories et dans la
+recherche globale — <b>cliquez sur le titre d'une colonne</b> pour trier dessus. Un
 second clic inverse l'ordre ; une petite flèche indique la colonne active.</p>
 <p>Le tri porte sur les <b>valeurs</b> et non sur le texte : les dates se
 classent dans l'ordre du calendrier et les montants du plus grand au plus
@@ -435,9 +413,9 @@ petit. Cliquer sur « Débit » range donc vos plus grosses dépenses en tête.
 Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 
 <h2>4. Période et mode date</h2>
-<p>La barre <b>Période</b> en haut de l'app filtre toutes les vues, sauf
-Sous-catégories, Règles auto et Prévisionnel : elle y est grisée, et le dit
-au survol.
+<p>La barre <b>Période</b> en haut de l'app filtre tous les onglets, sauf
+Prévisionnel : elle y est grisée, et le dit au survol. Les sous-catégories et
+les règles automatiques valent pour tout l'historique.
 Elle se lit <b>‹ année mois ›</b> : le menu de gauche choisit l'année (ou
 « Toutes périodes », tout l'historique), celui de droite le mois dans cette
 année (ou « Toute l'année »).</p>
@@ -706,14 +684,15 @@ le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
 <p>Les actions sont rangées par intention, chaque groupe annoncé par son
 intitulé : <b>Saisie</b>, <b>Consulter</b>, <b>Mettre au propre</b>,
 <b>Mes données</b>, <b>Réglages</b> et <b>Aide</b>. Le compte affiché se
-choisit au bout de la rangée d'onglets, dès qu'il y a deux comptes.</p>
+choisit au début de la rangée d'onglets, dès qu'il y a deux comptes.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
-  <tr><td>🧹 Mettre au propre…</td><td>Ouvre les quatre outils ci-dessous</td></tr>
+  <tr><td>🧹 Mettre au propre…</td><td>Ouvre les cinq outils ci-dessous</td></tr>
   <tr><td>&nbsp;&nbsp;🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>&nbsp;&nbsp;🔧 Suggérer catégories</td><td>Suggère des catégorisations d'après les libellés</td></tr>
+  <tr><td>&nbsp;&nbsp;🔖 Ranger sous-catégories</td><td>Renomme, fusionne ou vide les sous-catégories de vos opérations</td></tr>
   <tr><td>&nbsp;&nbsp;🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
   <tr><td>&nbsp;&nbsp;🔍 Chercher doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
@@ -721,12 +700,37 @@ choisit au bout de la rangée d'onglets, dès qu'il y a deux comptes.</p>
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
+  <tr><td>🧠 Règles auto</td><td>Les règles qui classent toutes seules les opérations importées, d'après leur libellé</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer, supprimer un compte bancaire, et <b>ranger la liste</b> — le compte du haut est celui qui s'ouvre au lancement</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter vers une autre installation</b> et <b>Fusionner un export</b>, pour transférer ou fusionner deux installations</td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
   <tr><td>🔄 Mise à jour</td><td>Affiche votre version et ouvre, dans votre navigateur, la page de la dernière version ou son installeur (§&nbsp;9). Pécule ne se connecte à rien : c'est vous qui comparez les numéros</td></tr>
 </table>
+
+<h3>🔖 Ranger sous-catégories</h3>
+<p>Sous le bouton <b>🧹 Mettre au propre…</b>, ouvre la liste des
+sous-catégories dans sa propre fenêtre. Gérez les sous-catégories de façon transversale : tri par fréquence d'usage,
+<b>fusion</b> de variantes, <b>renommage</b> en masse et nettoyage des
+sous-catégories vides ou rarement utilisées.</p>
+
+<h3>🧠 Règles auto</h3>
+<p>Bouton de la partie <b>Réglages</b> du menu de gauche : la liste des
+règles s'ouvre dans sa propre fenêtre. Les règles automatisent la catégorisation des opérations futures.
+Trois façons d'en créer :</p>
+<ul>
+  <li>Cocher <b>« Mémoriser »</b> dans le formulaire d'une opération</li>
+  <li>Bouton <b>➕ Nouvelle règle</b> dans la fenêtre des règles</li>
+  <li><b>🔧 Suggérer catégories</b>, sous le bouton <b>🧹 Mettre au propre…</b> du menu de gauche (suggestions automatiques)</li>
+</ul>
+<p>Une règle doit avoir une <b>catégorie</b> : c'est celle qu'elle donnera aux
+opérations reconnues. Dans les formulaires, la case Catégorie s'ouvre vide
+— rien n'est choisi à votre place. Une opération enregistrée sans catégorie
+est rangée dans « Non classé » ; une règle sans catégorie, elle, n'est pas
+créée.</p>
+<p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
+la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
+ou bouton ✏️.</p>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
 <p>Recherche dans <b>tout l'historique</b>, toutes périodes confondues : libellé,
@@ -882,7 +886,7 @@ une catégorie. Les catégories sont <b>communes à tous vos comptes</b>.</dd>
 
 <dt>Compte</dt>
 <dd>Un compte bancaire suivi par l'application : compte courant, livret,
-compte joint… Le compte affiché, choisi au bout de la rangée d'onglets, commande
+compte joint… Le compte affiché, choisi au début de la rangée d'onglets, commande
 tout l'écran. Chaque compte a ses propres <b>opérations, budgets,
 prévisionnel et solde de départ</b> ; les <b>règles automatiques, catégories,
 sous-catégories et libellés harmonisés</b> sont au contraire communs à tous,
@@ -994,7 +998,7 @@ périodes confondues : libellé, note, catégorie, montant ou date.</dd>
 <dt>Règle automatique</dt>
 <dd>Affectation automatique d'une catégorie et sous-catégorie aux opérations
 dont le libellé correspond à un motif donné. Appliquée à chaque import CSV
-et accessible depuis l'onglet Règles auto.</dd>
+et accessible depuis le bouton 🧠 Règles auto du menu de gauche.</dd>
 
 <dt>Solde bancaire réel (pointé)</dt>
 <dd>Montant réellement disponible sur le compte, tel qu'affiché en premier

@@ -32,7 +32,9 @@ def db(tmp_path):
 
 # ── Sélecteur de période ────────────────────────────────────────────────
 
-SANS_PERIODE = ("subs_view", "rules_view", "prev_view")
+# Sous-catégories et Règles auto ne sont plus des onglets (01/10/2026) :
+# elles s'ouvrent dans leur propre fenêtre, hors de la barre de période.
+SANS_PERIODE = ("prev_view",)
 
 
 def test_periode_grisee_la_ou_elle_ne_sert_pas(qapp, db):
@@ -230,23 +232,63 @@ def test_mettre_au_propre_tient_dans_un_bouton(qapp, db):
                   if b.text() == "🧹 Mettre au propre…")
     actions = [a.text() for a in bouton.menu().actions()]
     assert actions == ["🧹 Nettoyer catégories", "🔧 Suggérer catégories",
+                       "🔖 Ranger sous-catégories",
                        "🔠 Harmoniser libellés", "🔍 Chercher doublons"]
 
 
-def test_choix_du_compte_au_bout_des_onglets(qapp, db):
-    """Le choix du compte prenait trois lignes du menu : il passe au bout de
-    la rangée d'onglets, et ne s'y montre qu'avec plusieurs comptes."""
+def test_choix_du_compte_au_debut_des_onglets(qapp, db):
+    """Le choix du compte commande tout l'écran : il se lit en premier, au
+    début de la rangée d'onglets (choix de l'auteur du 01/10/2026 ; il était
+    au bout). Il ne s'y montre qu'avec plusieurs comptes."""
     from PySide6.QtWidgets import QScrollArea
     from comptesbudget.ui.main_window import MainWindow
     w = MainWindow(db)
     menu = w.centralWidget().findChild(QScrollArea).widget()
-    coin = w.tabs.cornerWidget(Qt.TopRightCorner)
+    coin = w.tabs.cornerWidget(Qt.TopLeftCorner)
     assert coin is not None and coin.isAncestorOf(w.compte_combo)
+    assert w.tabs.cornerWidget(Qt.TopRightCorner) is None
     assert not menu.isAncestorOf(w.compte_combo)
+    assert w.btn_recap.text() == "📊 Tous les comptes"
     assert coin.isHidden()                       # un seul compte
     db.add_compte("Livret", 0.0, "2026-01-01")
     w.refresh_all()
     assert not coin.isHidden()
+
+
+def test_regles_et_sous_categories_quittent_les_onglets(qapp, db):
+    """Règles auto et Sous-catégories servent rarement : elles passent dans
+    le menu de gauche (Réglages, Mettre au propre…) et s'ouvrent dans leur
+    propre fenêtre (choix de l'auteur du 01/10/2026)."""
+    from PySide6.QtWidgets import QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    onglets = [w.tabs.tabText(i) for i in range(w.tabs.count())]
+    assert onglets == ["🏠 Bilan", "📋 Opérations", "🎯 Budget",
+                       "🏷️ Catégories", "🔮 Prévisionnel"]
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    boutons = [b.text() for b in menu.findChildren(QPushButton)]
+    # Règles auto juste avant Mes comptes, dans « Réglages ».
+    assert boutons.index("🧠 Règles auto") + 1 == boutons.index("🏦 Mes comptes")
+    # Chaque vue vit dans sa fenêtre, rattachée à la fenêtre principale.
+    for vue, fenetre in ((w.rules_view, w.fenetre_regles),
+                         (w.subs_view, w.fenetre_sous_cats)):
+        assert fenetre.isAncestorOf(vue)
+        assert fenetre.parent() is w
+        assert w.tabs.indexOf(vue) == -1
+
+
+def test_fenetre_des_regles_suit_les_changements(qapp, db, monkeypatch):
+    """Une règle ajoutée dans sa fenêtre remet à jour la fenêtre principale,
+    comme quand c'était un onglet."""
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    appels = []
+    monkeypatch.setattr(w, "refresh_all", lambda: appels.append(1))
+    # La fenêtre s'ouvre sans attendre de clic : exec() est neutralisé.
+    monkeypatch.setattr(w.fenetre_regles, "exec", lambda: 0)
+    w.action_regles()
+    w.rules_view.rules_changed.emit()
+    assert appels
 
 
 def test_bandeau_carte_allege(qapp, tmp_path):

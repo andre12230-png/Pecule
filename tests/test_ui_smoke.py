@@ -101,7 +101,8 @@ def db(tmp_path):
 def test_main_window_construit(qapp, db):
     from comptesbudget.ui.main_window import MainWindow
     w = MainWindow(db)               # construit et appelle refresh_all()
-    assert w.tabs.count() == 7   # la Notice n'est plus un onglet (menu de gauche)
+    # La Notice, Règles auto et Sous-catégories sont passées au menu de gauche.
+    assert w.tabs.count() == 5
     w.refresh_all()                  # second passage : ne doit pas lever
 
 

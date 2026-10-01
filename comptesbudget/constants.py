@@ -906,7 +906,10 @@ SYNC_VERSION = 3
 # 1.41.1 : Infobulles lisibles : fond jaune pale et texte noir partout. Elles
 #          prenaient les couleurs sombres de Windows, et celle du bandeau
 #          Encours carte perdait son fond (texte gris clair sur beige).
-APP_VERSION = "1.41.1"
+# 1.41.2 : Le choix du compte ouvre la rangee d'onglets (il etait au bout).
+#          Regles auto et Sous-categories quittent les onglets pour le menu
+#          de gauche (Reglages, Mettre au propre...) et s'ouvrent en fenetre.
+APP_VERSION = "1.41.2"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

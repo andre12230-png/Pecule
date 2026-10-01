@@ -485,8 +485,9 @@ demande de le fermer au lieu de le fermer de force. L'installeur s'ajoute au
    `qif_import`, `sync`) —
    pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
 3. **Interface** (`ui/`) — widgets, dialogues et vues PySide6. La fenêtre
-   principale assemble sept onglets ; la huitième vue, la notice, s'ouvre en
-   fenêtre depuis le menu de gauche. Aucune vue n'en instancie une autre.
+   principale assemble cinq onglets ; trois autres vues (la notice, les
+   règles automatiques et les sous-catégories) s'ouvrent en fenêtre depuis le
+   menu de gauche. Aucune vue n'en instancie une autre.
 
 ---
 

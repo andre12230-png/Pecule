@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-01 (11) — Compte en tête des onglets, deux onglets au menu ; version 1.41.2
+
+**Fait.** Le choix du compte (« Compte : [liste] 📊 Tous les comptes ») passe
+au **début** de la rangée d'onglets, à gauche de 🏠 Bilan ; le bouton « 📊 Tous »
+devient « 📊 Tous les comptes » (sur la rangée, il ressemblait à un onglet).
+**Règles auto** et **Sous-catégories** ne sont plus des onglets : 🧠 Règles auto
+est un bouton de « Réglages », 🔖 Ranger sous-catégories une entrée du menu
+« 🧹 Mettre au propre… » ; chacune s'ouvre dans sa fenêtre (1000 × 640, bouton
+Fermer), construite une fois par la fenêtre principale. Il reste cinq onglets.
+La barre de période ne se grise plus que sur le Prévisionnel. Notice (parties
+2, 3, 4, 6 et glossaire) et README (architecture) mis à jour. Trois tests
+nouveaux ou réécrits vus en échec avant le changement ; 631 tests passés.
+**Pourquoi.** L'auteur : le compte commande tout l'écran, il doit se lire en
+premier, et les onglets qui servent rarement encombrent la rangée. Mesures
+(vraies polices, 1280 px) : sur la ligne « Période » (962 px) le compte
+(289 px) ne tenait pas ; dans le menu, il le faisait déborder. Menu de gauche
+649 → 683 px, sous les 689 px d'un portable 1366 × 768. Revient sur le « compte
+au bout des onglets » posé plus tôt dans la journée.
+**Reste.** Le menu n'a plus que 6 px de marge : un bouton de plus devra
+regrouper. Catégories reste un onglet (il suit la période).
+
 ## 2026-10-01 (10) — Infobulles lisibles ; version 1.41.1
 
 **Fait.** (commit 1219448) En essayant la 1.41.0, l'auteur a montré
