@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.37.0** — premier lancement repensé : importez d'abord votre relevé, Pécule vous demande ensuite le solde et règle seul la date de départ. Et un **récapitulatif de tous vos comptes**. Depuis la 1.35.0, un **installeur Windows** (`Pecule-Setup.exe`) s'ajoute à l'archive `.zip`.
+> Version publiée : **1.41.2** — saisie plus sûre, sauvegarde externe sur clé USB avec rappel, catégorie de plusieurs opérations changée d'un coup, suppression annulable, export vers Excel, courbe du solde, et tous les écrans relus. Un **installeur Windows** (`Pecule-Setup.exe`) accompagne l'archive `.zip`.
 
 ---
 
