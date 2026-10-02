@@ -11,7 +11,9 @@ Lancement (depuis n'importe où) :
     python outils/captures_promo.py mon_dossier  → écrit ailleurs, pour voir
 
 Les données sont tirées avec une graine fixe : deux exécutions le même jour
-donnent les mêmes images. Le mois affiché est toujours le mois en cours.
+donnent les mêmes images. Le mois affiché est le mois en cours, sauf en
+première quinzaine : le mois en cours est alors presque vide (budgets à 0 %),
+et la vitrine montre le mois précédent, complet.
 """
 import os
 import random
@@ -27,7 +29,7 @@ from datetime import date
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RACINE)
 
-from PySide6.QtCore import Qt                             # noqa: E402
+from PySide6.QtCore import QEvent, Qt                     # noqa: E402
 from PySide6.QtWidgets import QApplication                # noqa: E402
 
 from comptesbudget.app import (                           # noqa: E402
@@ -46,7 +48,9 @@ LARGEUR = 1668
 # ont un contenu court : leur donner la même hauteur ne ferait qu'agrandir le
 # vide sous leur tableau. On leur laisse donc la hauteur MINIMALE de la
 # fenêtre (984 px), sous laquelle Qt refuse de descendre.
-HAUTEUR_BILAN = 1080
+# 1200 depuis le 02/10/2026 : avec le bandeau « Budget dépassé », les trois
+# listes du bas (dépenses, revenus, plus grosses dépenses) étaient coupées.
+HAUTEUR_BILAN = 1200
 HAUTEUR_AUTRES = 984
 GRAINE = 20260809                     # captures reproductibles
 
@@ -200,6 +204,10 @@ def _laisser_dessiner(app, secondes):
     fin = time.time() + secondes
     while time.time() < fin:
         app.processEvents()
+        # processEvents() ne détruit pas les widgets remis à plus tard
+        # (deleteLater) ; la vraie boucle de l'appli, si. Sans cette ligne,
+        # les pastilles d'un Bilan redessiné restaient en coin de liste.
+        app.sendPostedEvents(None, QEvent.DeferredDelete)
         time.sleep(0.02)
 
 
@@ -220,6 +228,14 @@ def photographier(db, dossier):
     w = MainWindow(db)
     w.resize(LARGEUR, HAUTEUR_BILAN)
     w.statusBar().showMessage("Base : demo.db   —   données de démonstration")
+    # En première quinzaine, le mois en cours n'a presque rien : on montre
+    # le mois précédent, complet (vitrine du 02/10/2026 aux budgets vides).
+    # Choisi avant show() : changé après, le Bilan gardait des restes du
+    # premier dessin (textes superposés).
+    # Pas en janvier : les données inventées commencent au 1er janvier.
+    if AUJOURDHUI.day < 15 and AUJOURDHUI.month > 1:
+        w.period_bar.choisir_periode(
+            f"{AUJOURDHUI.year}-{AUJOURDHUI.month - 1:02d}")
     # Rendue sans apparaître à l'écran : show() ouvrait une vraie fenêtre
     # pendant qu'on travaille (charte, section 7).
     w.setAttribute(Qt.WA_DontShowOnScreen, True)
