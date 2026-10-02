@@ -21,6 +21,19 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-02 (2) — Images de partage refaites
+
+**Fait.** `promo_share_1200x630.png` (l'image qui s'affiche quand on colle le lien du
+site) et `promo_cover_630x500.png` refaites par `outils/couverture.py`, avec le logo
+actuel (sac et jeton €). Le script retire en plus un damier presque invisible incrusté
+dans `logo.png` : pixels presque transparents effacés, les autres ramenés aux trois
+couleurs du logo. Poussé sur `main` à la demande de l'auteur (site seul, pas de
+version) ; image servie identique à celle du dépôt.
+**Pourquoi.** Elles montraient encore le logo écarté le 10/09/2026, et le damier
+ressortait sur leur fond bleu nuit.
+**Reste.** Le même damier est dans `logo.png` et `Budget.ico` (icône du programme) :
+les nettoyer changerait l'icône, donc demande un nouveau numéro. Pas lancé.
+
 ## 2026-10-02 — Publication de la 1.41.2
 
 **Fait.** Version 1.41.2 publiée sur GitHub (installeur et archive), avec le site et le
