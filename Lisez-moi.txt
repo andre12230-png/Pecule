@@ -127,8 +127,8 @@ FONCTIONS
   quand des operations sont anterieures a la date de depart (leur total
   n'entre pas dans le solde : il est cense etre deja compris dedans).
   Il propose alors de reculer la date sans changer le solde du jour.
-- Plusieurs comptes : le compte affiche se choisit au bout de la rangee
-  d'onglets ; le bouton << Tous >>, a cote, donne le solde de chacun,
+- Plusieurs comptes : le compte affiche se choisit au debut de la rangee
+  d'onglets ; le bouton << Tous les comptes >>, a cote, donne le solde de chacun,
   puis le total.
 - Une seule fenetre a la fois sur les memes donnees : deux fenetres
   ouvertes en meme temps se contrediraient.

@@ -113,19 +113,21 @@ L'application s'organise en onglets :
 | 📋 **Opérations** | Liste filtrable des transactions, pointage, édition, doublons |
 | 🎯 **Budget** | Budgets par catégorie avec barres de progression |
 | 🏷️ **Catégories** | Exploration par catégorie (drill-down), recatégorisation en masse |
-| 🏷️ **Sous-catégories** | Tri, fusion, renommage, nettoyage des sous-catégories |
-| 🧠 **Règles auto** | Règles de catégorisation automatique (motif → catégorie) |
 | 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
 
-La **📖 Notice** (mode d'emploi et glossaire) n'est pas un onglet : c'est un
-bouton du menu de gauche, qui l'ouvre dans une fenêtre à part.
+Trois outils ne sont pas des onglets mais des boutons du menu de gauche, qui
+les ouvrent dans une fenêtre à part : la **📖 Notice** (mode d'emploi et
+glossaire), les **🧠 Règles auto** (catégorisation automatique, motif →
+catégorie) et **🔖 Ranger sous-catégories** (tri, fusion, renommage), dans le
+menu **🧹 Mettre au propre…**.
 
 Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
 **export CSV** des opérations affichées (pour Excel),
-**export et restauration JSON** de toutes vos données, et **sauvegarde
-quotidienne automatique** de la base.
+**export de toutes vos données vers une autre installation**, et **sauvegarde
+quotidienne automatique** de la base, plus la **💾 Sauvegarde externe** sur
+clé USB ou disque externe, avec un rappel quand la dernière date.
 
 ### Dès le premier relevé
 
@@ -205,11 +207,11 @@ retrouve à la réouverture.
 ### Plusieurs comptes
 
 Depuis la 1.24.0, Pécule suit **plusieurs comptes bancaires** dans un même
-fichier. Une liste **Compte affiché** apparaît en haut du menu de gauche dès
+fichier. Une liste **Compte** apparaît au début de la rangée d'onglets dès
 qu'il existe au moins deux comptes ; le compte choisi commande tout l'écran
 (bilan, opérations, budget, prévisionnel, rapport, recherche). Le bouton
 **🏦 Mes comptes** permet d'en ajouter, d'en renommer et d'en supprimer. Le
-bouton **📊 Tous les comptes** donne, compte par compte, le solde en banque, le
+bouton **📊 Tous les comptes**, à côté, donne, compte par compte, le solde en banque, le
 non pointé, le solde comptable et la date du dernier pointage, puis le total.
 
 | | Propre à chaque compte | Commun à tous les comptes |
@@ -252,15 +254,18 @@ Le Bilan résume tout cela dans son bandeau du mois : **où le compte finira le
 mois** (le verdict), puis, sous **🗓 Ce mois-ci**, les sorties et les entrées
 encore à venir.
 
-### Exporter et restaurer vos données
+### Transférer vos données vers une autre installation
 
-Deux boutons de **⚙️ Paramètres**, partie « Avancé », mettent vos données à
-l'abri dans un fichier lisible, indépendamment de la sauvegarde quotidienne automatique :
+Deux boutons de **⚙️ Paramètres**, partie « Avancé », servent à transférer
+toutes vos données vers une autre installation de Pécule, ou à fusionner deux
+installations. Pour une simple sauvegarde, préférez **💾 Sauvegarde externe**
+(menu de gauche), qui copie vos données sur une clé USB ou un disque externe et
+vérifie la copie :
 
-- **💾 Exporter (JSON)** écrit dans le fichier de votre choix la **totalité**
+- **📤 Exporter vers une autre installation…** écrit dans le fichier de votre choix la **totalité**
   de ce que contient le compte : opérations, règles, budgets, récurrences et
   réglages (solde et date de départ compris).
-- **♻️ Restaurer (JSON)** relit un tel fichier et le **fusionne** avec vos
+- **♻️ Fusionner un export…** relit un tel fichier et le **fusionne** avec vos
   données au lieu de les écraser : pour chaque opération, règle ou récurrence,
   c'est la version la plus récente qui l'emporte, de même pour les réglages
   de chaque compte (solde de départ, archivage). Rien de plus récent que le
@@ -387,7 +392,7 @@ comptesbudget/
 ├── ofx_import.py            Import des relevés bancaires OFX (compte et carte)
 ├── qif_import.py            Import des fichiers QIF (autres logiciels)
 ├── sync.py                  Moteur de fusion (LWW) : export et restauration
-│                            JSON du menu de gauche
+│                            de ⚙️ Paramètres › Avancé
 ├── export_csv.py            Export CSV des opérations affichées (pour Excel)
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
@@ -519,7 +524,7 @@ le programme :
 La sauvegarde quotidienne est effectuée **au lancement, avant l'ouverture de la
 base** : même une migration ratée ne peut pas abîmer la copie du jour.
 
-Les fichiers écrits par **💾 Exporter (JSON)** (⚙️ Paramètres › Avancé) ne vivent pas là : ils vont où
+Les fichiers écrits par **📤 Exporter vers une autre installation…** (⚙️ Paramètres › Avancé) ne vivent pas là : ils vont où
 vous les enregistrez, sous le nom que vous choisissez.
 
 ---
@@ -530,7 +535,7 @@ vous les enregistrez, sous le nom que vous choisissez.
   (*last-write-wins*) a été écrit pour la synchronisation avec l'ancienne
   application HTML, retirée en v1.9.5. La synchronisation automatique, elle,
   n'existe plus — mais le moteur sert toujours : c'est lui qui porte les
-  boutons **💾 Exporter (JSON)** et **♻️ Restaurer (JSON)** de ⚙️ Paramètres ›
+  boutons **📤 Exporter vers une autre installation…** et **♻️ Fusionner un export…** de ⚙️ Paramètres ›
   Avancé (`ui/main_window.py`, méthodes `action_export` et `action_import_json`).
 - **Couche métier testée** : `rules`, `labels`, `recurring`, `csv_import`,
   `ofx_import`, `qif_import` et `database` s'importent et s'exécutent sans Qt. Une suite de
