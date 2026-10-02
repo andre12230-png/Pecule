@@ -21,6 +21,23 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-02 (4) — Windows Defender a supprimé le zip chez un utilisateur
+
+**Fait.** Une réponse anonyme au questionnaire dit que Windows Defender a supprimé le
+zip en le prenant pour un « trojan ». Vérifié : le zip et l'installeur de la 1.41.2 sont
+identiques à ceux de la release (empreintes SHA-256), et Defender à jour ne trouve rien
+ni sur eux ni sur `Pecule.exe`. Sur VirusTotal en revanche, l'installeur est signalé
+par 2 moteurs sur 69, dont Microsoft : `Trojan:Win32/Wacatac.B!ml`, une détection par
+apprentissage automatique consultée en ligne, faux positif courant avec PyInstaller.
+Deux signalements de faux positif envoyés à Microsoft : `Pecule.exe` et l'installeur.
+**Pourquoi.** Defender est l'antivirus de presque tous les utilisateurs : une alerte
+chez lui arrête un nouvel utilisateur avant le premier lancement, sans qu'il écrive.
+**Reste.** Attendre la réponse de Microsoft. Repasser l'installeur sur VirusTotal avant
+la prochaine sortie : une nouvelle version peut être reprise par la même détection.
+Une note « si un antivirus bloque Pécule à tort » est prête (README et site, commit
+local) : elle partira avec la sortie de début novembre, pas d'annonce à part. La même réponse trouve les polices peu contrastées : à revoir si l'avis
+revient sur une version récente (la version déclarée est ancienne).
+
 ## 2026-10-02 (3) — Version 1.41.3 installée chez l'auteur : icône sans damier
 
 **Fait.** Numéro 1.41.3 (constants.py, Lisez-moi.txt), contrôle de livraison vert
