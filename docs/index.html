@@ -233,7 +233,7 @@
       C'est normal, et voici comment le passer :</p>
       <img src="media/smartscreen.png" class="capture"
            alt="Étape 1 : cliquer sur « Informations complémentaires » dans la fenêtre « Windows a protégé votre ordinateur ». Étape 2 : cliquer sur le bouton « Exécuter quand même ».">
-      <p style="margin-bottom:0">Ce message ne veut pas dire que le logiciel est dangereux. Il apparaît
+      <p>Ce message ne veut pas dire que le logiciel est dangereux. Il apparaît
       parce que Windows ne connaît pas encore ce fichier : il ne fait confiance qu'aux programmes déjà
       téléchargés par beaucoup de monde, et chaque nouvelle version repart de zéro. L'application n'est
       pas non plus <b>signée numériquement</b> ; une signature afficherait le nom de l'auteur, mais
@@ -241,6 +241,13 @@
       fichier pose problème. Le code source est
       entièrement <a href="https://github.com/andre12230-png/Pecule">consultable sur GitHub</a>, et vous
       pouvez reconstruire l'exécutable vous-même.</p>
+      <p style="margin-bottom:0"><b>Plus rarement, Windows Defender</b> (ou un autre antivirus) peut
+      bloquer l'installeur ou le <code>.zip</code> en le prenant à tort pour un virus. C'est une fausse
+      alerte connue des programmes non signés de ce type, et chaque nouvelle version peut en être
+      victime quelques jours. Vous pouvez vérifier le fichier vous-même sur
+      <a href="https://www.virustotal.com/gui/home/upload">VirusTotal</a>. Si cela vous arrive,
+      <a href="#avis">dites-le-nous</a> : la fausse alerte est alors signalée à Microsoft, qui la retire
+      pour tout le monde.</p>
     </div>
   </section>
 

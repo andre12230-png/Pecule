@@ -67,6 +67,14 @@ are needed, and uninstalling never deletes your data. Windows may show a
 SmartScreen warning because the program is not code-signed: click
 *More info*, then *Run anyway*.
 
+Occasionally, Windows Defender (or another antivirus) may wrongly flag the
+installer or the `.zip` as a threat. This is a known false positive with
+unsigned programs packaged with PyInstaller, and each new version can be
+caught again for a few days. You can check the file yourself on
+[VirusTotal](https://www.virustotal.com), and if it happens to you, please
+[open an issue](https://github.com/andre12230-png/Pecule/issues): the false
+alert gets reported to Microsoft, which then clears it for everyone.
+
 Prefer not to install anything? Take the `.zip` from the
 [latest release](https://github.com/andre12230-png/Pecule/releases/latest),
 unzip it anywhere and run `Pecule.exe`. Either way your data lives in
