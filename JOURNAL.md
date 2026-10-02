@@ -21,6 +21,26 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-02 — Publication de la 1.41.2
+
+**Fait.** Version 1.41.2 publiée sur GitHub (installeur et archive), avec le site et le
+manifeste Scoop. Avant : README, Lisez-moi et page de confidentialité alignés sur
+l'appli (Règles auto et Ranger sous-catégories hors des onglets, compte au début de la
+rangée d'onglets, « Exporter vers une autre installation » / « Fusionner un export »,
+Sauvegarde externe citée) ; captures du site refaites. Le script des captures montre
+le mois précédent en première quinzaine (le 2 du mois, budgets à 0 %), photographie
+le Bilan sur 1200 px, et détruit les widgets remis à plus tard (des pastilles
+restaient en coin de liste, sur les photos seulement). Contrôle de livraison vert,
+631 tests sur 631 ; exe et installeur essayés sur une base inventée, sans trace ;
+fichiers retéléchargés : empreintes identiques ; installation Scoop essayée puis
+retirée. Branche de sauvegarde de l'ancien historique supprimée avant l'envoi
+(copie de sécurité gardée hors du dépôt).
+**Pourquoi.** L'auteur a choisi de publier Pécule seul, avant la sortie groupée de
+mi-octobre prévue pour les trois applis.
+**Reste.** Les deux images de partage (`promo_cover`, `promo_share`) ne sont pas
+refaites par le script. Pas d'annonce faite. La mise à jour d'une ancienne
+installation par l'installeur n'a pas été essayée.
+
 ## 2026-10-01 (11) — Compte en tête des onglets, deux onglets au menu ; version 1.41.2
 
 **Fait.** Le choix du compte (« Compte : [liste] 📊 Tous les comptes ») passe
