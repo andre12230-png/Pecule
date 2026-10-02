@@ -31,8 +31,10 @@ couleurs du logo. Poussé sur `main` à la demande de l'auteur (site seul, pas d
 version) ; image servie identique à celle du dépôt.
 **Pourquoi.** Elles montraient encore le logo écarté le 10/09/2026, et le damier
 ressortait sur leur fond bleu nuit.
-**Reste.** Le même damier est dans `logo.png` et `Budget.ico` (icône du programme) :
-les nettoyer changerait l'icône, donc demande un nouveau numéro. Pas lancé.
+**Reste.** Le même damier était dans `logo.png` et `Budget.ico` : nettoyés le même
+jour à la demande de l'auteur (`outils/nettoyer_icone.py`, sept tailles, dessin
+inchangé, 631 tests), commit local. L'exe ne les porte qu'à la prochaine
+construction, sous un nouveau numéro.
 
 ## 2026-10-02 — Publication de la 1.41.2
 
