@@ -65,6 +65,37 @@ FORMATS = [
 ]
 
 
+# Les trois couleurs franches du logo (bleu foncé du jeton, bleu clair du sac,
+# lavande des reflets). Le fichier logo.png porte un damier presque invisible,
+# reste du fond « transparent » de l'outil qui l'a dessiné : sur la page
+# blanche du site il ne se voit pas, sur le fond bleu nuit de ces images si
+# (constat du 02/10/2026).
+COULEURS_LOGO = [QColor("#2d4fb3"), QColor("#85aeff"), QColor("#dfe4f9")]
+# En dessous de cette opacité (sur 255), un pixel fait partie du damier.
+SEUIL_DAMIER = 40
+
+
+def nettoyer_logo(logo: QImage) -> QImage:
+    """Retire le damier du logo, sans toucher au fichier lui-même.
+
+    Les pixels presque transparents deviennent transparents ; les autres
+    reprennent la plus proche des trois couleurs du logo, en gardant leur
+    opacité (les bords restent lisses)."""
+    img = logo.convertToFormat(QImage.Format_ARGB32)
+    for y in range(img.height()):
+        for x in range(img.width()):
+            c = img.pixelColor(x, y)
+            if c.alpha() <= SEUIL_DAMIER:
+                img.setPixelColor(x, y, QColor(0, 0, 0, 0))
+                continue
+            proche = min(COULEURS_LOGO, key=lambda r: (
+                (r.red() - c.red()) ** 2 + (r.green() - c.green()) ** 2
+                + (r.blue() - c.blue()) ** 2))
+            img.setPixelColor(x, y, QColor(proche.red(), proche.green(),
+                                           proche.blue(), c.alpha()))
+    return img
+
+
 def dessiner(fmt: dict, chemin_logo: str) -> QImage:
     largeur, hauteur = fmt["l"], fmt["h"]
     img = QImage(largeur, hauteur, QImage.Format_ARGB32)
@@ -84,6 +115,7 @@ def dessiner(fmt: dict, chemin_logo: str) -> QImage:
     if logo.isNull():
         p.end()
         raise SystemExit(f"Logo introuvable ou illisible : {chemin_logo}")
+    logo = nettoyer_logo(logo)
     cote = fmt["logo"]
     logo = logo.scaled(cote, cote, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     p.drawImage((largeur - logo.width()) // 2, fmt["logo_y"], logo)
