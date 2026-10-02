@@ -21,6 +21,19 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-02 (3) — Version 1.41.3 installée chez l'auteur : icône sans damier
+
+**Fait.** Numéro 1.41.3 (constants.py, Lisez-moi.txt), contrôle de livraison vert
+(631 tests sur 631), exe construit avec l'icône nettoyée, essayé sur une base
+inventée (titre « v1.41.3 »), puis installé : ancien exe gardé en
+`Pecule.exe.avant-1.41.3`, `_internal` mis à jour, `Budget.ico` du dossier
+d'installation remplacé (le raccourci du Bureau le lit). Base identique avant et
+après (SHA-256).
+**Pourquoi.** L'icône ne change dans le programme qu'à sa reconstruction : nouvelle
+version, selon la règle d'un numéro par exe installé.
+**Reste.** Version non publiée (prochaine sortie). Deux anciens exe gardés en filet ;
+un seul suffit.
+
 ## 2026-10-02 (2) — Images de partage refaites
 
 **Fait.** `promo_share_1200x630.png` (l'image qui s'affiche quand on colle le lien du
