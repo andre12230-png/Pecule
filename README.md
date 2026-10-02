@@ -116,10 +116,11 @@ L'application s'organise en onglets :
 | 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
 
 Trois outils ne sont pas des onglets mais des boutons du menu de gauche, qui
-les ouvrent dans une fenêtre à part : la **📖 Notice** (mode d'emploi et
-glossaire), les **🧠 Règles auto** (catégorisation automatique, motif →
-catégorie) et **🔖 Ranger sous-catégories** (tri, fusion, renommage), dans le
-menu **🧹 Mettre au propre…**.
+les ouvrent dans une fenêtre à part : les **🧠 Règles auto** (catégorisation
+automatique, motif → catégorie), dans la section Réglages ; la **📖 Notice**
+(mode d'emploi et glossaire), dans la section Aide ; et **🔖 Ranger
+sous-catégories** (tri, fusion, renommage), dans le menu **🧹 Mettre au
+propre…**.
 
 Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
 encodage windows-1252), **harmonisation** des catégories et libellés,
@@ -183,8 +184,8 @@ demande de le fermer.
 
 **Avec l'archive `.zip`** : décompressez la nouvelle version où vous voulez
 (par-dessus l'ancienne, c'est le plus simple) et lancez son `Pecule.exe` : vos
-données, rangées à part dans `%LOCALAPPDATA%\Pecule`, sont retrouvées toutes
-seules. L'installeur et l'archive partagent ce dossier : on passe de l'un à
+données, rangées dans le même dossier, sont retrouvées toutes seules.
+L'installeur et l'archive partagent ce dossier : on passe de l'un à
 l'autre sans rien faire. Avec Scoop, `scoop update pecule` suffit.
 
 **En usage portable** (un `comptes.db` à côté de `Pecule.exe` : installations
@@ -365,7 +366,7 @@ flowchart TD
     end
     subgraph F_G ["Fondation"]
         F
-        FF["constants · utils · database"]
+        FF["constants · utils · database · accords · erreurs · sauvegarde_externe"]
     end
 ```
 
@@ -394,6 +395,10 @@ comptesbudget/
 ├── sync.py                  Moteur de fusion (LWW) : export et restauration
 │                            de ⚙️ Paramètres › Avancé
 ├── export_csv.py            Export CSV des opérations affichées (pour Excel)
+├── accords.py               Accorder un mot avec un nombre (« 1 jour », « 2 jours »)
+├── erreurs.py               Erreurs techniques dites en français (module
+│                            commun aux trois applications de l'auteur)
+├── sauvegarde_externe.py    Copie vérifiée sur clé USB ou disque (commun)
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
     ├── models.py            TxTableModel (modèle de table)
@@ -403,6 +408,9 @@ comptesbudget/
     ├── assistants.py        Harmonisation, pré-remplissage du prévisionnel
     ├── report.py            Rapport mensuel (HTML, aperçu, PDF, impression)
     ├── search.py            Recherche globale (Ctrl+F)
+    ├── recapitulatif.py     « Tous les comptes » : soldes côte à côte et total
+    ├── avis.py              « Votre avis » : le questionnaire, dans le navigateur
+    ├── mise_a_jour.py       « Mise à jour » : la page de la dernière version
     ├── main_window.py       MainWindow : assemble onglets et menu d'actions
     └── views/
         ├── operations.py    Vue Opérations
@@ -415,10 +423,14 @@ comptesbudget/
         └── notice.py        Vue Notice (ouverte en fenêtre, pas en onglet)
 
 outils/
+├── audit_recurrences.py    Confronte les récurrences déclarées aux opérations
+│                           réellement passées en banque
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
+├── couverture.py           Refabrique les images de couverture de docs/media/
 ├── faire_archive.py        Fabrique le .zip de la release et son empreinte
 ├── faire_installeur.py     Fabrique l'installeur Pecule-Setup.exe
+├── nettoyer_icone.py       Retire le damier presque invisible de l'icône
 ├── pecule.iss              Recette de l'installeur (Inno Setup 6)
 └── version_exe.py          Écrit les informations de version de l'exécutable
 
@@ -484,7 +496,8 @@ demande de le fermer au lieu de le fermer de force. L'installeur s'ajoute au
 
 ### Couches
 
-1. **Fondation** (`constants`, `utils`, `database`) — données de configuration,
+1. **Fondation** (`constants`, `utils`, `database`, `accords`, `erreurs`,
+   `sauvegarde_externe`) — données de configuration,
    utilitaires et accès SQLite. Aucune dépendance vers le reste.
 2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `ofx_import`,
    `qif_import`, `sync`) —
