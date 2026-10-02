@@ -909,7 +909,9 @@ SYNC_VERSION = 3
 # 1.41.2 : Le choix du compte ouvre la rangee d'onglets (il etait au bout).
 #          Regles auto et Sous-categories quittent les onglets pour le menu
 #          de gauche (Reglages, Mettre au propre...) et s'ouvrent en fenetre.
-APP_VERSION = "1.41.2"
+# 1.41.3 : Icone sans damier : un motif presque invisible, incruste dans le
+#          dessin, ressortait sur fond sombre. Dessin inchange.
+APP_VERSION = "1.41.3"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
