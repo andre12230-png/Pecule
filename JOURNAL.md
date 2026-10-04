@@ -21,6 +21,23 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-04 — Audit de design (plugin Design)
+
+**Fait.** Les 5 onglets et 17 fenêtres capturés sur une base inventée (captures_promo),
+à 1082, 1280 et 1366 px, puis relus avec la grille « design-critique » du plugin Design
+et confrontés à la charte. Une douzaine d'écarts listés ; rien corrigé. Une fausse alerte
+écartée par la mesure (texte de la ligne sélectionnée du récapitulatif : bien lisible).
+Puis les trois priorités corrigées (deux commits locaux, 638 tests sur 638) :
+types d'opération accentués à l'écran (la base garde « Prelevement ») ; tuile
+« Mouvement pointé » devenue « Reste à pointer » (elle répétait le chiffre voisin),
+échéances du bandeau une par ligne, Notice à jour ; courbe du solde portée à 280 px
+de haut — à 200, Qt sautait une graduation sur deux (pas de 4 000 €).
+**Pourquoi.** Demande de l'auteur : un regard extérieur après la relecture du 01/10.
+**Reste.** Pas de nouveau numéro ni d'exe (à faire au déploiement : 1.41.4). Autres
+écarts de l'audit en attente de choix : pastilles des Règles, « 0 % » vert du Rapport,
+milliers dans les cases de montant, vide de l'onglet Catégories, saisie récurrente à
+aligner sur la saisie d'opération, libellé coupé à 1082 px. Clavier non vérifié.
+
 ## 2026-10-02 (4) — Windows Defender a supprimé le zip chez un utilisateur
 
 **Fait.** Une réponse anonyme au questionnaire dit que Windows Defender a supprimé le
