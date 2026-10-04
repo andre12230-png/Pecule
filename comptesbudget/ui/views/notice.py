@@ -248,14 +248,14 @@ de recherche qui accepte le libellé, la note, mais aussi un <b>montant</b> (45,
 (<code>○</code> non pointée / <code>✔</code> pointée et vérifiée sur le relevé).
 Les colonnes <b>Date opér.</b> et <b>Date valeur</b> sont affichées séparément, avec
 indication ⏱ orange si elles diffèrent (débit différé).</p>
-<p><b>Numéro de chèque</b> : choisissez le type <b>Cheque</b> dans le formulaire,
+<p><b>Numéro de chèque</b> : choisissez le type <b>Chèque</b> dans le formulaire,
 un champ <b>N° de chèque</b> apparaît. Le numéro s'affiche ensuite dans la
-colonne <b>Type</b> (« Cheque n° 1234567 ») et se retrouve par la recherche.
+colonne <b>Type</b> (« Chèque n° 1234567 ») et se retrouve par la recherche.
 Pour un chèque importé, Pécule reprend le numéro que la banque a écrit dans son
 libellé — parfois tronqué (« ...0132 »), vous pouvez alors le compléter.</p>
 <p><b>Sens de l'opération</b> : si vous enregistrez en <b>dépense</b> quelque
-chose qui ressemble à une entrée d'argent — type <b>Virement recu</b> ou
-<b>Depot d'especes</b>, ou catégorie <b>Revenus</b> — Pécule vous le signale et
+chose qui ressemble à une entrée d'argent — type <b>Virement reçu</b> ou
+<b>Dépôt d'espèces</b>, ou catégorie <b>Revenus</b> — Pécule vous le signale et
 vous demande de confirmer. Une recette saisie du mauvais côté fausse le solde de
 <b>deux fois</b> son montant : c'est l'erreur la plus difficile à retrouver
 ensuite. Vous restez libre de répondre oui.</p>

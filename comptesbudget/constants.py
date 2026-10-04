@@ -911,7 +911,15 @@ SYNC_VERSION = 3
 #          de gauche (Reglages, Mettre au propre...) et s'ouvrent en fenetre.
 # 1.41.3 : Icone sans damier : un motif presque invisible, incruste dans le
 #          dessin, ressortait sur fond sombre. Dessin inchange.
-APP_VERSION = "1.41.3"
+# 1.41.4 : Audit de design. Types d'operation accentues a l'ecran (la base
+#          garde les valeurs sans accents). Bilan : tuile « Reste a pointer »
+#          au lieu de « Mouvement pointe », echeances du bandeau une par
+#          ligne, courbe du solde plus haute (toutes ses graduations).
+#          Pastilles dans les Regles, zero sans couleur au Rapport, milliers
+#          separes dans les cases de montant, plus de vide dans Categories,
+#          saisie recurrente alignee sur la saisie d'operation, libelle
+#          lisible a la largeur minimale de la fenetre.
+APP_VERSION = "1.41.4"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

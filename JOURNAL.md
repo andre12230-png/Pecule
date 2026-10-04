@@ -38,7 +38,9 @@ budget non entamé sans couleur au Rapport, milliers dans les cases de montant, 
 vide dans Catégories, saisie récurrente alignée sur la saisie d'opération (mots, ordre,
 liste de sous-catégories), colonnes Catégorie/Sous-catégorie/Type à la largeur de leur
 contenu — libellé de 32 à ~95 px à 1082 px.
-**Reste.** Pas de nouveau numéro ni d'exe (à faire au déploiement : 1.41.4). Les trois
+Notice alignée sur les types accentués ; version montée en **1.41.4** pour l'installer
+chez l'auteur (pas de publication).
+**Reste.** Les trois
 colonnes ne se règlent plus à la souris. Clavier non vérifié.
 
 ## 2026-10-02 (4) — Windows Defender a supprimé le zip chez un utilisateur
