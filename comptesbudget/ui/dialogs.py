@@ -41,6 +41,22 @@ CATEGORIE_MANQUANTE = ("Choisissez la catégorie que la règle donnera aux "
                        "opérations reconnues (par exemple « Alimentation »).")
 
 
+def sous_categories_connues(transactions: list[dict]):
+    """Les sous-catégories déjà employées : { catégorie: [sous-catégories] },
+    puis la liste de toutes, pour une catégorie qui n'en a encore aucune.
+    Servent aux listes « Sous-catégorie » des deux fenêtres de saisie."""
+    par_cat: dict[str, list[str]] = {}
+    for t in transactions:
+        c = (t.get("categorie") or "").strip()
+        sc = (t.get("sous_cat") or "").strip()
+        if c and sc:
+            par_cat.setdefault(c, [])
+            if sc not in par_cat[c]:
+                par_cat[c].append(sc)
+    toutes = sorted({sc for lst in par_cat.values() for sc in lst})
+    return par_cat, toutes
+
+
 class TxDialog(QDialog):
     """Boîte de dialogue d'ajout / modification d'opération."""
 
@@ -149,17 +165,7 @@ class TxDialog(QDialog):
         self.sous_cat.setEditable(True)
         self.sous_cat.lineEdit().setMaxLength(80)
         self.sous_cat.setInsertPolicy(QComboBox.NoInsert)  # pas d'ajout auto à la liste
-        # Index { categorie: [sous_cats] } construit depuis toutes les transactions
-        self._subcat_by_cat: dict[str, list[str]] = {}
-        for t in self.all_tx:
-            c = (t.get("categorie") or "").strip()
-            sc = (t.get("sous_cat") or "").strip()
-            if c and sc:
-                self._subcat_by_cat.setdefault(c, [])
-                if sc not in self._subcat_by_cat[c]:
-                    self._subcat_by_cat[c].append(sc)
-        # Liste complète (toutes catégories) pour fallback
-        self._all_subcats = sorted({sc for lst in self._subcat_by_cat.values() for sc in lst})
+        self._subcat_by_cat, self._all_subcats = sous_categories_connues(self.all_tx)
         layout.addRow("Sous-catégorie :", self.sous_cat)
 
         # Mettre à jour la liste à chaque changement de catégorie
@@ -1235,6 +1241,9 @@ class RuleDialog(QDialog):
 
 
 class RecurringDialog(QDialog):
+    # La liste des sous-catégories se met à jour comme dans TxDialog.
+    _update_subcat_list = TxDialog._update_subcat_list
+
     def __init__(self, parent=None, rec: Optional[dict] = None,
                  categories: list[str] = None, all_tx: list[dict] = None):
         super().__init__(parent)
@@ -1263,8 +1272,9 @@ class RecurringDialog(QDialog):
         layout.addRow("Libellé :", self.libelle)
 
         sens_row = QHBoxLayout()
-        self.rb_debit = QRadioButton("Débit")
-        self.rb_credit = QRadioButton("Crédit")
+        # Mêmes mots que la saisie d'une opération (audit du 04/10/2026).
+        self.rb_debit = QRadioButton("Débit (sortie)")
+        self.rb_credit = QRadioButton("Crédit (entrée)")
         self.rb_debit.setChecked(True)
         sens_row.addWidget(self.rb_debit); sens_row.addWidget(self.rb_credit); sens_row.addStretch()
         sens_wrap = QWidget(); sens_wrap.setLayout(sens_row)
@@ -1274,6 +1284,13 @@ class RecurringDialog(QDialog):
         self.montant.setRange(0.0, 1_000_000.0); self.montant.setDecimals(2)
         self.montant.setSuffix(" €")
         layout.addRow("Montant :", self.montant)
+
+        # Type, Catégorie, Sous-catégorie : dans l'ordre de la saisie d'une
+        # opération (audit de design du 04/10/2026).
+        self.type_combo = QComboBox()
+        for typ in TYPES_OPERATION:      # accentué à l'écran, brut en base
+            self.type_combo.addItem(type_affiche(typ), typ)
+        layout.addRow("Type :", self.type_combo)
 
         self.cat = QComboBox(); self.cat.setEditable(True)
         # La liste reçue vient de `db.categories_proposees()` : elle tient
@@ -1295,13 +1312,16 @@ class RecurringDialog(QDialog):
             "proposée ensuite partout, budget compris.")
         layout.addRow("Catégorie :", self.cat)
 
-        self.sous_cat = QLineEdit()
+        # Une liste filtrée par la catégorie, texte libre permis, comme dans
+        # la saisie d'une opération : c'était ici une simple case.
+        self.sous_cat = QComboBox()
+        self.sous_cat.setEditable(True)
+        self.sous_cat.lineEdit().setMaxLength(80)
+        self.sous_cat.setInsertPolicy(QComboBox.NoInsert)
+        self._subcat_by_cat, self._all_subcats = sous_categories_connues(self.all_tx)
         layout.addRow("Sous-catégorie :", self.sous_cat)
-
-        self.type_combo = QComboBox()
-        for typ in TYPES_OPERATION:      # accentué à l'écran, brut en base
-            self.type_combo.addItem(type_affiche(typ), typ)
-        layout.addRow("Type :", self.type_combo)
+        self.cat.currentTextChanged.connect(self._update_subcat_list)
+        self._update_subcat_list(self.cat.currentText())
 
         self.frequency = QComboBox()
         for code, label in FREQUENCIES:
@@ -1351,7 +1371,7 @@ class RecurringDialog(QDialog):
             self.montant.setValue(abs(m))
             (self.rb_credit if m >= 0 else self.rb_debit).setChecked(True)
             self.cat.setCurrentText(rec.get("categorie", ""))
-            self.sous_cat.setText(rec.get("sous_cat", ""))
+            self.sous_cat.setCurrentText(rec.get("sous_cat", ""))
             idx = self.type_combo.findData(rec.get("type", ""))
             if idx >= 0: self.type_combo.setCurrentIndex(idx)
             for i in range(self.frequency.count()):
@@ -1385,7 +1405,7 @@ class RecurringDialog(QDialog):
         if prof["categorie"]:
             self.cat.setCurrentText(prof["categorie"])
         if prof["sous_cat"]:
-            self.sous_cat.setText(prof["sous_cat"])
+            self.sous_cat.setCurrentText(prof["sous_cat"])
         if prof["type"]:
             idx = self.type_combo.findData(prof["type"])
             if idx >= 0:
@@ -1403,7 +1423,7 @@ class RecurringDialog(QDialog):
             "libelle":      self.libelle.text().strip(),
             "montant":      m,
             "categorie":    self.cat.currentText().strip() or "Non classé",
-            "sous_cat":     self.sous_cat.text().strip(),
+            "sous_cat":     self.sous_cat.currentText().strip(),
             "type":         self.type_combo.currentData(),
             "frequency":    self.frequency.currentData(),
             "day_of_month": self.day_of_month.value(),

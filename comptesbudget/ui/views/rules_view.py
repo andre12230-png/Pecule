@@ -22,7 +22,7 @@ from ...database import Database
 from ...rules import apply_rules_to_tx
 
 from ..dialogs import CATEGORIE_MANQUANTE, MOTIF_TROP_COURT, RuleDialog
-from ..models import EtatVide, colonnes_sans_coupure
+from ..models import EtatVide, cellule_categorie, colonnes_sans_coupure
 from ..widgets import confirmer
 
 class RulesView(QWidget):
@@ -109,7 +109,7 @@ class RulesView(QWidget):
                 QStandardItem(r["pattern"]),
                 QStandardItem(fmt_euro(r["amount"]) if r["amount"] is not None else "—"),
                 it_sens,
-                QStandardItem(r["categorie"]),
+                cellule_categorie(r["categorie"]),   # pastille, comme ailleurs
                 QStandardItem(r["sous_cat"]),
                 QStandardItem(fmt_date_fr(r["created_at"] or "")),
             ]

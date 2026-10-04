@@ -124,12 +124,20 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
             reste = b - dep
             col = "#C0392B" if ratio >= 100 else ("#7E5109" if ratio >= 85 else "#18733A")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
+            if dep:
+                pct = f'<font color="{col}"><b>{ratio:.0f}&nbsp;%</b></font>'
+                coul_reste = "#C0392B" if reste < 0 else "#18733A"
+                reste_html = f'<font color="{coul_reste}">{euro(reste)}</font>'
+            else:
+                # Budget pas encore entamé : un zéro s'écrit sans couleur
+                # (charte ; audit de design du 04/10/2026).
+                pct = "0&nbsp;%"
+                reste_html = euro(reste)
             H.append(f'<tr{bg}><td>{_esc(cat)}</td>'
                      f'<td align="right">{euro(b)}</td>'
                      f'<td align="right">{euro(dep)}</td>'
-                     f'<td align="right"><font color="{col}"><b>{ratio:.0f}&nbsp;%</b></font></td>'
-                     f'<td align="right"><font color="{"#C0392B" if reste < 0 else "#18733A"}">'
-                     f'{euro(reste)}</font></td></tr>')
+                     f'<td align="right">{pct}</td>'
+                     f'<td align="right">{reste_html}</td></tr>')
         H.append("</table>")
 
     # — Dépenses par catégorie —

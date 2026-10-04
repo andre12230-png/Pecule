@@ -28,7 +28,14 @@ class MontantSpinBox(QDoubleSpinBox):
         (« 1.234,56 » → 1 234,56) ;
       - s'il est suivi de plus de chiffres que de décimales permises, aussi
         (« 1.234 » → 1 234) ;
-      - sinon c'est la virgule décimale (« 12.5 » → 12,50)."""
+      - sinon c'est la virgule décimale (« 12.5 » → 12,50).
+
+    Les milliers s'affichent séparés (« 1 850,00 € »), comme partout ailleurs
+    dans l'application (audit de design du 04/10/2026)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setGroupSeparatorShown(True)
 
     def _normalise(self, texte: str) -> str:
         """Le texte tapé, réécrit comme Qt l'attend en français."""

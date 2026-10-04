@@ -100,12 +100,11 @@ class CategoriesView(QWidget):
         self.tx_table.doubleClicked.connect(self._edit_tx)
         # Mêmes largeurs que la vue Opérations, dans un panneau plus étroit :
         # la colonne « Catégorie » redisait sur chaque ligne le nom écrit en
-        # titre, elle est masquée, et Sous-catégorie et Type sont resserrées.
-        # Sans cela, Débit et Crédit sortaient du panneau à 1280 px.
+        # titre, elle est masquée. Sous-catégorie et Type prennent la largeur
+        # de leur contenu (colonnes_des_operations) : Débit et Crédit, qui
+        # sortaient du panneau à 1280 px, y tiennent.
         colonnes_des_operations(self.tx_table)
         self.tx_table.setColumnHidden(4, True)
-        self.tx_table.setColumnWidth(5, 120)
-        self.tx_table.setColumnWidth(6, 120)
         self.tx_table.setSortingEnabled(True)
         self.tx_table.horizontalHeader().setSortIndicatorShown(True)
         self.tx_table.sortByColumn(TxTableModel.COL_DATE_VALEUR, Qt.DescendingOrder)
@@ -116,7 +115,10 @@ class CategoriesView(QWidget):
 
         splitter.addWidget(right)
         splitter.setSizes([320, 700])
-        v.addWidget(splitter)
+        # Facteur 1 : toute la hauteur libre va aux tableaux. Sans lui, la
+        # note du bas en prenait la moitié et laissait un grand vide sous
+        # des tableaux arrêtés à mi-hauteur (audit de design du 04/10/2026).
+        v.addWidget(splitter, 1)
 
         # À quelle date ces totaux sont comptés. Sans cette ligne, l'onglet
         # affiche 248,93 € en Shopping là où le Budget affiche 0,00 € pour le

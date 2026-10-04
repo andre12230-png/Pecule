@@ -166,12 +166,15 @@ def colonnes_sans_coupure(table, au_contenu, etirable: int,
 
 def colonnes_des_operations(table):
     """Largeurs du tableau des opérations (onglet Opérations, panneau de
-    droite des Catégories, Recherche) : P, dates, Débit et Crédit à la
-    largeur de leur contenu, le Libellé prend le reste. Type à 150 pour
-    « Cheque n° 1234567 »."""
+    droite des Catégories, Recherche) : toutes les colonnes à la largeur de
+    leur contenu, le Libellé prend le reste.
+
+    Catégorie, Sous-catégorie et Type avaient des largeurs fixées à la main
+    (170, 140, 150 px), bien plus que leur contenu le plus souvent : à la
+    largeur minimale de la fenêtre, le Libellé tombait à 32 px (audit de
+    design du 04/10/2026)."""
     colonnes_sans_coupure(
-        table, au_contenu=(0, 1, 2, 7, 8), etirable=3,
-        largeurs={4: 170, 5: 140, 6: 150})
+        table, au_contenu=(0, 1, 2, 4, 5, 6, 7, 8), etirable=3)
 
 
 def charger_en_conservant_le_tri(table, model, transactions: list[dict]):
