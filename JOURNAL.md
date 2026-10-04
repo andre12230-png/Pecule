@@ -38,8 +38,9 @@ budget non entamé sans couleur au Rapport, milliers dans les cases de montant, 
 vide dans Catégories, saisie récurrente alignée sur la saisie d'opération (mots, ordre,
 liste de sous-catégories), colonnes Catégorie/Sous-catégorie/Type à la largeur de leur
 contenu — libellé de 32 à ~95 px à 1082 px.
-Notice alignée sur les types accentués ; version montée en **1.41.4** pour l'installer
-chez l'auteur (pas de publication).
+Notice alignée sur les types accentués ; version **1.41.4** construite et installée chez
+l'auteur (pas de publication) : contrôle de livraison vert, corrections prouvées dans
+l'exe, base inchangée (même empreinte avant et après).
 **Reste.** Les trois
 colonnes ne se règlent plus à la souris. Clavier non vérifié.
 
