@@ -363,7 +363,7 @@ def test_txdialog_numero_de_cheque(qapp):
     dlg = TxDialog(None, None, categories=CATEGORIES_DEFAUT, all_transactions=[])
     assert not dlg.num_cheque.isVisibleTo(dlg)
     assert "reference" not in dlg.values()
-    dlg.type_combo.setCurrentText("Cheque")
+    dlg.type_combo.setCurrentText("Chèque")
     assert dlg.num_cheque.isVisibleTo(dlg)
     dlg.num_cheque.setText(" 1234567 ")
     assert dlg.values()["reference"] == "1234567"
@@ -385,9 +385,9 @@ def test_txdialog_numero_de_cheque(qapp):
     model = TxTableModel()
     model.load([chq, prlv])
     col = TxTableModel.HEADERS.index("Type")
-    assert model.item(0, col).text() == "Cheque n° 0000132"
+    assert model.item(0, col).text() == "Chèque n° 0000132"
     assert model.item(0, col).toolTip() == "Chèque n° 0000132"
-    assert model.item(1, col).text() == "Prelevement"
+    assert model.item(1, col).text() == "Prélèvement"
 
 
 def test_bulle_aide_pointage(qapp):
@@ -1338,7 +1338,7 @@ def test_changer_le_type_recale_la_date_de_valeur(qapp):
     # À l'ouverture, la date enregistrée est respectée telle quelle
     assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-09-04"
     # Le vrai type est « Prelevement » : la date de valeur suit
-    dlg.type_combo.setCurrentText("Prelevement")
+    dlg.type_combo.setCurrentText("Prélèvement")
     assert dlg.date_val.date().toString("yyyy-MM-dd") == "2026-08-05"
     # ...et le retour en carte bancaire redonne le débit différé
     dlg.type_combo.setCurrentText("Carte bancaire")

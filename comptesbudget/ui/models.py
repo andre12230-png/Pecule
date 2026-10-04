@@ -9,6 +9,7 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QHeaderView, QLabel
 
+from ..constants import type_affiche
 from ..utils import (
     cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
 )
@@ -222,7 +223,7 @@ class TxTableModel(QStandardItemModel):
         # n° 1234567 ») plutôt que dans une colonne à lui : une colonne de plus
         # élargirait la fenêtre, qui doit tenir en moitié d'écran.
         num = numero_cheque(tx)
-        texte_type = tx.get("type", "") + (f" n° {num}" if num else "")
+        texte_type = type_affiche(tx.get("type")) + (f" n° {num}" if num else "")
         items = [
             QStandardItem("✔" if pointee else ("⏳" if prevue else "○")),
             QStandardItem(fmt_date_fr(date_op)),

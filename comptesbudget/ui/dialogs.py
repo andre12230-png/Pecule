@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 
 from ..constants import (
     CATEGORIES_DEFAUT, CATEGORIES_NON_MASQUABLES, TYPES_OPERATION, FREQUENCIES,
+    type_affiche,
 )
 from ..utils import (
     fmt_euro, fmt_date_fr, carte_a_debit_differe, regle_debit_differe,
@@ -115,7 +116,10 @@ class TxDialog(QDialog):
         layout.addRow("Libellé :", self.libelle)
 
         self.type_combo = QComboBox()
-        self.type_combo.addItems(TYPES_OPERATION)
+        # Le type s'affiche accentué ; la valeur enregistrée (sans accents)
+        # voyage dans la donnée de chaque ligne de la liste.
+        for typ in TYPES_OPERATION:
+            self.type_combo.addItem(type_affiche(typ), typ)
         layout.addRow("Type :", self.type_combo)
 
         self.cat = QComboBox()
@@ -304,7 +308,7 @@ class TxDialog(QDialog):
             if tx.get("montant", 0) >= 0:
                 self.rb_credit.setChecked(True)
             self.libelle.setText(tx.get("libelle", ""))
-            idx = self.type_combo.findText(tx.get("type", ""))
+            idx = self.type_combo.findData(tx.get("type", ""))
             if idx >= 0:
                 self.type_combo.setCurrentIndex(idx)
             self.cat.setCurrentText(tx.get("categorie", ""))
@@ -341,7 +345,7 @@ class TxDialog(QDialog):
         self.rule_pattern.setText(self.libelle.text())
 
     def _est_un_cheque(self) -> bool:
-        return self.type_combo.currentText() == "Cheque"
+        return self.type_combo.currentData() == "Cheque"
 
     def _maj_champ_cheque(self):
         """Montre le champ « N° de chèque » pour un chèque, le cache sinon."""
@@ -405,7 +409,7 @@ class TxDialog(QDialog):
         d'opération, comme pour les autres types.
 
         Ne fait rien si la date de valeur a été saisie à la main."""
-        est_carte = (self.type_combo.currentText() == "Carte bancaire"
+        est_carte = (self.type_combo.currentData() == "Carte bancaire"
                      and self.rb_debit.isChecked()
                      and self._compte_en_debit_differe())
         # isVisibleTo (et non isVisible) : tant que la fenêtre n'est pas encore
@@ -443,7 +447,7 @@ class TxDialog(QDialog):
         # refuser, car l'utilisateur peut avoir une raison (une régularisation).
         # Le bouton par défaut est « Non » : une entrée sur laquelle on valide
         # sans lire ne passe pas en force.
-        alerte = alerte_sens_saisie(self.type_combo.currentText(),
+        alerte = alerte_sens_saisie(self.type_combo.currentData(),
                                     self.cat.currentText().strip(),
                                     -self.montant.value()
                                     if self.rb_debit.isChecked()
@@ -497,7 +501,7 @@ class TxDialog(QDialog):
         if prof["sous_cat"]:
             self.sous_cat.setCurrentText(prof["sous_cat"])
         if prof["type"]:
-            idx = self.type_combo.findText(prof["type"])
+            idx = self.type_combo.findData(prof["type"])
             if idx >= 0:
                 self.type_combo.setCurrentIndex(idx)
         # Montant : seulement si l'utilisateur n'a rien saisi (toujours à 0)
@@ -594,7 +598,7 @@ class TxDialog(QDialog):
             "date_valeur": dv,
             "libelle":     self.libelle.text().strip(),
             "libelle_op":  self.libelle.text().strip(),
-            "type":        self.type_combo.currentText(),
+            "type":        self.type_combo.currentData(),
             "categorie":   self.cat.currentText().strip() or "Non classé",
             "sous_cat":    self.sous_cat.currentText().strip(),
             "info":        self.note.text().strip(),
@@ -1294,7 +1298,9 @@ class RecurringDialog(QDialog):
         self.sous_cat = QLineEdit()
         layout.addRow("Sous-catégorie :", self.sous_cat)
 
-        self.type_combo = QComboBox(); self.type_combo.addItems(TYPES_OPERATION)
+        self.type_combo = QComboBox()
+        for typ in TYPES_OPERATION:      # accentué à l'écran, brut en base
+            self.type_combo.addItem(type_affiche(typ), typ)
         layout.addRow("Type :", self.type_combo)
 
         self.frequency = QComboBox()
@@ -1346,7 +1352,7 @@ class RecurringDialog(QDialog):
             (self.rb_credit if m >= 0 else self.rb_debit).setChecked(True)
             self.cat.setCurrentText(rec.get("categorie", ""))
             self.sous_cat.setText(rec.get("sous_cat", ""))
-            idx = self.type_combo.findText(rec.get("type", ""))
+            idx = self.type_combo.findData(rec.get("type", ""))
             if idx >= 0: self.type_combo.setCurrentIndex(idx)
             for i in range(self.frequency.count()):
                 if self.frequency.itemData(i) == rec.get("frequency"):
@@ -1381,7 +1387,7 @@ class RecurringDialog(QDialog):
         if prof["sous_cat"]:
             self.sous_cat.setText(prof["sous_cat"])
         if prof["type"]:
-            idx = self.type_combo.findText(prof["type"])
+            idx = self.type_combo.findData(prof["type"])
             if idx >= 0:
                 self.type_combo.setCurrentIndex(idx)
         if self.montant.value() == 0 and prof["montant"]:
@@ -1398,7 +1404,7 @@ class RecurringDialog(QDialog):
             "montant":      m,
             "categorie":    self.cat.currentText().strip() or "Non classé",
             "sous_cat":     self.sous_cat.text().strip(),
-            "type":         self.type_combo.currentText(),
+            "type":         self.type_combo.currentData(),
             "frequency":    self.frequency.currentData(),
             "day_of_month": self.day_of_month.value(),
             "start_date":   self.start_date.date().toString("yyyy-MM-dd"),

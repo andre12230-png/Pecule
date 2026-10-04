@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...constants import (
-    FREQUENCIES,
+    FREQUENCIES, type_affiche,
 )
 from ...accords import accorde, pluriel
 from ...utils import (
@@ -210,12 +210,15 @@ class OperationsView(QWidget):
         optypes = sorted(set((t.get("type") or "").strip()
                              for t in self.transactions
                              if (t.get("type") or "").strip()))
-        cur_opt = self.optype_filter.currentText()
+        # Accentué à l'écran (« Prélèvement »), brut dans la donnée de la
+        # ligne (« Prelevement ») : c'est elle que le filtre compare.
+        cur_opt = self.optype_filter.currentData()
         self.optype_filter.blockSignals(True)
         self.optype_filter.clear()
-        self.optype_filter.addItem("Tous")
-        self.optype_filter.addItems(optypes)
-        idx2 = self.optype_filter.findText(cur_opt)
+        self.optype_filter.addItem("Tous", "Tous")
+        for typ in sorted(optypes, key=lambda x: deaccent(type_affiche(x))):
+            self.optype_filter.addItem(type_affiche(typ), typ)
+        idx2 = self.optype_filter.findData(cur_opt)
         if idx2 >= 0:
             self.optype_filter.setCurrentIndex(idx2)
         self.optype_filter.blockSignals(False)
@@ -236,7 +239,7 @@ class OperationsView(QWidget):
         words = [w for w in words if w]
         cat = self.cat_filter.currentText()
         tp = self.type_filter.currentText()
-        opt = self.optype_filter.currentText()
+        opt = self.optype_filter.currentData()
         pt = self.pt_filter.currentText()
 
         # « Non pointées » répond à la question « que reste-t-il à pointer ? ».

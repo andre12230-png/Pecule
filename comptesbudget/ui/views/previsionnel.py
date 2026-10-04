@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...constants import (
-    FREQUENCIES,
+    FREQUENCIES, type_affiche,
 )
 from ...accords import accorde, pluriel
 from ...utils import (
@@ -148,7 +148,7 @@ class PrevisionnelView(QWidget):
                 QStandardItem(r["libelle"]),
                 QStandardItem(fmt_euro(r["montant"])),
                 cellule_categorie(r["categorie"]),
-                QStandardItem(r["type"] or ""),
+                QStandardItem(type_affiche(r["type"])),
                 QStandardItem(freq_lbl.get(r["frequency"], r["frequency"])),
                 # « du … au … » plutôt qu'une flèche (charte, 30/09/2026).
                 QStandardItem(

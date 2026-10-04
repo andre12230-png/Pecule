@@ -1015,6 +1015,24 @@ TYPES_OPERATION = [
     "Frais bancaires", "Autre",
 ]
 
+# Les types sont enregistrés sans accents (c'est ce qu'écrivent les imports et
+# ce que lisent les règles) ; à l'écran, on les écrit en bon français. Seul
+# l'affichage change : la base garde « Prelevement » (audit du 04/10/2026).
+TYPES_AFFICHES = {
+    "Virement recu": "Virement reçu",
+    "Prelevement": "Prélèvement",
+    "Pret": "Prêt",
+    "Cheque": "Chèque",
+    "Retrait d'especes": "Retrait d'espèces",
+    "Depot d'especes": "Dépôt d'espèces",
+}
+
+
+def type_affiche(valeur) -> str:
+    """Le type tel qu'il s'écrit à l'écran ; un type inconnu reste tel quel."""
+    valeur = valeur or ""
+    return TYPES_AFFICHES.get(valeur, valeur)
+
 # Règles d'harmonisation : on lit (libellé + sous-catégorie) sans accents,
 # première regex qui matche → catégorie canonique.
 HARMONIZE_RULES = [

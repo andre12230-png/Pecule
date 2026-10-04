@@ -55,7 +55,7 @@ def test_le_formulaire_demande_confirmation(qapp, monkeypatch):
 
     dlg = TxDialog(None, None, ["Revenus"], [])
     dlg.libelle.setText("CABINET MARTIN CONSEIL")
-    dlg.type_combo.setCurrentText("Virement recu")
+    dlg.type_combo.setCurrentText("Virement reçu")
     dlg.cat.setCurrentText("Revenus")
     dlg.montant.setValue(80.0)
     dlg.rb_debit.setChecked(True)
