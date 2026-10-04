@@ -88,3 +88,23 @@ def test_mois_de_l_axe_en_8_points(bilan):
     from PySide6.QtCore import Qt
     axe_x = bilan.bar_chart.axes(Qt.Horizontal)[0]
     assert axe_x.labelsFont().pointSize() == 8
+
+
+def test_courbe_du_solde_ecrit_toutes_ses_graduations(bilan, qapp):
+    """Audit de design du 04/10/2026 : dans une fenêtre ordinaire, la zone de
+    tracé de la courbe du solde ne faisait que 70 px de haut. Qt n'y logeait
+    pas six étiquettes et en sautait une sur deux : l'axe se lisait
+    « 2 000 / 6 000 / 10 000 € », un pas de 4 000 contraire à la charte.
+    Chaque graduation doit disposer d'au moins une hauteur de texte."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtGui import QFontMetrics
+    bilan.setAttribute(Qt.WA_DontShowOnScreen, True)
+    bilan.resize(1100, 700)
+    bilan.show()
+    for _ in range(5):
+        qapp.processEvents()
+    axe = bilan.solde_chart.axes(Qt.Vertical)[0]
+    n = len(axe.categoriesLabels())
+    assert n >= 3
+    par_graduation = bilan.solde_chart.plotArea().height() / (n - 1)
+    assert par_graduation >= QFontMetrics(axe.labelsFont()).height() * 1.5

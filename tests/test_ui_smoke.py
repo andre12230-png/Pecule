@@ -647,28 +647,33 @@ def test_titre_du_mouvement_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert titre("all") == "Mouvement — toutes périodes"
 
 
-def test_mouvement_pointe_se_lit_en_face_du_mouvement(qapp, tmp_path, monkeypatch):
-    """La tuile « Mouvement pointé » additionne les opérations pointées de la
-    période — et rien d'autre. Sur un mois entièrement pointé elle affiche le
-    même chiffre que « Mouvement du mois » ; l'écart, sinon, est ce qui n'est
-    pas encore passé en banque."""
+def test_reste_a_pointer_ne_repete_pas_le_mouvement(qapp, tmp_path, monkeypatch):
+    """La quatrième tuile dit ce qui reste à pointer sur la période (audit de
+    design du 04/10/2026). Elle s'appelait « Mouvement pointé » et, sur un
+    mois entièrement pointé — le cas courant après un import —, affichait le
+    même chiffre que « Mouvement du mois », juste à côté (charte : un chiffre
+    ne se répète pas). Le total pointé reste lisible dans son sous-titre."""
     BilanView, d = _bilan_trois_mois(tmp_path, monkeypatch)
-    # Une échéance de septembre encore en attente : elle ne doit pas y entrer.
+    # Une échéance de septembre encore en attente.
     d.insert_tx(_tx(id="s2", date="2026-09-20", date_valeur="2026-09-20",
                     libelle="ASSURANCE", type="Prélèvement",
                     categorie="Banque et assurances", montant=-30.0, pointee=0))
 
     v = BilanView(d); v.period = "2026-08"; v.refresh()
-    assert v.kpis["pointe"]._label.text() == "✔ Mouvement pointé"
-    # Août est entièrement pointé : les deux tuiles disent la même chose.
-    assert _euros(v.kpis["pointe"]._value.text()) == 300.0     # -200 + 500
-    assert v.kpis["pointe"]._value.text() == v.kpis["net"]._value.text()
-    assert "Août 2026" in v.kpis["pointe"]._sub.text()
+    assert v.kpis["pointe"]._label.text() == "✔ Reste à pointer"
+    # Août est entièrement pointé : rien à pointer, et pas de chiffre répété.
+    assert _euros(v.kpis["pointe"]._value.text()) == 0.0
+    assert v.kpis["pointe"]._value.text() != v.kpis["net"]._value.text()
+    sous_titre = v.kpis["pointe"]._sub.text()
+    assert "Tout est pointé" in sous_titre and "Août 2026" in sous_titre
 
-    # Septembre : l'échéance en attente creuse l'écart entre les deux.
+    # Septembre : l'échéance en attente est ce qui reste à pointer.
     v = BilanView(d); v.period = "2026-09"; v.refresh()
-    assert _euros(v.kpis["pointe"]._value.text()) == -50.0     # la seule pointée
+    assert _euros(v.kpis["pointe"]._value.text()) == -30.0
     assert _euros(v.kpis["net"]._value.text()) == -80.0        # avec l'échéance
+    sous_titre = v.kpis["pointe"]._sub.text()
+    assert "1 opération à pointer" in sous_titre
+    assert "pointé : " + fmt_euro(-50.0) in sous_titre          # la seule pointée
 
 
 def test_categories_dit_a_quelle_date_elle_compte(qapp, tmp_path):
@@ -1143,7 +1148,12 @@ def test_bandeau_ce_mois_ci(qapp, tmp_path, monkeypatch):
     assert "le mois à " + fmt_euro(1550.0) in _texte(v.verdict_banner)
     assert "débit carte" in v.mois_detail_complet
     # Les prochaines échéances nommées, reprises du bandeau des 15 jours.
-    assert "Prochaines : " in v.mois_detail.text()
+    # Une échéance par ligne (audit du 04/10/2026) : sur une seule ligne,
+    # elles se coupaient au milieu (« 10/10 » seul en bout de ligne).
+    lignes = v.mois_detail.text().split("\n")
+    assert lignes[0] == "Prochaines échéances :"
+    assert any(l.startswith(fmt_date_fr(dans_5j)[:5]) and "Loyer" in l
+               and l.endswith(fmt_euro(-750.0)) for l in lignes)
 
 
 def test_bandeau_mois_ne_compte_pas_deux_fois(qapp, tmp_path, monkeypatch):

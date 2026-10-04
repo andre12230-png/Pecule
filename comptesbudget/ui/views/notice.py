@@ -215,14 +215,13 @@ solde initial + les seules opérations <i>pointées</i> (vérifiées sur le rele
 <b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de
 l'app : les achats par carte à débit différé n'y entrent donc que le jour où la banque les
 prélève (au prélèvement groupé du mois suivant), pas avant. Le KPI
-<b>« ✔ Mouvement pointé »</b>, lui, additionne les opérations pointées de la
-période affichée : ce n'est pas un solde mais un mouvement, à comparer à votre
-relevé. Il se lit en face de la tuile voisine : <b>quand « Mouvement pointé »
-et « Mouvement du mois » affichent le même chiffre, tout le mois est pointé</b> ;
-l'écart entre les deux, c'est ce qui n'est pas encore passé en banque. Il
-s'appelait « Solde pointé » jusqu'à la 1.30.0, puis « Pointé sur la période » :
-le premier nom le faisait passer pour un solde, le second ne disait pas ce
-qu'il additionnait.</p>
+<b>« ✔ Reste à pointer »</b>, lui, additionne les opérations <i>pas encore
+pointées</i> de la période affichée : ce qui n'est pas encore passé en banque.
+<b>À 0,00 €, avec « Tout est pointé », la période est entièrement
+rapprochée</b>. Sinon, son sous-titre donne le nombre d'opérations à pointer et
+le total déjà pointé, à comparer à votre relevé. Elle s'appelait « Mouvement
+pointé » jusqu'à la 1.41.3 et affichait ce total pointé — souvent le même
+chiffre que la tuile voisine.</p>
 <p>La tuile <b>« Mouvement du mois »</b> porte sous son chiffre les deux moitiés
 qui le composent — « 2 000,00 € entrés (5) − 2 300,00 € sortis (46) ». Elles
 occupaient deux tuiles séparées (« Revenus » et « Dépenses ») jusqu'à la
@@ -597,7 +596,7 @@ est passé »), les deux chiffres perdent leur « à venir » (« Sorties »,
 « Entrées ») et le verdict donne le solde réellement constaté le dernier jour. Sur un
 mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année ou
 « Toutes périodes » le ramènent au mois en cours.</p>
-<p>La ligne <b>« Prochaines : »</b> nomme les trois échéances qui arrivent, avec
+<p>La liste <b>« Prochaines échéances : »</b> nomme, une par ligne, les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
 Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
 au survol du bandeau</b> : nombre de sorties et d'entrées, débit carte,
@@ -624,11 +623,10 @@ arbitraire, alors que le bandeau de verdict, en haut de page, donne le
 <div class="tip">💡 Le pointage est essentiel pour vérifier que vos opérations
 correspondent bien à votre relevé bancaire (rapprochement bancaire).</div>
 <p>Quand vous recevez votre relevé, ouvrez l'onglet Opérations et cliquez sur
-la colonne <b>P</b> de chaque ligne présente sur le relevé. Le KPI
-<b>« ✔ Mouvement pointé »</b> du Bilan vous indique alors le total des opérations
-vérifiées. Si tout le mois est pointé, il affiche le même chiffre que la tuile
-« Mouvement du mois » d'à côté — et ce total doit correspondre à la variation
-de solde de votre relevé.</p>
+la colonne <b>P</b> de chaque ligne présente sur le relevé. La tuile
+<b>« ✔ Reste à pointer »</b> du Bilan descend à mesure : à 0,00 €, tout le mois
+est pointé, et la tuile « Mouvement du mois » d'à côté doit alors correspondre
+à la variation de solde de votre relevé.</p>
 <p>Gain de temps : si vos exports CSV contiennent une colonne <b>Pointage</b>
 (« x » = opération passée en banque, comme chez BPCE), l'import pointe
 automatiquement ces opérations — y compris celles déjà enregistrées, qu'il
@@ -1012,10 +1010,10 @@ Sert de base pour tous les calculs de solde. <b>Propre à chaque compte.</b>
 Si vous archivez des opérations, il se décale à la date de coupure et englobe
 tout ce qui a été archivé — le solde affiché reste donc le même.</dd>
 
-<dt>Mouvement pointé</dt>
-<dd>Somme des opérations marquées comme pointées sur la période affichée.
-Indicateur de cohérence avec le relevé bancaire. Ce n'est pas un solde : c'est
-un mouvement — celui de la période, limité à ce que la banque a confirmé.</dd>
+<dt>Reste à pointer</dt>
+<dd>Somme des opérations pas encore pointées sur la période affichée : ce que
+la banque n'a pas encore confirmé. À 0,00 €, la période est entièrement
+rapprochée avec le relevé.</dd>
 
 <dt>Sous-catégorie</dt>
 <dd>Précision facultative à l'intérieur d'une catégorie

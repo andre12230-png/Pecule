@@ -260,7 +260,11 @@ class BilanView(QWidget):
             ("solde",    "💼 Solde bancaire réel (pointé)", "#1F3A6B"),
             ("net",      "Mouvement du mois",              "#1F3A6B"),
             ("epargne",  "Taux d'épargne",                 "#18733A"),
-            ("pointe",   "✔ Mouvement pointé",             "#18733A"),
+            # « Reste à pointer » depuis le 04/10/2026 (audit de design) : en
+            # « Mouvement pointé », elle répétait le chiffre de sa voisine
+            # dès que le mois était entièrement pointé, cas courant après un
+            # import. Le total pointé reste dans son sous-titre.
+            ("pointe",   "✔ Reste à pointer",              "#18733A"),
         ]
         for key, label, color in defs:
             card = self._make_kpi(label, "—", color)
@@ -521,7 +525,11 @@ class BilanView(QWidget):
         self.solde_chart.legend().setMarkerShape(QLegend.MarkerShapeFromSeries)
         solde_view = QChartView(self.solde_chart)
         solde_view.setRenderHint(QPainter.Antialiasing)
-        solde_view.setMinimumHeight(200)
+        # 280 et non 200 (audit de design du 04/10/2026) : à 200, la zone de
+        # tracé ne faisait que 70 px ; Qt y sautait une graduation sur deux
+        # et l'axe se lisait par pas de 4 000 €. Le Bilan défile : la place
+        # prise en hauteur ne coûte rien.
+        solde_view.setMinimumHeight(280)
         self.solde_panel = _make_panel("Solde en fin de mois", solde_view)
         self.etat_courbe = EtatVide(
             solde_view, "La courbe du solde apparaîtra avec vos premières "
@@ -1329,8 +1337,10 @@ class BilanView(QWidget):
                                key=lambda x: x[0])[:3]
             prochaines = ""
             if suivantes:
-                prochaines = "Prochaines : " + "  ·  ".join(
-                    f"{fmt_date_fr(d)[:5]} {lbl[:22]} {fmt_euro(m_)}"
+                # Une par ligne (audit du 04/10/2026) : à la suite, elles se
+                # coupaient au milieu en bout de ligne.
+                prochaines = "Prochaines échéances :\n" + "\n".join(
+                    f"{fmt_date_fr(d)[:5]}  {lbl[:22]}  {fmt_euro(m_)}"
                     for d, lbl, m_, _c in suivantes)
                 detail += "\n" + prochaines
             detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
@@ -1549,7 +1559,9 @@ class BilanView(QWidget):
 
         n_rev = sum(1 for t in active if t["montant"] > 0)
         n_dep = sum(1 for t in active if t["montant"] < 0)
-        n_pt  = sum(1 for t in active if t.get("pointee"))
+        # Ce qui n'est pas encore passé en banque sur la période.
+        non_pointees = [t for t in active if not t.get("pointee")]
+        reste_a_pointer = round(sum(t["montant"] for t in non_pointees), 2)
 
         mode_lbl = "valeur (banque)" if self.date_mode == "valeur" else "opération"
         self.kpis["solde"]._value.setText(fmt_euro(solde_compte))
@@ -1588,14 +1600,19 @@ class BilanView(QWidget):
             "part des revenus mis de côté" if tx_epargne >= 0
             else "dépenses supérieures aux revenus")
 
-        self.kpis["pointe"]._value.setText(fmt_euro(solde_p_periode))
-        # Couleur dynamique : vert si le solde pointé est positif, rouge s'il est négatif
-        self._colorer_kpi("pointe", self._couleur_du_signe(solde_p_periode))
-        # La période est rappelée ici : le titre ne la porte plus depuis qu'il
-        # dit ce qu'on additionne (« Mouvement pointé »).
-        self.kpis["pointe"]._sub.setText(
-            f"{pluriel(n_pt, 'opération', 'opérations')} "
-            f"{accorde(n_pt, 'pointée', 'pointées')} — {period_label(self.period)}")
+        self.kpis["pointe"]._value.setText(fmt_euro(reste_a_pointer))
+        # Vert ou rouge selon le signe ; un zéro reste sans couleur (charte).
+        self._colorer_kpi("pointe", self._couleur_du_signe(reste_a_pointer))
+        # Le sous-titre rappelle la période et, s'il reste à pointer, le total
+        # déjà pointé : l'ancien chiffre de la tuile n'est pas perdu.
+        if non_pointees:
+            self.kpis["pointe"]._sub.setText(
+                f"{pluriel(len(non_pointees), 'opération', 'opérations')} à pointer"
+                f" — pointé : {fmt_euro(solde_p_periode)}\n"
+                f"{period_label(self.period)}")
+        else:
+            self.kpis["pointe"]._sub.setText(
+                f"Tout est pointé — {period_label(self.period)}")
 
         # ── Graphique en barres : douze mois ──────────────────────────
         # Il reçoit TOUTES les opérations, pas celles de la période : sur un
