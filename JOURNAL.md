@@ -33,10 +33,13 @@ types d'opération accentués à l'écran (la base garde « Prelevement ») ; tu
 échéances du bandeau une par ligne, Notice à jour ; courbe du solde portée à 280 px
 de haut — à 200, Qt sautait une graduation sur deux (pas de 4 000 €).
 **Pourquoi.** Demande de l'auteur : un regard extérieur après la relecture du 01/10.
-**Reste.** Pas de nouveau numéro ni d'exe (à faire au déploiement : 1.41.4). Autres
-écarts de l'audit en attente de choix : pastilles des Règles, « 0 % » vert du Rapport,
-milliers dans les cases de montant, vide de l'onglet Catégories, saisie récurrente à
-aligner sur la saisie d'opération, libellé coupé à 1082 px. Clavier non vérifié.
+Enfin les six autres écarts (un commit, 644 tests sur 644) : pastilles dans les Règles,
+budget non entamé sans couleur au Rapport, milliers dans les cases de montant, plus de
+vide dans Catégories, saisie récurrente alignée sur la saisie d'opération (mots, ordre,
+liste de sous-catégories), colonnes Catégorie/Sous-catégorie/Type à la largeur de leur
+contenu — libellé de 32 à ~95 px à 1082 px.
+**Reste.** Pas de nouveau numéro ni d'exe (à faire au déploiement : 1.41.4). Les trois
+colonnes ne se règlent plus à la souris. Clavier non vérifié.
 
 ## 2026-10-02 (4) — Windows Defender a supprimé le zip chez un utilisateur
 
