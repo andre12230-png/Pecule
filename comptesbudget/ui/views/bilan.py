@@ -186,9 +186,10 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
     # QFrame : chaque libellé, chaque pourcentage et chaque montant se
     # retrouvait entouré du liseré gris de la carte.
     f.setObjectName("carteBilan")
+    # Arrondi des cartes : 12 px dans les trois applis (charte, 06/10/2026).
     f.setStyleSheet("""
         QFrame#carteBilan {
-            background: #FAF8F1; border: 1px solid #BEC7D4; border-radius: 4px;
+            background: #FAF8F1; border: 1px solid #BEC7D4; border-radius: 12px;
         }
     """)
     v = QVBoxLayout(f); v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
@@ -199,6 +200,7 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
         color: #1F3A6B; font-weight: 600; font-size: 9pt;
         padding: 4px 10px; border-bottom: 1px solid #B0BFD3;
         letter-spacing: 0.5px;
+        border-top-left-radius: 11px; border-top-right-radius: 11px;
     """)
     v.addWidget(header)
     v.addWidget(body, 1)
@@ -555,7 +557,7 @@ class BilanView(QWidget):
         f.setStyleSheet(f"""
             QFrame#tuileKpi {{
                 background: #FAF8F1; border: 1px solid #BEC7D4;
-                border-top: 3px solid {color}; border-radius: 4px;
+                border-top: 3px solid {color}; border-radius: 12px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
         """ + _bulle("tuileKpi"))
@@ -637,7 +639,7 @@ class BilanView(QWidget):
         carte.setStyleSheet(f"""
             QFrame#tuileKpi {{
                 background: #FAF8F1; border: 1px solid #BEC7D4;
-                border-top: 3px solid {trait}; border-radius: 4px;
+                border-top: 3px solid {trait}; border-radius: 12px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
         """ + _bulle("tuileKpi"))

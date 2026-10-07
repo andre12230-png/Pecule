@@ -21,6 +21,23 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-07 — Cartes et tuiles arrondies à 12 px ; design system commun
+
+**Fait.** Un design system commun aux trois applis a été monté à partir du
+code de Pécule (couleurs, typographie, espaces, neuf composants, règles
+d'écriture), sous forme de page privée de l'auteur. Puis, choix de
+l'auteur : les cartes gardent l'arrondi du Photovoltaïque, **12 px** au lieu
+de 4. Dans le Bilan, les cartes (`carteBilan`) et les tuiles chiffrées
+(`tuileKpi`, y compris quand elles sont recolorées) passent à 12 px ; l'en-tête bleu
+des cartes arrondit ses deux coins du haut (11 px), sans quoi il dépassait
+de la carte. Boutons, bandeaux et menus restent à 4 px. Nouveau
+`tests/test_arrondi_cartes.py` (3 tests, vus en échec avant). 647 tests sur
+647 sous Windows. Vérifié en image sur une base inventée.
+**Pourquoi.** Un des écarts de forme entre les trois applis, en attente
+depuis le 29/09.
+**Reste.** Pas d'exe. Le sélecteur de période et la fin du menu restent à
+trancher ; Recharges VE et le Photovoltaïque à confronter au design system.
+
 ## 2026-10-04 — Audit de design (plugin Design)
 
 **Fait.** Les 5 onglets et 17 fenêtres capturés sur une base inventée (captures_promo),
