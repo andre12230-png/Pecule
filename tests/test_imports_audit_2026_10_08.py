@@ -47,3 +47,27 @@ def test_import_d_un_csv_utf16(tmp_path):
 ])
 def test_signe_final_et_moins_typographique(texte, attendu):
     assert lire_montant(texte) == pytest.approx(attendu)
+
+
+# ── Tout est illisible : le message dit pourquoi ──────────────────────────
+# Le diagnostic du fichier (séparateur, dates) ne se faisait que si RIEN
+# n'avait été lu. Des lignes comptées illisibles donnaient seulement « date
+# ou montant illisible », sans la cause.
+
+def test_tout_illisible_le_message_dit_la_cause(qapp, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+
+    from comptesbudget.ui import main_window
+    vus = []
+    monkeypatch.setattr(QMessageBox, "warning",
+                        lambda parent, titre, texte, *a, **k: vus.append(texte))
+    monkeypatch.setattr(QMessageBox, "information",
+                        lambda parent, titre, texte, *a, **k: vus.append(texte))
+    db = Database(str(tmp_path / "t.db"))
+    fenetre = main_window.MainWindow(db)
+    p = _write(tmp_path, "iso.csv",
+               "Date;Libelle;Montant\n2026-09-05;LOYER;-650,00\n"
+               "2026-09-06;SALAIRE;2100,00\n".encode("utf-8"))
+    fenetre._import_files([p])
+    texte = "\n".join(vus)
+    assert "année d'abord" in texte, texte

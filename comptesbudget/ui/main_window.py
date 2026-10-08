@@ -545,7 +545,13 @@ class MainWindow(QMainWindow):
         # dans le fichier lui-même (séparateur, noms de colonnes, dates).
         rien_lu = not any((total_imp, total_skip, total_bad,
                            total_pt, total_recap, total_rappr))
-        if rien_lu and not errors:
+        # Aucune opération retenue, même si des lignes ont été comptées
+        # illisibles : la cause est souvent la même pour toutes (dates
+        # « année d'abord », séparateur virgule). On la cherche aussi dans ce
+        # cas (audit du 08/10/2026 : seul « date ou montant illisible »).
+        rien_retenu = not any((total_imp, total_skip, total_pt,
+                               total_recap, total_rappr))
+        if rien_retenu and not errors:
             for p in paths:
                 # Le diagnostic ne vaut que pour un CSV : appliqué à un OFX
                 # ou un QIF, il dirait n'importe quoi sur leurs colonnes.
