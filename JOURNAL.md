@@ -21,7 +21,7 @@ La date la plus récente est en haut.
 
 ---
 
-## 2026-10-08 — Audit complet avant la sortie de début novembre (rien corrigé)
+## 2026-10-08 (4) — Audit complet avant la sortie de début novembre (rien corrigé)
 
 **Fait.** Audit fond et design de la 1.41.5, sans correction : 649 tests sur 649 ; contrôle
 de livraison `--publication` (seuls les numéros des documents publics, attendus à la
