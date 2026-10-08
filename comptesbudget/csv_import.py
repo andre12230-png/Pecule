@@ -381,8 +381,8 @@ def diagnostiquer_releve(texte: str) -> Optional[str]:
 
     Trois causes couvrent la quasi-totalité des cas : le fichier est séparé
     par des virgules (export anglo-saxon), ses colonnes portent d'autres noms
-    (« label », « description »…), ou ses dates ne sont pas au format
-    JJ/MM/AAAA — auquel cas chaque ligne est écartée en silence."""
+    (« label », « description »…), ou ses dates ne s'écrivent pas jour,
+    mois, année (2026-01-05) — auquel cas chaque ligne est écartée."""
     lignes = [ln for ln in texte.splitlines() if ln.strip()]
     if not lignes:
         return "Le fichier est vide."
@@ -421,9 +421,10 @@ def diagnostiquer_releve(texte: str) -> Optional[str]:
             break
     if exemples and not any(parse_french_date(v) for v in exemples):
         return ("Les dates de ce relevé (« " + exemples[0] + " ») ne sont pas "
-                "au format attendu : il faut JJ/MM/AAAA, par exemple "
-                "05/01/2026 — jour et mois sur deux chiffres, année sur "
-                "quatre.\n\n"
+                "au format attendu : il faut une date à la française, jour "
+                "puis mois puis année, par exemple 05/01/2026, 5/1/2026 ou "
+                "05/01/26. L'écriture « année d'abord » (2026-01-05) n'est "
+                "pas lue.\n\n"
                 "Chaque ligne concernée est écartée, d'où un import à zéro "
                 "opération. Corrigez le format des dates dans votre tableur "
                 "avant de réenregistrer le fichier en CSV.")

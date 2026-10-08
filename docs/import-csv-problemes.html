@@ -130,10 +130,11 @@
     regardez une ligne.</p>
     <p><strong>Les colonnes sont séparées par des virgules</strong> — c'est le format
     anglo-saxon. Pécule attend des points-virgules.</p>
-    <p><strong>Ou les dates ne sont pas au bon format.</strong> Il faut
-    <code>05/01/2026</code> : jour et mois sur deux chiffres, année sur quatre.
-    <code>5/1/2026</code> et <code>2026-01-05</code> sont refusés, et chaque ligne
-    concernée est silencieusement écartée.</p>
+    <p><strong>Ou les dates ne sont pas au bon format.</strong> Il faut une date à
+    la française, jour puis mois puis année : <code>05/01/2026</code>,
+    <code>5/1/2026</code> ou <code>05/01/26</code>. L'écriture « année d'abord »
+    (<code>2026-01-05</code>) est refusée ; chaque ligne concernée est écartée, et
+    comptée dans le bilan de l'import.</p>
     <div class="sol"><strong>La solution :</strong> dans les deux cas, un passage par
     le tableau. Réenregistrez en CSV point-virgule, et forcez le format des dates en
     <em>JJ/MM/AAAA</em> avant d'enregistrer.</div>

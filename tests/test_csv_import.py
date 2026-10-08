@@ -595,7 +595,7 @@ def test_diagnostic_dates_au_mauvais_format():
     """En-tête reconnue, mais dates en 2026-09-05 : rien n'est importé."""
     txt = "Date;Libelle;Montant\n2026-09-05;CARREFOUR;-52,30\n"
     msg = diagnostiquer_releve(txt)
-    assert msg and "JJ/MM/AAAA" in msg
+    assert msg and "05/01/2026" in msg and "année d.abord" in msg
 
 
 def test_diagnostic_releve_correct_ne_dit_rien():

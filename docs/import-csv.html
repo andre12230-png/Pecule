@@ -101,11 +101,11 @@
   hexagonales. Si votre fichier utilise des virgules, ouvrez-le dans un tableur et
   réenregistrez-le en « CSV (séparateur point-virgule) ».</p>
 
-  <h3>2. Les dates doivent s'écrire JJ/MM/AAAA</h3>
-  <p>Le jour et le mois sur deux chiffres, l'année sur quatre :
-  <code>05/01/2026</code>. Les autres écritures sont refusées, y compris
-  <code>5/1/2026</code> et <code>2026-01-05</code>. Une ligne dont la date n'est pas
-  lisible est simplement ignorée.</p>
+  <h3>2. Les dates s'écrivent jour, mois, année</h3>
+  <p>À la française, séparées par des barres obliques : <code>05/01/2026</code>,
+  <code>5/1/2026</code> ou <code>05/01/26</code> désignent toutes le 5 janvier 2026.
+  L'écriture « année d'abord » (<code>2026-01-05</code>) est refusée. Une ligne dont
+  la date n'est pas lisible est écartée, et le bilan de l'import le dit.</p>
 
   <h3>3. Il faut une ligne d'en-tête nommant les colonnes</h3>
   <p>Pécule cherche la première ligne contenant à la fois le mot
