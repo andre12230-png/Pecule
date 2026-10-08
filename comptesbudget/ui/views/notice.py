@@ -970,11 +970,11 @@ abonnement, salaire…). Définie dans l'onglet Prévisionnel.</dd>
 
 <dt>Pointage</dt>
 <dd>Action de cocher une opération comme « vérifiée sur le relevé bancaire ».
-Symbolisée par ✔ dans la colonne P. Une opération pointée est verrouillée
-mentalement : elle est confirmée par la banque.</dd>
+Symbolisée par ✔ dans la colonne P. Une opération pointée est confirmée par
+la banque : sa date et son montant ne devraient plus changer.</dd>
 
 <dt>Période</dt>
-<dd>Filtre temporel appliqué aux vues : « Toutes », une année (« 2025 »),
+<dd>Filtre temporel appliqué aux vues : « Toute la période », une année (« 2025 »),
 ou un mois précis (« Mai 2026 »).</dd>
 
 <dt>Prévisionnel</dt>
@@ -995,8 +995,8 @@ périodes confondues : libellé, note, catégorie, montant ou date.</dd>
 
 <dt>Règle automatique</dt>
 <dd>Affectation automatique d'une catégorie et sous-catégorie aux opérations
-dont le libellé correspond à un motif donné. Appliquée à chaque import CSV
-et accessible depuis le bouton 🧠 Règles auto du menu de gauche.</dd>
+dont le libellé correspond à un motif donné. Appliquée à chaque import (CSV,
+OFX ou QIF) et accessible depuis le bouton 🧠 Règles auto du menu de gauche.</dd>
 
 <dt>Solde bancaire réel (pointé)</dt>
 <dd>Montant réellement disponible sur le compte, tel qu'affiché en premier

@@ -89,7 +89,7 @@ From source (any OS):
 
 ```bash
 pip install PySide6
-python pecule.py
+py pecule.py
 ```
 
 A **Winget** package has been
@@ -158,8 +158,8 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 - **Premier lancement** : le bouton « Importer mon premier relevé… » lit votre
   relevé, puis demande le solde du compte au jour de sa dernière opération ;
   Pécule en déduit seul la date et le solde de départ.
-- Sinon, la **date de départ** proposée est le 1<sup>er</sup> janvier de l'année
-  en cours, et le Bilan prévient tant que le **solde de départ** n'est pas
+- Sinon, Paramètres propose la **date du jour** à un compte neuf sans
+  opération (on y tape le solde lu aujourd'hui à la banque), et le Bilan prévient tant que le **solde de départ** n'est pas
   renseigné — ou quand des opérations plus anciennes que cette date restent
   hors du calcul du solde. Il propose alors de reculer la date, en calculant
   le solde de départ qui laisse le solde du jour inchangé.
@@ -294,13 +294,8 @@ et testé avec 3.13 / 3.14) et la dépendance **PySide6**.
 pip install PySide6
 ```
 
-**Lancer l'application :**
-
-```bash
-python pecule.py
-```
-
-**Sous Windows, préférez `py`**, le Python Launcher officiel : quand plusieurs
+**Lancer l'application.** Sous Windows, utilisez `py`, le Python Launcher
+officiel : quand plusieurs
 Python sont installés, `python` désigne celui du PATH, qui n'est pas forcément
 celui où PySide6 a été installé.
 
@@ -314,7 +309,7 @@ l'application (et retombe sur `py` si `pyw` est absent). Ou lancer le paquet
 directement :
 
 ```bash
-python -m comptesbudget
+py -m comptesbudget
 ```
 
 ---
@@ -384,7 +379,7 @@ flowchart TD
 pecule.py            Lanceur (point d'entrée des .bat et de PyInstaller)
 comptesbudget/
 ├── __init__.py
-├── __main__.py              Permet « python -m comptesbudget »
+├── __main__.py              Permet « py -m comptesbudget »
 ├── app.py                   main() : QApplication, palette, lancement
 │
 │   ── Fondation (Python pur, sans Qt) ──
@@ -460,7 +455,7 @@ Pour refaire les captures de la page de présentation après un changement
 d'interface :
 
 ```bash
-python outils/captures_promo.py
+py outils/captures_promo.py
 ```
 
 Le script fabrique une base de démonstration dans un dossier temporaire,
@@ -470,7 +465,7 @@ donnée réelle n'y figure, et votre `comptes.db` n'est jamais ouverte.
 Pour préparer une release, après `Construire-Exe.bat` :
 
 ```bash
-python outils/faire_archive.py
+py outils/faire_archive.py
 ```
 
 Il ajoute `Lisez-moi.txt` et `Budget.ico` au dossier construit, écrit le `.zip`
@@ -488,7 +483,7 @@ Un **installeur** Windows se fabrique de la même façon, avec
 `winget install JRSoftware.InnoSetup`) :
 
 ```bash
-python outils/faire_installeur.py
+py outils/faire_installeur.py
 ```
 
 Il produit `dist\Pecule-Setup.exe` — un nom **sans numéro**, pour que le lien
