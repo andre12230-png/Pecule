@@ -21,6 +21,16 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 (2) — Gris et rouge lisibles sur le crème
+
+**Fait.** Le gris `#6B6B6B` (4,37 pour 1 sur le crème) devient `#666666` (4,71) et le rouge
+`#C0392B` (4,46) devient `#BC3729` (4,63), partout dans le code (26 endroits). Palette du test
+mise à jour, mesure sur le crème ajoutée, vues en échec ; 649 tests sur 649 ; vu en image (Opérations).
+**Pourquoi.** Les deux passaient sur l'ivoire et le blanc, pas sur le crème des fenêtres et
+des boîtes de dialogue ; remplacer partout évite de surveiller le fond de chaque texte.
+Différence invisible à l'œil. Même changement dans les trois applis.
+**Reste.** Pas d'exe.
+
 ## 2026-10-08 — « Toute la période », le nom commun aux trois applis
 
 **Fait.** La ligne « tout voir » du menu des années s'appelle « Toute la période » (et
