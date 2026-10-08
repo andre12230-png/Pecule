@@ -192,7 +192,7 @@ MOIS_FR = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
 
 def period_label(p: str) -> str:
     if p == "all":
-        return "Toutes périodes"
+        return "Toute la période"
     if len(p) == 4:
         return f"Année {p}"
     if len(p) == 7:

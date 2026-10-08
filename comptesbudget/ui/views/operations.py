@@ -309,7 +309,7 @@ class OperationsView(QWidget):
                     "videz la recherche.")
         else:
             vide = ("Aucune opération sur cette période.\nChoisissez une "
-                    "autre période en haut, ou « Toutes périodes ».")
+                    "autre période en haut, ou « Toute la période ».")
         self.etat_vide.changer_texte(vide)
 
         solde = sum(t.get("montant", 0) for t in self.filtered)
@@ -322,7 +322,7 @@ class OperationsView(QWidget):
                f"— mouvement ({mode_lbl}) : {fmt_euro(solde)}")
         if toutes_periodes:
             # Sinon on croirait que le mois choisi contient toutes ces lignes.
-            txt = "toutes périodes — " + txt
+            txt = "toute la période — " + txt
         if pointed:
             txt += f"   ✔ pointées : {fmt_euro(solde_p)}"
         self.lbl_count.setText(txt)

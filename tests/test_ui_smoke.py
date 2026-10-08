@@ -212,6 +212,8 @@ def test_periodes_deux_menus_annee_puis_mois(qapp):
     barre, an = _barre_periodes(qapp)
     annees = _donnees(barre.annee_combo)
     assert annees == ["all", str(an), str(an - 1), str(an - 2)]
+    # Le même nom dans les trois applis (choix de l'auteur du 08/10/2026).
+    assert barre.annee_combo.itemText(0) == "Toute la période"
     # Ouverture sur le mois en cours : le menu des mois montre ceux de
     # l'annee en cours, et aucun mois d'une autre annee.
     mois = _donnees(barre.mois_combo)
@@ -644,7 +646,7 @@ def test_titre_du_mouvement_suit_la_periode(qapp, tmp_path, monkeypatch):
 
     assert titre("2026-08") == "Mouvement du mois"
     assert titre("2026") == "Mouvement de l'année"
-    assert titre("all") == "Mouvement — toutes périodes"
+    assert titre("all") == "Mouvement — toute la période"
 
 
 def test_reste_a_pointer_ne_repete_pas_le_mouvement(qapp, tmp_path, monkeypatch):
@@ -1683,12 +1685,12 @@ def test_non_pointees_ignore_la_periode(qapp, tmp_path):
     # « Non pointées » : les deux mois, et le compteur prévient
     v.pt_filter.setCurrentText("Non pointées")
     assert sorted(t["id"] for t in v.filtered) == ["a", "b"]
-    assert "toutes périodes" in v.lbl_count.text()
+    assert "toute la période" in v.lbl_count.text()
 
     # Les autres choix restent bornés au mois affiché
     v.pt_filter.setCurrentText("Pointées")
     assert [t["id"] for t in v.filtered] == ["c"]
-    assert "toutes périodes" not in v.lbl_count.text()
+    assert "toute la période" not in v.lbl_count.text()
 
 def test_traduction_qt_francaise(qapp):
     """Les boutons fournis par Qt doivent parler français.

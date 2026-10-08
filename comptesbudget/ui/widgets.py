@@ -183,7 +183,7 @@ class PeriodBar(QWidget):
         self.annee_combo = QComboBox()
         self.annee_combo.setMinimumWidth(120)
         self.annee_combo.setToolTip(
-            "Année affichée, ou « Toutes périodes » pour tout l'historique.")
+            "Année affichée, ou « Toute la période » pour tout l'historique.")
         self.annee_combo.currentIndexChanged.connect(self._on_annee)
         h.addWidget(self.annee_combo)
 

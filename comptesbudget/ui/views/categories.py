@@ -255,7 +255,7 @@ class CategoriesView(QWidget):
                     and in_period(self._eff_date(t), self.period)]
         if not affected:
             return
-        portee = ("toutes périodes confondues" if self.period == "all"
+        portee = ("sur toute la période" if self.period == "all"
                   else f"sur la période affichée ({period_label(self.period)})")
         if not confirmer(
                 self, "Recatégoriser",

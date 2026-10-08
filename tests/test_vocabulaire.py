@@ -90,3 +90,13 @@ def test_previsionnel_parle_d_entrees_et_de_sorties(qapp, tmp_path):
     vue.refresh()
     texte = vue.summary.text()
     assert "Entrées :" in texte and "Sorties :" in texte
+
+
+def test_toute_la_periode_porte_le_meme_nom_partout():
+    """« Toute la période », comme le Photovoltaïque et Recharges VE (choix
+    de l'auteur du 08/10/2026) : plus de « Toutes périodes » à l'écran."""
+    fautes = [f"{chemin.name}:{ligne}"
+              for chemin in sorted(RACINE.rglob("*.py"))
+              for ligne, texte in _textes_affiches(chemin)
+              if re.search(r"[Tt]outes périodes", texte)]
+    assert not fautes, ", ".join(fautes)

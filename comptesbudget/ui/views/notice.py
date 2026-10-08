@@ -226,7 +226,7 @@ chiffre que la tuile voisine.</p>
 qui le composent — « 2 000,00 € entrés (5) − 2 300,00 € sortis (46) ». Elles
 occupaient deux tuiles séparées (« Revenus » et « Dépenses ») jusqu'à la
 1.30.0 : trois cases pour deux informations. Son <b>titre suit la période</b> :
-« Mouvement de l'année » sur une année, « Mouvement — toutes périodes » sur
+« Mouvement de l'année » sur une année, « Mouvement — toute la période » sur
 tout l'historique.</p>
 <p>Des quatre tuiles, <b>trois suivent la période</b> choisie en haut : le
 mouvement, le taux d'épargne, et le pointé. Seul le
@@ -297,7 +297,7 @@ catégorie.</p>
 <p>Ce bandeau — « Budget dépassé… » en haut du Bilan — <b>suit la période
 choisie</b> en haut de l'écran : sur « Août 2026 » il montre ce qui a été
 dépassé en août, et le dit (« Budget dépassé en août 2026 »). Sur une année ou
-« Toutes périodes », il revient au <b>mois en cours</b> : un budget mensuel ne
+« Toute la période », il revient au <b>mois en cours</b> : un budget mensuel ne
 se juge qu'au mois.</p>
 <p>Double-cliquez sur une catégorie pour modifier son budget mensuel. Le
 tableau ne montre que les catégories qui ont un budget ou des dépenses sur la
@@ -381,7 +381,7 @@ fenêtre au lieu de la réduire :</p>
   <li><b>un mois choisi</b> — les douze mois qui s'achèvent sur lui, pour le
       situer dans sa propre histoire ;</li>
   <li><b>une année</b> — ses douze mois, de janvier à décembre ;</li>
-  <li><b>toutes périodes</b> — les douze derniers mois.</li>
+  <li><b>toute la période</b> — les douze derniers mois.</li>
 </ul>
 <p>Les bornes exactes sont rappelées dans le <b>titre</b> du cadre
 (« Évolution sur 12 mois — d'octobre 2025 à septembre 2026 ») : sur douze colonnes, les
@@ -416,12 +416,12 @@ Le tri choisi est conservé quand vous changez de filtre ou de période.</p>
 Prévisionnel : elle y est grisée, et le dit au survol. Les sous-catégories et
 les règles automatiques valent pour tout l'historique.
 Elle se lit <b>‹ année mois ›</b> : le menu de gauche choisit l'année (ou
-« Toutes périodes », tout l'historique), celui de droite le mois dans cette
+« Toute la période », tout l'historique), celui de droite le mois dans cette
 année (ou « Toute l'année »).</p>
 <p>Les deux <b>flèches</b> qui les encadrent reculent et avancent d'un cran sans
 ouvrir de liste : d'un mois si vous affichez un mois, d'une année si vous
 affichez une année. Elles <b>se grisent</b> quand il n'y a plus rien de ce côté,
-et le menu des mois se grise sur « Toutes périodes », qui est à cheval sur
+et le menu des mois se grise sur « Toute la période », qui est à cheval sur
 toutes les années. En changeant d'année, le mois affiché est conservé s'il
 existe là-bas — pratique pour comparer un même mois d'une année sur l'autre.</p>
 <p>Le bouton <b>Ce mois-ci</b> ramène au mois en cours en un clic ; il est grisé
@@ -429,11 +429,11 @@ quand vous y êtes déjà. Au clavier : <code>Ctrl+←</code> mois précédent,
 <code>Ctrl+→</code> mois suivant, <code>Ctrl+Origine</code> mois en cours (dans
 une zone de saisie, <code>Ctrl+←</code> et <code>Ctrl+→</code> gardent leur rôle
 habituel : sauter d'un mot). Le <b>Rapport mensuel</b> a le même sélecteur, sans
-« Toutes périodes » ni « Toute l'année » puisqu'il porte sur un seul mois.</p>
+« Toute la période » ni « Toute l'année » puisqu'il porte sur un seul mois.</p>
 <p>L'application <b>s'ouvre toujours sur le mois en cours</b> : elle ne se
 souvient pas de la période que vous consultiez la fois précédente, pour ne pas
 vous faire prendre de vieux chiffres pour ceux du mois courant. Si le mois en
-cours ne porte encore aucune opération, elle ouvre sur « Toutes périodes »
+cours ne porte encore aucune opération, elle ouvre sur « Toute la période »
 plutôt que sur un écran vide.</p>
 <p>Le sélecteur <b>Date</b> à côté contrôle la chronologie :</p>
 <table>
@@ -486,7 +486,7 @@ Le bandeau est vert quand le compte tient, rouge sinon.</p>
 temps avec elle : sur un mois clos elle se met au passé (« Août 2026 : le compte
 a fini le mois à 100,00 €. Au plus bas : −300,00 € le 01/08/2026 »), sur un mois
 à venir elle annonce ce qui est déjà prévu, et sur le mois en cours elle reste
-un verdict pour agir. Une année ou « Toutes périodes » ne désignent aucun mois :
+un verdict pour agir. Une année ou « Toute la période » ne désignent aucun mois :
 le bandeau revient alors au mois en cours.</p>
 <p><b>Pourquoi le jour et pas seulement le total.</b> Un creux vient souvent du
 <b>calendrier</b>, pas du niveau de dépenses : un prélèvement (le lot de la
@@ -535,7 +535,7 @@ ce que le mois laisse ne reposent pas sur les mêmes opérations.</p>
 et il montre l'encours d'août : ses achats, ce qu'il restait, et la date à laquelle
 la banque l'a prélevé. Les deux premiers chiffres disparaissent alors — plus rien
 n'est « en attente » sur un mois passé — et le bandeau annonce qu'il est en
-consultation. Sur une année ou « Toutes périodes », qui ne désignent aucun mois,
+consultation. Sur une année ou « Toute la période », qui ne désignent aucun mois,
 il revient au mois en cours : un encours de carte ne se juge qu'au mois.</p>
 <p><b>Le verdict du mois écoulé</b> est rappelé sous les chiffres : « Mois
 précédent — août 2026 : 600,00 € dépensés à la carte, il a MANQUÉ 150,00 € une
@@ -595,7 +595,7 @@ attendre — mais <b>ce qui est passé</b> : le titre le dit (« AOÛT 2026 — 
 est passé »), les deux chiffres perdent leur « à venir » (« Sorties »,
 « Entrées ») et le verdict donne le solde réellement constaté le dernier jour. Sur un
 mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année ou
-« Toutes périodes » le ramènent au mois en cours.</p>
+« Toute la période » le ramènent au mois en cours.</p>
 <p>La liste <b>« Prochaines échéances : »</b> nomme, une par ligne, les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
 Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
@@ -675,7 +675,7 @@ telles quelles.</p>
 « que me reste-t-il à pointer ? » : il affiche <b>toutes</b> les opérations en
 attente, sans se limiter à la période choisie en haut de la fenêtre — une ligne
 oubliée le mois dernier ne peut donc pas passer inaperçue. Le compteur de droite
-le rappelle en affichant « toutes périodes ». Les autres choix (Pointées,
+le rappelle en affichant « toute la période ». Les autres choix (Pointées,
 Échéances prévues) restent, eux, bornés à la période affichée.</p>
 
 <h2>6. Outils du menu de gauche</h2>
@@ -731,7 +731,7 @@ la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
 ou bouton ✏️.</p>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
-<p>Recherche dans <b>tout l'historique</b>, toutes périodes confondues : libellé,
+<p>Recherche dans <b>tout l'historique</b>, toute la période confondues : libellé,
 note, catégorie, montant ou date. Les montants peuvent être tapés comme à l'écran :
 <code>-45,30 €</code> fonctionne (le signe et le € sont ignorés). Plusieurs mots =
 tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>

@@ -618,7 +618,7 @@ class BilanView(QWidget):
             return "Mouvement du mois"
         if len(period) == 4:
             return "Mouvement de l'année"
-        return "Mouvement — toutes périodes"
+        return "Mouvement — toute la période"
 
     @staticmethod
     def _couleur_du_signe(valeur: float):

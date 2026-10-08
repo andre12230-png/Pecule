@@ -74,7 +74,7 @@ def test_in_period():
 
 
 def test_period_label():
-    assert period_label("all") == "Toutes périodes"
+    assert period_label("all") == "Toute la période"
     assert period_label("2026") == "Année 2026"
     assert period_label("2026-06") == "Juin 2026"
     assert period_label("2026-13") == "2026-13"      # mois invalide → tel quel
