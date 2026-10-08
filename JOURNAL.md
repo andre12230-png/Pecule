@@ -21,6 +21,21 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 (6) — Partie 2 de l'audit : imports et documentation (commits locaux)
+
+**Fait.** Imports : le « Texte Unicode » de Windows (UTF-16) est décodé, pour le CSV, le QIF
+et l'OFX ; « 12,50- » et le signe moins typographique « − » sont lus ; quand aucune
+opération n'est retenue, le message cherche la cause dans le fichier même si des lignes ont
+été comptées illisibles ; un QIF ou un OFX dont toutes les opérations sont illisibles le dit,
+avec leur nombre ; un QIF dont l'ordre jour / mois a dû être deviné est signalé dans le
+compte rendu. Notice : glossaire à « Toute la période », règles automatiques pour tous les
+imports, définition du pointage reformulée. README : date du jour proposée à un compte neuf
+dans Paramètres, commandes en `py`. Douze tests ajoutés, vus en échec ; 671 tests sur 671.
+**Pourquoi.** Suite de l'audit du jour.
+**Reste.** Pas d'exe. Laissés : replis « 2025-01-01 » écrits dans le code (sans effet, la
+base pose sa date à l'ouverture), CSV renommé en .ofx (message sur les colonnes), filtre des
+lignes « dépenses carte ». Partie 3 (design) et les quatre choix de l'auteur.
+
 ## 2026-10-08 (5) — Les cinq points prioritaires de l'audit corrigés (commits locaux)
 
 **Fait.** (1) Base abîmée : message en français au démarrage, qui dit où sont les
