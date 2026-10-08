@@ -110,7 +110,7 @@ _LIGNE_PAIRE = "#F5F5F0"   # une ligne sur deux dans les tableaux
 _ENCRE       = "#000000"   # tous les textes
 _SELECTION   = "#316AC5"   # fond de la ligne sélectionnée
 _BULLE       = "#FFFFDC"   # fond des info-bulles
-_GRIS_PALE   = "#6B6B6B"   # texte d'invite et libellés désactivés
+_GRIS_PALE   = "#666666"   # texte d'invite et libellés désactivés
 _LIEN        = "#0B5AA8"
 _LIEN_VU     = "#6A3FA0"
 

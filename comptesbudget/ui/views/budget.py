@@ -164,7 +164,7 @@ class BudgetView(QWidget):
             it_reste.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             if budget:
                 if reste < 0:
-                    it_reste.setForeground(QBrush(QColor("#C0392B")))
+                    it_reste.setForeground(QBrush(QColor("#BC3729")))
                 else:
                     it_reste.setForeground(QBrush(QColor("#18733A")))
 
@@ -176,7 +176,7 @@ class BudgetView(QWidget):
             bar.setValue(min(int(ratio), 100) if budget > 0 else 0)
             # « 89 % » avec son espace (insécable), comme partout ailleurs.
             bar.setFormat(f"{ratio:.0f}\xa0%" if budget else "—")
-            color = "#27AE60" if ratio < 80 else ("#E67E22" if ratio < 100 else "#C0392B")
+            color = "#27AE60" if ratio < 80 else ("#E67E22" if ratio < 100 else "#BC3729")
             # Budget dépassé : la barre est pleine et rouge, le chiffre s'y
             # écrit en blanc (5,44 pour 1 ; en noir, 3,86 seulement).
             encre = "#FFFFFF" if ratio >= 100 and budget else "#000000"

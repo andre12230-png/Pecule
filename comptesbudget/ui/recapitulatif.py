@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from ..accords import pluriel
 from ..utils import fmt_date_fr, fmt_euro
 
-ROUGE = "#C0392B"
+ROUGE = "#BC3729"
 VERT = "#18733A"
 
 # Titres courts : « Dernière opération pointée » coupait la colonne.

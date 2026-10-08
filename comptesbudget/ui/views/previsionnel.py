@@ -157,7 +157,7 @@ class PrevisionnelView(QWidget):
                 QStandardItem("✔" if r["actif"] else ""),
             ]
             row[1].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[1].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
+            row[1].setForeground(QBrush(QColor("#BC3729" if r["montant"] < 0 else "#18733A")))
             row[6].setTextAlignment(Qt.AlignCenter)
             tris = [r["libelle"].lower(), r["montant"], r["categorie"].lower(),
                     (r["type"] or "").lower(), r["frequency"], r["start_date"],
@@ -197,7 +197,7 @@ class PrevisionnelView(QWidget):
                 cellule_categorie(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[2].setForeground(QBrush(QColor("#C0392B" if r["montant"] < 0 else "#18733A")))
+            row[2].setForeground(QBrush(QColor("#BC3729" if r["montant"] < 0 else "#18733A")))
             for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
                                      r["montant"], r["categorie"].lower()]):
                 it.setData(tri, SORT_ROLE)

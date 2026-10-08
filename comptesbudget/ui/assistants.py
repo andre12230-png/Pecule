@@ -145,12 +145,12 @@ class DuplicatesDialog(QDialog):
             it_check = case_a_cocher(True)
             it_check.setData(t["id"], Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#C0392B")))
+            it_check.setForeground(QBrush(QColor("#BC3729")))
 
             it_montant = QStandardItem(fmt_euro(t.get("montant", 0)))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if t.get("montant", 0) < 0 else "#18733A")))
+                QBrush(QColor("#BC3729" if t.get("montant", 0) < 0 else "#18733A")))
 
             it_cat = cellule_categorie(t.get("categorie", ""))
 
@@ -264,7 +264,7 @@ class PrefillRecurringDialog(QDialog):
             it_montant = QStandardItem(fmt_euro(c["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if c["montant"] < 0 else "#18733A")))
+                QBrush(QColor("#BC3729" if c["montant"] < 0 else "#18733A")))
 
             it_cat = cellule_categorie(c["categorie"])
 
@@ -434,7 +434,7 @@ class GenererEcheancesDialog(QDialog):
             it_montant = QStandardItem(fmt_euro(e["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#C0392B" if e["montant"] < 0 else "#18733A")))
+                QBrush(QColor("#BC3729" if e["montant"] < 0 else "#18733A")))
 
             it_cat = cellule_categorie(e["categorie"])
 

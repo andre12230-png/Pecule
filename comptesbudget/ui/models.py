@@ -274,7 +274,7 @@ class TxTableModel(QStandardItemModel):
                 "Elle sera complétée automatiquement à l'import du relevé.\n\n"
                 + AIDE_POINTAGE)
         else:
-            items[0].setForeground(QBrush(QColor("#6B6B6B")))
+            items[0].setForeground(QBrush(QColor("#666666")))
         if not prevue:
             items[0].setToolTip(AIDE_POINTAGE)
         items[0].setTextAlignment(Qt.AlignCenter)
@@ -301,7 +301,7 @@ class TxTableModel(QStandardItemModel):
         # Alignement des montants à droite
         items[7].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         items[8].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        items[7].setForeground(QBrush(QColor("#C0392B")))
+        items[7].setForeground(QBrush(QColor("#BC3729")))
         items[8].setForeground(QBrush(QColor("#18733A")))
 
         self.appendRow(items)

@@ -585,7 +585,7 @@ class TxDialog(QDialog):
         msg = f"{pluriel(n, 'opération', 'opérations')} {accorde(n, 'correspondante', 'correspondantes')}{suffix}."
         if len(cats) > 1 and already_classed:
             msg += f" ⚠️ Catégories existantes : {', '.join(f'« {c} »' for c in already_classed)}."
-            self.rule_match_info.setStyleSheet("color:#C0392B; font-size:10pt; font-weight:600")
+            self.rule_match_info.setStyleSheet("color:#BC3729; font-size:10pt; font-weight:600")
         else:
             self.rule_match_info.setStyleSheet("color:#18733A; font-size:10pt")
         self.rule_match_info.setText(msg)

@@ -91,17 +91,17 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     H.append('<table cellpadding="6" cellspacing="0" width="100%">')
     kpis = [
         ("Revenus", euro(revenus), "#18733A"),
-        ("Dépenses", euro(depenses), "#C0392B"),
+        ("Dépenses", euro(depenses), "#BC3729"),
     ]
     if mis_de_cote:
         kpis.append(("Mis de côté (Épargne)", euro(mis_de_cote), "#18733A"))
     kpis += [
-        ("Mouvement du mois", euro(net), "#18733A" if net >= 0 else "#C0392B"),
+        ("Mouvement du mois", euro(net), "#18733A" if net >= 0 else "#BC3729"),
         # Virgule décimale, comme le Bilan (« 53,9 % », pas « 53.9 % »).
         ("Taux d'épargne", f"{taux:.1f}".replace(".", ",") + "&nbsp;%",
-         "#18733A" if taux >= 0 else "#C0392B"),
+         "#18733A" if taux >= 0 else "#BC3729"),
         (f"Solde bancaire réel au {fmt_date_fr(arret)}", euro(solde_fin),
-         "#1F3A6B" if solde_fin >= 0 else "#C0392B"),
+         "#1F3A6B" if solde_fin >= 0 else "#BC3729"),
     ]
     for lbl, val, col in kpis:
         H.append(f'<tr><td width="55%">{lbl}</td>'
@@ -122,11 +122,11 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
         for ratio, cat, b in reversed(rows):
             dep = spent_budget.get(cat, 0)
             reste = b - dep
-            col = "#C0392B" if ratio >= 100 else ("#7E5109" if ratio >= 85 else "#18733A")
+            col = "#BC3729" if ratio >= 100 else ("#7E5109" if ratio >= 85 else "#18733A")
             bg = ' bgcolor="#FDEDEB"' if ratio >= 100 else ""
             if dep:
                 pct = f'<font color="{col}"><b>{ratio:.0f}&nbsp;%</b></font>'
-                coul_reste = "#C0392B" if reste < 0 else "#18733A"
+                coul_reste = "#BC3729" if reste < 0 else "#18733A"
                 reste_html = f'<font color="{coul_reste}">{euro(reste)}</font>'
             else:
                 # Budget pas encore entamé : un zéro s'écrit sans couleur
@@ -163,7 +163,7 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
             H.append(f'<tr><td>{fmt_date_fr(t["date"])}</td>'
                      f'<td>{_esc(t.get("libelle", ""))}</td>'
                      f'<td>{_esc(t.get("categorie", ""))}</td>'
-                     f'<td align="right"><font color="#C0392B">{euro(t["montant"])}</font></td></tr>')
+                     f'<td align="right"><font color="#BC3729">{euro(t["montant"])}</font></td></tr>')
         H.append("</table>")
 
     return "\n".join(H)

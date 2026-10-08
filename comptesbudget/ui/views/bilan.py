@@ -107,7 +107,7 @@ class CatRowsWidget(QWidget):
                 self.lay.addWidget(s, i, 2, Qt.AlignRight | Qt.AlignVCenter)
             amt = QLabel(fmt_euro(amount))
             amt.setStyleSheet(
-                f"color: {'#C0392B' if amount < 0 else '#18733A'}; "
+                f"color: {'#BC3729' if amount < 0 else '#18733A'}; "
                 "font-weight:600; background: transparent")
             self.lay.addWidget(amt, i, 3, Qt.AlignRight | Qt.AlignVCenter)
         # Une rangée vide et extensible en dessous : sans elle, la grille
@@ -627,7 +627,7 @@ class BilanView(QWidget):
         if valeur > 0.005:
             return "#18733A"
         if valeur < -0.005:
-            return "#C0392B"
+            return "#BC3729"
         return None
 
     def _colorer_kpi(self, cle: str, couleur):
@@ -1795,7 +1795,7 @@ class BilanView(QWidget):
             # Découvert au moins un mois : la ligne du zéro, en rouge, montre
             # quand la courbe passe dessous.
             zero = QLineSeries()
-            zero.setPen(QPen(QColor("#C0392B"), 1))
+            zero.setPen(QPen(QColor("#BC3729"), 1))
             zero.append(0, 0)
             zero.append(len(points) - 1, 0)
             series.append(zero)

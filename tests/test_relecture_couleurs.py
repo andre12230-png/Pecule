@@ -19,9 +19,9 @@ UI = Path(comptesbudget.__file__).parent / "ui"
 # Palette de la charte (skill charte-applis, section 1).
 PALETTE = {
     "#ECE9D8", "#FAF8F1", "#BEC7D4", "#E8EEF7", "#C9D6E8", "#1F3A6B", "#B0BFD3",
-    "#FFFFFF", "#F5F5F0", "#000000", "#555555", "#666666", "#6B6B6B", "#5A5A5A",
+    "#FFFFFF", "#F5F5F0", "#000000", "#555555", "#666666", "#5A5A5A",
     "#A9A9A9", "#316AC5", "#FCFCFC", "#808080", "#222222", "#EAF2FB", "#D8E7F7",
-    "#6F7885", "#18733A", "#C0392B", "#FEF5E7", "#E67E22", "#7E5109", "#FFFBE6",
+    "#6F7885", "#18733A", "#BC3729", "#FEF5E7", "#E67E22", "#7E5109", "#FFFBE6",
     "#E8D77B", "#FDEDEB", "#E74C3C", "#7B241C", "#0B5AA8", "#6A3FA0", "#FFFFDC",
     # Bandeau favorable (vert) de Pécule, ajouté à la charte le 30/09/2026.
     "#EAF6EC", "#229954", "#1A5E32",
@@ -119,3 +119,12 @@ def test_les_exceptions_sont_utilisees():
     tout = "".join(t for f in UI.rglob("*.py") for _l, t in _textes_du_code(f)).upper()
     for c in EXCEPTIONS:
         assert c in tout, f"{c} n'est plus employée : la retirer des exceptions"
+
+
+def test_gris_et_rouge_se_lisent_sur_le_creme():
+    """08/10/2026 : le gris #6B6B6B (4,37) et le rouge #C0392B (4,46) restaient
+    sous 4,5 sur le crème des fenêtres et des boîtes de dialogue. Remplacés
+    par #666666 et #BC3729 dans les trois applis."""
+    from comptesbudget.app import _GRIS_PALE
+    for couleur in (_GRIS_PALE, "#BC3729"):
+        assert _contraste(couleur, "#ECE9D8") >= 4.5, couleur

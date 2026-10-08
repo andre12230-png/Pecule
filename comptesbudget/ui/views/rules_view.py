@@ -102,7 +102,7 @@ class RulesView(QWidget):
             sens = r.get("sens") or ""
             it_sens = QStandardItem(self.SENS_LBL.get(sens, "Les deux"))
             if sens == "debit":
-                it_sens.setForeground(QBrush(QColor("#C0392B")))
+                it_sens.setForeground(QBrush(QColor("#BC3729")))
             elif sens == "credit":
                 it_sens.setForeground(QBrush(QColor("#18733A")))
             items = [
