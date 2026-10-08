@@ -919,7 +919,11 @@ SYNC_VERSION = 3
 #          separes dans les cases de montant, plus de vide dans Categories,
 #          saisie recurrente alignee sur la saisie d'operation, libelle
 #          lisible a la largeur minimale de la fenetre.
-APP_VERSION = "1.41.4"
+# 1.41.5 : Cartes et tuiles du Bilan arrondies a 12 px, comme les deux autres
+#          applis. << Toute la periode >> au lieu de << Toutes periodes >>
+#          (menu, Bilan, Operations, Notice). Gris et rouge un peu plus
+#          fonces, lisibles sur le fond creme.
+APP_VERSION = "1.41.5"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

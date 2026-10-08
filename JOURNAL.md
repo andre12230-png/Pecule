@@ -21,6 +21,14 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 (3) — Version 1.41.5 installée chez l'auteur
+
+**Fait.** Numéro 1.41.5 (constants.py, Lisez-moi.txt) : cartes et tuiles du Bilan à
+12 px, « Toute la période », gris et rouge lisibles sur le crème. Exe construit et
+installé chez l'auteur (pas de publication).
+**Pourquoi.** Règle d'un numéro par exe installé.
+**Reste.** Version non publiée (sortie de début novembre).
+
 ## 2026-10-08 (2) — Gris et rouge lisibles sur le crème
 
 **Fait.** Le gris `#6B6B6B` (4,37 pour 1 sur le crème) devient `#666666` (4,71) et le rouge
