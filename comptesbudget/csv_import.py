@@ -51,6 +51,12 @@ def lire_montant(s: str) -> Optional[float]:
     t = re.sub(r"[\s\xa0 €]", "", s)
     if not t:
         return None
+    # Le signe moins d'un tableur (« − », U+2212) vaut le tiret ; un signe
+    # placé APRÈS le nombre (« 12,50- », certains exports) aussi. Les deux
+    # étaient refusés (audit du 08/10/2026).
+    t = t.replace("−", "-")
+    if t.endswith("-") and not t.startswith("-"):
+        t = "-" + t[:-1]
     negatif = t.startswith("-") or (t.startswith("(") and t.endswith(")"))
     t = t.strip("()").lstrip("+-").strip()
     if not t:
@@ -351,7 +357,17 @@ def _decode_csv(raw: bytes) -> str:
     valide, donc si le décodage réussit c'est bien de l'UTF-8 (ou de l'ASCII
     pur, identique dans les deux cas). Sinon, Windows-1252 — l'encodage
     habituel des banques françaises — puis latin-1 en dernier recours
-    (celui-ci ne peut pas échouer)."""
+    (celui-ci ne peut pas échouer).
+
+    Le « Texte Unicode » de Windows (UTF-16) se reconnaît à sa marque de
+    tête, ou, sans elle, aux octets nuls entre les lettres : décodé en
+    cp1252, il passait sans erreur mais illisible (« aucune ligne ne nomme
+    les colonnes », audit du 08/10/2026)."""
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return raw.decode("utf-16")
+    debut = raw[:200]
+    if debut and debut.count(b"\x00") > len(debut) // 4:
+        return raw.decode("utf-16-be" if debut[0] == 0 else "utf-16-le")
     try:
         return raw.decode("utf-8-sig")   # « -sig » : ignore un éventuel BOM
     except UnicodeDecodeError:
