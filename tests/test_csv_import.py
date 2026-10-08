@@ -875,3 +875,30 @@ def test_recapitulatif_ecarte_si_les_achats_sont_detailles(tmp_path):
                "06/09/2026;PRLV SEPA EDF;-50,00\n")
     res = import_csv(p, db)
     assert (res.importees, res.recaps) == (2, 1)
+
+
+def test_ligne_datee_sans_montant_n_est_pas_une_operation(tmp_path):
+    """« 30/06/2024;SOLDE AU 30/06/2024; » devenait une operation de 0,00 €,
+    pointee et comptee parmi les importees (audit du 08/10/2026). Elle est
+    maintenant ecartee et comptee, comme une ligne illisible ; un « 0,00 »
+    ecrit, lui, reste lu."""
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "solde.csv",
+               "Date;Libelle;Montant\n"
+               "30/06/2024;SOLDE AU 30/06/2024;\n"
+               "01/07/2024;LOYER;-650,00\n")
+    res = import_csv(p, db)
+    assert res.importees == 1
+    assert res.illisibles == 1
+    libelles = [t["libelle"] for t in db.list_tx()]
+    assert not any("SOLDE" in lib for lib in libelles)
+
+
+def test_debit_et_credit_vides_ne_font_pas_une_operation(tmp_path):
+    db = Database(str(tmp_path / "t.db"))
+    p = _write(tmp_path, "dc.csv",
+               "Date;Libelle;Debit;Credit\n"
+               "30/06/2024;SOLDE AU 30/06/2024;;\n"
+               "01/07/2024;LOYER;650,00;\n")
+    res = import_csv(p, db)
+    assert res.importees == 1 and res.illisibles == 1

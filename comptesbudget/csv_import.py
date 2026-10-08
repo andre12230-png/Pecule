@@ -536,6 +536,15 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
         d_iso = parse_french_date(cols[iDate])
         if not d_iso:
             return None, 0.0, True
+        # Une ligne datée dont toutes les cases de montant sont vides (« SOLDE
+        # AU 30/06 ») n'est pas une opération : elle devenait une opération
+        # de 0,00 €, pointée (audit du 08/10/2026). Elle compte parmi les
+        # lignes non importées, signalées en fin d'import. Un « 0,00 » écrit,
+        # lui, reste lu.
+        cases = [cols[i] for i in (iMontant, iDebit, iCredit)
+                 if 0 <= i < len(cols)]
+        if not any(c.strip() for c in cases):
+            return d_iso, 0.0, False
         if 0 <= iMontant < len(cols):
             montant, lisible = _parse_amount_checked(cols[iMontant])
         else:
