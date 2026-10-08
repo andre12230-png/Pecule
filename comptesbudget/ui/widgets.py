@@ -104,7 +104,8 @@ def demander_montant(parent, titre: str, question: str, valeur: float = 0.0,
 
 
 def boite_de_confirmation(parent, titre: str, question: str, action: str,
-                          garder: str = "Annuler", danger: bool = False):
+                          garder: str = "Annuler", danger: bool = False,
+                          action_par_defaut: bool = False):
     """Construit, sans l'afficher, la boîte qui demande confirmation d'une
     action sans retour. Renvoie (boîte, bouton d'action).
 
@@ -113,6 +114,8 @@ def boite_de_confirmation(parent, titre: str, question: str, action: str,
     - Le bouton d'action dit ce qu'il fait (« Supprimer la règle »), au lieu
       d'un « Oui » qui oblige à relire la question.
     - `danger` : une suppression montre l'icône d'avertissement.
+    - `action_par_defaut` : pour une action qui se défait (suppression
+      annulable, archivage), l'action reste le bouton par défaut.
 
     Laissée à Qt, une question mettait « Oui » par défaut (relecture du
     30/09/2026)."""
@@ -123,17 +126,19 @@ def boite_de_confirmation(parent, titre: str, question: str, action: str,
     boite.setText(question)
     bouton_action = boite.addButton(action, QMessageBox.AcceptRole)
     bouton_garder = boite.addButton(garder, QMessageBox.RejectRole)
-    boite.setDefaultButton(bouton_garder)
+    boite.setDefaultButton(bouton_action if action_par_defaut
+                           else bouton_garder)
     boite.setEscapeButton(bouton_garder)
     return boite, bouton_action
 
 
 def confirmer(parent, titre: str, question: str, action: str,
-              garder: str = "Annuler", danger: bool = False) -> bool:
+              garder: str = "Annuler", danger: bool = False,
+              action_par_defaut: bool = False) -> bool:
     """Pose la question (voir boite_de_confirmation). True seulement si
     l'utilisateur a cliqué le bouton d'action."""
     boite, bouton_action = boite_de_confirmation(
-        parent, titre, question, action, garder, danger)
+        parent, titre, question, action, garder, danger, action_par_defaut)
     boite.exec()
     return boite.clickedButton() is bouton_action
 

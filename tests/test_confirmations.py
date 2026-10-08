@@ -75,7 +75,8 @@ def _espionner(monkeypatch, module, reponse=False):
     from PySide6.QtWidgets import QMessageBox
     appels = []
 
-    def espion(parent, titre, question, action, garder="Annuler", danger=False):
+    def espion(parent, titre, question, action, garder="Annuler", danger=False,
+               action_par_defaut=False):
         appels.append({"titre": titre, "question": question,
                        "action": action, "danger": danger})
         return reponse

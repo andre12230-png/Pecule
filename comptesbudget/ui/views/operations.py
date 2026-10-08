@@ -698,9 +698,10 @@ class OperationsView(QWidget):
         # par confirmer().
         titre = ("Supprimer l'opération" if len(ids) == 1
                  else "Supprimer les opérations")
-        if QMessageBox.question(self, titre, question,
-                                QMessageBox.Yes | QMessageBox.No,
-                                QMessageBox.Yes) != QMessageBox.Yes:
+        if not confirmer(self, titre, question,
+                         action=("Supprimer" if len(ids) == 1
+                                 else f"Supprimer les {len(ids)}"),
+                         danger=True, action_par_defaut=True):
             return
         # Copie complète des lignes AVANT de les effacer : c'est ce que le
         # bouton « Annuler » remettra en place.

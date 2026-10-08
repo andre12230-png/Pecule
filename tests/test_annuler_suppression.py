@@ -55,8 +55,9 @@ def test_bandeau_annuler_apres_suppression(qapp, tmp_path, monkeypatch):
     vue.reload_from_db()
     assert not vue.bandeau_annuler.isVisibleTo(vue)
 
-    monkeypatch.setattr(QMessageBox, "question",
-                        lambda *a, **k: QMessageBox.Yes)
+    # La question passe par confirmer() depuis le 08/10/2026.
+    import comptesbudget.ui.views.operations as module_operations
+    monkeypatch.setattr(module_operations, "confirmer", lambda *a, **k: True)
     from PySide6.QtCore import QItemSelectionModel
     vue.table.selectRow(0)
     vue.table.selectionModel().select(
@@ -80,8 +81,9 @@ def test_le_bandeau_disparait_en_changeant_de_compte(qapp, tmp_path, monkeypatch
     vue = OperationsView(db)
     vue.period = "all"
     vue.reload_from_db()
-    monkeypatch.setattr(QMessageBox, "question",
-                        lambda *a, **k: QMessageBox.Yes)
+    # La question passe par confirmer() depuis le 08/10/2026.
+    import comptesbudget.ui.views.operations as module_operations
+    monkeypatch.setattr(module_operations, "confirmer", lambda *a, **k: True)
     vue.table.selectRow(0)
     vue.delete_selected()
     assert vue.bandeau_annuler.isVisibleTo(vue)
@@ -100,8 +102,9 @@ def test_le_bandeau_reste_apres_un_rafraichissement(qapp, tmp_path, monkeypatch)
     vue = OperationsView(db)
     vue.period = "all"
     vue.reload_from_db()
-    monkeypatch.setattr(QMessageBox, "question",
-                        lambda *a, **k: QMessageBox.Yes)
+    # La question passe par confirmer() depuis le 08/10/2026.
+    import comptesbudget.ui.views.operations as module_operations
+    monkeypatch.setattr(module_operations, "confirmer", lambda *a, **k: True)
     vue.table.selectRow(0)
     vue.delete_selected()
     vue.reload_from_db()

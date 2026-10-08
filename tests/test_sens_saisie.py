@@ -64,9 +64,11 @@ def test_le_formulaire_demande_confirmation(qapp, monkeypatch):
 
     def _question(parent, titre, texte, *a, **kw):
         posees.append(texte)
-        return QMessageBox.No
+        return False                     # « Revenir au sens »
 
-    monkeypatch.setattr(QMessageBox, "question", staticmethod(_question))
+    # La question passe par confirmer() depuis le 08/10/2026.
+    import comptesbudget.ui.dialogs as module_dialogs
+    monkeypatch.setattr(module_dialogs, "confirmer", _question)
     dlg._validate_and_accept()
     assert posees, "aucune question posée sur le sens de l'opération"
     assert dlg.result() == 0, "le formulaire s'est fermé malgré le « Non »"

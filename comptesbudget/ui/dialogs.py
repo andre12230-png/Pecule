@@ -23,7 +23,7 @@ from ..accords import accorde, pluriel
 from ..erreurs import erreur_en_clair
 from ..labels import build_libelle_profiles
 from .widgets import (
-    MontantSpinBox, boutons_enregistrer_annuler, demander_montant,
+    MontantSpinBox, boutons_enregistrer_annuler, confirmer, demander_montant,
 )
 
 # Messages de saisie incomplète : ce qui manque, puis comment faire.
@@ -459,10 +459,10 @@ class TxDialog(QDialog):
                                     if self.rb_debit.isChecked()
                                     else self.montant.value())
         if alerte:
-            rep = QMessageBox.question(
-                self, "Sens de l'opération", alerte,
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if rep != QMessageBox.Yes:
+            # Boutons qui disent l'action (audit du 08/10/2026 : Oui / Non).
+            if not confirmer(self, "Sens de l'opération", alerte,
+                             action="Enregistrer quand même",
+                             garder="Revenir au sens"):
                 # On ramène l'utilisateur sur le choix du sens : c'est là que
                 # se corrige l'erreur en un clic.
                 self.rb_credit.setFocus()
@@ -949,13 +949,12 @@ class ComptesDialog(QDialog):
         else:
             ce_qui_part = (f"Ses {pluriel(n, 'opération')}, ses budgets et "
                            "ses récurrences seront")
-        rep = QMessageBox.question(
-            self, "Supprimer le compte",
-            f"Supprimer le compte « {nom} » ?\n\n"
-            f"{ce_qui_part} "
-            f"définitivement effacés. Cette action est irréversible.",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if rep != QMessageBox.Yes:
+        if not confirmer(
+                self, "Supprimer le compte",
+                f"Supprimer le compte « {nom} » ?\n\n"
+                f"{ce_qui_part} "
+                f"définitivement effacés. Cette action est irréversible.",
+                action="Supprimer le compte", garder="Garder", danger=True):
             return
         try:
             self.db.delete_compte(cid)
@@ -1093,14 +1092,14 @@ class ArchivesDialog(QDialog):
             f"  • {self.db.nom_compte(c)} : "
             f"{pluriel(self.db.a_archiver(jusqua, c), 'opération', 'opérations')}"
             for c in comptes)
-        if QMessageBox.question(
+        # Rien n'est supprimé, tout se rétablit : l'action reste par défaut.
+        if not confirmer(
                 self, "Archiver",
                 f"Mettre de côté les opérations jusqu'au "
                 f"{fmt_date_fr(jusqua)} inclus ?\n\n{detail}\n\n"
                 f"Rien n'est supprimé : vous pourrez les revoir avec la case "
                 f"« Voir les archives », ou tout rétablir.",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes) != QMessageBox.Yes:
+                action="Archiver", action_par_defaut=True):
             return
         n = 0
         with self.db.batch():
@@ -1121,11 +1120,10 @@ class ArchivesDialog(QDialog):
             f"  • {self.db.nom_compte(c)} : "
             f"{pluriel(self.db.nb_archivees(c), 'opération', 'opérations')}"
             for c in comptes)
-        if QMessageBox.question(
+        if not confirmer(
                 self, "Tout rétablir",
                 f"Remettre à la vue toutes les opérations archivées ?\n\n"
-                f"{detail}", QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.Yes) != QMessageBox.Yes:
+                f"{detail}", action="Tout rétablir", action_par_defaut=True):
             return
         n = 0
         with self.db.batch():

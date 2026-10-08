@@ -760,14 +760,16 @@ class MainWindow(QMainWindow):
         """Un solde de 0,00 € vient le plus souvent d'une validation par
         réflexe, le champ n'ayant pas été rempli. On le fait confirmer :
         True si l'utilisateur maintient ce zéro."""
-        reponse = QMessageBox.question(
-            self, "Solde de départ",
-            phrase + "<br><br>"
+        # Boutons qui disent l'action (audit du 08/10/2026 : Oui / Non).
+        # confirmer() écrit en texte simple : on retire le gras de la phrase.
+        phrase = phrase.replace("<b>", "").replace("</b>", "")
+        return confirmer(
+            self, "Solde de départ à zéro",
+            phrase + "\n\n"
             "Ce n'est juste que si votre compte était vide à cette date. "
             "Sinon, le solde affiché par Pécule sera faux de tout ce que "
-            "vous aviez en banque.<br><br>Enregistrer quand même ?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        return reponse == QMessageBox.Yes
+            "vous aviez en banque.",
+            action="Enregistrer 0,00 €", garder="Corriger le solde")
 
     def _solde_jamais_donne(self) -> bool:
         """Le solde de départ du compte n'a jamais été saisi (NULL), ce qui

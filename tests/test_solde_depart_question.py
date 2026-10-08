@@ -77,12 +77,12 @@ def _banque(db):
 
 def test_zero_demande_confirmation_et_peut_etre_refuse(qapp, tmp_path,
                                                       monkeypatch):
-    from PySide6.QtWidgets import QMessageBox
     db, fenetre, _ = _fenetre(tmp_path, monkeypatch, [0.0])
     confirmations = []
-    monkeypatch.setattr(
-        QMessageBox, "question",
-        staticmethod(lambda *a, **k: confirmations.append(a) or QMessageBox.No))
+    # La question passe par confirmer() depuis le 08/10/2026.
+    from comptesbudget.ui import main_window
+    monkeypatch.setattr(main_window, "confirmer",
+                        lambda *a, **k: confirmations.append(a) or False)
     assert fenetre.action_premier_releve() is True
     assert len(confirmations) == 1
     # Refusé : rien n'est enregistré, le bandeau orange reste là.
@@ -93,10 +93,9 @@ def test_zero_demande_confirmation_et_peut_etre_refuse(qapp, tmp_path,
 
 def test_zero_confirme_est_enregistre(qapp, tmp_path, monkeypatch):
     """Un compte réellement à zéro ce jour-là reste possible."""
-    from PySide6.QtWidgets import QMessageBox
     db, fenetre, _ = _fenetre(tmp_path, monkeypatch, [0.0])
-    monkeypatch.setattr(QMessageBox, "question",
-                        staticmethod(lambda *a, **k: QMessageBox.Yes))
+    from comptesbudget.ui import main_window
+    monkeypatch.setattr(main_window, "confirmer", lambda *a, **k: True)
     fenetre.action_premier_releve()
     assert _banque(db) == 0.0
     fenetre.refresh_all()
