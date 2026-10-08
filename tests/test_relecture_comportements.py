@@ -582,3 +582,29 @@ def test_boutons_au_dessus_du_tableau(qapp, db):
         tableau = _rang_dans_la_page(vue, vue.table)
         for b in boutons:
             assert _rang_dans_la_page(vue, b) < tableau, (nom, b.text())
+
+
+def test_pas_de_verdict_sans_solde_de_depart(qapp, tmp_path):
+    """Audit du 08/10/2026 : sans solde de départ, le bandeau affichait
+    « ✅ … aucun découvert prévu », calculé depuis 0 €, à côté de l'alerte
+    « Solde de départ non renseigné ». Pas de verdict tant qu'il manque."""
+    from comptesbudget.ui.views.bilan import BilanView
+    d = Database(str(tmp_path / "neuve.db"))
+    jour = date.today().isoformat()
+    d.insert_tx(_tx(id="edf", date=jour, date_valeur=jour, type="Prelevement",
+                    libelle="EDF", montant=-80.0, pointee=0))
+    vue = BilanView(d)
+    vue.refresh()
+    assert vue.solde_depart_alert.isVisibleTo(vue)
+    assert not vue.verdict_banner.isVisibleTo(vue)
+    # Le bandeau garde ce qu'il a à dire : l'échéance encore à passer.
+    assert vue.mois_ligne.isVisibleTo(vue)
+
+
+def test_pas_de_cadre_vide_sur_une_base_neuve(qapp, tmp_path):
+    """Sans solde ni opération, le bandeau du mois n'a rien à dire : il ne
+    reste pas affiché comme un cadre vert vide."""
+    from comptesbudget.ui.views.bilan import BilanView
+    vue = BilanView(Database(str(tmp_path / "vide.db")))
+    vue.refresh()
+    assert not vue.mois_banner.isVisibleTo(vue)

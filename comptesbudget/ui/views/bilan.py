@@ -909,6 +909,14 @@ class BilanView(QWidget):
         elle : un mois clos se raconte au passé — où il a fini, jusqu'où il est
         descendu — un mois à venir se dit au conditionnel, et le mois en cours
         reste un verdict pour agir, tourné vers le prochain découvert."""
+        # Sans solde de départ, le calcul part de 0 € : « ✅ aucun découvert
+        # prévu » rassurait à tort (audit du 08/10/2026). Pas de verdict ;
+        # l'alerte « Solde de départ non renseigné », juste dessous, dit quoi
+        # faire.
+        compte = self.db.get_compte()
+        if compte is None or compte["solde_initial"] is None:
+            self.verdict_banner.setVisible(False)
+            return
         mois, _consultation = self._mois_du_bandeau()
         solde_fin = self._solde_fin_de_mois(txs, mois, solde_compte)
         an, m = int(mois[:4]), int(mois[5:7])
@@ -1558,6 +1566,10 @@ class BilanView(QWidget):
         self._refresh_verdict_banner(txs_prevus, solde_compte)
         self._refresh_cb_banner(txs_prevus, solde_compte)
         self._refresh_mois_banner(txs_prevus, solde_compte)
+        # Rien à dire (ni verdict, ni « reste à passer ») : pas de cadre vert
+        # vide (audit du 08/10/2026, base sans solde de départ).
+        self.mois_banner.setVisible(not self.verdict_banner.isHidden()
+                                    or not self.mois_ligne.isHidden())
 
         n_rev = sum(1 for t in active if t["montant"] > 0)
         n_dep = sum(1 for t in active if t["montant"] < 0)
