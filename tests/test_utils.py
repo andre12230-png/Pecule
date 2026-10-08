@@ -233,7 +233,7 @@ def test_rotation_ne_touche_pas_aux_sauvegardes_manuelles(tmp_path, monkeypatch)
     backup_db = u.backup_db
 
     base = tmp_path / "comptes.db"
-    base.write_bytes(b"donnees")
+    _vraie_base(base)    # une vraie base : la sauvegarde la verifie (08/10/2026)
     dossier = tmp_path / "sauvegardes"
     dossier.mkdir()
     manuelles = [f"comptes-avant-essai-{i}.db" for i in range(10)]
@@ -281,7 +281,7 @@ def test_echec_de_sauvegarde_n_est_plus_muet(tmp_path, monkeypatch):
     import comptesbudget.utils as u
     monkeypatch.setattr(u, "_data_dir", lambda: str(tmp_path))
     base = tmp_path / "comptes.db"
-    base.write_bytes(b"donnees")
+    _vraie_base(base)    # une vraie base : la sauvegarde la verifie (08/10/2026)
 
     def disque_plein(*a, **k):
         raise OSError(28, "Il n'y a plus d'espace disponible sur le disque")
@@ -318,3 +318,66 @@ def test_suggest_category_revenus_seulement_pour_une_rentree():
     # Un virement reçu peut être un remboursement d'un proche : à trancher
     # par l'utilisateur, pas un revenu d'office.
     assert suggest_category("VIREMENT RECU DE M DUPONT", montant=50.0) is None
+
+
+# ── Base abîmée (audit du 08/10/2026) ─────────────────────────────────────
+# Une base illisible faisait échouer l'ouverture sans message compréhensible,
+# et la sauvegarde du jour pouvait copier la base déjà abîmée.
+
+def _vraie_base(chemin):
+    import sqlite3
+    con = sqlite3.connect(str(chemin))
+    con.execute("CREATE TABLE t (x)")
+    con.commit()
+    con.close()
+
+
+def test_base_saine_reconnait_une_base_abimee(tmp_path):
+    import comptesbudget.utils as u
+    bonne = tmp_path / "bonne.db"
+    _vraie_base(bonne)
+    abimee = tmp_path / "abimee.db"
+    abimee.write_bytes(b"ceci n'est pas une base")
+    tronquee = tmp_path / "tronquee.db"
+    tronquee.write_bytes(bonne.read_bytes()[:100])
+    assert u.base_saine(str(bonne))
+    assert not u.base_saine(str(abimee))
+    assert not u.base_saine(str(tronquee))
+
+
+def test_la_sauvegarde_ne_copie_pas_une_base_abimee(tmp_path, monkeypatch):
+    """La copie du jour est la seule bonne copie récente : une base abîmée
+    ne doit pas la remplacer."""
+    import pytest
+    import comptesbudget.utils as u
+    monkeypatch.setattr(u, "_data_dir", lambda: str(tmp_path))
+    base = tmp_path / "comptes.db"
+    base.write_bytes(b"ceci n'est pas une base")
+    with pytest.raises(u.BaseAbimee):
+        u.backup_db(str(base))
+    assert not list((tmp_path / "sauvegardes").glob("comptes-*.db")) \
+        if (tmp_path / "sauvegardes").exists() else True
+
+
+def test_le_demarrage_previent_d_une_base_abimee(monkeypatch):
+    """Au lieu d'un plantage (message technique en anglais), un message en
+    français qui dit où sont les sauvegardes, et rien n'est modifié."""
+    import sqlite3
+
+    import comptesbudget.app as a
+    vus = []
+
+    def illisible():
+        raise sqlite3.DatabaseError("file is not a database")
+    monkeypatch.setattr(a, "Database", illisible)
+    monkeypatch.setattr(a, "_prevenir_base_abimee",
+                        lambda: vus.append("prevenu"))
+    assert a._ouvrir_base() is None
+    assert vus == ["prevenu"]
+
+
+def test_le_message_de_base_abimee_dit_quoi_faire(tmp_path):
+    import comptesbudget.app as a
+    texte = a.message_base_abimee(str(tmp_path))
+    assert "sauvegardes" in texte and str(tmp_path) in texte
+    assert "comptes.db" in texte and "Rien n'a été modifié" in texte

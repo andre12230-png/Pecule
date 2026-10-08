@@ -34,6 +34,29 @@ class SauvegardeImpossible(OSError):
     droits refusés…). Le message porte la cause, à montrer à l'utilisateur."""
 
 
+class BaseAbimee(Exception):
+    """La base ne se lit pas comme une base SQLite saine. La sauvegarde du
+    jour ne la copie pas : elle remplacerait la seule bonne copie récente
+    (audit du 08/10/2026)."""
+
+
+def base_saine(path: str) -> bool:
+    """Vrai si la base s'ouvre et passe la vérification rapide de SQLite.
+
+    Ouverte en lecture seule : la vérifier ne la modifie jamais."""
+    import pathlib
+    import sqlite3
+    try:
+        uri = pathlib.Path(path).resolve().as_uri() + "?mode=ro"
+        con = sqlite3.connect(uri, uri=True)
+        try:
+            return con.execute("PRAGMA quick_check").fetchone()[0] == "ok"
+        finally:
+            con.close()
+    except sqlite3.DatabaseError:
+        return False
+
+
 def sauvegardes_a_garder(noms: list[str], keep: int = 10,
                          mois: int = 12) -> set[str]:
     """Parmi les noms de sauvegardes automatiques (comptes-AAAA-MM-JJ.db),
@@ -75,6 +98,11 @@ def backup_db(path: str = DB_PATH, keep: int = 10) -> Optional[str]:
     échoue — l'échec était muet (audit du 23/09/2026)."""
     if not os.path.exists(path):
         return None
+    # Une base abîmée n'est pas copiée : elle remplacerait la bonne copie
+    # du jour, ou deviendrait elle-même la « sauvegarde » (audit du
+    # 08/10/2026).
+    if not base_saine(path):
+        raise BaseAbimee(path)
     # Les sauvegardes suivent la base : même dossier qu'elle, jamais celui du
     # programme, qui est remplacé à chaque mise à jour.
     bdir = os.path.join(_data_dir(), "sauvegardes")

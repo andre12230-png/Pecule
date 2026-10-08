@@ -1,15 +1,17 @@
 """Point d'entrée de l'application."""
 import os
+import sqlite3
 import sys
 
-from PySide6.QtCore import QLibraryInfo, QLockFile, Qt, QTranslator
-from PySide6.QtGui import QColor, QIcon, QPalette, QPen
+from PySide6.QtCore import QLibraryInfo, QLockFile, Qt, QTranslator, QUrl
+from PySide6.QtGui import QColor, QDesktopServices, QIcon, QPalette, QPen
 from PySide6.QtWidgets import (
     QApplication, QMessageBox, QProxyStyle, QStyle, QStyleFactory, QToolTip,
 )
 
 from .erreurs import erreur_en_clair
-from .utils import _app_dir, _data_dir, backup_db, SauvegardeImpossible
+from .utils import (_app_dir, _data_dir, backup_db, BaseAbimee,
+                    SauvegardeImpossible)
 from .database import Database
 from .labels import charger_alias
 from .ui.main_window import MainWindow
@@ -189,6 +191,45 @@ def appliquer_theme_clair(app: QApplication) -> None:
     QToolTip.setPalette(palette_claire())
 
 
+def message_base_abimee(dossier: str) -> str:
+    """Ce que dit Pécule quand sa base ne se lit pas (audit du 08/10/2026 :
+    l'appli s'arrêtait sur un message technique en anglais)."""
+    sauvegardes = os.path.join(dossier, "sauvegardes")
+    return (
+        "Le fichier de vos comptes (comptes.db) est abîmé : Pécule ne peut "
+        "pas l'ouvrir. Rien n'a été modifié.\n\n"
+        "Vos sauvegardes automatiques, une par jour, sont dans :\n"
+        f"{sauvegardes}\n\n"
+        "Pour revenir à la plus récente : fermez ce message, copiez le "
+        "dernier fichier « comptes-AAAA-MM-JJ.db » dans le dossier\n"
+        f"{dossier},\n"
+        "puis renommez-le « comptes.db » (gardez l'ancien sous un autre nom, "
+        "au cas où) et relancez Pécule.")
+
+
+def _prevenir_base_abimee() -> None:
+    """Le message, avec un bouton qui ouvre le dossier des sauvegardes."""
+    dossier = _data_dir()
+    boite = QMessageBox(QMessageBox.Critical, "Comptes illisibles",
+                        message_base_abimee(dossier))
+    ouvrir = boite.addButton("Ouvrir le dossier des sauvegardes",
+                             QMessageBox.ActionRole)
+    boite.addButton("Fermer", QMessageBox.RejectRole)
+    boite.exec()
+    if boite.clickedButton() is ouvrir:
+        QDesktopServices.openUrl(QUrl.fromLocalFile(
+            os.path.join(dossier, "sauvegardes")))
+
+
+def _ouvrir_base():
+    """La base, ou None après avoir prévenu si elle est abîmée."""
+    try:
+        return Database()
+    except sqlite3.DatabaseError:
+        _prevenir_base_abimee()
+        return None
+
+
 def main():
     app = QApplication(sys.argv)
     appliquer_theme_clair(app)
@@ -235,6 +276,9 @@ def main():
     # avoir une copie de la veille (audit du 23/09/2026).
     try:
         bak = backup_db()
+    except BaseAbimee:
+        _prevenir_base_abimee()
+        return
     except SauvegardeImpossible as e:
         bak = None
         QMessageBox.warning(
@@ -245,7 +289,9 @@ def main():
             "sauvegardées aujourd'hui. Vérifiez la place libre sur le disque, "
             "ou faites une « 💾 Sauvegarde externe » depuis le menu de gauche.")
 
-    db = Database()
+    db = _ouvrir_base()
+    if db is None:
+        return
     # Correspondances de libellés propres à cette base (« raison sociale du
     # relevé » → « enseigne »), utilisées par tout le nettoyage de libellés.
     charger_alias(db.get_alias_libelles())
