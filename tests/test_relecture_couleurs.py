@@ -31,8 +31,6 @@ PALETTE = {
 EXCEPTIONS = {
     "#D6F0DC": "fond de la case P d'une opération pointée (le ✔ vert y tient 4,6)",
     "#27AE60": "barre du Budget sous 80 % (le chiffre s'y écrit en noir : 7,3)",
-    "#B9551A": "barres « Dépenses » du Bilan (orange foncé, 4,5 sur l'ivoire ; "
-               "#E67E22 n'y faisait que 2,68)",
 }
 
 # Fond le plus sombre sur lequel un texte coloré se pose dans un tableau.

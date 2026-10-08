@@ -488,7 +488,19 @@ class BilanView(QWidget):
         bar_view = QChartView(self.bar_chart)
         bar_view.setRenderHint(QPainter.Antialiasing)
         bar_view.setMinimumHeight(240)
-        self.bar_panel = _make_panel("Évolution sur 12 mois", bar_view)
+        # Sous le graphique, la note du mois en cours (audit du 08/10/2026).
+        bar_corps = QWidget()
+        bar_lignes = QVBoxLayout(bar_corps)
+        bar_lignes.setContentsMargins(0, 0, 0, 0)
+        bar_lignes.setSpacing(0)
+        bar_lignes.addWidget(bar_view, 1)
+        self.bar_note = QLabel()
+        self.bar_note.setWordWrap(True)
+        self.bar_note.setStyleSheet(
+            "color: #666666; font-size: 11px; padding: 0px 10px 6px 10px;")
+        self.bar_note.setVisible(False)
+        bar_lignes.addWidget(self.bar_note)
+        self.bar_panel = _make_panel("Évolution sur 12 mois", bar_corps)
         self.etat_barres = EtatVide(
             bar_view, "Aucune opération sur ces douze mois.\nImportez un "
             "relevé (📥 Importer un relevé, à gauche) pour voir vos revenus "
@@ -1871,10 +1883,12 @@ class BilanView(QWidget):
 
         bar_rev = QBarSet("Revenus")
         bar_dep = QBarSet("Dépenses")
+        # Dépenses au rouge des dépenses de toute l'appli (choix de l'auteur
+        # du 08/10/2026 ; c'était un brun-orange hors palette).
         bar_rev.setColor(QColor("#229954"))
-        bar_dep.setColor(QColor("#B9551A"))
+        bar_dep.setColor(QColor("#BC3729"))
         bar_rev.setBorderColor(QColor("#229954"))
-        bar_dep.setBorderColor(QColor("#B9551A"))
+        bar_dep.setBorderColor(QColor("#BC3729"))
         for m in months:
             # Montants arrondis à l'euro : c'est ce que porteront les
             # étiquettes, et à cette échelle les centimes n'apportent rien.
@@ -1898,10 +1912,12 @@ class BilanView(QWidget):
             series.setLabelsPrecision(9)
             # Étiquette DANS la barre, près du sommet : au-dessus (OutsideEnd),
             # celle de la barre la plus haute sort de la zone de tracé et
-            # disparaît. En blanc, lisible sur le vert comme sur l'orange.
+            # disparaît. Couleur choisie au vrai contraste (charte) : noir sur
+            # le vert (5,75 pour 1), blanc sur le rouge (5,65). Le blanc sur le
+            # vert ne faisait que 3,65 (audit du 08/10/2026).
             series.setLabelsPosition(QAbstractBarSeries.LabelsInsideEnd)
-            bar_rev.setLabelColor(QColor("white"))
-            bar_dep.setLabelColor(QColor("white"))
+        bar_rev.setLabelColor(QColor("black"))
+        bar_dep.setLabelColor(QColor("white"))
         self.bar_chart.addSeries(series)
 
         # Axe X : le mois seul. Sur douze colonnes, « Oct 25 » ne tient pas —
@@ -1910,6 +1926,18 @@ class BilanView(QWidget):
         # donc passée dans le TITRE du panneau, où elle a toute la place.
         _court = _mois_court
         labels = [_court(m) for m in months]
+        # Le mois en cours n'est pas terminé : QtCharts ne sait pas hachurer
+        # une seule barre, il porte donc un astérisque, et la note le dit
+        # (charte : une période incomplète se signale ; audit du 08/10/2026).
+        en_cours = date.today().strftime("%Y-%m")
+        if months[-1] == en_cours:
+            labels[-1] += "*"
+            self.bar_note.setText(
+                f"* {period_label(en_cours)} n'est pas terminé : ses montants "
+                "vont encore changer.")
+            self.bar_note.setVisible(True)
+        else:
+            self.bar_note.setVisible(False)
         self.bar_panel._header.setText(
             f"ÉVOLUTION SUR 12 MOIS — {de_mois_a_mois(months[0], months[-1]).upper()}")
         ax_x = QBarCategoryAxis(); ax_x.append(labels)
