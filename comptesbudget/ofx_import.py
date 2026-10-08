@@ -41,7 +41,8 @@ from typing import NamedTuple, Optional
 
 # L'import CSV fournit le décodage de fichier (UTF-8 / Windows-1252) et le
 # moteur d'import proprement dit : l'OFX s'appuie sur les deux.
-from .csv_import import ResultatImport, _decode_csv, import_csv_text
+from .csv_import import (ResultatImport, _decode_csv, _toutes_illisibles,
+                         import_csv_text)
 from .database import Database
 from .utils import date_debit_differe, deaccent
 
@@ -331,6 +332,9 @@ def import_ofx_text(text: str, db: Database) -> ResultatImport:
             "ce fichier contient plusieurs comptes (" + ", ".join(comptes)
             + "). Pécule importe dans le compte affiché : téléchargez un "
             "compte à la fois depuis le site de votre banque.")
+    if not operations and illisibles:
+        # Voir qif_import : un relevé dont aucune opération ne se lit.
+        raise ValueError(_toutes_illisibles(illisibles, "OFX"))
     if not operations:
         raise ValueError(
             "aucune opération lisible dans ce fichier OFX. Vérifiez qu'il "

@@ -31,8 +31,8 @@ from typing import NamedTuple, Optional
 
 # L'import CSV fournit le décodage de fichier (UTF-8 / Windows-1252) et le
 # moteur d'import proprement dit : le QIF s'appuie sur les deux.
-from .csv_import import (ResultatImport, _decode_csv, import_csv_text,
-                         lire_montant)
+from .csv_import import (ResultatImport, _decode_csv, _toutes_illisibles,
+                         import_csv_text, lire_montant)
 from .database import Database
 
 
@@ -299,6 +299,12 @@ def import_qif_text(text: str, db: Database) -> ResultatImport:
             + "). Un import va dans le compte ouvert : réexportez un "
             "compte à la fois depuis votre logiciel, puis importez chacun "
             "dans son compte.")
+    if not operations and illisibles:
+        # Le fichier est bien un relevé : ce sont ses dates ou ses montants
+        # qui ne se lisent pas (audit du 08/10/2026 : le message disait de
+        # vérifier qu'il s'agissait d'un export de compte).
+        raise ValueError(
+            _toutes_illisibles(illisibles, "QIF"))
     if not operations:
         raise ValueError(
             "aucune opération lisible dans ce fichier QIF. Vérifiez qu'il "

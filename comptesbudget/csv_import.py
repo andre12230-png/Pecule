@@ -351,6 +351,18 @@ def encours_carte_annonce(db: Database) -> Optional[dict]:
     return lot if isinstance(lot, dict) and "montant" in lot else None
 
 
+def _toutes_illisibles(n: int, format_: str) -> str:
+    """Message d'un relevé QIF ou OFX dont aucune opération ne se lit : il
+    dit combien il en contient, au lieu de laisser croire que ce n'est pas
+    un relevé (audit du 08/10/2026)."""
+    ops = "1 opération" if n == 1 else f"{n} opérations"
+    return (f"ce fichier {format_} contient {ops}, mais aucune n'a une date "
+            "et un montant lisibles : rien n'est importé. Le fichier est "
+            "peut-être abîmé, ou d'un format que Pécule ne connaît pas encore. "
+            "Essayez l'export CSV de votre banque, ou saisissez ces "
+            "opérations à la main.")
+
+
 def _decode_csv(raw: bytes) -> str:
     """Décode un relevé bancaire. L'UTF-8 est essayé d'abord : un fichier
     Windows-1252 contenant des accents n'est pratiquement jamais de l'UTF-8

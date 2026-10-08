@@ -71,3 +71,31 @@ def test_tout_illisible_le_message_dit_la_cause(qapp, tmp_path, monkeypatch):
     fenetre._import_files([p])
     texte = "\n".join(vus)
     assert "année d'abord" in texte, texte
+
+
+# ── QIF / OFX : des opérations, toutes illisibles ────────────────────────
+# Le message disait « vérifiez qu'il s'agit bien d'un export de compte »,
+# alors que le fichier en était un : seuls les montants étaient illisibles.
+
+def test_qif_aux_montants_illisibles_le_dit(tmp_path):
+    from comptesbudget.qif_import import import_qif_text
+    db = Database(str(tmp_path / "t.db"))
+    qif = ("!Type:Bank\nD05/09/2026\nTdouze euros\nPLOYER\n^\n"
+           "D06/09/2026\nTn/a\nPSALAIRE\n^\n")
+    with pytest.raises(ValueError) as err:
+        import_qif_text(qif, db)
+    assert "2 opérations" in str(err.value)
+    assert "export de compte" not in str(err.value)
+
+
+def test_ofx_au_montant_illisible_le_dit(tmp_path):
+    from comptesbudget.ofx_import import import_ofx_text
+    db = Database(str(tmp_path / "t.db"))
+    ofx = ("<OFX><BANKMSGSRSV1><STMTTRNRS><STMTRS><BANKTRANLIST>"
+           "<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260905<TRNAMT>douze"
+           "<FITID>1<NAME>LOYER</STMTTRN>"
+           "</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>")
+    with pytest.raises(ValueError) as err:
+        import_ofx_text(ofx, db)
+    assert "1 opération" in str(err.value)
+    assert "relevé de compte" not in str(err.value)
