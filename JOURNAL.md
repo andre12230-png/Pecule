@@ -21,6 +21,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 (5) — Les cinq points prioritaires de l'audit corrigés (commits locaux)
+
+**Fait.** (1) Base abîmée : message en français au démarrage, qui dit où sont les
+sauvegardes et comment revenir à la plus récente, avec un bouton qui ouvre leur dossier ;
+la sauvegarde du jour vérifie d'abord la base (`base_saine`, lecture seule, environ 0,07 s)
+et ne copie pas une base abîmée. (2) Page d'aide de l'import CSV et message de l'appli :
+« 5/1/2026 » et « 05/01/26 » sont lus, seule l'écriture « année d'abord » est refusée, et
+les lignes écartées sont annoncées. (3) Une ligne datée sans montant (« SOLDE AU… ») n'est
+plus une opération à 0,00 € : elle compte parmi les lignes non importées. (4) Pas de verdict
+« aucun découvert prévu » tant que le solde de départ manque ; le bandeau du mois se masque
+s'il n'a rien à dire. (5) Page Confidentialité, en français et en anglais : deux boutons
+ouvrent le navigateur, « Votre avis » copie aussi la version de Windows. Neuf tests
+ajoutés, vus en échec ; 659 tests sur 659. Vérifié sur une base inventée et sur une base
+vide, en image.
+**Pourquoi.** Audit du jour, avant la sortie de début novembre.
+**Reste.** Pas d'exe. Partie 2 (imports qui se taisent, Notice, README), partie 3 (design),
+et les quatre choix acceptés par l'auteur (« + » sur les mouvements et les restes, « Reste
+à pointer » neutre, dépenses en rouge, question avant de fermer une saisie).
+
 ## 2026-10-08 (4) — Audit complet avant la sortie de début novembre (rien corrigé)
 
 **Fait.** Audit fond et design de la 1.41.5, sans correction : 649 tests sur 649 ; contrôle
