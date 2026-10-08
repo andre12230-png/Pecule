@@ -26,9 +26,9 @@ from ..utils import (
 from ..database import Database
 from ..erreurs import erreur_en_clair
 from ..labels import charger_alias, clean_libelle
-from ..csv_import import diagnostiquer_fichier, import_csv
+from ..csv_import import _decode_csv, diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
-from ..qif_import import import_qif
+from ..qif_import import import_qif, ordre_jour_mois_devine
 from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
 
 from .widgets import PeriodBar, confirmer, demander_montant
@@ -561,6 +561,21 @@ class MainWindow(QMainWindow):
                 if cause:
                     msg += (f"\n\n⚠ Aucune ligne n'a pu être lue dans "
                             f"« {os.path.basename(p)} ».\n\n{cause}")
+        # QIF : l'ordre jour / mois a pu être deviné (audit du 08/10/2026).
+        for p in paths:
+            if not p.lower().endswith(".qif"):
+                continue
+            try:
+                with open(p, "rb") as f:
+                    devine = ordre_jour_mois_devine(_decode_csv(f.read()))
+            except OSError:
+                devine = False
+            if devine:
+                msg += (f"\n\n⚠ « {os.path.basename(p)} » : aucune date n'a "
+                        "un jour au-delà du 12, l'ordre jour / mois n'a donc "
+                        "pas pu être vérifié. Pécule les a lues jour puis "
+                        "mois, l'usage français. Si ce fichier vient d'un "
+                        "logiciel américain, vérifiez les dates importées.")
         if errors:
             msg += "\n\nErreurs :\n  • " + "\n  • ".join(errors)
         if errors or total_bad or rien_lu:

@@ -116,6 +116,21 @@ def jour_en_premier(composantes: list) -> bool:
     return True
 
 
+def ordre_jour_mois_devine(text: str) -> bool:
+    """Vrai si l'ordre jour / mois du fichier n'a pas pu être vérifié :
+    des dates s'écrivent dans les deux ordres possibles (« 06/01 ») et
+    aucune n'a un nombre au-delà de 12. Pécule lit alors jour puis mois ;
+    le compte rendu de l'import le dit, un fichier américain étant lu à
+    l'envers sans un mot (audit du 08/10/2026)."""
+    composantes = [_composantes_date(ligne.strip()[1:].strip())
+                   for ligne in text.splitlines()
+                   if ligne.strip().startswith("D")]
+    ambigues = [c for c in composantes if c and c[3]]
+    if not any(a != b for a, b, _an, _amb in ambigues):
+        return False           # « 05/05 » se lit pareil dans les deux sens
+    return not any(a > 12 or b > 12 for a, b, _an, _amb in ambigues)
+
+
 def _date_francaise(comp, jour_d_abord: bool) -> Optional[str]:
     """Met une date découpée à la forme jj/mm/aaaa attendue par l'import
     CSV. Retourne None si le calendrier la refuse (31 février…)."""

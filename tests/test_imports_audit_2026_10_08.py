@@ -99,3 +99,38 @@ def test_ofx_au_montant_illisible_le_dit(tmp_path):
         import_ofx_text(ofx, db)
     assert "1 opération" in str(err.value)
     assert "relevé de compte" not in str(err.value)
+
+
+# ── QIF : ordre jour / mois deviné ───────────────────────────────────────
+# Si aucune date n'a un nombre au-delà de 12, l'ordre ne se déduit pas :
+# Pécule lit jour puis mois, l'usage français. Un fichier américain était
+# alors lu à l'envers sans un mot ; le compte rendu le signale désormais.
+
+_QIF_AMBIGU = ("!Type:Bank\nD06/01/2024\nT-12,50\nPLOYER\n^\n"
+               "D07/02/2024\nT-20,00\nPEDF\n^\n")
+_QIF_SUR = ("!Type:Bank\nD06/01/2024\nT-12,50\nPLOYER\n^\n"
+            "D25/02/2024\nT-20,00\nPEDF\n^\n")
+
+
+def test_ordre_devine_reconnu():
+    from comptesbudget.qif_import import ordre_jour_mois_devine
+    assert ordre_jour_mois_devine(_QIF_AMBIGU)
+    assert not ordre_jour_mois_devine(_QIF_SUR)
+
+
+def test_le_compte_rendu_signale_l_ordre_devine(qapp, tmp_path, monkeypatch):
+    from PySide6.QtWidgets import QMessageBox
+
+    from comptesbudget.ui import main_window
+    vus = []
+    for nom in ("warning", "information"):
+        monkeypatch.setattr(QMessageBox, nom,
+                            lambda parent, titre, texte, *a, **k: vus.append(texte))
+    # Après un premier import, la fenêtre demande le solde de départ : une
+    # boîte qui attendrait un clic.
+    monkeypatch.setattr(main_window.MainWindow, "_regler_depart_depuis_releve",
+                        lambda self: None)
+    fenetre = main_window.MainWindow(Database(str(tmp_path / "t.db")))
+    p = _write(tmp_path, "export.qif", _QIF_AMBIGU.encode("utf-8"))
+    fenetre._import_files([p])
+    assert "jour puis mois" in "\n".join(vus)
