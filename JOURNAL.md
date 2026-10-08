@@ -21,6 +21,18 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 — « Toute la période », le nom commun aux trois applis
+
+**Fait.** La ligne « tout voir » du menu des années s'appelle « Toute la période » (et
+non plus « Toutes périodes »), comme dans les deux autres applis : `period_label`, tuile
+« Mouvement — toute la période », état vide et compteur des Opérations, infobulle du
+menu, confirmation de recatégorisation, et 12 mentions de la Notice. Valeur interne
+`all` inchangée. Tests mis à jour et nouveau test de vocabulaire, vus en échec ; 648
+tests sur 648.
+**Pourquoi.** Choix de l'auteur pour la charte commune : un même nom partout.
+**Reste.** Pas d'exe. Le changement ne se voit que menu ouvert ou sur « Toute la
+période » : prouvé par les tests, pas par une capture.
+
 ## 2026-10-07 — Cartes et tuiles arrondies à 12 px ; design system commun
 
 **Fait.** Un design system commun aux trois applis a été monté à partir du
