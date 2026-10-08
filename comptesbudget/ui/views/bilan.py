@@ -78,7 +78,11 @@ class CatRowsWidget(QWidget):
         self.lay.setRowStretch(self._nb_lignes, 0)
         self._nb_lignes = 0
         if not items:
-            self.lay.addWidget(QLabel("— Aucune donnée —"), 0, 0, 1, 4)
+            # Pourquoi c'est vide (audit du 08/10/2026 : « — Aucune
+            # donnée — »). Le conseil de période est sous le camembert voisin.
+            vide = QLabel("Rien sur cette période.")
+            vide.setStyleSheet("color: #666666;")
+            self.lay.addWidget(vide, 0, 0, 1, 4)
             self._nb_lignes = 1
             self.lay.setRowStretch(1, 1)   # le message reste en haut du cadre
             return
@@ -523,7 +527,8 @@ class BilanView(QWidget):
         mid_row.addWidget(_make_panel("Répartition des dépenses", pie_view), 2)
         self.pie_view = pie_view
         self.etat_camembert = EtatVide(
-            pie_view, "Aucune dépense sur cette période.", suivre_modele=False)
+            pie_view, "Aucune dépense sur cette période.\nChoisissez une "
+            "autre période avec les flèches ‹ › en haut.", suivre_modele=False)
 
         main.addLayout(mid_row, 1)
 

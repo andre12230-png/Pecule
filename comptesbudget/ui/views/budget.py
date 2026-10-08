@@ -79,7 +79,7 @@ class BudgetView(QWidget):
             self.table,
             "Aucun budget ni dépense sur cette période.\nPour fixer un budget "
             "mensuel à une catégorie : « ✏️ Définir / modifier le budget », "
-            "en haut.")
+            "en haut ; ou choisissez une autre période avec les flèches ‹ ›.")
 
 
     def _eff_date(self, t: dict) -> str:

@@ -608,3 +608,20 @@ def test_pas_de_cadre_vide_sur_une_base_neuve(qapp, tmp_path):
     vue = BilanView(Database(str(tmp_path / "vide.db")))
     vue.refresh()
     assert not vue.mois_banner.isVisibleTo(vue)
+
+
+def test_periode_vide_conseille_de_changer_de_periode(qapp, tmp_path):
+    """Audit du 08/10/2026 : Catégories, Budget et le camembert du Bilan
+    disaient « Aucune … sur cette période » sans dire quoi faire. Ils
+    conseillent désormais de changer de période (flèches ‹ ›)."""
+    vues = _vues_rafraichies(Database(str(tmp_path / "vide.db")))
+    for nom in ("Catégories", "Budget", "Bilan"):
+        assert any("‹ ›" in p for p in _phrases_visibles(vues[nom])), nom
+
+
+def test_les_listes_du_bilan_disent_pourquoi(qapp, tmp_path):
+    from PySide6.QtWidgets import QLabel
+    vue = _vues_rafraichies(Database(str(tmp_path / "vide.db")))["Bilan"]
+    textes = [l.text() for l in vue.list_dep.findChildren(QLabel)]
+    assert "— Aucune donnée —" not in textes
+    assert any("sur cette période" in t for t in textes)

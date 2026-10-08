@@ -65,7 +65,10 @@ class CategoriesView(QWidget):
         colonnes_sans_coupure(self.cats_table, au_contenu=(1, 2), etirable=0)
         lv.addWidget(self.cats_table)
         self.etat_vide_cats = EtatVide(
-            self.cats_table, "Aucune opération sur cette période.")
+            # Pourquoi, et quoi faire (audit du 08/10/2026).
+            self.cats_table, "Aucune opération sur cette période.\nChoisissez "
+            "une autre période avec les flèches ‹ › en haut, ou importez un "
+            "relevé (📥 Importer un relevé, à gauche).")
         # Les 17 catégories livrées d'origine sont proposées même si l'on
         # ne s'en sert jamais. Ce bouton permet d'écarter celles qui ne
         # servent pas — sans rien supprimer.
