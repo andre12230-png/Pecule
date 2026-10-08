@@ -157,7 +157,10 @@ def test_formulaires_sans_bouton_ok(qapp, db):
         assert "Enregistrer" in textes, f"{nom} : {textes}"
 
 
-TITRES_VAGUES = {"Saisie", "Récurrent", "Règle", "Confirmer", "Supprimer"}
+# « Import » et « Paramètres » ajoutés le 08/10/2026 : un import
+# incomplet et un import réussi s'annonçaient sous le même titre.
+TITRES_VAGUES = {"Saisie", "Récurrent", "Règle", "Confirmer", "Supprimer",
+                 "Import", "Paramètres"}
 
 
 def test_aucun_titre_de_boite_vague():

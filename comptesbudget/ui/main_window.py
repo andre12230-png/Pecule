@@ -579,9 +579,9 @@ class MainWindow(QMainWindow):
         if errors:
             msg += "\n\nErreurs :\n  • " + "\n  • ".join(errors)
         if errors or total_bad or rien_lu:
-            QMessageBox.warning(self, "Import", msg)
+            QMessageBox.warning(self, "Import incomplet", msg)
         else:
-            QMessageBox.information(self, "Import", msg)
+            QMessageBox.information(self, "Import terminé", msg)
         self.refresh_all()
         if total_imp:
             if self._solde_jamais_donne():
@@ -751,7 +751,7 @@ class MainWindow(QMainWindow):
         self.db.set_setting("initial_date", nd)
         self.db.set_setting("initial_balance", str(nb))
         QMessageBox.information(
-            self, "Paramètres",
+            self, "Solde de départ enregistré",
             f"« {self.db.nom_compte()} » — solde de départ : "
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
