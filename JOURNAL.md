@@ -21,6 +21,20 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 — Audit complet avant la sortie de début novembre (rien corrigé)
+
+**Fait.** Audit fond et design de la 1.41.5, sans correction : 649 tests sur 649 ; contrôle
+de livraison `--publication` (seuls les numéros des documents publics, attendus à la
+sortie) ; captures des cinq onglets sur base inventée et sur base vide ; doc ↔ code,
+charte ↔ code, nouvel utilisateur (fichiers fabriqués). Principaux écarts : ouverture d'une
+base abîmée sans message compréhensible ; pages d'aide et un message de l'appli qui
+annoncent « 5/1/2026 » refusé alors que l'appli l'accepte ; ligne datée sans montant
+importée à 0,00 € ; bandeau « aucun découvert prévu » sans solde de départ ; chiffres
+blancs sur les barres vertes du Bilan (3,65 pour 1) ; mois en cours non hachuré ; boîtes
+Oui / Non.
+**Pourquoi.** Sortie publique de début novembre.
+**Reste.** Liste rendue à l'auteur, qui choisit les corrections.
+
 ## 2026-10-08 (3) — Version 1.41.5 installée chez l'auteur
 
 **Fait.** Numéro 1.41.5 (constants.py, Lisez-moi.txt) : cartes et tuiles du Bilan à
