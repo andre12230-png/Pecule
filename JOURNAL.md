@@ -24,8 +24,10 @@ La date la plus récente est en haut.
 ## 2026-10-08 (3) — Version 1.41.5 installée chez l'auteur
 
 **Fait.** Numéro 1.41.5 (constants.py, Lisez-moi.txt) : cartes et tuiles du Bilan à
-12 px, « Toute la période », gris et rouge lisibles sur le crème. Exe construit et
-installé chez l'auteur (pas de publication).
+12 px, « Toute la période », gris et rouge lisibles sur le crème. Contrôle de livraison
+vert (649 tests sur 649), exe construit, corrections prouvées dans l'exe (lecture du
+PYZ), puis installé : ancien exe gardé en `Pecule.exe.avant-1.41.5`, `_internal` mis à
+jour, base identique avant et après (SHA-256), version lue dans l'exe : 1.41.5.
 **Pourquoi.** Règle d'un numéro par exe installé.
 **Reste.** Version non publiée (sortie de début novembre).
 
