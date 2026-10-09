@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 
 from ...accords import pluriel
 from ...utils import (
-    carte_a_debit_differe, deaccent, fmt_euro, in_period,
+    carte_a_debit_differe, deaccent, fmt_euro, fmt_euro_signe, in_period,
     period_label,
 )
 from ...database import Database
@@ -181,7 +181,7 @@ class CategoriesView(QWidget):
             it_c.setData(deaccent(c), SORT_ROLE)
             it_n = QStandardItem(str(n)); it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_n.setData(n, SORT_ROLE)          # trier sur le nombre, pas « 10 » < « 9 »
-            it_t = QStandardItem(fmt_euro(tot)); it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            it_t = QStandardItem(fmt_euro_signe(tot)); it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_t.setForeground(QBrush(QColor("#BC3729" if tot < 0 else "#18733A")))
             it_t.setData(tot, SORT_ROLE)
             self.cats_model.appendRow([it_c, it_n, it_t])

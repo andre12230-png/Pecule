@@ -22,7 +22,7 @@ from ...accords import accorde, pluriel
 from ...utils import (
     carte_a_debit_differe, cat_color, de_mois_a_mois,
     depense_nette_par_categorie, est_paiement_carte,
-    fmt_euro, fmt_date_fr, in_period, period_label, regle_debit_differe,
+    fmt_euro, fmt_euro_signe, fmt_date_fr, in_period, period_label, regle_debit_differe,
 )
 from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
@@ -109,7 +109,7 @@ class CatRowsWidget(QWidget):
                 # ces pourcentages et ces dates se lisaient mal en gris pâle.
                 s = QLabel(sub); s.setStyleSheet("color:#555; font-size:9pt; background: transparent")
                 self.lay.addWidget(s, i, 2, Qt.AlignRight | Qt.AlignVCenter)
-            amt = QLabel(fmt_euro(amount))
+            amt = QLabel(fmt_euro_signe(amount))   # signe : charte, 08/10/2026
             amt.setStyleSheet(
                 f"color: {'#BC3729' if amount < 0 else '#18733A'}; "
                 "font-weight:600; background: transparent")
@@ -1611,7 +1611,7 @@ class BilanView(QWidget):
 
         net = net_periode
         self.kpis["net"]._label.setText(self._titre_mouvement(self.period))
-        self.kpis["net"]._value.setText(fmt_euro(net))
+        self.kpis["net"]._value.setText(fmt_euro_signe(net))
         # Les deux moitiés du mouvement, là où elles occupaient deux tuiles.
         self.kpis["net"]._sub.setText(
             f"{fmt_euro(revenus)} entrés ({n_rev}) − "
@@ -1631,9 +1631,10 @@ class BilanView(QWidget):
             "part des revenus mis de côté" if tx_epargne >= 0
             else "dépenses supérieures aux revenus")
 
-        self.kpis["pointe"]._value.setText(fmt_euro(reste_a_pointer))
-        # Vert ou rouge selon le signe ; un zéro reste sans couleur (charte).
-        self._colorer_kpi("pointe", self._couleur_du_signe(reste_a_pointer))
+        self.kpis["pointe"]._value.setText(fmt_euro_signe(reste_a_pointer))
+        # Neutre : un reste à faire n'est ni un gain ni une perte (choix de
+        # l'auteur du 08/10/2026 ; il était vert ou rouge selon le signe).
+        self._colorer_kpi("pointe", None)
         # Le sous-titre rappelle la période et, s'il reste à pointer, le total
         # déjà pointé : l'ancien chiffre de la tuile n'est pas perdu.
         if non_pointees:

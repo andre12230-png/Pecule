@@ -86,7 +86,7 @@ def test_onglet_budget_deduit_le_remboursement(qapp, tmp_path):
     ligne = next(r for r in range(v.model.rowCount())
                  if v.model.item(r, 0).text() == "Shopping")
     assert v.model.item(ligne, 2).text() == fmt_euro(30.0)
-    assert v.model.item(ligne, 4).text() == fmt_euro(20.0)
+    assert v.model.item(ligne, 4).text() == "+" + fmt_euro(20.0)   # reste signe (08/10/2026)
 
 
 def test_rapport_budgets_du_mois_deduit_le_remboursement(tmp_path):

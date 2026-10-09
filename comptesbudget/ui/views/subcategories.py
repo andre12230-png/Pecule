@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 
 from ...accords import accorde, nombre, pluriel
 from ...utils import (
-    deaccent, fmt_euro,
+    deaccent, fmt_euro_signe,
 )
 from ...database import Database
 from ..models import EtatVide, cellule_categorie, colonnes_sans_coupure
@@ -202,7 +202,7 @@ class SubcategoriesView(QWidget):
             it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_n.setData(n, Qt.UserRole + 1)
 
-            it_t = QStandardItem(fmt_euro(total))
+            it_t = QStandardItem(fmt_euro_signe(total))
             it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_t.setForeground(QBrush(QColor("#BC3729" if total < 0 else "#18733A")))
             it_t.setData(total, Qt.UserRole + 1)

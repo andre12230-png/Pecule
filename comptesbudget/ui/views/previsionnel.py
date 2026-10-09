@@ -20,7 +20,7 @@ from ...constants import (
 )
 from ...accords import accorde, pluriel
 from ...utils import (
-    carte_a_debit_differe, est_paiement_carte, fmt_euro,
+    carte_a_debit_differe, est_paiement_carte, fmt_euro, fmt_euro_signe,
     fmt_date_fr, period_label, regle_debit_differe,
 )
 from ...database import Database
@@ -146,7 +146,7 @@ class PrevisionnelView(QWidget):
         for r in recs:
             row = [
                 QStandardItem(r["libelle"]),
-                QStandardItem(fmt_euro(r["montant"])),
+                QStandardItem(fmt_euro_signe(r["montant"])),
                 cellule_categorie(r["categorie"]),
                 QStandardItem(type_affiche(r["type"])),
                 QStandardItem(freq_lbl.get(r["frequency"], r["frequency"])),
@@ -193,7 +193,7 @@ class PrevisionnelView(QWidget):
             row = [
                 QStandardItem(fmt_date_fr(d.isoformat())),
                 QStandardItem(r["libelle"]),
-                QStandardItem(fmt_euro(r["montant"])),
+                QStandardItem(fmt_euro_signe(r["montant"])),
                 cellule_categorie(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)

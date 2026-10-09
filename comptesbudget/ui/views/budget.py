@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...utils import (
-    deaccent, depense_nette_par_categorie, fmt_euro, in_period,
+    deaccent, depense_nette_par_categorie, fmt_euro, fmt_euro_signe, in_period,
 )
 from ...database import Database
 from ..models import EtatVide, cellule_categorie, colonnes_sans_coupure
@@ -160,7 +160,8 @@ class BudgetView(QWidget):
             it_prog = QStandardItem("")
             it_prog.setData(ratio, Qt.UserRole)
 
-            it_reste = QStandardItem(fmt_euro(reste) if budget else "—")
+            # Le reste porte son signe (choix de l'auteur du 08/10/2026).
+            it_reste = QStandardItem(fmt_euro_signe(reste) if budget else "—")
             it_reste.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             if budget:
                 if reste < 0:

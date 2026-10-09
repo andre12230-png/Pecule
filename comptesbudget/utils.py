@@ -382,6 +382,16 @@ def fmt_euro(value: float) -> str:
     return f"{s}\xa0€"
 
 
+def fmt_euro_signe(value: float) -> str:
+    """Un mouvement ou un reste, avec son signe : « +1 234,56 € »,
+    « -12,50 € », et « 0,00 € » sans signe. La couleur ne porte jamais seule
+    le sens (charte ; choix de l'auteur du 08/10/2026). Pas pour un solde,
+    qui n'est pas un mouvement."""
+    if round(value, 2) == 0:
+        return fmt_euro(0.0)
+    return ("+" if value > 0 else "") + fmt_euro(value)
+
+
 # ── Carte à débit différé ───────────────────────────────────────────────────
 
 JOUR_DEBIT_DIFFERE = 4   # la banque prélève les achats carte le 4 du mois suivant
