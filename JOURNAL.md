@@ -25,7 +25,10 @@ La date la plus récente est en haut.
 
 **Fait.** Numéro 1.41.6 : les corrections de l'audit complet du 08/10 (base abîmée, aide
 sur les dates, ligne sans montant, verdict sans solde de départ, imports, Oui / Non,
-signes, graphique du Bilan, fenêtres de saisie). Détail de l'installation : voir plus bas.
+signes, graphique du Bilan, fenêtres de saisie). Exe construit (version lue dans le
+fichier : 1.41.6), essayé sur une base inventée, puis installé : base de l'auteur
+identique avant et après (empreinte SHA-256), titre « v1.41.6 ». Ancien exe gardé en
+réserve sous le nom `Pecule.exe.avant-1.41.6`.
 **Pourquoi.** Règle d'un numéro par exe installé ; voir les corrections avant la sortie de
 début novembre.
 **Reste.** Sortie publique de début novembre.
