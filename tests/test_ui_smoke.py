@@ -546,7 +546,7 @@ def test_alerte_budget_suit_la_periode(qapp, tmp_path, monkeypatch):
     assert bandeau("2026-09") == ""
     # Août : le dépassement est là, et le bandeau dit de quel mois il parle.
     aout = bandeau("2026-08")
-    assert "Transports" in aout and "150 %" in aout
+    assert "Transports" in aout and "150\xa0%" in aout   # insécable (08/10/2026)
     assert "août 2026" in aout and "ce mois-ci" not in aout
     # Une année ou toutes périodes ramènent au mois en cours.
     assert bandeau("2026") == ""

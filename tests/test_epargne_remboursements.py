@@ -49,7 +49,7 @@ def test_bilan_taux_d_epargne_compte_le_livret_comme_epargne(qapp, tmp_path):
     v.period = MOIS
     v.refresh()
     # (2 000 − 700) / 2 000 : les 300 € du livret sont mis de côté.
-    assert v.kpis["epargne"]._value.text() == "65,0 %"
+    assert v.kpis["epargne"]._value.text() == "65,0\xa0%"   # insécable
     # Le mouvement du compte, lui, garde tout ce qui est sorti.
     assert fmt_euro(1000.0) in _texte(v.kpis["net"]._sub)
     parts = [s.label() for s in v.pie_chart.series()[0].slices()]

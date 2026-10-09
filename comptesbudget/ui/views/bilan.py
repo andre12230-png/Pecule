@@ -1423,7 +1423,7 @@ class BilanView(QWidget):
 
         def _fmt(items):
             return ", ".join(
-                f"<b>{_esc(cat)}</b> {ratio:.0f} % ({fmt_euro(dep)} / {fmt_euro(budget)})"
+                f"<b>{_esc(cat)}</b> {ratio:.0f}\xa0% ({fmt_euro(dep)} / {fmt_euro(budget)})"
                 for ratio, cat, dep, budget in sorted(items, reverse=True))
 
         parts = []
@@ -1623,7 +1623,7 @@ class BilanView(QWidget):
         # Virgule décimale, comme partout ailleurs dans l'application : le
         # taux d'épargne était le seul chiffre à s'écrire « -10.6 % ».
         self.kpis["epargne"]._value.setText(
-            f"{tx_epargne:.1f}".replace(".", ",") + " %")
+            f"{tx_epargne:.1f}".replace(".", ",") + "\xa0%")
         # Vert d'encre commun (#18733A) : le vert-bleu #16A085 d'avant ne
         # faisait que 3,09 pour 1 sur l'ivoire de la tuile.
         self._colorer_kpi("epargne", self._couleur_du_signe(tx_epargne))
