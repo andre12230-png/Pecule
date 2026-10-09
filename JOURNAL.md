@@ -21,6 +21,25 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-08 (7) — Partie 3 de l'audit : design et choix de l'auteur (commits locaux)
+
+**Fait.** Graphique d'évolution du Bilan : chiffres noirs sur le vert (5,75 pour 1, ils
+étaient blancs à 3,65), dépenses au rouge de l'appli au lieu d'un brun-orange hors palette,
+mois en cours marqué « Oct* » avec sa note (QtCharts ne hachure pas une barre seule ; règle
+ajoutée à la charte). États vides sur une période (Catégories, Budget, camembert, listes du
+Bilan) : pourquoi et quoi faire. Plus aucune boîte Oui / Non : six questions passent par
+`confirmer()`, qui reçoit une option `action_par_defaut` pour ce qui se défait (suppression
+annulable, archivage, tout rétablir) ; titres « Import terminé », « Import incomplet »,
+« Solde de départ enregistré ». Espace insécable devant « % ». Choix de l'auteur :
+`fmt_euro_signe` met le « + » aux mouvements et aux restes positifs (Bilan, Budget,
+Catégories, Sous-catégories, Prévisionnel ; pas les soldes ni les colonnes Débit / Crédit) ;
+« Reste à pointer » neutre ; fenêtres d'opération, de récurrence, de règle et de paramètres
+qui demandent avant de se fermer si une valeur a changé (`SaisieProtegee`). 687 tests sur
+687, vus en image (Bilan, Budget, Catégories, base vide).
+**Pourquoi.** Fin de l'audit du jour, avant la sortie de début novembre.
+**Reste.** Pas d'exe. Laissés : largeurs de colonnes fixées à la main dans les assistants
+(rien de coupé constaté), vert #27AE60 des barres du Budget (exception déjà justifiée).
+
 ## 2026-10-08 (6) — Partie 2 de l'audit : imports et documentation (commits locaux)
 
 **Fait.** Imports : le « Texte Unicode » de Windows (UTF-16) est décodé, pour le CSV, le QIF
