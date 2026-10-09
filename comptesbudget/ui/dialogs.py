@@ -57,7 +57,37 @@ def sous_categories_connues(transactions: list[dict]):
     return par_cat, toutes
 
 
-class TxDialog(QDialog):
+class SaisieProtegee:
+    """Pour une fenêtre de saisie : ce qui est tapé ne se perd pas sans un
+    mot (charte ; choix de l'auteur du 08/10/2026). Les valeurs sont
+    mémorisées en fin de construction (_photographier_saisie) ; fermer sans
+    enregistrer (Annuler, Échap, la croix) alors qu'elles ont changé demande
+    « Fermer sans enregistrer » ou « Continuer la saisie », ce dernier par
+    défaut."""
+
+    def _etat_saisie(self):
+        try:
+            return self.values()
+        except Exception:
+            return None
+
+    def _photographier_saisie(self):
+        self._saisie_initiale = self._etat_saisie()
+
+    def reject(self):
+        initiale = getattr(self, "_saisie_initiale", None)
+        if initiale is not None and self._etat_saisie() != initiale:
+            if not confirmer(
+                    self, "Saisie non enregistrée",
+                    "Les valeurs tapées dans cette fenêtre ne sont pas "
+                    "enregistrées. Fermer quand même ? Elles seront perdues.",
+                    action="Fermer sans enregistrer",
+                    garder="Continuer la saisie"):
+                return
+        QDialog.reject(self)
+
+
+class TxDialog(SaisieProtegee, QDialog):
     """Boîte de dialogue d'ajout / modification d'opération."""
 
     def __init__(self, parent=None, tx: Optional[dict] = None,
@@ -349,6 +379,7 @@ class TxDialog(QDialog):
 
         # Initialisation du motif par défaut = libellé
         self.rule_pattern.setText(self.libelle.text())
+        self._photographier_saisie()
 
     def _est_un_cheque(self) -> bool:
         return self.type_combo.currentData() == "Cheque"
@@ -715,7 +746,7 @@ class CategorieEnMasseDialog(QDialog):
 # Dialogue de paramètres (solde initial)
 # ─────────────────────────────────────────────────────────────────────────────
 
-class SettingsDialog(QDialog):
+class SettingsDialog(SaisieProtegee, QDialog):
     def __init__(self, parent=None, initial_date: str = "2025-01-01",
                  initial_balance: float = 0.0, nom_compte: str = "",
                  avance: bool = False):
@@ -800,6 +831,7 @@ class SettingsDialog(QDialog):
         self.btns.accepted.connect(self.accept)
         self.btns.rejected.connect(self.reject)
         layout.addRow(self.btns)
+        self._photographier_saisie()
 
     def values(self) -> tuple[str, float]:
         return (self.initial_date.date().toString("yyyy-MM-dd"),
@@ -810,7 +842,8 @@ class SettingsDialog(QDialog):
         sont pas enregistrés, et la restauration pourra changer le solde
         de départ sans que cette fenêtre le réécrive ensuite."""
         self.action_avancee = action
-        self.reject()
+        # Choix explicite : on ferme sans la question des saisies.
+        QDialog.reject(self)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1139,7 +1172,7 @@ class ArchivesDialog(QDialog):
 # Dialogue d'édition d'une règle
 # ─────────────────────────────────────────────────────────────────────────────
 
-class RuleDialog(QDialog):
+class RuleDialog(SaisieProtegee, QDialog):
     """Création / modification d'une règle de catégorisation."""
 
     def __init__(self, parent=None, rule: Optional[dict] = None,
@@ -1221,6 +1254,7 @@ class RuleDialog(QDialog):
             self.cat.setCurrentText(rule.get("categorie", ""))
             self.sous_cat.setText(rule.get("sous_cat", ""))
             self.no_overwrite.setChecked(bool(rule.get("no_overwrite")))
+        self._photographier_saisie()
 
     def values(self) -> dict:
         return {
@@ -1238,7 +1272,7 @@ class RuleDialog(QDialog):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-class RecurringDialog(QDialog):
+class RecurringDialog(SaisieProtegee, QDialog):
     # La liste des sous-catégories se met à jour comme dans TxDialog.
     _update_subcat_list = TxDialog._update_subcat_list
 
@@ -1384,6 +1418,7 @@ class RecurringDialog(QDialog):
             if ed:
                 self.end_date.setDate(QDate.fromString(ed, "yyyy-MM-dd"))
             self.actif.setChecked(bool(rec.get("actif", 1)))
+        self._photographier_saisie()
 
     def _validate_and_accept(self):
         """Libellé obligatoire — vérifié ici pour valoir à l'ajout ET à la
