@@ -21,6 +21,15 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-09 — Version 1.41.6 installée chez l'auteur
+
+**Fait.** Numéro 1.41.6 : les corrections de l'audit complet du 08/10 (base abîmée, aide
+sur les dates, ligne sans montant, verdict sans solde de départ, imports, Oui / Non,
+signes, graphique du Bilan, fenêtres de saisie). Détail de l'installation : voir plus bas.
+**Pourquoi.** Règle d'un numéro par exe installé ; voir les corrections avant la sortie de
+début novembre.
+**Reste.** Sortie publique de début novembre.
+
 ## 2026-10-08 (7) — Partie 3 de l'audit : design et choix de l'auteur (commits locaux)
 
 **Fait.** Graphique d'évolution du Bilan : chiffres noirs sur le vert (5,75 pour 1, ils

@@ -1,4 +1,4 @@
-PECULE - version 1.41.5
+PECULE - version 1.41.6
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.

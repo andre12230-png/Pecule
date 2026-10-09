@@ -923,7 +923,15 @@ SYNC_VERSION = 3
 #          applis. << Toute la periode >> au lieu de << Toutes periodes >>
 #          (menu, Bilan, Operations, Notice). Gris et rouge un peu plus
 #          fonces, lisibles sur le fond creme.
-APP_VERSION = "1.41.5"
+# 1.41.6 : Audit complet avant la sortie. Base abimee annoncee en clair au
+#          demarrage, sauvegarde du jour qui ne la copie pas ; aide sur les
+#          dates juste ; ligne sans montant ecartee ; pas de faux « aucun
+#          decouvert » sans solde de depart ; Texte Unicode, « 12,50- » et
+#          « − » lus ; messages d'import qui donnent la cause ; plus de
+#          Oui / Non ; « + » sur les mouvements et les restes ; graphique du
+#          Bilan lisible, depenses en rouge, mois en cours signale ; fenetres
+#          de saisie qui demandent avant de se fermer.
+APP_VERSION = "1.41.6"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
