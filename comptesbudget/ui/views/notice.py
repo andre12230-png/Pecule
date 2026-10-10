@@ -208,8 +208,10 @@ rattachées à un compte nommé <b>Compte courant</b> : rien n'a bougé.</p>
 <h3>🏠 Bilan (tableau de bord)</h3>
 <p>Vue d'ensemble avec 4 indicateurs clés, le verdict du mois, l'évolution sur
 12 mois, la répartition des dépenses par catégorie, la courbe du solde en fin de
-mois, et les listes top dépenses / sources de revenus / plus grosses dépenses
-individuelles.</p>
+mois, et les listes top dépenses / sources de revenus / plus grosses dépenses.
+Dans cette dernière, plusieurs dépenses au même libellé tiennent sur une seule
+ligne, avec leur total : elle indique alors « 2 fois » (ou plus) à la place de
+la date.</p>
 <p>Le KPI <b>« 💼 Solde bancaire réel (pointé) »</b> donne le solde réel du compte :
 solde initial + les seules opérations <i>pointées</i> (vérifiées sur le relevé). Il est
 <b>toujours calculé en date de valeur</b>, quel que soit le sélecteur « Date » en haut de

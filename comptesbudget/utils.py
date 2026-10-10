@@ -159,6 +159,36 @@ def depense_nette_par_categorie(txs: list[dict]) -> dict[str, float]:
     return {c: round(-v, 2) for c, v in net.items() if v < -0.005}
 
 
+def plus_grosses_depenses(txs: list[dict], limite: int = 8) -> list[dict]:
+    """Les plus grosses dépenses des opérations données, un libellé par ligne.
+
+    Deux dépenses au même libellé (majuscules et espaces en bout de texte
+    mis à part) font une seule ligne avec leur total : deux passages au même
+    magasin sur la période ne prennent plus deux places de la liste
+    (demande d'André du 10/10/2026). Le classement se fait sur ce total.
+
+    Chaque ligne : libelle et categorie de sa plus grosse opération,
+    montant (total, négatif), nb (nombre d'opérations) et date (celle de la
+    plus grosse opération)."""
+    groupes: dict[str, dict] = {}
+    # De la plus grosse à la plus petite : la première vue de chaque libellé
+    # donne le nom, la catégorie et la date de la ligne.
+    for t in sorted((t for t in txs if t["montant"] < 0),
+                    key=lambda t: t["montant"]):
+        libelle = (t.get("libelle") or "—").strip()
+        cle = libelle.casefold()
+        if cle not in groupes:
+            groupes[cle] = {"libelle": libelle,
+                            "categorie": t.get("categorie", ""),
+                            "date": t.get("date", ""),
+                            "montant": 0.0, "nb": 0}
+        groupes[cle]["montant"] += t["montant"]
+        groupes[cle]["nb"] += 1
+    for g in groupes.values():
+        g["montant"] = round(g["montant"], 2)
+    return sorted(groupes.values(), key=lambda g: g["montant"])[:limite]
+
+
 def suggest_category(libelle: str, sous_cat: str = "",
                      montant: Optional[float] = None) -> Optional[str]:
     """Retourne la catégorie suggérée d'après libellé/sous-cat, ou None.

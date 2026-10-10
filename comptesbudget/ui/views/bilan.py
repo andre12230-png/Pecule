@@ -22,7 +22,8 @@ from ...accords import accorde, pluriel
 from ...utils import (
     carte_a_debit_differe, cat_color, de_mois_a_mois,
     depense_nette_par_categorie, est_paiement_carte,
-    fmt_euro, fmt_euro_signe, fmt_date_fr, in_period, period_label, regle_debit_differe,
+    fmt_euro, fmt_euro_signe, fmt_date_fr, in_period, period_label,
+    plus_grosses_depenses, regle_debit_differe,
 )
 from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
@@ -1707,14 +1708,15 @@ class BilanView(QWidget):
                      for c, amt in sorted(by_rev.items(), key=lambda x: x[1], reverse=True)[:8]]
         self.list_rev.set_items(rev_items)
 
-        # ── Liste : plus grosses dépenses individuelles ───────────────
-        top = sorted([t for t in analyse if t["montant"] < 0],
-                     key=lambda t: t["montant"])[:8]
+        # ── Liste : plus grosses dépenses, un libellé par ligne ───────
+        # Deux passages au même endroit font une seule ligne, avec leur
+        # total : elle dit alors « 2 fois » au lieu de la date.
         top_items = []
-        for t in top:
-            sub = fmt_date_fr(t["date"])[:5]  # "JJ/MM"
-            top_items.append((t.get("libelle", "—")[:40], t["montant"],
-                              cat_color(t.get("categorie", "")), sub))
+        for d in plus_grosses_depenses(analyse, 8):
+            sub = (f"{d['nb']} fois" if d["nb"] > 1
+                   else fmt_date_fr(d["date"])[:5])  # "JJ/MM"
+            top_items.append((d["libelle"][:40], d["montant"],
+                              cat_color(d["categorie"]), sub))
         self.list_top.set_items(top_items)
 
     def _mois_du_graphique(self, actives: list[dict]) -> list[str]:

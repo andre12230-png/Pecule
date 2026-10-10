@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 from ..accords import pluriel
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
+    plus_grosses_depenses,
 )
 from ..database import Database
 from .widgets import PeriodBar
@@ -153,14 +154,17 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     H.append("</table>")
 
     # — Plus grosses dépenses —
-    top = sorted((t for t in analyse if t["montant"] < 0), key=lambda t: t["montant"])[:10]
+    # Un libellé par ligne : deux passages au même endroit font une seule
+    # ligne avec leur total, comme dans le Bilan (« 2 fois » au lieu de la date).
+    top = plus_grosses_depenses(analyse, 10)
     if top:
         H.append("<h2>Plus grosses dépenses</h2>")
         H.append('<table cellpadding="5" cellspacing="0" width="100%">'
                  '<tr bgcolor="#E8EEF7"><td><b>Date</b></td><td><b>Libellé</b></td>'
                  '<td><b>Catégorie</b></td><td align="right"><b>Montant</b></td></tr>')
         for t in top:
-            H.append(f'<tr><td>{fmt_date_fr(t["date"])}</td>'
+            quand = f'{t["nb"]} fois' if t["nb"] > 1 else fmt_date_fr(t["date"])
+            H.append(f'<tr><td>{quand}</td>'
                      f'<td>{_esc(t.get("libelle", ""))}</td>'
                      f'<td>{_esc(t.get("categorie", ""))}</td>'
                      f'<td align="right"><font color="#BC3729">{euro(t["montant"])}</font></td></tr>')
