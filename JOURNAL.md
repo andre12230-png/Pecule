@@ -26,7 +26,8 @@ La date la plus récente est en haut.
 
 **Fait.** Dans le Bilan, la liste « Plus grosses dépenses » réunit sur une seule ligne les dépenses de même libellé de la période (majuscules et espaces en bout de texte mis à part), avec leur total ; la ligne dit « 2 fois » à la place de la date. Même chose dans le rapport mensuel imprimable. Nouvelle fonction `plus_grosses_depenses` dans `utils.py`, 5 tests (`test_plus_grosses_depenses.py`), phrase de la notice mise à jour. Suite complète : 694 tests sur 694.
 **Pourquoi.** Deux passages au même magasin sur le mois (achats carte du mois précédent débités ce mois-ci) prenaient deux places de la liste.
-**Reste.** Pas encore de nouvel exe : il faudra un nouveau numéro de version (après 1.41.6) pour l'installer.
+**Déployé.** Version **1.41.7** installée chez André le même jour (contrôle de livraison passé, fonction vérifiée dans l'exe, base inchangée, titre « v1.41.7 »). Réserve : la 1.41.6 seule ; la 1.41.5 mise à la Corbeille.
+**Reste.** Rien.
 
 ## 2026-10-09 — Version 1.41.6 installée chez l'auteur
 
