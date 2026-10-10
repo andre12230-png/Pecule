@@ -931,7 +931,10 @@ SYNC_VERSION = 3
 #          Oui / Non ; « + » sur les mouvements et les restes ; graphique du
 #          Bilan lisible, depenses en rouge, mois en cours signale ; fenetres
 #          de saisie qui demandent avant de se fermer.
-APP_VERSION = "1.41.6"
+# 1.41.7 : Bilan, << Plus grosses depenses >> : un meme libelle sur une seule
+#          ligne, avec son total, et << 2 fois >> a la place de la date.
+#          Pareil dans le rapport mensuel.
+APP_VERSION = "1.41.7"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
