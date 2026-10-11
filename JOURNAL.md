@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 (6) — Infobulles du menu de gauche
+## 2026-10-11 (6) — Infobulles du menu de gauche (v1.41.12)
 
 **Fait.** « Nouvelle opération » a son infobulle (avec son raccourci,
 Insert, dans l'onglet Opérations) ; « Mise à jour » a les mêmes mots que

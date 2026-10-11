@@ -944,7 +944,9 @@ SYNC_VERSION = 3
 # 1.41.11 : Nom de l'appli et sous-titre << Vos comptes et votre budget >> en
 #           tete du menu de gauche, comme les deux autres applis ; espaces
 #           resserres pour tenir sur un portable 1366 x 768.
-APP_VERSION = "1.41.11"
+# 1.41.12 : Infobulles du menu de gauche : << Nouvelle operation >> en a une,
+#           << Mise a jour >> dit la meme chose que dans les deux autres applis.
+APP_VERSION = "1.41.12"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
