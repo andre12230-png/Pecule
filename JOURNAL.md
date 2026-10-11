@@ -32,8 +32,9 @@ Un test exige une infobulle sur chaque bouton du menu ; 701 tests passent.
 Numéro monté à 1.41.12 ; contrôle passé (701 tests), exe construit,
 installé dans le dossier d'usage (base identique, titre « v1.41.12 » lu
 depuis le dossier d'usage) ; réserve Pecule.exe.avant-1.41.12.
-**Reste.** Réserve Pecule.exe.avant-1.41.11 (la 1.41.10) à mettre à la
-Corbeille si l'auteur le veut.
+Réserve Pecule.exe.avant-1.41.11 (la 1.41.10) mise à la Corbeille, avec
+l'accord de l'auteur.
+**Reste.** Rien.
 
 ## 2026-10-11 (5) — Marges du menu de gauche gardées par un test
 
