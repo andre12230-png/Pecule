@@ -1960,6 +1960,26 @@ def test_nom_de_l_appli_en_tete_du_menu_de_gauche(qapp, tmp_path):
     assert second.text() == "Vos comptes et votre budget"
 
 
+def test_chaque_bouton_du_menu_a_son_infobulle(qapp, tmp_path):
+    """Charte : une infobulle sur chaque bouton du menu de gauche, comme dans
+    les deux autres applis ; « Mise à jour » dit la même chose dans les
+    trois (11/10/2026)."""
+    from PySide6.QtWidgets import QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "bulles.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    menu = fenetre.centralWidget().findChild(QScrollArea).widget()
+    boutons = {b.text(): b for b in menu.findChildren(QPushButton)}
+    for texte, b in boutons.items():
+        assert b.toolTip(), texte
+    assert "(Insert" in boutons["➕ Nouvelle opération"].toolTip()
+    assert boutons["🔄 Mise à jour"].toolTip() == (
+        "Voir s'il existe une version plus récente (la page s'ouvre dans "
+        "votre navigateur ; rien n'est vérifié automatiquement)")
+
+
 def test_version_en_pied_du_menu_de_gauche(qapp, tmp_path):
     """Comme le Photovoltaïque et Recharges VE : le numéro de version, « v »
     compris, est le dernier élément du menu de gauche, sous un ressort qui le

@@ -22,6 +22,15 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (6) — Infobulles du menu de gauche
+
+**Fait.** « Nouvelle opération » a son infobulle (avec son raccourci,
+Insert, dans l'onglet Opérations) ; « Mise à jour » a les mêmes mots que
+dans les deux autres applis (« … rien n'est vérifié automatiquement »).
+Un test exige une infobulle sur chaque bouton du menu ; 701 tests passent.
+**Pourquoi.** Demande de l'auteur : harmoniser les infobulles des trois bandeaux.
+**Reste.** Pas d'exe : part avec le prochain déploiement.
+
 ## 2026-10-11 (5) — Marges du menu de gauche gardées par un test
 
 **Fait.** Rien ne change à l'écran : Pécule avait déjà 6 px en haut et 4

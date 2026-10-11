@@ -172,7 +172,9 @@ class MainWindow(QMainWindow):
 
         # Juste sous le nom de l'appli : un peu d'air suffit.
         add_section("Saisie", air=4)
-        add_btn("➕ Nouvelle opération", self.action_new_tx)
+        add_btn("➕ Nouvelle opération", self.action_new_tx,
+                "Saisir une opération à la main (Insert, dans l'onglet "
+                "Opérations)")
         add_btn("📥 Importer un relevé", self.action_import,
                 "Relevé bancaire CSV ou OFX téléchargé chez votre banque, ou "
                 "fichier QIF exporté depuis un autre logiciel de comptes "
@@ -258,9 +260,10 @@ class MainWindow(QMainWindow):
                 "(questionnaire en ligne, dans votre navigateur)")
         # Libellé court : le menu de gauche fixe la largeur minimale de la
         # fenêtre, qui doit tenir en moitié d'écran.
+        # Infobulle commune aux trois applis (11/10/2026).
         add_btn("🔄 Mise à jour", self.action_mise_a_jour,
-                "Voir s'il existe une version plus récente "
-                "(dans votre navigateur ; Pécule ne se connecte à rien)")
+                "Voir s'il existe une version plus récente (la page s'ouvre "
+                "dans votre navigateur ; rien n'est vérifié automatiquement)")
         mv.addStretch()
         # La version en pied, comme le Photovoltaïque et Recharges VE
         # (11/10/2026) : utile pour une capture d'écran ou un signalement,
