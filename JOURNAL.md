@@ -35,8 +35,9 @@ il a choisi l'infobulle.
 Numéro monté à 1.41.13 ; contrôle passé (702 tests), exe construit,
 installé (base identique, titre « v1.41.13 » lu depuis le dossier
 d'usage) ; réserve Pecule.exe.avant-1.41.13.
-**Reste.** Réserve Pecule.exe.avant-1.41.12 (la 1.41.11) à mettre à la
-Corbeille si l'auteur le veut.
+Réserve Pecule.exe.avant-1.41.12 (la 1.41.11) mise à la Corbeille, avec
+l'accord de l'auteur.
+**Reste.** Rien.
 
 ## 2026-10-11 (6) — Infobulles du menu de gauche (v1.41.12)
 
