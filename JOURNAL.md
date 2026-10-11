@@ -37,8 +37,9 @@ des trois applis.
 Numéro monté à 1.41.8. Exe construit, installé dans le dossier d'usage
 (base identique avant et après, titre « v1.41.8 » lu depuis le dossier
 d'usage) ; réserve Pecule.exe.avant-1.41.8.
-**Reste.** Réserve Pecule.exe.avant-1.41.7 (la 1.41.6) à mettre à la
-Corbeille si l'auteur le veut.
+Réserve Pecule.exe.avant-1.41.7 (la 1.41.6) mise à la Corbeille, avec
+l'accord de l'auteur.
+**Reste.** Rien.
 
 ## 2026-10-10 — Plus grosses dépenses : un libellé par ligne
 
