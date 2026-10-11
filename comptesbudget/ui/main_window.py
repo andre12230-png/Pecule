@@ -70,7 +70,10 @@ class MainWindow(QMainWindow):
         # ses données, régler, se faire aider — chaque groupe annoncé par un
         # intitulé. Quinze boutons d'affilée ne se lisaient pas.
         menu = QWidget()
-        menu.setFixedWidth(184)
+        # 212 px, comme le Photovoltaïque et Recharges VE (11/10/2026 ; c'était
+        # 184). La fenêtre tient toujours en moitié d'écran (1280 px) : voir
+        # tests/test_ui_smoke.py et la mesure notée au JOURNAL.md.
+        menu.setFixedWidth(212)
         mv = QVBoxLayout(menu)
         mv.setContentsMargins(8, 8, 8, 8)
         mv.setSpacing(4)

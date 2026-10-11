@@ -1924,6 +1924,21 @@ def test_fenetre_tient_sur_un_petit_ecran(qapp, tmp_path):
     assert mini.height() <= 700, f"hauteur minimale : {mini.height()} px"
 
 
+def test_menu_de_gauche_aussi_large_que_dans_les_autres_applis(qapp, tmp_path):
+    """Le Photovoltaïque et Recharges VE ont un bandeau de 212 px ; celui de
+    Pécule en faisait 184 (harmonisé le 11/10/2026). La largeur de la
+    fenêtre en moitié d'écran se vérifie à part, vraies polices."""
+    from PySide6.QtWidgets import QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "largeur.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    menu = fenetre.centralWidget().findChild(QScrollArea)
+    assert menu.width() == 212
+    assert menu.widget().width() == 212
+
+
 def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):
     """Un tableur déposé sur la fenêtre était ignoré sans un mot : rien ne
     distinguait « format non lu » de « glisser-déposer en panne »."""

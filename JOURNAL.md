@@ -22,6 +22,18 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (2) — Menu de gauche à 212 px, comme les deux autres applis
+
+**Fait.** Le menu de gauche passe de 184 à 212 px de large. Mesuré, vraies
+polices, sur une copie d'une base réelle : largeur minimale de la fenêtre
+1 174 px (1 146 avant, +28), toujours fixée par l'onglet Prévisionnel ; il
+reste 106 px sous les 1 280 d'une moitié d'écran. Capture à 1 280 px
+regardée : libellés entiers, rien ne déborde. Un test garde les 212 px ;
+698 tests passent.
+**Pourquoi.** Demande de l'auteur : harmoniser la largeur du bandeau avec le
+Photovoltaïque et Recharges VE.
+**Reste.** Pas d'exe : part avec le prochain déploiement.
+
 ## 2026-10-11 — Ménage du menu de gauche, installée chez l'auteur (v1.41.8)
 
 **Fait.** Plus de section « Mettre au propre » : son titre redisait son seul
