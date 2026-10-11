@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 (2) — Menu de gauche à 212 px, comme les deux autres applis
+## 2026-10-11 (2) — Menu de gauche à 212 px, comme les deux autres applis (v1.41.9)
 
 **Fait.** Le menu de gauche passe de 184 à 212 px de large. Mesuré, vraies
 polices, sur une copie d'une base réelle : largeur minimale de la fenêtre

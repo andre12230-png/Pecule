@@ -937,7 +937,9 @@ SYNC_VERSION = 3
 # 1.41.8 : Menu de gauche range : << Mettre au propre... >> rejoint << Mes
 #          donnees >> (plus de section a son nom), << Nettoyer categories >>
 #          sans l'emoji du bouton, Notice dans l'ordre du menu.
-APP_VERSION = "1.41.8"
+# 1.41.9 : Menu de gauche a 212 px, comme les deux autres applis (184 avant) ;
+#          la fenetre tient toujours en moitie d'ecran.
+APP_VERSION = "1.41.9"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
