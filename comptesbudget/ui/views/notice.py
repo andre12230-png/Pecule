@@ -820,7 +820,9 @@ version la plus récente :<br>
 Internet et ne peut donc pas vous l'annoncer tout seul. Cliquez sur
 <code>🔄 Mise à jour</code>, dans la rubrique Aide du menu de gauche : il
 affiche votre version et ouvre la page de la dernière dans votre navigateur.
-Si son numéro est plus grand que le vôtre, une mise à jour vous attend.</p>
+Si son numéro est plus grand que le vôtre, une mise à jour vous attend. Votre
+numéro se lit aussi tout en bas du menu de gauche, et dans le titre de la
+fenêtre.</p>
 
 <p><b>Avec l'archive .zip</b> : décompressez la nouvelle version où vous
 voulez (par-dessus l'ancienne, c'est le plus simple), puis lancez son
