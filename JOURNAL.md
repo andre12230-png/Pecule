@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 (4) — Nom de l'appli en tête du menu de gauche
+## 2026-10-11 (4) — Nom de l'appli en tête du menu de gauche (v1.41.11)
 
 **Fait.** « Pécule » ouvre le menu de gauche, en bleu nuit gras (9,18 pour 1
 sur le crème), comme le nom des deux autres applis. Le menu montait alors à
