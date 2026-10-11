@@ -32,7 +32,11 @@ regardée : libellés entiers, rien ne déborde. Un test garde les 212 px ;
 698 tests passent.
 **Pourquoi.** Demande de l'auteur : harmoniser la largeur du bandeau avec le
 Photovoltaïque et Recharges VE.
-**Reste.** Pas d'exe : part avec le prochain déploiement.
+Puis numéro monté à 1.41.9 ; exe construit, installé dans le dossier
+d'usage (base identique avant et après, titre « v1.41.9 » lu depuis le
+dossier d'usage) ; réserve Pecule.exe.avant-1.41.9.
+**Reste.** Réserve Pecule.exe.avant-1.41.8 (la 1.41.7) à mettre à la
+Corbeille si l'auteur le veut.
 
 ## 2026-10-11 — Ménage du menu de gauche, installée chez l'auteur (v1.41.8)
 
