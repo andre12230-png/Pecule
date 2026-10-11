@@ -1939,6 +1939,22 @@ def test_menu_de_gauche_aussi_large_que_dans_les_autres_applis(qapp, tmp_path):
     assert menu.widget().width() == 212
 
 
+def test_nom_de_l_appli_en_tete_du_menu_de_gauche(qapp, tmp_path):
+    """Comme le Photovoltaïque et Recharges VE : le nom de l'appli, accentué,
+    ouvre le menu de gauche (harmonisé le 11/10/2026)."""
+    from PySide6.QtWidgets import QLabel, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "nom.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    disposition = fenetre.centralWidget().findChild(QScrollArea).widget().layout()
+    premier = disposition.itemAt(0).widget()
+    assert isinstance(premier, QLabel)
+    assert premier.text() == "Pécule"
+    assert "#1F3A6B" in premier.styleSheet()
+
+
 def test_version_en_pied_du_menu_de_gauche(qapp, tmp_path):
     """Comme le Photovoltaïque et Recharges VE : le numéro de version, « v »
     compris, est le dernier élément du menu de gauche, sous un ressort qui le

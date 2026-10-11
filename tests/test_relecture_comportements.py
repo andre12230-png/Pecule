@@ -233,6 +233,8 @@ def test_ordre_du_menu_de_gauche(qapp, db):
         elif isinstance(el, QLabel):
             lignes.append("# " + el.text())
     assert lignes == [
+        # Le nom en tête, comme les deux autres applis (11/10/2026).
+        "# Pécule",
         "# SAISIE", "➕ Nouvelle opération", "📥 Importer un relevé",
         "# CONSULTER", "🔎 Rechercher", "🖨 Rapport mensuel",
         "# MES DONNÉES", "💾 Sauvegarde externe", "🧹 Mettre au propre…",

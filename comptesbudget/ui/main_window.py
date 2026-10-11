@@ -75,7 +75,8 @@ class MainWindow(QMainWindow):
         # tests/test_ui_smoke.py et la mesure notée au JOURNAL.md.
         menu.setFixedWidth(212)
         mv = QVBoxLayout(menu)
-        mv.setContentsMargins(8, 8, 8, 8)
+        # 6 px en haut, comme Recharges VE : le nom de l'appli y prend place.
+        mv.setContentsMargins(8, 6, 8, 8)
         mv.setSpacing(4)
 
         STYLE_BOUTON = (
@@ -109,17 +110,29 @@ class MainWindow(QMainWindow):
             mv.addWidget(b)
             return b
 
-        def add_section(titre):
+        def add_section(titre, air=8):
             """Intitulé de groupe : un peu d'air, un mot en petites capitales,
-            un filet. Renvoie ses widgets, pour pouvoir masquer le groupe."""
+            un filet. Renvoie ses widgets, pour pouvoir masquer le groupe.
+
+            8 px d'air (11 avant le 11/10/2026) : avec le nom de l'appli en
+            tête, le menu doit encore tenir sans défiler sur un portable
+            1366 × 768 (~689 px utiles), mesuré vraies polices."""
             espace = QWidget()
-            espace.setFixedHeight(11 if mv.count() else 0)
+            espace.setFixedHeight(air)
             mv.addWidget(espace)
             lbl = QLabel(titre.upper())
             lbl.setStyleSheet(STYLE_TITRE)
             mv.addWidget(lbl)
             mv.addSpacing(2)
             return espace, lbl
+
+        # Le nom de l'appli en tête, comme le Photovoltaïque et Recharges VE
+        # (11/10/2026) : bleu nuit, gras. Il précède le premier titre de
+        # section, qui reçoit donc ses 11 px d'air comme les suivants.
+        marque = QLabel("Pécule")
+        marque.setStyleSheet(
+            "color:#1F3A6B; font-size:13pt; font-weight:700; padding:2px 2px 0")
+        mv.addWidget(marque)
 
         # ── Compte affiché ──
         # Le compte choisi commande TOUT l'écran : bilan, opérations, budget,
@@ -148,7 +161,8 @@ class MainWindow(QMainWindow):
         self.btn_recap.clicked.connect(self.action_recap_comptes)
         coin.addWidget(self.btn_recap)
 
-        add_section("Saisie")
+        # Juste sous le nom de l'appli : un peu d'air suffit.
+        add_section("Saisie", air=4)
         add_btn("➕ Nouvelle opération", self.action_new_tx)
         add_btn("📥 Importer un relevé", self.action_import,
                 "Relevé bancaire CSV ou OFX téléchargé chez votre banque, ou "

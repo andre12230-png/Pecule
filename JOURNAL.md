@@ -22,6 +22,21 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (4) — Nom de l'appli en tête du menu de gauche
+
+**Fait.** « Pécule » ouvre le menu de gauche, en bleu nuit gras (9,18 pour 1
+sur le crème), comme le nom des deux autres applis. Le menu montait alors à
+705 px, au-delà des ~689 utiles d'un portable 1366 × 768 : marge du haut
+ramenée à 6 px, 4 px entre le nom et « Saisie », 8 px (au lieu de 11) avant
+les autres titres. Mesuré vraies polices : 684 px. Bandeau regardé en image ;
+un test garde le nom ; 700 tests passent.
+**Pourquoi.** Demande de l'auteur : harmoniser le nom de l'appli dans le
+bandeau. Pas de sous-titre (les deux autres en ont un) : la demande portait
+sur le nom.
+**Reste.** Pas d'exe : part avec le prochain déploiement. Sur une
+installation vide, le bouton « Reprendre un fichier » s'ajoute et le menu
+défile sur un portable (c'était déjà le cas avant).
+
 ## 2026-10-11 (3) — Version en pied du menu de gauche (v1.41.10)
 
 **Fait.** Le numéro de version (« v1.41.9 ») s'affiche en bas du menu de
