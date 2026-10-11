@@ -32,7 +32,11 @@ le garde ; 702 tests passent ; une infobulle regardée en image.
 **Pourquoi.** Demande de l'auteur : harmoniser les sous-titres des pages.
 Pécule n'en avait pas ; entre l'infobulle d'onglet et un titre de page,
 il a choisi l'infobulle.
-**Reste.** Pas d'exe : part avec le prochain déploiement.
+Numéro monté à 1.41.13 ; contrôle passé (702 tests), exe construit,
+installé (base identique, titre « v1.41.13 » lu depuis le dossier
+d'usage) ; réserve Pecule.exe.avant-1.41.13.
+**Reste.** Réserve Pecule.exe.avant-1.41.12 (la 1.41.11) à mettre à la
+Corbeille si l'auteur le veut.
 
 ## 2026-10-11 (6) — Infobulles du menu de gauche (v1.41.12)
 
