@@ -34,7 +34,11 @@ Trois tests ajoutés (ordre complet du menu, sous-menu sans l'emoji de son
 bouton, Notice dans l'ordre du menu) ; 697 tests passent.
 **Pourquoi.** Demande de l'auteur : faire le ménage dans le bandeau de gauche
 des trois applis.
-**Reste.** Pas de nouvel exe : le changement attend le prochain déploiement.
+Numéro monté à 1.41.8. Exe construit, installé dans le dossier d'usage
+(base identique avant et après, titre « v1.41.8 » lu depuis le dossier
+d'usage) ; réserve Pecule.exe.avant-1.41.8.
+**Reste.** Réserve Pecule.exe.avant-1.41.7 (la 1.41.6) à mettre à la
+Corbeille si l'auteur le veut.
 
 ## 2026-10-10 — Plus grosses dépenses : un libellé par ligne
 
