@@ -40,8 +40,9 @@ bandeau, puis lui donner un sous-titre comme les deux autres applis.
 Numéro monté à 1.41.11 ; exe construit, installé dans le dossier d'usage
 (base identique avant et après, titre « v1.41.11 » lu depuis le dossier
 d'usage) ; réserve Pecule.exe.avant-1.41.11.
-**Reste.** Réserve Pecule.exe.avant-1.41.10 (la 1.41.9) à mettre à la
-Corbeille si l'auteur le veut. Sur une installation vide, le bouton « Reprendre un fichier » s'ajoute et le menu
+Réserve Pecule.exe.avant-1.41.10 (la 1.41.9) mise à la Corbeille, avec
+l'accord de l'auteur.
+**Reste.** Sur une installation vide, le bouton « Reprendre un fichier » s'ajoute et le menu
 défile sur un portable (c'était déjà le cas avant).
 
 ## 2026-10-11 (3) — Version en pied du menu de gauche (v1.41.10)
