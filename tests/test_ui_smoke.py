@@ -1977,6 +1977,10 @@ def test_version_en_pied_du_menu_de_gauche(qapp, tmp_path):
     assert dernier.text() == f"v{APP_VERSION}"
     ressort = disposition.itemAt(disposition.count() - 2)
     assert ressort.spacerItem() is not None
+    # 6 px au-dessus du nom, 4 sous la version, dans les trois applis
+    # (11/10/2026).
+    assert disposition.contentsMargins().top() == 6
+    assert disposition.contentsMargins().bottom() == 4
 
 
 def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):

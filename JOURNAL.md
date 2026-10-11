@@ -22,6 +22,16 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (5) — Marges du menu de gauche gardées par un test
+
+**Fait.** Rien ne change à l'écran : Pécule avait déjà 6 px en haut et 4
+en bas, la valeur retenue pour les trois applis. Le test de la version en
+pied vérifie désormais ces deux marges ; 700 tests passent.
+**Pourquoi.** Demande de l'auteur : harmoniser la marge du bas des trois
+bandeaux ; 4 px est celle de Pécule, dont le menu ne peut pas grandir
+(687 px sur ~689).
+**Reste.** Rien.
+
 ## 2026-10-11 (4) — Nom de l'appli en tête du menu de gauche (v1.41.11)
 
 **Fait.** « Pécule » ouvre le menu de gauche, en bleu nuit gras (9,18 pour 1
