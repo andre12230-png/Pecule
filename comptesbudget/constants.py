@@ -939,7 +939,9 @@ SYNC_VERSION = 3
 #          sans l'emoji du bouton, Notice dans l'ordre du menu.
 # 1.41.9 : Menu de gauche a 212 px, comme les deux autres applis (184 avant) ;
 #          la fenetre tient toujours en moitie d'ecran.
-APP_VERSION = "1.41.9"
+# 1.41.10 : Numero de version en pied du menu de gauche, comme les deux autres
+#           applis.
+APP_VERSION = "1.41.10"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

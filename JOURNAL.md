@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 (3) — Version en pied du menu de gauche
+## 2026-10-11 (3) — Version en pied du menu de gauche (v1.41.10)
 
 **Fait.** Le numéro de version (« v1.41.9 ») s'affiche en bas du menu de
 gauche, en petit et en gris (#5A5A5A, 5,65 pour 1 sur le crème), comme dans
