@@ -1953,6 +1953,11 @@ def test_nom_de_l_appli_en_tete_du_menu_de_gauche(qapp, tmp_path):
     assert isinstance(premier, QLabel)
     assert premier.text() == "Pécule"
     assert "#1F3A6B" in premier.styleSheet()
+    # Puis son sous-titre, qui dit ce que l'appli apporte, comme Recharges VE
+    # (« Coût réel de vos recharges ») ; choix de l'auteur du 11/10/2026.
+    second = disposition.itemAt(1).widget()
+    assert isinstance(second, QLabel)
+    assert second.text() == "Vos comptes et votre budget"
 
 
 def test_version_en_pied_du_menu_de_gauche(qapp, tmp_path):

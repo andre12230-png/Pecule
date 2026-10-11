@@ -30,9 +30,13 @@ sur le crème), comme le nom des deux autres applis. Le menu montait alors à
 ramenée à 6 px, 4 px entre le nom et « Saisie », 8 px (au lieu de 11) avant
 les autres titres. Mesuré vraies polices : 684 px. Bandeau regardé en image ;
 un test garde le nom ; 700 tests passent.
+Puis, à la demande de l'auteur, le sous-titre « Vos comptes et votre
+budget » sous le nom (les mots du site, le modèle de Recharges VE). Pour
+tenir : 6 px avant les titres, 4 px de marge en bas, version sans espace
+au-dessus. Mesuré : 687 px, 2 px de marge seulement. Image regardée ;
+700 tests passent.
 **Pourquoi.** Demande de l'auteur : harmoniser le nom de l'appli dans le
-bandeau. Pas de sous-titre (les deux autres en ont un) : la demande portait
-sur le nom.
+bandeau, puis lui donner un sous-titre comme les deux autres applis.
 **Reste.** Pas d'exe : part avec le prochain déploiement. Sur une
 installation vide, le bouton « Reprendre un fichier » s'ajoute et le menu
 défile sur un portable (c'était déjà le cas avant).

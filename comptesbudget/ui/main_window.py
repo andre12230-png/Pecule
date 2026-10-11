@@ -75,8 +75,10 @@ class MainWindow(QMainWindow):
         # tests/test_ui_smoke.py et la mesure notée au JOURNAL.md.
         menu.setFixedWidth(212)
         mv = QVBoxLayout(menu)
-        # 6 px en haut, comme Recharges VE : le nom de l'appli y prend place.
-        mv.setContentsMargins(8, 6, 8, 8)
+        # 6 px en haut, comme Recharges VE : le nom de l'appli y prend place ;
+        # 4 px en bas, sous la version. Le menu doit tenir sans défiler sur
+        # un portable 1366 × 768 (~689 px utiles), mesuré vraies polices.
+        mv.setContentsMargins(8, 6, 8, 4)
         mv.setSpacing(4)
 
         STYLE_BOUTON = (
@@ -110,13 +112,14 @@ class MainWindow(QMainWindow):
             mv.addWidget(b)
             return b
 
-        def add_section(titre, air=8):
+        def add_section(titre, air=6):
             """Intitulé de groupe : un peu d'air, un mot en petites capitales,
             un filet. Renvoie ses widgets, pour pouvoir masquer le groupe.
 
-            8 px d'air (11 avant le 11/10/2026) : avec le nom de l'appli en
-            tête, le menu doit encore tenir sans défiler sur un portable
-            1366 × 768 (~689 px utiles), mesuré vraies polices."""
+            6 px d'air (11 avant le 11/10/2026) : avec le nom de l'appli et
+            son sous-titre en tête, le menu doit encore tenir sans défiler
+            sur un portable 1366 × 768 (~689 px utiles), mesuré vraies
+            polices."""
             espace = QWidget()
             espace.setFixedHeight(air)
             mv.addWidget(espace)
@@ -133,6 +136,12 @@ class MainWindow(QMainWindow):
         marque.setStyleSheet(
             "color:#1F3A6B; font-size:13pt; font-weight:700; padding:2px 2px 0")
         mv.addWidget(marque)
+        # Son sous-titre dit ce que l'appli apporte, comme celui de Recharges
+        # VE (« Coût réel de vos recharges ») et dans les mots du site
+        # (choix de l'auteur du 11/10/2026). Gris des titres de section.
+        sous_titre = QLabel("Vos comptes et votre budget")
+        sous_titre.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:0 2px")
+        mv.addWidget(sous_titre)
 
         # ── Compte affiché ──
         # Le compte choisi commande TOUT l'écran : bilan, opérations, budget,
@@ -257,7 +266,7 @@ class MainWindow(QMainWindow):
         # (11/10/2026) : utile pour une capture d'écran ou un signalement,
         # sans qu'on la lise tous les jours. Gris des titres de section.
         version = QLabel(f"v{APP_VERSION}")
-        version.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:4px 3px 0")
+        version.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:0 3px")
         mv.addWidget(version)
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
