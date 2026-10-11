@@ -239,6 +239,12 @@ class MainWindow(QMainWindow):
                 "Voir s'il existe une version plus récente "
                 "(dans votre navigateur ; Pécule ne se connecte à rien)")
         mv.addStretch()
+        # La version en pied, comme le Photovoltaïque et Recharges VE
+        # (11/10/2026) : utile pour une capture d'écran ou un signalement,
+        # sans qu'on la lise tous les jours. Gris des titres de section.
+        version = QLabel(f"v{APP_VERSION}")
+        version.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:4px 3px 0")
+        mv.addWidget(version)
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
         sc_search = QShortcut(QKeySequence("Ctrl+F"), self)

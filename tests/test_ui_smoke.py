@@ -1939,6 +1939,25 @@ def test_menu_de_gauche_aussi_large_que_dans_les_autres_applis(qapp, tmp_path):
     assert menu.widget().width() == 212
 
 
+def test_version_en_pied_du_menu_de_gauche(qapp, tmp_path):
+    """Comme le Photovoltaïque et Recharges VE : le numéro de version, « v »
+    compris, est le dernier élément du menu de gauche, sous un ressort qui le
+    pousse en bas (harmonisé le 11/10/2026)."""
+    from PySide6.QtWidgets import QLabel, QScrollArea
+    from comptesbudget.constants import APP_VERSION
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "version.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    disposition = fenetre.centralWidget().findChild(QScrollArea).widget().layout()
+    dernier = disposition.itemAt(disposition.count() - 1).widget()
+    assert isinstance(dernier, QLabel)
+    assert dernier.text() == f"v{APP_VERSION}"
+    ressort = disposition.itemAt(disposition.count() - 2)
+    assert ressort.spacerItem() is not None
+
+
 def test_glisser_deposer_explique_un_fichier_excel(qapp, tmp_path):
     """Un tableur déposé sur la fenêtre était ignoré sans un mot : rien ne
     distinguait « format non lu » de « glisser-déposer en panne »."""

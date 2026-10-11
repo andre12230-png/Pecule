@@ -221,6 +221,7 @@ def test_ordre_du_menu_de_gauche(qapp, db):
     d'un bouton du même nom ; le bouton rejoint « Mes données ». La fin du
     menu reste celle des trois applis (Mes données, Réglages, Aide)."""
     from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea
+    from comptesbudget.constants import APP_VERSION
     from comptesbudget.ui.main_window import MainWindow
     w = MainWindow(db)
     menu = w.centralWidget().findChild(QScrollArea).widget()
@@ -237,7 +238,9 @@ def test_ordre_du_menu_de_gauche(qapp, db):
         "# MES DONNÉES", "💾 Sauvegarde externe", "🧹 Mettre au propre…",
         "📦 Archiver", "📂 Reprendre un fichier",
         "# RÉGLAGES", "🧠 Règles auto", "🏦 Mes comptes", "⚙️ Paramètres",
-        "# AIDE", "📖 Notice", "💬 Votre avis", "🔄 Mise à jour"]
+        "# AIDE", "📖 Notice", "💬 Votre avis", "🔄 Mise à jour",
+        # La version en pied, comme les deux autres applis (11/10/2026).
+        "# v" + APP_VERSION]
 
 
 def test_sous_menu_sans_l_emoji_de_son_bouton(qapp, db):

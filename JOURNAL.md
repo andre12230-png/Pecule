@@ -22,6 +22,16 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (3) — Version en pied du menu de gauche
+
+**Fait.** Le numéro de version (« v1.41.9 ») s'affiche en bas du menu de
+gauche, en petit et en gris (#5A5A5A, 5,65 pour 1 sur le crème), comme dans
+le Photovoltaïque et Recharges VE. Il reste aussi dans le titre de la fenêtre.
+Un test le garde ; 699 tests passent ; bandeau regardé en image.
+**Pourquoi.** Demande de l'auteur : harmoniser la version affichée dans le
+bandeau avec les deux autres applis.
+**Reste.** Pas d'exe : part avec le prochain déploiement.
+
 ## 2026-10-11 (2) — Menu de gauche à 212 px, comme les deux autres applis (v1.41.9)
 
 **Fait.** Le menu de gauche passe de 184 à 212 px de large. Mesuré, vraies
