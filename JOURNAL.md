@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 (7) — Une phrase par onglet, au survol
+## 2026-10-11 (7) — Une phrase par onglet, au survol (v1.41.13)
 
 **Fait.** Chaque onglet (Bilan, Opérations, Budget, Catégories,
 Prévisionnel) a une infobulle qui dit ce qu'il contient, dans les mots
