@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-11 — Ménage du menu de gauche
+## 2026-10-11 — Ménage du menu de gauche, installée chez l'auteur (v1.41.8)
 
 **Fait.** Plus de section « Mettre au propre » : son titre redisait son seul
 bouton. « 🧹 Mettre au propre… » passe dans « Mes données », après la

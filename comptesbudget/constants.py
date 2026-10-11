@@ -934,7 +934,10 @@ SYNC_VERSION = 3
 # 1.41.7 : Bilan, << Plus grosses depenses >> : un meme libelle sur une seule
 #          ligne, avec son total, et << 2 fois >> a la place de la date.
 #          Pareil dans le rapport mensuel.
-APP_VERSION = "1.41.7"
+# 1.41.8 : Menu de gauche range : << Mettre au propre... >> rejoint << Mes
+#          donnees >> (plus de section a son nom), << Nettoyer categories >>
+#          sans l'emoji du bouton, Notice dans l'ordre du menu.
+APP_VERSION = "1.41.8"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
