@@ -34,8 +34,9 @@ Puis la Notice (§ 9) dit où lire son numéro : en bas du menu et dans le
 titre. Numéro monté à 1.41.10 ; exe construit, installé dans le dossier
 d'usage (base identique avant et après, titre « v1.41.10 » lu depuis le
 dossier d'usage) ; réserve Pecule.exe.avant-1.41.10.
-**Reste.** Réserve Pecule.exe.avant-1.41.9 (la 1.41.8) à mettre à la
-Corbeille si l'auteur le veut.
+Réserve Pecule.exe.avant-1.41.9 (la 1.41.8) mise à la Corbeille, avec
+l'accord de l'auteur.
+**Reste.** Rien.
 
 ## 2026-10-11 (2) — Menu de gauche à 212 px, comme les deux autres applis (v1.41.9)
 
