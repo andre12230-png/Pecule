@@ -216,22 +216,80 @@ def test_pre_remplir_garde_accents_et_sigles():
 
 # ── Menu de gauche et bandeau Encours carte (choix de l'auteur, 01/10) ──
 
+def test_ordre_du_menu_de_gauche(qapp, db):
+    """Ménage du 11/10/2026 : plus de titre « Mettre au propre » au-dessus
+    d'un bouton du même nom ; le bouton rejoint « Mes données ». La fin du
+    menu reste celle des trois applis (Mes données, Réglages, Aide)."""
+    from PySide6.QtWidgets import QLabel, QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    lignes = []
+    for i in range(menu.layout().count()):
+        el = menu.layout().itemAt(i).widget()
+        if isinstance(el, QPushButton):
+            lignes.append(el.text())
+        elif isinstance(el, QLabel):
+            lignes.append("# " + el.text())
+    assert lignes == [
+        "# SAISIE", "➕ Nouvelle opération", "📥 Importer un relevé",
+        "# CONSULTER", "🔎 Rechercher", "🖨 Rapport mensuel",
+        "# MES DONNÉES", "💾 Sauvegarde externe", "🧹 Mettre au propre…",
+        "📦 Archiver", "📂 Reprendre un fichier",
+        "# RÉGLAGES", "🧠 Règles auto", "🏦 Mes comptes", "⚙️ Paramètres",
+        "# AIDE", "📖 Notice", "💬 Votre avis", "🔄 Mise à jour"]
+
+
+def test_sous_menu_sans_l_emoji_de_son_bouton(qapp, db):
+    """Un outil du sous-menu ne reprend pas l'emoji du bouton qui l'ouvre :
+    « 🧹 Nettoyer catégories » sous « 🧹 Mettre au propre… » se confondaient."""
+    from PySide6.QtWidgets import QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    w = MainWindow(db)
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    for bouton in menu.findChildren(QPushButton):
+        if bouton.menu() is None:
+            continue
+        emoji = bouton.text().split(" ")[0]
+        for action in bouton.menu().actions():
+            assert action.text().split(" ")[0] != emoji, action.text()
+
+
+def test_notice_suit_l_ordre_du_menu(qapp, db):
+    """Le tableau « Outils du menu de gauche » de la Notice range les
+    boutons dans l'ordre où l'écran les montre."""
+    import re
+    from PySide6.QtWidgets import QPushButton, QScrollArea
+    from comptesbudget.ui.main_window import MainWindow
+    from comptesbudget.ui.views import notice
+    w = MainWindow(db)
+    menu = w.centralWidget().findChild(QScrollArea).widget()
+    a_l_ecran = [b.text() for b in menu.findChildren(QPushButton)]
+    source = open(notice.__file__, encoding="utf-8").read()
+    tableau = source.split("<h2>6. Outils du menu de gauche</h2>")[1]
+    tableau = tableau.split("</table>")[0]
+    # Les outils du sous-menu (lignes en retrait) ne sont pas à l'écran.
+    dans_la_notice = [t for t in re.findall(r"<tr><td>([^<]+)</td>", tableau)
+                      if not t.startswith("&nbsp;")]
+    assert dans_la_notice == a_l_ecran
+
+
 def test_mettre_au_propre_tient_dans_un_bouton(qapp, db):
     """Quatre boutons d'affilée faisaient déborder le menu sur un portable :
-    un seul bouton « Mettre au propre… » ouvre les quatre outils."""
+    un seul bouton « Mettre au propre… » ouvre les cinq outils."""
     from PySide6.QtWidgets import QPushButton, QScrollArea
     from comptesbudget.ui.main_window import MainWindow
     w = MainWindow(db)
     menu = w.centralWidget().findChild(QScrollArea).widget()
     textes = [b.text() for b in menu.findChildren(QPushButton)]
     assert "🧹 Mettre au propre…" in textes
-    for ancien in ("🧹 Nettoyer catégories", "🔧 Suggérer catégories",
+    for ancien in ("🧽 Nettoyer catégories", "🔧 Suggérer catégories",
                    "🔠 Harmoniser libellés", "🔍 Chercher doublons"):
         assert ancien not in textes, ancien
     bouton = next(b for b in menu.findChildren(QPushButton)
                   if b.text() == "🧹 Mettre au propre…")
     actions = [a.text() for a in bouton.menu().actions()]
-    assert actions == ["🧹 Nettoyer catégories", "🔧 Suggérer catégories",
+    assert actions == ["🧽 Nettoyer catégories", "🔧 Suggérer catégories",
                        "🔖 Ranger sous-catégories",
                        "🔠 Harmoniser libellés", "🔍 Chercher doublons"]
 

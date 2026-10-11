@@ -66,8 +66,8 @@ class MainWindow(QMainWindow):
         # ── Menu d'actions vertical (à gauche) ──
         # (Auparavant une barre d'outils horizontale ; déplacé à gauche pour
         #  s'aligner sur les interfaces native et Qt.)
-        # Les actions sont rangées par intention — saisir, consulter, mettre
-        # au propre, gérer ses données, régler — chaque groupe annoncé par un
+        # Les actions sont rangées par intention — saisir, consulter, gérer
+        # ses données, régler, se faire aider — chaque groupe annoncé par un
         # intitulé. Quinze boutons d'affilée ne se lisaient pas.
         menu = QWidget()
         menu.setFixedWidth(184)
@@ -93,13 +93,16 @@ class MainWindow(QMainWindow):
             "border-bottom:1px solid #A9A9A9")
 
         def add_btn(text, slot, tip=""):
+            """Bouton du menu. Sans « slot », il ouvre seulement le menu
+            déroulant qu'on lui pose ensuite (setMenu)."""
             b = QPushButton(text)
             b.setMinimumHeight(30)
             b.setStyleSheet(STYLE_BOUTON)
             b.setCursor(Qt.PointingHandCursor)
             if tip:
                 b.setToolTip(tip)
-            b.clicked.connect(slot)
+            if slot is not None:
+                b.clicked.connect(slot)
             mv.addWidget(b)
             return b
 
@@ -156,15 +159,24 @@ class MainWindow(QMainWindow):
         add_btn("🖨 Rapport mensuel", self.action_monthly_report,
                 "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
 
-        add_section("Mettre au propre")
+        add_section("Mes données")
+        # Les sauvegardes automatiques restent sur le même disque que la
+        # base : celle-ci part sur une clé ou un disque externe.
+        add_btn("💾 Sauvegarde externe", self.action_sauvegarde_externe,
+                "Copie vos données sur une clé USB ou un disque externe, "
+                "dans un dossier daté, et vérifie la copie")
+
         # Un seul bouton, qui ouvre les outils de rangement : quatre boutons
         # d'affilée faisaient déborder le menu sur un portable (choix de
         # l'auteur du 01/10/2026). Libellés courts, qui disent ce qu'on
-        # obtient (relecture du 30/09/2026).
+        # obtient (relecture du 30/09/2026). Il avait sa propre section,
+        # « Mettre au propre », dont le titre redisait son seul bouton :
+        # ranger ses catégories, c'est toucher à ses données (11/10/2026).
+        # Aucun outil ne reprend l'emoji 🧹 du bouton qui les ouvre.
         self.menu_propre = QMenu(self)
         self.menu_propre.setToolTipsVisible(True)
         for texte, action, aide in (
-                ("🧹 Nettoyer catégories", self.action_clean_cats,
+                ("🧽 Nettoyer catégories", self.action_clean_cats,
                  "Ramène les catégories venues des banques aux noms de Pécule"),
                 ("🔧 Suggérer catégories", self.action_harmonize,
                  "Suggère une catégorie d'après le libellé (motifs prédéfinis)"),
@@ -182,17 +194,11 @@ class MainWindow(QMainWindow):
             act.setToolTip(aide)
             act.triggered.connect(action)
         self.btn_propre = add_btn(
-            "🧹 Mettre au propre…", lambda: None,
+            "🧹 Mettre au propre…", None,
             "Nettoyer les catégories, suggérer des catégories, ranger les "
             "sous-catégories, harmoniser les libellés, chercher les doublons")
         self.btn_propre.setMenu(self.menu_propre)
 
-        add_section("Mes données")
-        # Les sauvegardes automatiques restent sur le même disque que la
-        # base : celle-ci part sur une clé ou un disque externe.
-        add_btn("💾 Sauvegarde externe", self.action_sauvegarde_externe,
-                "Copie vos données sur une clé USB ou un disque externe, "
-                "dans un dossier daté, et vérifie la copie")
         add_btn("📦 Archiver", self.action_archives,
                 "Met de côté les opérations anciennes : elles sortent des "
                 "listes sans être supprimées")
@@ -275,7 +281,8 @@ class MainWindow(QMainWindow):
         root = QHBoxLayout(central)
         root.setContentsMargins(0, 0, 0, 0); root.setSpacing(0)
         # Le menu défile si la fenêtre est trop courte pour lui. Ses seize
-        # boutons empilés réclamaient 730 px de haut — mesuré — et fixaient à
+        # boutons d'alors (quatorze aujourd'hui, 11/10/2026) réclamaient
+        # 730 px de haut — mesuré — et fixaient à
         # eux seuls la hauteur minimale de la fenêtre à 754 px : trop pour un
         # portable 1366 × 768, où le bas de l'écran passait sous la barre des
         # tâches. Sur un grand écran, rien ne change : aucune barre de

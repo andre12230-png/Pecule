@@ -682,24 +682,24 @@ le rappelle en affichant « toute la période ». Les autres choix (Pointées,
 
 <h2>6. Outils du menu de gauche</h2>
 <p>Les actions sont rangées par intention, chaque groupe annoncé par son
-intitulé : <b>Saisie</b>, <b>Consulter</b>, <b>Mettre au propre</b>,
-<b>Mes données</b>, <b>Réglages</b> et <b>Aide</b>. Le compte affiché se
+intitulé : <b>Saisie</b>, <b>Consulter</b>, <b>Mes données</b>,
+<b>Réglages</b> et <b>Aide</b>. Le compte affiché se
 choisit au début de la rangée d'onglets, dès qu'il y a deux comptes.</p>
 <table>
   <tr><th>Bouton</th><th>Fonction</th></tr>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
+  <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
+  <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
+  <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>🧹 Mettre au propre…</td><td>Ouvre les cinq outils ci-dessous</td></tr>
-  <tr><td>&nbsp;&nbsp;🧹 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
+  <tr><td>&nbsp;&nbsp;🧽 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
   <tr><td>&nbsp;&nbsp;🔧 Suggérer catégories</td><td>Suggère des catégorisations d'après les libellés</td></tr>
   <tr><td>&nbsp;&nbsp;🔖 Ranger sous-catégories</td><td>Renomme, fusionne ou vide les sous-catégories de vos opérations</td></tr>
   <tr><td>&nbsp;&nbsp;🔠 Harmoniser libellés</td><td>Regroupe les variantes d'un même commerçant (« LIDL 3193 », « lidl 3852 » → « Lidl »)</td></tr>
   <tr><td>&nbsp;&nbsp;🔍 Chercher doublons</td><td>Détecte les doublons potentiels et ouvre une <b>liste de vérification à cocher</b> avant toute suppression</td></tr>
-  <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
-  <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
-  <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
-  <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
   <tr><td>📦 Archiver</td><td>Met de côté les opérations anciennes : elles sortent des listes sans être supprimées</td></tr>
+  <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🧠 Règles auto</td><td>Les règles qui classent toutes seules les opérations importées, d'après leur libellé</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer, supprimer un compte bancaire, et <b>ranger la liste</b> — le compte du haut est celui qui s'ouvre au lancement</td></tr>
   <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter vers une autre installation</b> et <b>Fusionner un export</b>, pour transférer ou fusionner deux installations</td></tr>

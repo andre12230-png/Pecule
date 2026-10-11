@@ -22,6 +22,20 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 — Ménage du menu de gauche
+
+**Fait.** Plus de section « Mettre au propre » : son titre redisait son seul
+bouton. « 🧹 Mettre au propre… » passe dans « Mes données », après la
+Sauvegarde externe. Dans son sous-menu, « Nettoyer catégories » prend 🧽 au
+lieu de 🧹, l'emoji du bouton qui l'ouvre. Le tableau « Outils du menu de
+gauche » de la Notice suit désormais l'ordre de l'écran. Côté code : le bouton
+à menu n'a plus de clic vide (`lambda: None`), commentaires recomptés.
+Trois tests ajoutés (ordre complet du menu, sous-menu sans l'emoji de son
+bouton, Notice dans l'ordre du menu) ; 697 tests passent.
+**Pourquoi.** Demande de l'auteur : faire le ménage dans le bandeau de gauche
+des trois applis.
+**Reste.** Pas de nouvel exe : le changement attend le prochain déploiement.
+
 ## 2026-10-10 — Plus grosses dépenses : un libellé par ligne
 
 **Fait.** Dans le Bilan, la liste « Plus grosses dépenses » réunit sur une seule ligne les dépenses de même libellé de la période (majuscules et espaces en bout de texte mis à part), avec leur total ; la ligne dit « 2 fois » à la place de la date. Même chose dans le rapport mensuel imprimable. Nouvelle fonction `plus_grosses_depenses` dans `utils.py`, 5 tests (`test_plus_grosses_depenses.py`), phrase de la notice mise à jour. Suite complète : 694 tests sur 694.
