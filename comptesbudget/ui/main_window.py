@@ -298,6 +298,20 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.budget_view, "🎯 Budget")
         self.tabs.addTab(self.cats_view, "🏷️ Catégories")
         self.tabs.addTab(self.prev_view, "🔮 Prévisionnel")
+        # Une phrase par onglet, au survol : ce que la page contient. C'est
+        # le sous-titre des pages du Photovoltaïque et de Recharges VE, ici
+        # sans titre en tête qui prendrait de la hauteur (choix de l'auteur
+        # du 11/10/2026). Les mots de la Notice, § 3.
+        for i, phrase in enumerate((
+                "Vue d'ensemble de la période : solde, mouvements du mois, "
+                "épargne, et où va votre argent",
+                "Toutes vos opérations, à rechercher, pointer, modifier ou "
+                "supprimer",
+                "Vos dépenses face au budget mensuel de chaque catégorie",
+                "Vos opérations rangées par catégorie, avec leur total",
+                "Vos opérations récurrentes et les échéances des 12 prochains "
+                "mois")):
+            self.tabs.setTabToolTip(i, phrase)
         self.tabs.setCornerWidget(self.compte_espace, Qt.TopLeftCorner)
 
         # Sous-catégories et Règles auto ne sont plus des onglets : elles

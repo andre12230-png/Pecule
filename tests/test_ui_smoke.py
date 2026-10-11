@@ -1960,6 +1960,22 @@ def test_nom_de_l_appli_en_tete_du_menu_de_gauche(qapp, tmp_path):
     assert second.text() == "Vos comptes et votre budget"
 
 
+def test_chaque_onglet_dit_ce_qu_il_contient(qapp, tmp_path):
+    """Les deux autres applis ont, pour chaque page, une phrase qui dit ce
+    qu'elle contient (sous-titre et infobulle). Pécule l'a en infobulle de
+    chaque onglet, sans titre en tête qui prendrait de la hauteur (choix de
+    l'auteur du 11/10/2026)."""
+    from comptesbudget.ui.main_window import MainWindow
+
+    db = Database(str(tmp_path / "onglets.db"))
+    db.set_setting("initial_balance", "0")
+    fenetre = MainWindow(db)
+    for i in range(fenetre.tabs.count()):
+        bulle = fenetre.tabs.tabToolTip(i)
+        assert bulle, fenetre.tabs.tabText(i)
+        assert " / " not in bulle, bulle
+
+
 def test_chaque_bouton_du_menu_a_son_infobulle(qapp, tmp_path):
     """Charte : une infobulle sur chaque bouton du menu de gauche, comme dans
     les deux autres applis ; « Mise à jour » dit la même chose dans les

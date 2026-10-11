@@ -22,6 +22,18 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-11 (7) — Une phrase par onglet, au survol
+
+**Fait.** Chaque onglet (Bilan, Opérations, Budget, Catégories,
+Prévisionnel) a une infobulle qui dit ce qu'il contient, dans les mots
+de la Notice (§ 3). C'est l'équivalent des sous-titres de page des deux
+autres applis, sans titre en tête qui prendrait de la hauteur. Un test
+le garde ; 702 tests passent ; une infobulle regardée en image.
+**Pourquoi.** Demande de l'auteur : harmoniser les sous-titres des pages.
+Pécule n'en avait pas ; entre l'infobulle d'onglet et un titre de page,
+il a choisi l'infobulle.
+**Reste.** Pas d'exe : part avec le prochain déploiement.
+
 ## 2026-10-11 (6) — Infobulles du menu de gauche (v1.41.12)
 
 **Fait.** « Nouvelle opération » a son infobulle (avec son raccourci,
