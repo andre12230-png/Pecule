@@ -41,6 +41,34 @@ CATEGORIE_MANQUANTE = ("Choisissez la catégorie que la règle donnera aux "
                        "opérations reconnues (par exemple « Alimentation »).")
 
 
+def garder_la_frappe(combo: QComboBox):
+    """Garde dans une liste modifiable le nom tapé, avec ses majuscules et
+    minuscules à lui.
+
+    Qt cherche les noms connus sans tenir compte de la casse : taper
+    « Alimentation » puis Entrée redonnait « ALIMENTATION » s'il était déjà
+    dans la liste (catégories en capitales venues d'un import QIF). Il était
+    alors impossible de corriger l'écriture (signalé le 13/10/2026).
+
+    On retient donc la dernière frappe ; si Qt la remplace par le même mot
+    écrit autrement, on remet la frappe. Un début de mot complété par la
+    case (« alim » → « ALIMENTATION ») n'est pas touché : ce n'est pas le
+    même mot."""
+    edition = combo.lineEdit()
+    frappe = {"texte": ""}
+
+    def noter(texte: str):
+        frappe["texte"] = texte
+
+    def retablir(texte: str):
+        tape = frappe["texte"].strip()
+        if tape and texte != tape and texte.strip().casefold() == tape.casefold():
+            edition.setText(tape)
+
+    edition.textEdited.connect(noter)       # seulement ce que tape la personne
+    edition.textChanged.connect(retablir)   # tout changement, Qt compris
+
+
 def sous_categories_connues(transactions: list[dict]):
     """Les sous-catégories déjà employées : { catégorie: [sous-catégories] },
     puis la liste de toutes, pour une catégorie qui n'en a encore aucune.
@@ -170,6 +198,7 @@ class TxDialog(SaisieProtegee, QDialog):
 
         self.cat = QComboBox()
         self.cat.setEditable(True)
+        garder_la_frappe(self.cat)
         # La liste reçue vient de `db.categories_proposees()` : elle tient
         # déjà compte des catégories que l'utilisateur a masquées. On n'y
         # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
@@ -193,6 +222,7 @@ class TxDialog(SaisieProtegee, QDialog):
         # filtrée par la catégorie sélectionnée
         self.sous_cat = QComboBox()
         self.sous_cat.setEditable(True)
+        garder_la_frappe(self.sous_cat)
         self.sous_cat.lineEdit().setMaxLength(80)
         self.sous_cat.setInsertPolicy(QComboBox.NoInsert)  # pas d'ajout auto à la liste
         self._subcat_by_cat, self._all_subcats = sous_categories_connues(self.all_tx)
@@ -693,6 +723,7 @@ class CategorieEnMasseDialog(QDialog):
         # on peut taper une catégorie nouvelle.
         self.cat = QComboBox()
         self.cat.setEditable(True)
+        garder_la_frappe(self.cat)
         self.cat.addItems(sorted(set(categories)) if categories
                           else sorted(CATEGORIES_DEFAUT))
         self.cat.setCurrentText(categorie)
@@ -708,6 +739,7 @@ class CategorieEnMasseDialog(QDialog):
                 self._subcat_by_cat.setdefault(c, set()).add(sc)
         self.sous_cat = QComboBox()
         self.sous_cat.setEditable(True)
+        garder_la_frappe(self.sous_cat)
         self.sous_cat.lineEdit().setMaxLength(80)
         self.sous_cat.setInsertPolicy(QComboBox.NoInsert)
         layout.addRow("Sous-catégorie :", self.sous_cat)
@@ -1209,6 +1241,7 @@ class RuleDialog(SaisieProtegee, QDialog):
 
         self.cat = QComboBox()
         self.cat.setEditable(True)
+        garder_la_frappe(self.cat)
         # La liste reçue vient de `db.categories_proposees()` : elle tient
         # déjà compte des catégories que l'utilisateur a masquées. On n'y
         # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
@@ -1325,6 +1358,7 @@ class RecurringDialog(SaisieProtegee, QDialog):
         layout.addRow("Type :", self.type_combo)
 
         self.cat = QComboBox(); self.cat.setEditable(True)
+        garder_la_frappe(self.cat)
         # La liste reçue vient de `db.categories_proposees()` : elle tient
         # déjà compte des catégories que l'utilisateur a masquées. On n'y
         # rajoute donc plus les 17 d'origine, sans quoi le masquage n'aurait
@@ -1348,6 +1382,7 @@ class RecurringDialog(SaisieProtegee, QDialog):
         # la saisie d'une opération : c'était ici une simple case.
         self.sous_cat = QComboBox()
         self.sous_cat.setEditable(True)
+        garder_la_frappe(self.sous_cat)
         self.sous_cat.lineEdit().setMaxLength(80)
         self.sous_cat.setInsertPolicy(QComboBox.NoInsert)
         self._subcat_by_cat, self._all_subcats = sous_categories_connues(self.all_tx)

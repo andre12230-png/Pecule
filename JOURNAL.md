@@ -22,6 +22,30 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-13 — Une catégorie tapée garde ses majuscules et minuscules
+
+**Fait.** Les cases Catégorie et Sous-catégorie des quatre fenêtres de
+saisie (opération, reclassement de plusieurs lignes, règle, opération
+récurrente) gardent désormais le nom tapé tel quel. Avant, taper
+« Alimentation » puis Entrée redonnait « ALIMENTATION » si ce nom était
+déjà dans la liste : Qt cherche les noms connus sans tenir compte de la
+casse et remplaçait la frappe. Nouvelle fonction `garder_la_frappe`
+(`ui/dialogs.py`) : elle retient la dernière frappe et la remet si Qt la
+remplace par le même mot écrit autrement. Un début de mot complété par la
+case (« alim » → « ALIMENTATION ») n'est pas touché. Test écrit d'abord
+(il échouait), gardé : `tests/test_categorie_garde_la_casse.py`, 9 cas ;
+711 tests passent.
+**Pourquoi.** Signalé par un utilisateur : après un import QIF, des
+catégories en capitales ne pouvaient plus être réécrites, même supprimées
+puis retapées. Astuce donnée en attendant : reclasser en cliquant
+« Enregistrer » sans appuyer sur Entrée.
+**Reste.** Pas de nouvel exe : la correction partira avec la sortie du
+01/11/2026. Non vérifié dans l'appli à l'écran ; la complétion d'un début
+de mot n'est pas couverte par le test (sans écran, Qt ne complète pas).
+
+---
+
+
 ## 2026-10-11 (7) — Une phrase par onglet, au survol (v1.41.13)
 
 **Fait.** Chaque onglet (Bilan, Opérations, Budget, Catégories,
