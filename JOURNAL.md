@@ -22,7 +22,7 @@ La date la plus récente est en haut.
 ---
 
 
-## 2026-10-13 — Une catégorie tapée garde ses majuscules et minuscules
+## 2026-10-13 — Une catégorie tapée garde ses majuscules et minuscules (v1.41.14)
 
 **Fait.** Les cases Catégorie et Sous-catégorie des quatre fenêtres de
 saisie (opération, reclassement de plusieurs lignes, règle, opération
@@ -39,9 +39,13 @@ case (« alim » → « ALIMENTATION ») n'est pas touché. Test écrit d'abord
 catégories en capitales ne pouvaient plus être réécrites, même supprimées
 puis retapées. Astuce donnée en attendant : reclasser en cliquant
 « Enregistrer » sans appuyer sur Entrée.
-**Reste.** Pas de nouvel exe : la correction partira avec la sortie du
-01/11/2026. Non vérifié dans l'appli à l'écran ; la complétion d'un début
-de mot n'est pas couverte par le test (sans écran, Qt ne complète pas).
+Installée chez l'auteur à sa demande : numéro monté à 1.41.14, contrôle
+passé (711 tests ; Notice relue, déjà juste : « ou tapez-en une
+nouvelle »), exe construit et installé, base identique ; réserve
+Pecule.exe.avant-1.41.14 ; la réserve avant-1.41.13 à la Corbeille, avec
+son accord.
+**Reste.** La complétion d'un début de mot n'est pas couverte par le test
+(sans écran, Qt ne complète pas). Publication avec la sortie du 01/11/2026.
 
 ---
 

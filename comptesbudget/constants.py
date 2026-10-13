@@ -947,7 +947,9 @@ SYNC_VERSION = 3
 # 1.41.12 : Infobulles du menu de gauche : << Nouvelle operation >> en a une,
 #           << Mise a jour >> dit la meme chose que dans les deux autres applis.
 # 1.41.13 : Une phrase par onglet, au survol : ce que chacun contient.
-APP_VERSION = "1.41.13"
+# 1.41.14 : Une categorie tapee garde ses majuscules et minuscules : taper
+#           << Alimentation >> ne redonne plus << ALIMENTATION >> deja connue.
+APP_VERSION = "1.41.14"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
