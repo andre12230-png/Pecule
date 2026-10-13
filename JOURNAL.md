@@ -21,6 +21,12 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-13 — Pécule accepté dans Winget
+
+**Fait.** La demande microsoft/winget-pkgs#416272 (version 1.23.0) a été approuvée et fusionnée le 13 octobre, trois jours après la dérogation à la politique 1.8. Le README, la page d'accueil du site et `winget/README.md` donnent désormais `winget install --id andre12230-png.Pecule` et `winget upgrade`. Ces textes sont publiés seuls le 14 octobre, avant la sortie du 1er novembre.
+**Pourquoi.** Offrir une installation en une commande ; le paquet était la dernière voie d'installation encore « en attente ».
+**Reste.** Le 14 octobre, le catalogue connaît le paquet et `winget download` vérifie l'empreinte de l'archive. Remonter les manifestes de `winget/` et soumettre la nouvelle version avec la sortie du 1er novembre ; d'ici là, ne pas toucher au `.zip` de la 1.23.0.
+
 ## 2026-10-02 — Publication de la 1.41.2
 
 **Fait.** Version 1.41.2 publiée sur GitHub (installeur et archive), avec le site et le
