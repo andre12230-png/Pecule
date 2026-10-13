@@ -10,7 +10,7 @@
 
 > 📦 Ou en ligne de commande avec **[Scoop](https://scoop.sh)** : `scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json`
 >
-> ⏳ Un paquet **Winget** est [soumis et en attente de revue](https://github.com/microsoft/winget-pkgs/pull/416272) : `winget install` ne le connaît pas encore.
+> 📦 Ou avec **Winget**, le gestionnaire d'applications intégré à Windows 10/11 : `winget install --id andre12230-png.Pecule` (la version proposée par Winget peut avoir quelques jours de retard sur la dernière).
 
 > 💬 **Un problème, une idée ?** Dites-le dans le [questionnaire en ligne](https://forms.cloud.microsoft/r/gBQcGGD33d) — deux minutes, sans compte à créer, toutes les questions facultatives (n'y indiquez ni numéro de compte ni montant). Avec un compte GitHub, vous pouvez aussi [ouvrir un ticket](https://github.com/andre12230-png/Pecule/issues).
 
@@ -84,9 +84,12 @@ pip install PySide6
 python pecule.py
 ```
 
-A **Winget** package has been
-[submitted](https://github.com/microsoft/winget-pkgs/pull/416272) and is
-awaiting review; `winget install` does not know about it yet.
+Or with **Winget**, the package manager built into Windows 10/11 (the Winget
+version may lag a few days behind the latest release):
+
+```bash
+winget install --id andre12230-png.Pecule
+```
 
 Requires Python ≥ 3.9 (developed and tested on 3.13 / 3.14). Licensed under
 **MIT**. Windows 10/11 is the primary target, but the code is pure Python + Qt
@@ -185,7 +188,8 @@ demande de le fermer.
 (par-dessus l'ancienne, c'est le plus simple) et lancez son `Pecule.exe` : vos
 données, rangées à part dans `%LOCALAPPDATA%\Pecule`, sont retrouvées toutes
 seules. L'installeur et l'archive partagent ce dossier : on passe de l'un à
-l'autre sans rien faire. Avec Scoop, `scoop update pecule` suffit.
+l'autre sans rien faire. Avec Scoop, `scoop update pecule` suffit ; avec
+Winget, `winget upgrade --id andre12230-png.Pecule`.
 
 **En usage portable** (un `comptes.db` à côté de `Pecule.exe` : installations
 commencées avant la 1.22, ou rendues portables en y copiant sa base),
@@ -455,7 +459,7 @@ python outils/faire_archive.py
 
 Il ajoute `Lisez-moi.txt` et `Budget.ico` au dossier construit, écrit le `.zip`
 puis affiche l'empreinte SHA-256 à reporter dans `bucket/pecule.json` — et,
-le moment venu, dans les manifestes Winget de [`winget/`](winget/README.md).
+à chaque version soumise à Winget, dans ses manifestes de [`winget/`](winget/README.md).
 
 **Ne fabriquez pas ce `.zip` avec le clic droit de Windows.** `Compress-Archive`
 écrit les entrées de dossier sans le marqueur « répertoire » : un outil strict
