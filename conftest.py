@@ -19,6 +19,23 @@ def qapp():
 
 
 @pytest.fixture(autouse=True)
+def revenir_au_theme_clair(tmp_path, monkeypatch):
+    """Les préférences de Windows (le thème choisi) sont remplacées par un
+    fichier temporaire : un test ne lit ni n'écrit jamais celles de
+    l'utilisateur. Après chaque test, le thème clair revient : un test qui
+    essaie le sombre ne doit pas changer les couleurs des tests suivants."""
+    from PySide6.QtCore import QSettings
+    from comptesbudget import theme
+    fichier = str(tmp_path / "preferences-test.ini")
+    monkeypatch.setattr(
+        theme, "preferences",
+        lambda: QSettings(fichier, QSettings.IniFormat))
+    yield
+    from comptesbudget.theme import choisir_theme
+    choisir_theme("clair")
+
+
+@pytest.fixture(autouse=True)
 def detruire_les_fenetres():
     """Après chaque test, détruit les fenêtres qu'il a laissées ouvertes.
 

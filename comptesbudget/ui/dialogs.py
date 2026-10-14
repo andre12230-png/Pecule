@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
     QDialogButtonBox, QFrame, QRadioButton, QSpinBox, QCompleter, QMessageBox,
     QListWidget, QListWidgetItem, QPushButton, QInputDialog, QScrollArea,
+    QButtonGroup,
 )
 
 from ..constants import (
@@ -22,6 +23,7 @@ from ..utils import (
 from ..accords import accorde, pluriel
 from ..erreurs import erreur_en_clair
 from ..labels import build_libelle_profiles
+from ..theme import T
 from .widgets import (
     MontantSpinBox, boutons_enregistrer_annuler, confirmer, demander_montant,
 )
@@ -781,7 +783,7 @@ class CategorieEnMasseDialog(QDialog):
 class SettingsDialog(SaisieProtegee, QDialog):
     def __init__(self, parent=None, initial_date: str = "2025-01-01",
                  initial_balance: float = 0.0, nom_compte: str = "",
-                 avance: bool = False):
+                 avance: bool = False, theme_actuel: str = "clair"):
         super().__init__(parent)
         # Action demandée par un bouton de la partie « Avancé » (« exporter »
         # ou « restaurer »), lancée par la fenêtre principale une fois
@@ -818,6 +820,33 @@ class SettingsDialog(SaisieProtegee, QDialog):
         self.initial_balance.setSuffix(" €")
         self.initial_balance.setValue(initial_balance)
         layout.addRow("Solde de départ :", self.initial_balance)
+
+        # Apparence : clair ou sombre (décision de l'auteur du 12/10/2026).
+        # Le choix vaut pour toute l'application, pas pour ce seul compte, et
+        # ne s'applique qu'au prochain démarrage (voir comptesbudget/theme.py).
+        filet_apparence = QFrame()
+        filet_apparence.setFrameShape(QFrame.HLine)
+        filet_apparence.setStyleSheet(f"color:{T['filet']}")
+        layout.addRow(filet_apparence)
+        layout.addRow(QLabel("<b>Apparence</b>"))
+        self.radio_clair = QRadioButton("Clair")
+        self.radio_sombre = QRadioButton("Sombre")
+        self._groupe_theme = QButtonGroup(self)
+        self._groupe_theme.addButton(self.radio_clair)
+        self._groupe_theme.addButton(self.radio_sombre)
+        (self.radio_sombre if theme_actuel == "sombre"
+         else self.radio_clair).setChecked(True)
+        ligne_theme = QHBoxLayout()
+        ligne_theme.addWidget(self.radio_clair)
+        ligne_theme.addWidget(self.radio_sombre)
+        ligne_theme.addStretch()
+        layout.addRow("Thème :", ligne_theme)
+        note_theme = QLabel(
+            "Pour tous les comptes. Le changement s'applique au prochain "
+            "démarrage de Pécule.")
+        note_theme.setWordWrap(True)
+        note_theme.setStyleSheet(f"color:{T['texte_secondaire']}")
+        layout.addRow(note_theme)
 
         if avance:
             # Export et restauration JSON : sortis du menu de gauche le
@@ -868,6 +897,18 @@ class SettingsDialog(SaisieProtegee, QDialog):
     def values(self) -> tuple[str, float]:
         return (self.initial_date.date().toString("yyyy-MM-dd"),
                 self.initial_balance.value())
+
+    def theme_choisi(self) -> str:
+        """« clair » ou « sombre », tel que coché."""
+        return "sombre" if self.radio_sombre.isChecked() else "clair"
+
+    def _etat_saisie(self):
+        # Le thème compte aussi : changé puis abandonné par Annuler, il ne
+        # doit pas se perdre sans un mot.
+        try:
+            return (self.values(), self.theme_choisi())
+        except Exception:
+            return None
 
     def _choisir_avance(self, action: str) -> None:
         """Retient l'action et ferme SANS valider : les réglages saisis ne

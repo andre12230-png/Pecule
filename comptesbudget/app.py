@@ -14,6 +14,7 @@ from .utils import (_app_dir, _data_dir, backup_db, BaseAbimee,
                     SauvegardeImpossible)
 from .database import Database
 from .labels import charger_alias
+from .theme import CLAIR, SOMBRE, T, choisir_theme, lire_theme
 from .ui.main_window import MainWindow
 
 def installer_traduction_qt(app) -> bool:
@@ -94,54 +95,69 @@ def verrouiller_instance(dossier: str):
     return verrou
 
 
-# ──────────────── Thème clair, quel que soit le réglage de Windows ─────────
-# Pécule s'affiche TOUJOURS en thème clair : c'est un choix, pas un oubli.
+# ──────────────── Thème clair ou sombre, jamais celui de Windows ───────────
+# Pécule s'affiche dans le thème choisi dans ⚙️ Paramètres (clair par
+# défaut), quel que soit le réglage de Windows : c'est un choix, pas un oubli.
 # Attention au piège corrigé le 16/09/2026 : la palette était construite à
 # partir de celle du système (`app.palette()`), et l'on n'y remplaçait que les
 # FONDS. Sur un poste réglé en « mode sombre », Qt fournit une palette dont les
 # TEXTES sont blancs : ceux-ci se retrouvaient sur le fond crème imposé ici,
 # donc invisibles — la boîte « Bienvenue dans Pécule » apparaissait vide.
 # La palette est désormais construite entièrement, textes compris, sans rien
-# emprunter au système.
+# emprunter au système. Ses couleurs viennent de comptesbudget/theme.py.
 
-# Couleurs de l'application. Chaque texte a été vérifié contre son fond :
-# au moins 4,5 pour 1 de contraste (cf. tests/test_theme_clair.py).
-_CREME       = "#ECE9D8"   # fond des fenêtres
-_BLANC       = "#FFFFFF"   # fond des champs et des listes
-_LIGNE_PAIRE = "#F5F5F0"   # une ligne sur deux dans les tableaux
-_ENCRE       = "#000000"   # tous les textes
-_SELECTION   = "#316AC5"   # fond de la ligne sélectionnée
-_BULLE       = "#FFFFDC"   # fond des info-bulles
-_GRIS_PALE   = "#666666"   # texte d'invite et libellés désactivés
-_LIEN        = "#0B5AA8"
-_LIEN_VU     = "#6A3FA0"
+# Gardé pour les tests qui le vérifient sur le crème.
+_GRIS_PALE = CLAIR["texte_discret"]
+
+# Reliefs que Fusion dessine avec Light, Mid, Dark… (cadres, onglets,
+# séparateurs). Laissés à leur valeur par défaut — claire —, ils
+# formaient des traits blancs sur le fond sombre. Le clair garde les
+# valeurs de Qt, inchangées depuis toujours.
+_RELIEFS_SOMBRES = {
+    QPalette.Light: "#45443E",
+    QPalette.Midlight: "#3A3934",
+    QPalette.Mid: "#2E2D29",
+    QPalette.Dark: "#141310",
+    QPalette.Shadow: "#0A0A08",
+}
 
 
-def palette_claire() -> QPalette:
-    """La palette de Pécule, construite de zéro — fonds ET textes.
+def palette_pour(t: dict) -> QPalette:
+    """La palette Qt d'un thème, construite de zéro — fonds ET textes.
 
     Ne prend rien à la palette du système : c'est ce qui garantit la même
     apparence sur un poste réglé en clair et sur un poste réglé en sombre."""
     pal = QPalette()
-    pal.setColor(QPalette.Window,          QColor(_CREME))
-    pal.setColor(QPalette.WindowText,      QColor(_ENCRE))
-    pal.setColor(QPalette.Base,            QColor(_BLANC))
-    pal.setColor(QPalette.Text,            QColor(_ENCRE))
-    pal.setColor(QPalette.AlternateBase,   QColor(_LIGNE_PAIRE))
-    pal.setColor(QPalette.Button,          QColor(_CREME))
-    pal.setColor(QPalette.ButtonText,      QColor(_ENCRE))
-    pal.setColor(QPalette.ToolTipBase,     QColor(_BULLE))
-    pal.setColor(QPalette.ToolTipText,     QColor(_ENCRE))
-    pal.setColor(QPalette.Highlight,       QColor(_SELECTION))
-    pal.setColor(QPalette.HighlightedText, QColor(_BLANC))
-    pal.setColor(QPalette.PlaceholderText, QColor(_GRIS_PALE))
-    pal.setColor(QPalette.BrightText,      QColor(_BLANC))
-    pal.setColor(QPalette.Link,            QColor(_LIEN))
-    pal.setColor(QPalette.LinkVisited,     QColor(_LIEN_VU))
+    for role, cle in (
+            (QPalette.Window, "fond_page"), (QPalette.WindowText, "texte"),
+            (QPalette.Base, "saisie"), (QPalette.Text, "texte"),
+            (QPalette.AlternateBase, "ligne_paire"),
+            (QPalette.Button, "bouton_qt"), (QPalette.ButtonText, "texte"),
+            (QPalette.ToolTipBase, "bulle_fond"),
+            (QPalette.ToolTipText, "bulle_texte"),
+            (QPalette.Highlight, "selection"),
+            (QPalette.HighlightedText, "texte_selection"),
+            (QPalette.PlaceholderText, "texte_discret"),
+            (QPalette.BrightText, "texte_selection"),
+            (QPalette.Link, "lien"), (QPalette.LinkVisited, "lien_vu")):
+        pal.setColor(role, QColor(t[cle]))
     # Ce qui est désactivé s'efface, sans disparaître pour autant.
     for role in (QPalette.WindowText, QPalette.Text, QPalette.ButtonText):
-        pal.setColor(QPalette.Disabled, role, QColor(_GRIS_PALE))
+        pal.setColor(QPalette.Disabled, role, QColor(t["texte_desactive"]))
+    if t is SOMBRE:
+        for role, couleur in _RELIEFS_SOMBRES.items():
+            pal.setColor(role, QColor(couleur))
     return pal
+
+
+def palette_claire() -> QPalette:
+    """La palette du thème clair, celui de référence."""
+    return palette_pour(CLAIR)
+
+
+def palette_sombre() -> QPalette:
+    """La palette du thème sombre (charte commune du 12/10/2026)."""
+    return palette_pour(SOMBRE)
 
 
 class StyleClair(QProxyStyle):
@@ -150,13 +166,16 @@ class StyleClair(QProxyStyle):
 
     Avec la palette claire, Fusion ne leur donnait qu'un contour pâle : une
     case décochée disparaissait dans les listes des assistants. La charte
-    veut 3 pour 1 pour ce qu'on clique : contour #6F7885 (relecture du
-    30/09/2026)."""
-
-    CONTOUR = QColor("#6F7885")
+    veut 3 pour 1 pour ce qu'on clique : contour T["contour"] (relecture
+    du 30/09/2026), éclairci en thème sombre."""
 
     def __init__(self):
         super().__init__(QStyleFactory.create("Fusion"))
+
+    @staticmethod
+    def contour() -> QColor:
+        """Le contour du thème de la session, lu au moment de dessiner."""
+        return QColor(T["contour"])
 
     def drawPrimitive(self, element, option, painter, widget=None):
         super().drawPrimitive(element, option, painter, widget)
@@ -166,7 +185,7 @@ class StyleClair(QProxyStyle):
             painter.save()
             painter.setRenderHint(painter.RenderHint.Antialiasing,
                                   element == QStyle.PE_IndicatorRadioButton)
-            painter.setPen(QPen(self.CONTOUR, 1))
+            painter.setPen(QPen(self.contour(), 1))
             painter.setBrush(Qt.NoBrush)
             cadre = option.rect.adjusted(0, 0, -1, -1)
             if element == QStyle.PE_IndicatorRadioButton:
@@ -176,19 +195,29 @@ class StyleClair(QProxyStyle):
             painter.restore()
 
 
-def appliquer_theme_clair(app: QApplication) -> None:
-    """Impose à l'application son apparence claire.
+def _poser_palette(app: QApplication, palette: QPalette) -> None:
+    """Style Fusion et palette complète, infobulles comprises.
 
     Le style « Fusion » est indispensable : les styles natifs de Windows
     peignent certains textes eux-mêmes, sans consulter la palette. Il est
     posé à travers StyleClair, qui ajoute un contour lisible aux cases."""
     app.setStyle(StyleClair())
-    app.setPalette(palette_claire())
+    app.setPalette(palette)
     # Les infobulles ont leur palette à elles, prise au système, que
     # setPalette() ne touche pas : chez l'auteur, fond #3C3C3C et texte
     # #D4D4D4 au lieu du jaune pâle et du noir de la charte (01/10/2026,
     # tests/test_infobulles.py).
-    QToolTip.setPalette(palette_claire())
+    QToolTip.setPalette(palette)
+
+
+def appliquer_theme(app: QApplication) -> None:
+    """Impose à l'application le thème de la session (voir theme.py)."""
+    _poser_palette(app, palette_pour(T))
+
+
+def appliquer_theme_clair(app: QApplication) -> None:
+    """Impose à l'application son apparence claire, celle de référence."""
+    _poser_palette(app, palette_claire())
 
 
 def message_base_abimee(dossier: str) -> str:
@@ -231,8 +260,11 @@ def _ouvrir_base():
 
 
 def main():
+    # Le thème se lit avant tout le reste : la première boîte de message
+    # (verrou, sauvegarde) doit déjà avoir les bonnes couleurs.
+    choisir_theme(lire_theme())
     app = QApplication(sys.argv)
-    appliquer_theme_clair(app)
+    appliquer_theme(app)
     installer_traduction_qt(app)
 
     # Icône d'application (visible dans la barre des tâches Windows)

@@ -46,10 +46,14 @@ class _FauxParametres:
     solde_saisi = 1234.56
 
     def __init__(self, parent, initial_date, initial_balance, nom_compte,
-                 avance=False):
+                 avance=False, theme_actuel="clair"):
         self.action_avancee = None
         self._date = initial_date
+        self._theme = theme_actuel
         _FauxParametres.propositions.append(initial_date)
+
+    def theme_choisi(self):
+        return self._theme          # thème inchangé
 
     def exec(self):
         from PySide6.QtWidgets import QDialog

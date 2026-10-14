@@ -25,6 +25,7 @@ from ..utils import (
 )
 from ..database import Database
 from ..erreurs import erreur_en_clair
+from ..theme import enregistrer_theme, lire_theme
 from ..labels import charger_alias, clean_libelle
 from ..csv_import import _decode_csv, diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
@@ -781,7 +782,9 @@ class MainWindow(QMainWindow):
         # et « Reculer la date » calcule le bon solde de départ.
         if jamais_renseigne and self.db.bornes_operations() is None:
             d = date.today().isoformat()
-        dlg = SettingsDialog(self, d, b, self.db.nom_compte(), avance=True)
+        theme_avant = lire_theme()
+        dlg = SettingsDialog(self, d, b, self.db.nom_compte(), avance=True,
+                             theme_actuel=theme_avant)
         if dlg.exec() != QDialog.Accepted:
             # Les boutons de la partie « Avancé » ferment la fenêtre AVANT
             # d'agir : une restauration JSON change le solde de départ, que
@@ -792,6 +795,13 @@ class MainWindow(QMainWindow):
                 self.action_import_json()
             return
         nd, nb = dlg.values()
+        # Le thème d'abord : il ne dépend pas du solde, et la question du
+        # solde à zéro ci-dessous peut interrompre la suite.
+        theme_choisi = dlg.theme_choisi()
+        if theme_choisi != theme_avant:
+            self._enregistrer_theme(theme_choisi)
+            if (nd, nb) == (d, b):
+                return              # seul le thème a changé
         # Valider le formulaire sans y toucher enregistrait 0,00 € — et
         # l'invite du premier lancement ne revenait plus jamais, laissant un
         # solde faux pour toujours. On demande confirmation, une seule fois.
@@ -811,6 +821,20 @@ class MainWindow(QMainWindow):
             f"« {self.db.nom_compte()} » — solde de départ : "
             f"{fmt_euro(nb)} au {fmt_date_fr(nd)}.")
         self.refresh_all()
+
+    def _enregistrer_theme(self, nom: str) -> None:
+        """Enregistre le thème choisi dans ⚙️ Paramètres, et le dit — ou dit
+        qu'il n'a pas pu l'être : jamais « enregistré » sans l'avoir vérifié."""
+        if enregistrer_theme(nom):
+            QMessageBox.information(
+                self, "Apparence enregistrée",
+                f"Pécule s'affichera en thème {nom} au prochain démarrage.")
+        else:
+            QMessageBox.warning(
+                self, "Apparence non enregistrée",
+                "Le choix du thème n'a pas pu être enregistré dans les "
+                "préférences de Windows. Pécule garde son apparence "
+                "actuelle.")
 
     def _confirmer_solde_nul(self, phrase: str) -> bool:
         """Un solde de 0,00 € vient le plus souvent d'une validation par
