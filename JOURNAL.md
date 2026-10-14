@@ -22,6 +22,12 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 — Textes Winget publiés, tout ce qui est en ligne vérifié
+
+**Fait.** `winget show` trouve le paquet et `winget download` vérifie l'empreinte de l'archive 1.23.0 ; `winget install` n'a pas pu être essayé sur un poste où Pécule est déjà inscrit dans une version plus récente (non forcé). Les deux commits Winget ont été publiés seuls, depuis une branche partie d'`origin/main`, sans les commits des versions 1.41.3 et suivantes. Relus ensuite en ligne : page d'accueil du site, README, `winget/README.md`, ce journal, page de confidentialité (identique au dépôt), fiche du catalogue Winget, release v1.23.0 (archive et empreinte intactes), manifeste Scoop (1.41.2, empreinte conforme à la release), questionnaire « Votre avis » (ouvert, 11 questions, « winget » parmi les modes d'installation, aucune nouvelle réponse).
+**Pourquoi.** Annoncer Winget sans attendre la sortie du 1er novembre, et s'assurer que chaque porte d'entrée d'un nouvel utilisateur mène au bon fichier.
+**Reste.** Avec la sortie du 1er novembre : remonter les manifestes de `winget/` et `bucket/pecule.json`, soumettre la nouvelle version à Winget. Le site n'a pas de page propre à Scoop : il ne mentionne Scoop nulle part.
+
 ## 2026-10-13 — Pécule accepté dans Winget
 
 **Fait.** La demande microsoft/winget-pkgs#416272 (version 1.23.0) a été approuvée et fusionnée le 13 octobre, trois jours après la dérogation à la politique 1.8. Le README, la page d'accueil du site et `winget/README.md` donnent désormais `winget install --id andre12230-png.Pecule` et `winget upgrade`. Ces textes sont publiés seuls le 14 octobre, avant la sortie du 1er novembre.
