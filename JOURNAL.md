@@ -44,7 +44,12 @@ le code puis reproduit par un test qui échouait, corrigés, tests gardés
   fichiers nommés à la racine, .dll .pyd .qm .zip .ico dans _internal),
   dans le dossier comme dans le .zip. Vérifié sur la vraie appli construite :
   180 fichiers, aucun refusé.
-Numéro 1.41.16. 791 tests sur 791, ruff propre.
+Notice : une fusion refuse un fichier abîmé sans rien modifier.
+Numéro 1.41.16. 791 tests sur 791, ruff propre. Installée chez l'auteur :
+contrôle passé, corrections prouvées dans l'exe, base identique (SHA-256),
+titre « v1.41.16 » lu depuis le dossier d'usage ; réserve
+Pecule.exe.avant-1.41.16 (et avant-1.41.15, à la Corbeille si l'auteur le
+veut).
 **Pourquoi.** Audit du 14/10/2026 ; l'auteur a choisi de corriger par lots,
 la protection des données d'abord.
 **Reste.** Lots 2 (imports : A03, A06), 3 (calculs : A04, A05) et 4
