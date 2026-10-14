@@ -15,6 +15,7 @@ from ..constants import (
     FREQUENCIES,
 )
 from ..accords import accorde, nombre, pluriel
+from ..theme import T
 from ..utils import (
     fmt_euro, fmt_date_fr, period_label,
 )
@@ -38,7 +39,7 @@ class HarmonizeDialog(QDialog):
             "puis cliquez « Appliquer »."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
+        info.setStyleSheet(f"padding:8px; background:{T['info_fond']}; border:1px solid {T['info_cadre']}")
         v.addWidget(info)
 
         self.model = QStandardItemModel(0, 5, self)
@@ -55,7 +56,7 @@ class HarmonizeDialog(QDialog):
         for tx, suggested in suggestions:
             it_check = case_a_cocher(True)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#18733A")))
+            it_check.setForeground(QBrush(QColor(T["credit"])))
             row = [
                 it_check,
                 QStandardItem(fmt_date_fr(tx["date"])),
@@ -124,7 +125,7 @@ class DuplicatesDialog(QDialog):
             "avant de valider."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("padding:8px; background:#FDEDEB; border:1px solid #E74C3C")
+        info.setStyleSheet(f"padding:8px; background:{T['erreur_fond']}; border:1px solid {T['erreur_cadre']}")
         v.addWidget(info)
 
         self.model = QStandardItemModel(0, 5, self)
@@ -145,12 +146,12 @@ class DuplicatesDialog(QDialog):
             it_check = case_a_cocher(True)
             it_check.setData(t["id"], Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#BC3729")))
+            it_check.setForeground(QBrush(QColor(T["debit"])))
 
             it_montant = QStandardItem(fmt_euro(t.get("montant", 0)))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#BC3729" if t.get("montant", 0) < 0 else "#18733A")))
+                QBrush(QColor(T["debit"] if t.get("montant", 0) < 0 else T["credit"])))
 
             it_cat = cellule_categorie(t.get("categorie", ""))
 
@@ -234,7 +235,7 @@ class PrefillRecurringDialog(QDialog):
             "sont ceux des derniers passages."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
+        info.setStyleSheet(f"padding:8px; background:{T['info_fond']}; border:1px solid {T['info_cadre']}")
         v.addWidget(info)
 
         self.model = QStandardItemModel(0, 8, self)
@@ -259,19 +260,19 @@ class PrefillRecurringDialog(QDialog):
             it_check = case_a_cocher(checked)
             it_check.setData(c, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#18733A")))
+            it_check.setForeground(QBrush(QColor(T["credit"])))
 
             it_montant = QStandardItem(fmt_euro(c["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#BC3729" if c["montant"] < 0 else "#18733A")))
+                QBrush(QColor(T["debit"] if c["montant"] < 0 else T["credit"])))
 
             it_cat = cellule_categorie(c["categorie"])
 
             it_range = QStandardItem(f"{fmt_euro(c['_min'])} … {fmt_euro(c['_max'])}")
-            it_range.setForeground(QBrush(QColor("#5A5A5A")))
+            it_range.setForeground(QBrush(QColor(T["texte_grise"])))
             if not c["_stable"]:
-                it_range.setForeground(QBrush(QColor("#7E5109")))
+                it_range.setForeground(QBrush(QColor(T["avertissement"])))
 
             it_nb = QStandardItem(str(c["_months"]))
             it_nb.setTextAlignment(Qt.AlignCenter)
@@ -363,7 +364,7 @@ class GenererEcheancesDialog(QDialog):
             "à une opération déjà enregistrée : elles ne seront pas recréées."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
+        info.setStyleSheet(f"padding:8px; background:{T['info_fond']}; border:1px solid {T['info_cadre']}")
         v.addWidget(info)
 
         bar = QHBoxLayout()
@@ -429,21 +430,21 @@ class GenererEcheancesDialog(QDialog):
             it_check.setData(e, Qt.UserRole)
             it_check.setData(verrou, self.VERROU)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#18733A")))
+            it_check.setForeground(QBrush(QColor(T["credit"])))
 
             it_montant = QStandardItem(fmt_euro(e["montant"]))
             it_montant.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_montant.setForeground(
-                QBrush(QColor("#BC3729" if e["montant"] < 0 else "#18733A")))
+                QBrush(QColor(T["debit"] if e["montant"] < 0 else T["credit"])))
 
             it_cat = cellule_categorie(e["categorie"])
 
             if verrou:
-                etat, couleur = "✔ déjà enregistrée", "#5A5A5A"
+                etat, couleur = "✔ déjà enregistrée", T["texte_grise"]
             elif e["_passee"]:
-                etat, couleur = "⚠ date déjà passée", "#7E5109"
+                etat, couleur = "⚠ date déjà passée", T["avertissement"]
             else:
-                etat, couleur = "à créer", "#18733A"
+                etat, couleur = "à créer", T["credit"]
             it_etat = QStandardItem(etat)
             it_etat.setForeground(QBrush(QColor(couleur)))
 
@@ -459,7 +460,7 @@ class GenererEcheancesDialog(QDialog):
                 # Ligne informative : elle montre que l'échéance est couverte,
                 # mais il n'y a rien à faire dessus.
                 for it in row:
-                    it.setForeground(QBrush(QColor("#5A5A5A")))
+                    it.setForeground(QBrush(QColor(T["texte_grise"])))
             self.model.appendRow(row)
         self._update_summary()
 
@@ -513,7 +514,7 @@ class HarmonizeLabelsDialog(QDialog):
             "Décochez ce que vous ne voulez pas changer."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("padding:8px; background:#FFFBE6; border:1px solid #E8D77B")
+        info.setStyleSheet(f"padding:8px; background:{T['info_fond']}; border:1px solid {T['info_cadre']}")
         v.addWidget(info)
 
         self.model = QStandardItemModel(0, 4, self)
@@ -535,12 +536,12 @@ class HarmonizeLabelsDialog(QDialog):
             it_check = case_a_cocher(True)
             it_check.setData(row, Qt.UserRole)
             it_check.setTextAlignment(Qt.AlignCenter)
-            it_check.setForeground(QBrush(QColor("#18733A")))
+            it_check.setForeground(QBrush(QColor(T["credit"])))
             it_check.setEditable(False)
 
             it_old = QStandardItem(row["old"])
             it_old.setEditable(False)
-            it_old.setForeground(QBrush(QColor("#5A5A5A")))
+            it_old.setForeground(QBrush(QColor(T["texte_grise"])))
 
             it_n = QStandardItem(str(row["n"]))
             it_n.setTextAlignment(Qt.AlignCenter)

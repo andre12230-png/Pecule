@@ -20,22 +20,24 @@ from test_theme_sombre import contraste
 
 UI = Path(comptesbudget.__file__).parent / "ui"
 
-# Étape 2, premier lot (14/10/2026) : le menu de gauche et les tableaux.
 ECRANS_CONVERTIS = [
-    # Étape 2, troisième lot (14/10/2026) : les fenêtres de saisie.
-    "dialogs.py",
+    # Étape 2, premier lot (14/10/2026) : le menu de gauche et les tableaux.
     "main_window.py",
     "models.py",
     "recapitulatif.py",
     "search.py",
-    # Étape 2, deuxième lot (14/10/2026) : le Bilan et ses graphiques.
-    "views/bilan.py",
     "views/budget.py",
     "views/categories.py",
     "views/operations.py",
     "views/previsionnel.py",
     "views/rules_view.py",
     "views/subcategories.py",
+    # Deuxième lot : le Bilan et ses graphiques.
+    "views/bilan.py",
+    # Troisième lot : les fenêtres de saisie.
+    "dialogs.py",
+    # Quatrième lot : les assistants (doublons, harmonisation, prévisionnel).
+    "assistants.py",
 ]
 
 HEXA = re.compile(r"(?<![&\w])#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])")

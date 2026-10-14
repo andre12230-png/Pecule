@@ -22,6 +22,21 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (6) — Mode sombre, étape 2 : les assistants
+
+**Fait.** Les cinq assistants d'`assistants.py` (harmoniser les
+catégories, doublons, pré-remplir le prévisionnel, générer les échéances
+du mois, harmoniser les libellés) prennent leurs couleurs dans le thème.
+Ils rejoignent la liste des écrans sans couleur en dur. 752 tests sur
+752. Les cinq regardés en image, en sombre et en clair, sur des données
+inventées : tout se lit.
+**Pourquoi.** Suite du mode sombre promis pour le 01/11/2026.
+**Reste.** Notice, « Votre avis », « Mise à jour ». À la relecture
+(étape 3) : les pastilles des catégories aux couleurs foncées
+(« Banque et assurances », « Logement - maison », « Impôts et taxes »)
+se voient mal sur le fond sombre ; décider s'il leur faut une variante
+plus claire en sombre.
+
 ## 2026-10-14 (5) — Mode sombre, étape 2 : les fenêtres de saisie
 
 **Fait.** Les fenêtres de `dialogs.py` (saisie d'une opération,
