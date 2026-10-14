@@ -42,7 +42,11 @@ gardés ; les trois tests d'écran échouent bien sur l'ancien Bilan) :
   d'aujourd'hui ; ce qui est déjà pointé à ce jour n'est pas recompté.
 Notice et Glossaire complétés. Effet mesuré, en lecture seule, sur les
 données de l'auteur : un seul mois change, de quelques points.
-Numéro 1.41.18. 810 tests sur 810, ruff propre.
+Numéro 1.41.18. 810 tests sur 810, ruff propre. Installée chez l'auteur :
+contrôle passé, corrections prouvées dans l'exe, base identique (SHA-256),
+titre « v1.41.18 » lu depuis le dossier d'usage ; réserve
+Pecule.exe.avant-1.41.18 (et avant-1.41.17, à la Corbeille si l'auteur le
+veut). La réserve avant-1.41.16 à la Corbeille, avec son accord.
 **Pourquoi.** Audit du 14/10/2026, troisième lot choisi par l'auteur.
 **Reste.** Lot 4 (affichage : A09 axes du Bilan, A10 texte de recherche coupé).
 
