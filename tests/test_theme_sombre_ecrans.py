@@ -266,3 +266,56 @@ def test_aucun_ecran_oublie():
                    for ligne, texte in _chaines(fichier)
                    for m in HEXA.findall(texte)]
     assert not en_dur, "Couleurs à prendre dans le thème :\n" + "\n".join(en_dur)
+
+
+def test_pastilles_des_categories_visibles_en_sombre(sombre):
+    """Une pastille est un repère de couleur : au moins 3 pour 1 sur le fond
+    le plus clair du sombre (cases et tableaux). « Impôts et taxes » n'y
+    faisait que 1,2, « Banque et assurances » 1,4 (relecture du 14/10/2026).
+    Éclaircie en sombre, elle garde sa teinte."""
+    from PySide6.QtGui import QColor
+    from comptesbudget.constants import CATEGORY_COLORS
+    from comptesbudget.utils import couleur_categorie
+    for cat, origine in CATEGORY_COLORS.items():
+        couleur = couleur_categorie(cat)
+        assert contraste(couleur, SOMBRE["saisie"]) >= 3.0, cat
+        # Même teinte (à quelques degrés près, l'éclaircissement arrondit).
+        a, b = QColor(origine), QColor(couleur)
+        if a.hslSaturation() > 40 and a.hslHue() >= 0:
+            ecart = abs(a.hslHue() - b.hslHue()) % 360
+            assert min(ecart, 360 - ecart) <= 6, cat
+
+
+def test_pastilles_inchangees_en_clair():
+    from comptesbudget.constants import CATEGORY_COLORS
+    from comptesbudget.utils import couleur_categorie
+    for cat, origine in CATEGORY_COLORS.items():
+        assert couleur_categorie(cat) == origine, cat
+
+
+def test_les_ecrans_prennent_la_couleur_de_pastille_du_theme():
+    """À l'écran, couleur_categorie() ; cat_color(), toujours claire, ne
+    sert plus qu'au rapport mensuel."""
+    for fichier in sorted(UI.rglob("*.py")):
+        if fichier.name != "report.py":
+            assert "cat_color(" not in fichier.read_text(encoding="utf-8"),                 fichier.name
+
+
+@pytest.mark.parametrize("nom", ["clair", "sombre"])
+def test_encadres_de_la_notice_cadres(qapp, nom):
+    """Qt ne dessine pas le trait de gauche (border-left) d'un bloc : les
+    encadrés « astuce » et « attention » ne se distinguaient que par un fond
+    à peine différent de la page (relecture du 14/10/2026). Affichés, ils
+    deviennent des tableaux d'une case, avec un vrai cadre de leur couleur."""
+    from comptesbudget.ui.views import notice
+    theme.choisir_theme(nom)
+    try:
+        p = theme.THEMES[nom]
+        html = notice.encadres_visibles(notice.NOTICE_HTML)
+    finally:
+        theme.choisir_theme("clair")
+    assert 'class="tip"' not in html and 'class="warn"' not in html
+    assert html.count(f"border-color:{p['info_cadre']}; margin-top") == 4
+    assert html.count(f"border-color:{p['erreur_cadre']}; margin-top") == 1
+    # Le cadre se voit sur la page (3 pour 1, comme un repère).
+    assert contraste(p["info_cadre"], p["carte"]) >= 3.0 or nom == "clair"

@@ -20,7 +20,7 @@ from PySide6.QtCharts import (
 
 from ...accords import accorde, pluriel
 from ...utils import (
-    carte_a_debit_differe, cat_color, de_mois_a_mois,
+    carte_a_debit_differe, couleur_categorie, de_mois_a_mois,
     depense_nette_par_categorie, est_paiement_carte,
     fmt_euro, fmt_euro_signe, fmt_date_fr, in_period, period_label,
     plus_grosses_depenses, regle_debit_differe,
@@ -1704,7 +1704,7 @@ class BilanView(QWidget):
         series.setHoleSize(0.0)
         for c, amt in sorted(by_cat.items(), key=lambda x: x[1], reverse=True):
             s = series.append(f"{c}", amt)
-            s.setBrush(QColor(cat_color(c)))
+            s.setBrush(QColor(couleur_categorie(c)))
             # Le libellé d'une part sert de texte dans la LÉGENDE : on y met le
             # nom ET le montant. Écrire en plus ces montants autour du
             # camembert ferait doublon, et les textes longs (« Logement -
@@ -1729,7 +1729,7 @@ class BilanView(QWidget):
         dep_items = []
         for c, amt in sorted(by_cat.items(), key=lambda x: x[1], reverse=True)[:8]:
             pct = amt / total_dep * 100
-            dep_items.append((c, -amt, cat_color(c), f"{pct:.0f}%"))
+            dep_items.append((c, -amt, couleur_categorie(c), f"{pct:.0f}%"))
         self.list_dep.set_items(dep_items)
 
         # ── Liste : sources de revenus ────────────────────────────────
@@ -1739,7 +1739,7 @@ class BilanView(QWidget):
                 continue
             c = t.get("categorie", "Non classé")
             by_rev[c] = by_rev.get(c, 0) + t["montant"]
-        rev_items = [(c, amt, cat_color(c))
+        rev_items = [(c, amt, couleur_categorie(c))
                      for c, amt in sorted(by_rev.items(), key=lambda x: x[1], reverse=True)[:8]]
         self.list_rev.set_items(rev_items)
 
@@ -1751,7 +1751,7 @@ class BilanView(QWidget):
             sub = (f"{d['nb']} fois" if d["nb"] > 1
                    else fmt_date_fr(d["date"])[:5])  # "JJ/MM"
             top_items.append((d["libelle"][:40], d["montant"],
-                              cat_color(d["categorie"]), sub))
+                              couleur_categorie(d["categorie"]), sub))
         self.list_top.set_items(top_items)
 
     def _mois_du_graphique(self, actives: list[dict]) -> list[str]:

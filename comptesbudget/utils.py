@@ -402,6 +402,44 @@ def cat_color(name: str) -> str:
     return CATEGORY_COLORS.get(canon, "#8A877F")
 
 
+def _luminance(couleur: str) -> float:
+    """Luminance relative d'une couleur « #RRGGBB » (formule du WCAG)."""
+    def canal(v: int) -> float:
+        x = v / 255
+        return x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4
+    r, g, b = (int(couleur[i:i + 2], 16) for i in (1, 3, 5))
+    return 0.2126 * canal(r) + 0.7152 * canal(g) + 0.0722 * canal(b)
+
+
+def contraste(a: str, b: str) -> float:
+    """Rapport de contraste entre deux couleurs « #RRGGBB » (1 à 21)."""
+    la, lb = _luminance(a), _luminance(b)
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def couleur_categorie(name: str) -> str:
+    """Couleur de la pastille d'une catégorie à l'écran, selon le thème.
+
+    En clair : celle de la catégorie, telle quelle. En sombre, une pastille
+    trop foncée disparaissait dans le fond (« Impôts et taxes » 1,2 pour 1) :
+    elle est éclaircie, en gardant sa teinte, jusqu'à 3 pour 1 sur le fond
+    le plus clair du sombre (cases et tableaux), le minimum de la charte
+    pour un repère de couleur (relecture du 14/10/2026). Le rapport mensuel,
+    toujours clair, garde cat_color()."""
+    from .theme import T, est_sombre
+    couleur = cat_color(name)
+    if not est_sombre():
+        return couleur
+    r, g, b = (int(couleur[i:i + 2], 16) for i in (1, 3, 5))
+    part = 0.0
+    while contraste(couleur, T["saisie"]) < 3.0 and part < 1.0:
+        # Mélange avec du blanc, par pas de 5 % : la teinte ne bouge pas.
+        part += 0.05
+        couleur = "#{:02X}{:02X}{:02X}".format(
+            *(round(v + (255 - v) * part) for v in (r, g, b)))
+    return couleur
+
+
 def fmt_euro(value: float) -> str:
     """Formatage français : 1 234,56 €.
 

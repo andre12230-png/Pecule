@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QHeaderView, QLabel
 from ..constants import type_affiche
 from ..theme import T
 from ..utils import (
-    cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
+    couleur_categorie, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
 )
 
 # Une pastille par couleur, dessinée une seule fois.
@@ -27,7 +27,7 @@ def pastille_categorie(categorie: str) -> QIcon:
     4,5 pour 1 (« Virements internes » : 1,78 sur blanc). La pastille garde le
     repère de couleur sans avoir besoin d'être lue : le nom est écrit à côté
     (relecture du 30/09/2026)."""
-    couleur = cat_color(categorie)
+    couleur = couleur_categorie(categorie)
     if couleur not in _PASTILLES:
         image = QPixmap(12, 12)
         image.fill(Qt.transparent)

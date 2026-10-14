@@ -58,6 +58,29 @@ def style_notice() -> str:
 """
 
 
+def encadres_visibles(html: str) -> str:
+    """Les encadrés « astuce » (class="tip") et « attention » (class="warn")
+    en tableaux d'une case, avec un vrai cadre de leur couleur.
+
+    Qt ne dessine pas le trait de gauche (border-left) d'un bloc : seul un
+    fond à peine différent de la page les distinguait, surtout en sombre
+    (relecture du 14/10/2026). Un tableau, lui, porte son cadre."""
+    import re
+    couleurs = {"tip": ("info_fond", "info_cadre"),
+                "warn": ("erreur_fond", "erreur_cadre")}
+
+    def tableau(m):
+        fond, cadre = couleurs[m.group(2)]
+        return (f'<table width="100%" border="1" cellspacing="0" '
+                f'cellpadding="8" style="border-style:solid; '
+                f'border-color:{T[cadre]}; margin-top:8px; '
+                f'margin-bottom:8px;"><tr><td style="background-color:'
+                f'{T[fond]}; border-color:{T[cadre]};">{m.group(3)}'
+                f'</td></tr></table>')
+    return re.sub(r'<(div|p) class="(tip|warn)">(.*?)</\1>', tableau, html,
+                  flags=re.S)
+
+
 def style_glossaire() -> str:
     """Feuille de style du Glossaire, aux couleurs du thème."""
     return f"""
@@ -1083,7 +1106,8 @@ class NoticeView(QWidget):
         # le vrai chemin plutôt qu'une explication vague, pour que l'utilisateur
         # sache exactement quoi copier lors d'une sauvegarde manuelle.
         notice.setHtml(style_notice()
-                       + NOTICE_HTML.replace("DOSSIER_DONNEES", _data_dir()))
+                       + encadres_visibles(
+                           NOTICE_HTML.replace("DOSSIER_DONNEES", _data_dir())))
         sub_tabs.addTab(notice, "📖 Notice d'utilisation")
 
         # Glossaire
