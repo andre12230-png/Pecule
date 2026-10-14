@@ -953,7 +953,11 @@ SYNC_VERSION = 3
 #           prochain demarrage. Tous les ecrans suivent le theme ; le
 #           rapport mensuel reste clair. Week-ends du calendrier lisibles,
 #           encadres de la Notice cadres.
-APP_VERSION = "1.41.15"
+# 1.41.16 : Audit du 14/10/2026, lot 1 : aucun export (CSV, JSON, PDF)
+#           ne peut plus ecraser le fichier de comptes ; la fusion
+#           d'un export verifie le fichier d'abord puis se fait en
+#           tout ou rien ; un export JSON qui echoue le dit en clair.
+APP_VERSION = "1.41.16"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

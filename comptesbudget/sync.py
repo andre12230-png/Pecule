@@ -58,6 +58,43 @@ def read_sync_file(path: str = SYNC_PATH) -> Optional[dict]:
         return None
 
 
+# Les deux noms sous lesquels Pécule a signé ses exports.
+APPS_RECONNUES = ("pecule.py", "comptes_budget.py")
+LISTES = ("comptes", "transactions", "rules", "recurring", "deletions")
+OBJETS = ("budgets", "budgets_par_compte", "settings")
+
+
+def verifier_export(data) -> Optional[str]:
+    """Ce qui empêche de fusionner ce fichier, en clair, ou None s'il est
+    bien formé (audit du 14/10/2026, A02).
+
+    Tout est vérifié AVANT la première écriture : un fichier abîmé au
+    milieu laissait sinon une partie de ses changements dans les comptes.
+    Les exports de toutes les versions passées restent acceptés : ils
+    portent tous « version », et, s'ils sont signés, l'une des deux
+    signatures de Pécule."""
+    if not isinstance(data, dict) or "version" not in data:
+        return "Ce fichier n'est pas un export de Pécule."
+    if "app" in data and data["app"] not in APPS_RECONNUES:
+        return "Ce fichier n'est pas un export de Pécule."
+    for cle in LISTES:
+        valeur = data.get(cle)
+        if valeur is None:
+            continue
+        if not isinstance(valeur, list):
+            return f"Le fichier est abîmé (partie « {cle} »)."
+        for rec in valeur:
+            if not isinstance(rec, dict):
+                return f"Le fichier est abîmé (partie « {cle} »)."
+            if cle != "deletions" and not isinstance(rec.get("id"), str):
+                return f"Le fichier est abîmé (partie « {cle} »)."
+    for cle in OBJETS:
+        valeur = data.get(cle)
+        if valeur is not None and not isinstance(valeur, dict):
+            return f"Le fichier est abîmé (partie « {cle} »)."
+    return None
+
+
 def _eff_ts(rec: dict, fallback: str) -> str:
     """Horodatage effectif d'un enregistrement distant : son updated_at, sinon
     le synced_at du fichier (compatibilité avec un export sans horodatage)."""
@@ -71,6 +108,19 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     stats = {"applied": 0, "deleted": 0, "comptes_retablis": []}
     if not remote:
         return stats
+    raison = verifier_export(remote)
+    if raison:
+        raise ValueError(raison)
+    # Tout ou rien : une erreur en cours de route annule la fusion entière,
+    # au lieu d'en laisser une partie que la prochaine écriture rendait
+    # définitive (audit du 14/10/2026, A02).
+    with db.batch():
+        _fusionner(db, remote, stats)
+    return stats
+
+
+def _fusionner(db: "Database", remote: dict, stats: dict) -> None:
+    """Le corps de la fusion, appelé à l'intérieur d'un db.batch()."""
     fallback = remote.get("synced_at") or ""
 
     # 0) Les comptes d'abord : une opération ne peut être rattachée qu'à un
@@ -184,6 +234,3 @@ def merge_remote_into_db(db: "Database", remote: Optional[dict]) -> dict:
     if rset and ((l_unset and r_has) or (r_set_ts and r_set_ts > l_set_ts)):
         db.apply_settings_synced(rset, r_set_ts or l_set_ts)
         stats["applied"] += 1
-
-    db.conn.commit()
-    return stats

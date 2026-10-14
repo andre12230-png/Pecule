@@ -25,12 +25,15 @@ from ..utils import (
 )
 from ..database import Database
 from ..erreurs import erreur_en_clair
+from ..destinations import avec_extension, destination_refusee
 from ..theme import T, enregistrer_theme, lire_theme
 from ..labels import charger_alias, clean_libelle
 from ..csv_import import _decode_csv, diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
 from ..qif_import import import_qif, ordre_jour_mois_devine
-from ..sync import write_sync_file, read_sync_file, merge_remote_into_db
+from ..sync import (
+    merge_remote_into_db, read_sync_file, verifier_export, write_sync_file,
+)
 
 from .widgets import PeriodBar, confirmer, demander_montant
 from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
@@ -1293,7 +1296,22 @@ class MainWindow(QMainWindow):
             "Export de Pécule (*.json)")
         if not path:
             return
-        write_sync_file(self.db, path)
+        # Jamais par-dessus le fichier de comptes (audit du 14/10/2026, A01).
+        raison = destination_refusee(path, self.db.path)
+        path = avec_extension(path, ".json")
+        raison = raison or destination_refusee(path, self.db.path)
+        if raison:
+            QMessageBox.warning(self, "Export", raison)
+            return
+        try:
+            write_sync_file(self.db, path)
+        except OSError as e:
+            # Fichier en lecture seule, ouvert ailleurs, clé retirée… : un
+            # message en français plutôt qu'un plantage (audit, R02).
+            QMessageBox.warning(self, "Export",
+                "L'export n'a pas pu être enregistré.\n\n"
+                f"{erreur_en_clair(e)}")
+            return
         QMessageBox.information(self, "Export",
             f"Données exportées : {path}\n\n"
             "L'export contient opérations, règles, budgets, récurrences et "
@@ -1309,10 +1327,13 @@ class MainWindow(QMainWindow):
         if not path:
             return
         data = read_sync_file(path)
-        if data is None:
+        # Vérifié en entier avant d'écrire quoi que ce soit (audit, A02).
+        raison = ("Ce fichier n'est pas un export de Pécule." if data is None
+                  else verifier_export(data))
+        if raison:
             QMessageBox.warning(self, "Fichier non reconnu",
-                "Ce fichier n'est pas un export de Pécule. Choisissez le fichier "
-                "écrit par « Exporter vers une autre installation ».")
+                f"{raison} Choisissez le fichier écrit par « Exporter vers "
+                "une autre installation ». Rien n'a été modifié.")
             return
         if not confirmer(
                 self, "Restaurer / fusionner",

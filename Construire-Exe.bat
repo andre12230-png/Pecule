@@ -112,12 +112,19 @@ if not exist "%~dp0dist\Pecule\Pecule.exe" (
 rem --------------------------------------------------------------------------
 echo.
 echo === 3/4 : Nettoyage du dossier de construction ===
-rem  Si l'executable a deja ete lance depuis dist\, il y a cree une base
-rem  VIDE. On la supprime : ainsi le dossier dist\ ne contient que le
-rem  programme, et une copie malencontreuse ne peut plus ecraser de donnees.
+rem  Si l'executable a ete lance depuis dist\, il y a cree une base. On ne
+rem  l'efface plus : rien ne prouve qu'elle est vide (soldes, budgets,
+rem  regles comptent aussi). On s'arrete et on demande de la deplacer
+rem  (audit du 14/10/2026, A07).
 if exist "%~dp0dist\Pecule\comptes.db" (
-    del /q "%~dp0dist\Pecule\comptes.db"
-    echo Base de test supprimee de dist\ ^(elle etait vide^).
+    echo.
+    echo ARRET : un fichier de comptes se trouve dans le dossier de construction :
+    echo    %~dp0dist\Pecule\comptes.db
+    echo Il ne doit pas partir avec le programme et peut contenir des donnees.
+    echo Deplacez-le ailleurs, ou mettez-le a la Corbeille s'il ne sert a rien,
+    echo puis relancez Construire-Exe.bat. Rien n'a ete supprime.
+    pause
+    exit /b 1
 ) else (
     echo Rien a nettoyer.
 )

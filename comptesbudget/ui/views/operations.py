@@ -19,6 +19,7 @@ from ...constants import (
     FREQUENCIES, type_affiche,
 )
 from ...accords import accorde, pluriel
+from ...destinations import avec_extension, destination_refusee
 from ...theme import T
 from ...utils import (
     deaccent, fmt_date_fr, fmt_euro, in_period,
@@ -361,6 +362,14 @@ class OperationsView(QWidget):
             self, "Exporter les opérations affichées",
             os.path.join(dossier, nom), "Fichier CSV pour Excel (*.csv)")
         if not chemin:
+            return
+        # Jamais par-dessus le fichier de comptes (audit du 14/10/2026, A01) :
+        # le nom choisi est vérifié tel quel, puis avec son extension.
+        raison = destination_refusee(chemin, self.db.path)
+        chemin = avec_extension(chemin, ".csv")
+        raison = raison or destination_refusee(chemin, self.db.path)
+        if raison:
+            QMessageBox.warning(self, "Exporter", raison)
             return
         try:
             n = ecrire_csv_operations(chemin, ops)

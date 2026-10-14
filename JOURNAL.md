@@ -22,6 +22,34 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (11) — Audit, lot 1 : protéger les fichiers (v1.41.16)
+
+**Fait.** Les cinq points « protection » de l'audit (10), chacun vérifié sur
+le code puis reproduit par un test qui échouait, corrigés, tests gardés
+(`tests/test_audit_lot1_protection.py`, 25 cas) :
+- A01 : les trois exports (CSV des opérations, export JSON, PDF du rapport)
+  refusent le fichier de comptes et tout fichier .db, et ajoutent leur
+  extension (`comptesbudget/destinations.py`). L'export CSV écrasait
+  réellement la base d'essai.
+- A02 : la fusion vérifie tout le fichier avant d'écrire (`verifier_export` ;
+  les exports de toutes les versions restent acceptés) et se fait en tout ou
+  rien (`db.batch()`). Avant, une fusion ratée laissait une opération que la
+  première écriture suivante rendait définitive. Trois tests de `test_sync.py`
+  portent désormais la marque de tout vrai export.
+- R02 : un export JSON qui échoue le dit en clair.
+- A07 : `Construire-Exe.bat` s'arrête au lieu d'effacer une comptes.db trouvée
+  dans dist\.
+- A08 et R01 : `outils/faire_archive.py` n'ouvre ni n'efface plus aucune base
+  (il s'arrête), et refuse tout fichier qui n'est pas du programme (trois
+  fichiers nommés à la racine, .dll .pyd .qm .zip .ico dans _internal),
+  dans le dossier comme dans le .zip. Vérifié sur la vraie appli construite :
+  180 fichiers, aucun refusé.
+Numéro 1.41.16. 791 tests sur 791, ruff propre.
+**Pourquoi.** Audit du 14/10/2026 ; l'auteur a choisi de corriger par lots,
+la protection des données d'abord.
+**Reste.** Lots 2 (imports : A03, A06), 3 (calculs : A04, A05) et 4
+(affichage : A09, A10).
+
 ## 2026-10-14 (10) — Audit de la protection des données et des calculs
 
 **Fait.** Audit du code, de la suite de tests, de l’interface et des outils de

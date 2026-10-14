@@ -19,6 +19,7 @@ def test_fusion_le_plus_recent_gagne(tmp_path):
     db.insert_tx(_tx(id="a", categorie="Non classé",
                      updated_at="2026-01-01T00:00:00Z"))
     remote = {
+        "version": 3, "app": "pecule.py",          # comme tout vrai export
         "synced_at": "2026-02-01T00:00:00Z",
         "transactions": [_tx(id="a", categorie="Alimentation",
                              updated_at="2026-02-01T00:00:00Z")],
@@ -34,6 +35,7 @@ def test_fusion_n_ecrase_pas_plus_recent(tmp_path):
     db.insert_tx(_tx(id="a", categorie="Santé",
                      updated_at="2026-03-01T00:00:00Z"))
     remote = {
+        "version": 3, "app": "pecule.py",          # comme tout vrai export
         "synced_at": "2026-01-01T00:00:00Z",
         "transactions": [_tx(id="a", categorie="Loisirs",
                              updated_at="2026-01-01T00:00:00Z")],
@@ -47,6 +49,7 @@ def test_fusion_propage_les_suppressions(tmp_path):
     db = Database(str(tmp_path / "t.db"))
     db.insert_tx(_tx(id="a", updated_at="2026-01-01T00:00:00Z"))
     remote = {
+        "version": 3, "app": "pecule.py",          # comme tout vrai export
         "synced_at": "2026-02-01T00:00:00Z",
         "deletions": [{"entity": "transactions", "id": "a",
                        "deleted_at": "2026-02-01T00:00:00Z"}],

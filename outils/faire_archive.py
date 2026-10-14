@@ -21,7 +21,6 @@ Lancement (depuis n'importe où) :
 import hashlib
 import os
 import shutil
-import sqlite3
 import sys
 import zipfile
 
@@ -35,28 +34,22 @@ A_COPIER = ("Lisez-moi.txt", "Budget.ico")
 
 
 def verifier_absence_de_donnees(dossier):
-    """Refuse de continuer si une base contenant des opérations traîne ici.
+    """S'arrête si un fichier de comptes se trouve dans le dossier.
 
-    Lancer l'exe depuis dist/ y crée une comptes.db VIDE. On la supprime, car
-    elle n'a rien à faire dans l'archive. Mais si elle contient des écritures,
-    c'est qu'on ne travaille pas sur ce qu'on croit : on s'arrête.
+    Lancer l'exe depuis dist/ y crée une comptes.db. On ne l'efface plus,
+    même « vide » : une base sans opération garde soldes, budgets, règles et
+    récurrences, et l'effacer sous Windows échouait de toute façon (audit
+    du 14/10/2026, A07 et A08). On s'arrête et on demande de la déplacer.
     """
-    base = os.path.join(dossier, "comptes.db")
-    if not os.path.exists(base):
-        return
-    try:
-        with sqlite3.connect(base) as conn:
-            n = conn.execute("SELECT count(*) FROM transactions").fetchone()[0]
-    except sqlite3.Error:
-        n = -1
-    if n == 0:
-        os.remove(base)
-        print("  base de test vide supprimée de dist/")
-    else:
+    bases = sorted(f for f in os.listdir(dossier)
+                   if f.lower().startswith("comptes.db"))
+    if bases:
         raise SystemExit(
-            f"ARRÊT : {base} contient {n} opération(s).\n"
-            "Cette base n'est pas celle d'un dossier de construction. "
-            "Vérifiez avant de continuer — rien n'a été modifié.")
+            "ARRÊT : un fichier de comptes se trouve dans le dossier de "
+            f"construction ({', '.join(bases)}).\n"
+            "Il ne doit pas partir dans l'archive et peut contenir des "
+            "données. Déplacez-le ailleurs, puis relancez. Rien n'a été "
+            "modifié.")
 
 
 def retirer_le_verrou(dossier):
@@ -70,6 +63,46 @@ def retirer_le_verrou(dossier):
     if os.path.exists(chemin):
         os.remove(chemin)
         print("  verrou d'essai (pecule.lock) supprimé de dist/")
+
+
+# Ce qu'une archive de Pécule contient, et rien d'autre (audit du
+# 14/10/2026, R01) : un relevé, un export ou une base laissés par erreur dans
+# dist/Pecule partaient sinon dans le .zip publié. À la racine, trois
+# fichiers nommés ; dans _internal, des fichiers de programme seulement.
+A_LA_RACINE = {"Pecule.exe", "Lisez-moi.txt", "Budget.ico"}
+DANS_INTERNAL = {".dll", ".pyd", ".qm", ".zip", ".ico"}
+
+
+def fichiers_inattendus(chemins):
+    """Parmi des chemins relatifs au dossier Pecule (barres obliques), ceux
+    qui ne sont pas des fichiers du programme."""
+    inattendus = []
+    for chemin in chemins:
+        morceaux = chemin.split("/")
+        if len(morceaux) == 1:
+            if chemin not in A_LA_RACINE:
+                inattendus.append(chemin)
+        elif morceaux[0] != "_internal" or \
+                os.path.splitext(chemin)[1].lower() not in DANS_INTERNAL:
+            inattendus.append(chemin)
+    return inattendus
+
+
+def verifier_contenu(dossier):
+    """S'arrête si le dossier contient autre chose que le programme."""
+    chemins = []
+    for courant, _, fichiers in os.walk(dossier):
+        for f in fichiers:
+            chemin = os.path.relpath(os.path.join(courant, f), dossier)
+            chemins.append(chemin.replace(os.sep, "/"))
+    inattendus = fichiers_inattendus(chemins)
+    if inattendus:
+        raise SystemExit(
+            "ARRÊT : fichiers inattendus dans le dossier à archiver :\n  "
+            + "\n  ".join(sorted(inattendus))
+            + "\nUn relevé, un export ou une base ne doivent jamais être "
+            "publiés. Retirez-les, puis relancez. S'il s'agit d'un nouveau "
+            "fichier du programme, ajoutez son type à DANS_INTERNAL.")
 
 
 def preparer(dossier):
@@ -115,6 +148,11 @@ def controler(cible):
             problemes.append("des données sont corrompues")
         if "Pecule/Pecule.exe" not in noms:
             problemes.append("l'exécutable est absent")
+        intrus = fichiers_inattendus(
+            [x.split("/", 1)[1] if x.startswith("Pecule/") else x
+             for x in noms])
+        if intrus:
+            problemes.append("fichiers inattendus : " + ", ".join(intrus))
     if problemes:
         raise SystemExit("ARCHIVE INVALIDE : " + " ; ".join(problemes))
     print(f"  contrôle : {len(noms)} fichiers, archive conforme")
@@ -131,6 +169,7 @@ def main():
     verifier_absence_de_donnees(DOSSIER_BUILD)
     retirer_le_verrou(DOSSIER_BUILD)
     preparer(DOSSIER_BUILD)
+    verifier_contenu(DOSSIER_BUILD)
 
     os.makedirs(sortie, exist_ok=True)
     cible = os.path.join(sortie, f"Pecule-{APP_VERSION}-win64.zip")

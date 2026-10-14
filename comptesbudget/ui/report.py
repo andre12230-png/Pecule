@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..accords import pluriel
+from ..destinations import avec_extension, destination_refusee
 from ..theme import CLAIR
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
@@ -271,6 +272,13 @@ class MonthlyReportDialog(QDialog):
         path, _ = QFileDialog.getSaveFileName(
             self, "Enregistrer le rapport", f"rapport-{mo}.pdf", "PDF (*.pdf)")
         if not path:
+            return
+        # Jamais par-dessus le fichier de comptes (audit du 14/10/2026, A01).
+        raison = destination_refusee(path, self.db.path)
+        path = avec_extension(path, ".pdf")
+        raison = raison or destination_refusee(path, self.db.path)
+        if raison:
+            QMessageBox.warning(self, "Rapport", raison)
             return
         printer = QPrinter(QPrinter.HighResolution)
         printer.setOutputFormat(QPrinter.PdfFormat)
