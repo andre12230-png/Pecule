@@ -957,7 +957,10 @@ SYNC_VERSION = 3
 #           ne peut plus ecraser le fichier de comptes ; la fusion
 #           d'un export verifie le fichier d'abord puis se fait en
 #           tout ou rien ; un export JSON qui echoue le dit en clair.
-APP_VERSION = "1.41.16"
+# 1.41.17 : Audit, lot 2 : reimporter un releve dont une ligne est
+#           archivee ne bloque plus tout le releve ; une annee sur deux
+#           chiffres suit la convention du QIF (99 = 1999, 26 = 2026).
+APP_VERSION = "1.41.17"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

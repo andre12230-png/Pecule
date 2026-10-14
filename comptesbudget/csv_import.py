@@ -110,8 +110,11 @@ def parse_french_date(s: str) -> Optional[str]:
     if not m:
         return None
     jour, mois, annee = int(m.group(1)), int(m.group(2)), int(m.group(3))
-    if annee < 100:
-        annee += 2000
+    if len(m.group(3)) == 2:
+        # Même convention que le QIF : 00 à 69 → 2000 et plus, 70 à 99 →
+        # 1900 et plus. « 05/09/99 » devenait le 5 septembre 2099, hors de
+        # toutes les périodes (audit du 14/10/2026, A06).
+        annee += 2000 if annee < 70 else 1900
     try:
         # Une date impossible (31/02) est illisible, pas enregistrée telle quelle.
         return date(annee, mois, jour).isoformat()
@@ -610,7 +613,10 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             csv_par_dm[f"{d_iso}|{montant:.2f}"] += 1
 
     rules = [dict(r) for r in db.list_rules()]
-    existing_tx = [dict(r) for r in db.list_tx()]
+    # Archives comprises : masquée ou non, une opération archivée est dans
+    # la base. L'ignorer faisait échouer le relevé entier sur son identifiant,
+    # nouvelles lignes comprises (audit du 14/10/2026, A03).
+    existing_tx = [dict(r) for r in db.list_tx_avec_archives()]
     # Multiplicité des opérations déjà en base, sous DEUX clés d'identité :
     # par référence bancaire (quand la ligne en a une) ET par libellé nettoyé.
     # Correspondre à l'une OU l'autre suffit pour être un doublon — sinon une

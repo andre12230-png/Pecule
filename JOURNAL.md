@@ -22,6 +22,24 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (12) — Audit, lot 2 : les imports (v1.41.17)
+
+**Fait.** Deux constats de l'audit (10), vérifiés sur le code et reproduits
+par des tests qui échouaient (`tests/test_audit_lot2_imports.py`, 10 cas,
+gardés) :
+- A03 : l'import cherchait les doublons parmi les opérations visibles ; une
+  opération archivée n'était pas reconnue, sa recréation échouait sur son
+  identifiant et tout le relevé était annulé, nouvelles lignes comprises.
+  Nouvelle méthode `list_tx_avec_archives()` pour l'import (archives du compte
+  importé seulement). Vaut aussi pour l'OFX et le QIF, qui passent par l'import
+  CSV.
+- A06 : une année sur deux chiffres recevait toujours « 2000 + » (05/09/99 →
+  2099). Même convention que le QIF désormais : 00 à 69 → 2000 et plus, 70 à
+  99 → 1900 et plus ; un test garde l'accord des deux.
+Numéro 1.41.17. 801 tests sur 801, ruff propre.
+**Pourquoi.** Audit du 14/10/2026, deuxième lot choisi par l'auteur.
+**Reste.** Lots 3 (calculs : A04, A05) et 4 (affichage : A09, A10).
+
 ## 2026-10-14 (11) — Audit, lot 1 : protéger les fichiers (v1.41.16)
 
 **Fait.** Les cinq points « protection » de l'audit (10), chacun vérifié sur

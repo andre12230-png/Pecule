@@ -670,6 +670,14 @@ class Database:
         self.voir_archives = bool(voir)
 
     # ── Transactions ────────────────────────────────────────────────
+    def list_tx_avec_archives(self) -> list[sqlite3.Row]:
+        """Toutes les opérations du compte de travail, archivées comprises,
+        qu'on les affiche ou non. Pour l'import : une opération archivée est
+        toujours dans la base, la recréer échouait (audit du 14/10/2026, A03)."""
+        return list(self.conn.execute(
+            "SELECT * FROM transactions WHERE compte_id = ? "
+            "ORDER BY date DESC", (self.compte_id,)))
+
     def list_tx(self) -> list[sqlite3.Row]:
         """Opérations du compte de travail, de la plus récente à la plus
         ancienne. Les archivées sont écartées, sauf si l'on a demandé à les
