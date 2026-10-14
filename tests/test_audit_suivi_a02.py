@@ -52,6 +52,7 @@ def _avec_operation(db, **kw):
     {"montant": float("nan")},
     {"montant": float("inf")},
     {"montant": "12,5"},        # la base le garderait comme texte
+    {"montant": "1_000"},       # idem (trouvé à la contre-vérification)
     {"date": "pas une date"},
     {"date": "2026-13-45"},
     {"date": None},
@@ -151,3 +152,37 @@ def test_un_montant_en_texte_est_enregistre_comme_nombre(base):
     finally:
         relue.close()
     assert ligne == ("real", -12.5)
+
+
+@pytest.mark.parametrize("ecrit, attendu", [
+    ("1e3", 1000.0), ("+12", 12.0), (".5", 0.5), (7, 7.0)])
+def test_tout_montant_admis_entre_dans_la_base_comme_nombre(base, ecrit,
+                                                            attendu):
+    """Contre-vérification : le contrôle et la base ne lisent pas les
+    nombres pareil. La fusion convertit donc elle-même chaque montant admis
+    avant de l'écrire, opérations, récurrences, règles et comptes."""
+    donnees = _avec_operation(base, montant=ecrit)
+    donnees["recurring"].append({"id": "r1", "libelle": "LOYER",
+                                 "montant": ecrit, "frequency": "monthly",
+                                 "start_date": "2026-01-01"})
+    donnees["rules"].append({"id": "g1", "pattern": "MAGASIN",
+                             "amount": ecrit})
+    donnees["comptes"][0].update(solde_initial=ecrit,
+                                 updated_at="2099-01-01T00:00:00Z")
+    merge_remote_into_db(base, donnees)
+    relue = sqlite3.connect(base.path)
+    try:
+        lignes = [
+            relue.execute("SELECT typeof(montant), montant FROM transactions "
+                          "WHERE id = 'n1'").fetchone(),
+            relue.execute("SELECT typeof(montant), montant FROM recurring "
+                          "WHERE id = 'r1'").fetchone(),
+            relue.execute("SELECT typeof(amount), amount FROM rules "
+                          "WHERE id = 'g1'").fetchone(),
+            relue.execute("SELECT typeof(solde_initial), solde_initial FROM "
+                          "comptes WHERE id = ?",
+                          (donnees["comptes"][0]["id"],)).fetchone(),
+        ]
+    finally:
+        relue.close()
+    assert lignes == [("real", attendu)] * 4

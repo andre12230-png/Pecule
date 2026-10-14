@@ -22,6 +22,35 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (18) — Version 1.41.20 : contre-vérification d'A02 corrigée
+
+**Fait.** « 1_000 » est refusé, et surtout la fusion convertit elle-même
+chaque montant admis en nombre avant de l'écrire (opérations, récurrences,
+règles, comptes) : le contrôle et la base ne lisent plus les nombres
+différemment. Tests d'abord (« 1_000 » échouait), 845 tests sur 845.
+Version 1.41.20 construite et installée ; réserve avant-1.41.19 à la
+Corbeille avec l'accord d'André, avant-1.41.20 gardée.
+
+**Pourquoi.** Trou trouvé par la contre-vérification (entrée 17).
+
+**Reste.** README à la sortie du 01/11.
+
+## 2026-10-14 (17) — Vérification du complément de validation JSON
+
+**Fait.** Code au commit 67d9818 contrôlé ; 840 tests sur 840 réussissent en
+65,21 secondes. Le montant texte « invalide » est désormais refusé avant
+écriture. Un essai supplémentaire sur base fictive montre que « 1_000 »
+est encore accepté par le contrôle, enregistré comme texte par SQLite,
+puis fait échouer le calcul des revenus et dépenses. Preuve conservée dans
+le suivi local de l’audit ; rapport actualisé.
+
+**Pourquoi.** La conversion de texte en nombre utilisée pour vérifier un
+montant accepte plus de formats que la conversion faite au stockage.
+
+**Reste.** Convertir les montants admis en nombres avant enregistrement, ou
+refuser les formats incompatibles. Aucun code applicatif ni donnée d’usage
+modifié par cette vérification ; aucun exécutable construit ou déployé.
+
 ## 2026-10-14 (16) — A02 fermé : les valeurs d'un export sont vérifiées
 
 **Fait.** La fusion d'un export JSON vérifie maintenant, avant toute

@@ -127,7 +127,8 @@ def _est_montant(v) -> bool:
     if isinstance(v, str):
         # Pas de virgule ni d'espaces autour : la base ne rangerait pas
         # « 12,5 » comme un nombre.
-        if v != v.strip() or "," in v:
+        # Ni « 1_000 » : Python le lit, la base non (contre-vérification).
+        if v != v.strip() or "," in v or "_" in v:
             return False
         try:
             return math.isfinite(float(v))
@@ -149,6 +150,19 @@ def _est_date(v) -> bool:
 
 def _vide(v) -> bool:
     return v is None or v == ""
+
+
+def _en_nombres(partie: str, rec: dict) -> dict:
+    """Copie de l'enregistrement dont chaque montant admis devient un vrai
+    nombre : le contrôle et la base ne lisent pas les nombres écrits en
+    texte de la même façon, la base doit donc toujours recevoir un nombre
+    (contre-vérification de l'audit du 14/10/2026, A02)."""
+    champs = _CHAMPS[partie]
+    rec = dict(rec)
+    for c in champs["montants"] + champs["montants_facultatifs"]:
+        if not _vide(rec.get(c)):
+            rec[c] = float(rec[c])
+    return rec
 
 
 def _verifier_valeurs(data: dict) -> Optional[str]:
@@ -241,6 +255,7 @@ def _fusionner(db: "Database", remote: dict, stats: dict) -> None:
     for c in remote.get("comptes", []) or []:
         if not c.get("id"):
             continue
+        c = _en_nombres("comptes", c)
         ts = _eff_ts(c, fallback)
         cur = comptes_locaux.get(c["id"])
         if cur is None:
@@ -277,7 +292,8 @@ def _fusionner(db: "Database", remote: dict, stats: dict) -> None:
                 continue  # suppression locale plus récente
             cur = local[entity].get(rid)
             if cur is None or (cur.get("updated_at") or "") < ts:
-                db.upsert_synced(entity, {**rec, "updated_at": ts})
+                db.upsert_synced(entity, {**_en_nombres(entity, rec),
+                                          "updated_at": ts})
                 stats["applied"] += 1
 
     # 2) Pierres tombales distantes

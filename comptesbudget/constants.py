@@ -967,7 +967,9 @@ SYNC_VERSION = 3
 # 1.41.19 : Audit, lot 4 : le texte d'exemple de la recherche des
 #           Operations tient dans son champ, le detail passe dans une
 #           infobulle.
-APP_VERSION = "1.41.19"
+# 1.41.20 : Verification de l'audit : la fusion d'un export JSON refuse
+#           un montant ou une date illisible avant toute ecriture.
+APP_VERSION = "1.41.20"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
