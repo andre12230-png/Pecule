@@ -32,6 +32,7 @@ from ...recurring import echeances_du_mois
 from ...sauvegarde_externe import rappel_sauvegarde_externe
 from ..avis import CLE_PREMIERE_UTILISATION
 from ..models import EtatVide
+from ...theme import T
 
 # Jour de la dernière sauvegarde externe réussie (AAAA-MM-JJ), pour le
 # bandeau de rappel (28/09/2026). Le préfixe « _meta_ » la tient à l'écart
@@ -82,7 +83,7 @@ class CatRowsWidget(QWidget):
             # Pourquoi c'est vide (audit du 08/10/2026 : « — Aucune
             # donnée — »). Le conseil de période est sous le camembert voisin.
             vide = QLabel("Rien sur cette période.")
-            vide.setStyleSheet("color: #666666;")
+            vide.setStyleSheet(f"color: {T['texte_discret']};")
             self.lay.addWidget(vide, 0, 0, 1, 4)
             self._nb_lignes = 1
             self.lay.setRowStretch(1, 1)   # le message reste en haut du cadre
@@ -103,16 +104,17 @@ class CatRowsWidget(QWidget):
             self.lay.addWidget(dot, i, 0, Qt.AlignHCenter | Qt.AlignVCenter)
             lbl = QLabel(label)
             lbl.setTextFormat(Qt.PlainText)   # libellé affiché tel quel (jamais interprété)
-            lbl.setStyleSheet("color:#222; background: transparent")
+            lbl.setStyleSheet(f"color:{T['texte_libelle']}; background: transparent")
             self.lay.addWidget(lbl, i, 1)
             if sub:
                 # Même correction de contraste que les sous-titres des tuiles :
                 # ces pourcentages et ces dates se lisaient mal en gris pâle.
-                s = QLabel(sub); s.setStyleSheet("color:#555; font-size:9pt; background: transparent")
+                s = QLabel(sub); s.setStyleSheet(
+                    f"color:{T['texte_secondaire']}; font-size:9pt; background: transparent")
                 self.lay.addWidget(s, i, 2, Qt.AlignRight | Qt.AlignVCenter)
             amt = QLabel(fmt_euro_signe(amount))   # signe : charte, 08/10/2026
             amt.setStyleSheet(
-                f"color: {'#BC3729' if amount < 0 else '#18733A'}; "
+                f"color: {T['debit'] if amount < 0 else T['credit']}; "
                 "font-weight:600; background: transparent")
             self.lay.addWidget(amt, i, 3, Qt.AlignRight | Qt.AlignVCenter)
         # Une rangée vide et extensible en dessous : sans elle, la grille
@@ -158,7 +160,22 @@ def axe_euros(bas: float, haut: float) -> QCategoryAxis:
     # Sans cela, Qt remplace les étiquettes par « … » dès que le graphique
     # manque un peu de hauteur — elles tiennent pourtant (vérifié en image).
     axe.setTruncateLabels(False)
+    habiller_axe(axe)
     return axe
+
+
+def habiller_axe(axe) -> None:
+    """Étiquettes, trait et grille d'un axe aux couleurs du thème. Laissés
+    à QtCharts, ils restent gris moyen, prévus pour un fond clair :
+    illisibles en sombre."""
+    axe.setLabelsColor(QColor(T["texte_secondaire"]))
+    axe.setLinePenColor(QColor(T["filet"]))
+    axe.setGridLineColor(QColor(T["grille"]))
+
+
+def habiller_legende(graphique) -> None:
+    """Texte de la légende d'un graphique dans la couleur du texte."""
+    graphique.legend().setLabelColor(QColor(T["texte"]))
 
 
 def _mois_court(m: str) -> str:
@@ -178,9 +195,17 @@ def _bulle(cadre: str) -> str:
     effaçait son fond, et son texte restait sur le beige de la page (défaut
     vu chez l'auteur le 01/10/2026). Cette règle vise l'infobulle aussi
     précisément que la règle fautive, et vient après elle : elle l'emporte.
-    Couleurs de la charte : fond #FFFFDC, texte noir."""
-    return (f"QFrame#{cadre} QToolTip {{ background: #FFFFDC; color: #000000; "
-            "border: 1px solid #808080; padding: 2px; }")
+    Couleurs des infobulles du thème (jaune pâle et noir en clair)."""
+    return (f"QFrame#{cadre} QToolTip {{ background: {T['bulle_fond']}; "
+            f"color: {T['bulle_texte']}; "
+            f"border: 1px solid {T['bulle_cadre']}; padding: 2px; }}")
+
+
+def _STYLE_ALERTE() -> str:
+    """Bandeau orange de la charte (à faire bientôt), aux couleurs du thème."""
+    return (f"QLabel {{ background:{T['alerte_fond']}; "
+            f"border:1px solid {T['alerte_cadre']}; "
+            f"color:{T['alerte_texte']}; border-radius:4px; padding:8px 14px; }}")
 
 
 def _make_panel(title: str, body: QWidget) -> QFrame:
@@ -192,18 +217,19 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
     # retrouvait entouré du liseré gris de la carte.
     f.setObjectName("carteBilan")
     # Arrondi des cartes : 12 px dans les trois applis (charte, 06/10/2026).
-    f.setStyleSheet("""
-        QFrame#carteBilan {
-            background: #FAF8F1; border: 1px solid #BEC7D4; border-radius: 12px;
-        }
+    f.setStyleSheet(f"""
+        QFrame#carteBilan {{
+            background: {T['carte']}; border: 1px solid {T['lisere']};
+            border-radius: 12px;
+        }}
     """)
     v = QVBoxLayout(f); v.setContentsMargins(0, 0, 0, 0); v.setSpacing(0)
     header = QLabel(title.upper())
-    header.setStyleSheet("""
+    header.setStyleSheet(f"""
         background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-            stop:0 #E8EEF7, stop:1 #C9D6E8);
-        color: #1F3A6B; font-weight: 600; font-size: 9pt;
-        padding: 4px 10px; border-bottom: 1px solid #B0BFD3;
+            stop:0 {T['entete_haut']}, stop:1 {T['entete_bas']});
+        color: {T['entete_texte']}; font-weight: 600; font-size: 9pt;
+        padding: 4px 10px; border-bottom: 1px solid {T['entete_filet']};
         letter-spacing: 0.5px;
         border-top-left-radius: 11px; border-top-right-radius: 11px;
     """)
@@ -224,11 +250,11 @@ class BilanView(QWidget):
         self.db = db
         self.period = "all"
         self.date_mode = "valeur"
-        # Fond creme, celui de la fenetre, et cartes ivoire (#FAF8F1) : le
+        # Fond creme, celui de la fenetre, et cartes ivoire (en clair) : le
         # gris-bleu et le blanc pur d'avant juraient avec le reste de
         # l'application (demande de l'auteur, 25/09/2026 ; memes couleurs dans le
         # Photovoltaique et Recharges VE).
-        self.setStyleSheet("BilanView { background: #ECE9D8; }")
+        self.setStyleSheet(f"BilanView {{ background: {T['fond_page']}; }}")
 
         # ── Le Bilan défile ───────────────────────────────────────────
         # Sans cela, la hauteur minimale de la FENÊTRE est celle de tout ce
@@ -245,7 +271,7 @@ class BilanView(QWidget):
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # Le fond du panneau déroulant est blanc par défaut : on lui redonne
         # le fond de la vue, sinon une bande claire apparaît sous le contenu.
-        self.scroll.viewport().setStyleSheet("background: #ECE9D8;")
+        self.scroll.viewport().setStyleSheet(f"background: {T['fond_page']};")
         exterieur.addWidget(self.scroll)
         contenu = QWidget()
         self.scroll.setWidget(contenu)
@@ -264,14 +290,14 @@ class BilanView(QWidget):
         # opérations pointées de la période : son nom le disait mal, juste à
         # côté du vrai solde et pour une valeur voisine.
         defs = [
-            ("solde",    "💼 Solde bancaire réel (pointé)", "#1F3A6B"),
-            ("net",      "Mouvement du mois",              "#1F3A6B"),
-            ("epargne",  "Taux d'épargne",                 "#18733A"),
+            ("solde",    "💼 Solde bancaire réel (pointé)", T["bleu_nuit"]),
+            ("net",      "Mouvement du mois",              T["bleu_nuit"]),
+            ("epargne",  "Taux d'épargne",                 T["credit"]),
             # « Reste à pointer » depuis le 04/10/2026 (audit de design) : en
             # « Mouvement pointé », elle répétait le chiffre de sa voisine
             # dès que le mois était entièrement pointé, cas courant après un
             # import. Le total pointé reste dans son sous-titre.
-            ("pointe",   "✔ Reste à pointer",              "#18733A"),
+            ("pointe",   "✔ Reste à pointer",              T["credit"]),
         ]
         for key, label, color in defs:
             card = self._make_kpi(label, "—", color)
@@ -328,7 +354,8 @@ class BilanView(QWidget):
             w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
             lbl = QLabel(label_txt); lbl.setStyleSheet("font-size:8pt")
             lbl.setWordWrap(True)
-            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
+            val = QLabel("—"); val.setStyleSheet(
+                f"color:{T['texte']}; font-size:12pt; font-weight:bold")
             l.addWidget(lbl); l.addWidget(val)
             return w, val, lbl
 
@@ -354,17 +381,18 @@ class BilanView(QWidget):
         # Style nommé (voir _make_panel) : sans cela, chaque étiquette du
         # bandeau se retrouvait encadrée, un QLabel étant lui aussi un QFrame.
         self.cb_banner.setObjectName("bandeauCarte")
-        self.cb_banner.setStyleSheet("""
-            QFrame#bandeauCarte {
-                     background: #FFFBE6;
-                     border: 1px solid #E8D77B; border-radius: 4px; }
-            QFrame#bandeauCarte QWidget { background: transparent; }
+        self.cb_banner.setStyleSheet(f"""
+            QFrame#bandeauCarte {{
+                     background: {T['info_fond']};
+                     border: 1px solid {T['info_cadre']}; border-radius: 4px; }}
+            QFrame#bandeauCarte QWidget {{ background: transparent; }}
         """ + _bulle("bandeauCarte"))
         cb_lay = QHBoxLayout(self.cb_banner)
         cb_lay.setContentsMargins(12, 4, 12, 4); cb_lay.setSpacing(18)
 
         self.cb_title = QLabel("💳 ENCOURS CARTE BANCAIRE")
-        self.cb_title.setStyleSheet("font-weight:bold; color:#7E5109; font-size:9pt")
+        self.cb_title.setStyleSheet(
+            f"font-weight:bold; color:{T['avertissement']}; font-size:9pt")
         # Repli sur deux lignes en fenêtre étroite (sinon le bandeau réclame
         # 1390 pixels de large et bloque le redimensionnement de la fenêtre).
         self.cb_title.setWordWrap(True)
@@ -374,12 +402,14 @@ class BilanView(QWidget):
         # 4 mini-blocs : confirmé / en cours / total à débiter / disponible
         def _mini(label_txt):
             w = QWidget(); l = QVBoxLayout(w); l.setContentsMargins(0,0,0,0); l.setSpacing(0)
-            lbl = QLabel(label_txt); lbl.setStyleSheet("color:#7E5109; font-size:8pt")
+            lbl = QLabel(label_txt); lbl.setStyleSheet(
+                f"color:{T['avertissement']}; font-size:8pt")
             # Repli sur deux lignes, comme le titre : à quatre blocs, des
             # libellés d'un seul tenant imposeraient une fenêtre plus large
             # que la moitié d'écran sur laquelle André travaille.
             lbl.setWordWrap(True)
-            val = QLabel("—"); val.setStyleSheet("color:#000000; font-size:12pt; font-weight:bold")
+            val = QLabel("—"); val.setStyleSheet(
+                f"color:{T['texte']}; font-size:12pt; font-weight:bold")
             # Le repli des libellés rétrécit le bloc au point de couper le
             # montant (« -241,39 » sans son €). Un chiffre tronqué est pire
             # qu'un bandeau large : on lui garantit sa place.
@@ -417,7 +447,7 @@ class BilanView(QWidget):
         cb_lay.addStretch()
         self.cb_detail = QLabel("")
         self.cb_detail_complet = ""      # tout le détail (infobulle)
-        self.cb_detail.setStyleSheet("color:#7E5109; font-size:9pt")
+        self.cb_detail.setStyleSheet(f"color:{T['avertissement']}; font-size:9pt")
         self.cb_detail.setWordWrap(True)
         cb_lay.addWidget(self.cb_detail)
         # Une seconde ligne rappelait ce qui restait sur les six derniers
@@ -449,8 +479,7 @@ class BilanView(QWidget):
         self.solde_depart_alert.setTextFormat(Qt.RichText)
         self.solde_depart_alert.setVisible(False)
         self.solde_depart_alert.setStyleSheet(
-            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
-            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+            _STYLE_ALERTE())
         self.solde_depart_alert.linkActivated.connect(
             lambda _l: self.goto_parametres.emit())
         main.addWidget(self.solde_depart_alert)
@@ -463,8 +492,7 @@ class BilanView(QWidget):
         self.hors_solde_alert.setTextFormat(Qt.RichText)
         self.hors_solde_alert.setVisible(False)
         self.hors_solde_alert.setStyleSheet(
-            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
-            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+            _STYLE_ALERTE())
         self.hors_solde_alert.linkActivated.connect(
             lambda _l: self.goto_recul_depart.emit())
         main.addWidget(self.hors_solde_alert)
@@ -476,8 +504,7 @@ class BilanView(QWidget):
         self.sauvegarde_alert.setTextFormat(Qt.RichText)
         self.sauvegarde_alert.setVisible(False)
         self.sauvegarde_alert.setStyleSheet(
-            "QLabel { background:#FEF5E7; border:1px solid #E67E22; "
-            "color:#7E5109; border-radius:4px; padding:8px 14px; }")
+            _STYLE_ALERTE())
         self.sauvegarde_alert.linkActivated.connect(
             lambda _l: self.sauvegarde_demandee.emit())
         main.addWidget(self.sauvegarde_alert)
@@ -488,6 +515,7 @@ class BilanView(QWidget):
         # Barres mensuelles
         self.bar_chart = QChart()
         self.bar_chart.setBackgroundVisible(False)
+        habiller_legende(self.bar_chart)
         self.bar_chart.legend().setAlignment(Qt.AlignBottom)
         self.bar_chart.setAnimationOptions(QChart.SeriesAnimations)
         bar_view = QChartView(self.bar_chart)
@@ -502,7 +530,7 @@ class BilanView(QWidget):
         self.bar_note = QLabel()
         self.bar_note.setWordWrap(True)
         self.bar_note.setStyleSheet(
-            "color: #666666; font-size: 11px; padding: 0px 10px 6px 10px;")
+            f"color: {T['texte_discret']}; font-size: 11px; padding: 0px 10px 6px 10px;")
         self.bar_note.setVisible(False)
         bar_lignes.addWidget(self.bar_note)
         self.bar_panel = _make_panel("Évolution sur 12 mois", bar_corps)
@@ -515,6 +543,7 @@ class BilanView(QWidget):
         # Camembert
         self.pie_chart = QChart()
         self.pie_chart.setBackgroundVisible(False)
+        habiller_legende(self.pie_chart)
         self.pie_chart.legend().setAlignment(Qt.AlignRight)
         # La légende porte le nom ET le montant de chaque catégorie : un texte
         # un peu plus petit évite qu'elle soit tronquée en fenêtre étroite.
@@ -539,6 +568,7 @@ class BilanView(QWidget):
         # pointillés pour ce qui est prévu.
         self.solde_chart = QChart()
         self.solde_chart.setBackgroundVisible(False)
+        habiller_legende(self.solde_chart)
         self.solde_chart.legend().setAlignment(Qt.AlignBottom)
         # Légende dessinée avec le trait de chaque courbe (plein, pointillé) :
         # deux carrés de la même couleur ne se distinguaient pas.
@@ -574,14 +604,15 @@ class BilanView(QWidget):
         f.setObjectName("tuileKpi")
         f.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: #FAF8F1; border: 1px solid #BEC7D4;
+                background: {T['carte']}; border: 1px solid {T['lisere']};
                 border-top: 3px solid {color}; border-radius: 12px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
         """ + _bulle("tuileKpi"))
         lay = QVBoxLayout(f); lay.setContentsMargins(10, 8, 10, 8); lay.setSpacing(2)
         l_label = QLabel(label)
-        l_label.setStyleSheet("color:#666; font-size:9pt; font-weight:600; text-transform:uppercase")
+        l_label.setStyleSheet(f"color:{T['texte_discret']}; font-size:9pt; "
+                              "font-weight:600; text-transform:uppercase")
         # Même raison : « Solde bancaire réel (pointé) » sur une seule ligne
         # imposait 228 pixels à sa tuile, soit 940 pixels pour la rangée.
         l_label.setWordWrap(True)
@@ -589,10 +620,11 @@ class BilanView(QWidget):
         l_value.setStyleSheet(f"color:{color}; font-size:16pt; font-weight:bold")
         l_sub = QLabel("")
         # Gris foncé, pas gris pâle : #999 sur blanc ne donne qu'un contraste
-        # de 2,8 pour 1, très en dessous du minimum lisible (4,5). #555 monte
+        # de 2,8 pour 1, très en dessous du minimum lisible (4,5). Le gris
+        # secondaire (#555 en clair) monte
         # à 7,5 pour 1, tout en restant nettement secondaire par rapport au
         # montant. Et 9pt plutôt que 8 : ces lignes portent des chiffres.
-        l_sub.setStyleSheet("color:#555; font-size:9pt")
+        l_sub.setStyleSheet(f"color:{T['texte_secondaire']}; font-size:9pt")
         l_sub.setWordWrap(True)
         lay.addWidget(l_label); lay.addWidget(l_value); lay.addWidget(l_sub)
         f._value = l_value
@@ -643,20 +675,20 @@ class BilanView(QWidget):
         """Vert si positif, rouge si négatif, None si nul : un bilan nul
         s'écrit « 0,00 », sans couleur (charte ; relecture du 30/09/2026)."""
         if valeur > 0.005:
-            return "#18733A"
+            return T["credit"]
         if valeur < -0.005:
-            return "#BC3729"
+            return T["debit"]
         return None
 
     def _colorer_kpi(self, cle: str, couleur):
         """Recolore une tuile : le montant ET le liseré du haut, pour qu'ils
         s'accordent toujours (vert quand c'est positif, rouge quand ça ne l'est
         pas). `couleur` None : montant nul, en noir sur un liseré gris."""
-        texte, trait = (couleur, couleur) if couleur else ("#000000", "#A9A9A9")
+        texte, trait = (couleur, couleur) if couleur else (T["texte"], T["filet"])
         carte = self.kpis[cle]
         carte.setStyleSheet(f"""
             QFrame#tuileKpi {{
-                background: #FAF8F1; border: 1px solid #BEC7D4;
+                background: {T['carte']}; border: 1px solid {T['lisere']};
                 border-top: 3px solid {trait}; border-radius: 12px;
             }}
             QFrame#tuileKpi QLabel {{ background: transparent; }}
@@ -888,8 +920,9 @@ class BilanView(QWidget):
         """Couleurs du bandeau du mois : vert quand le compte tient, rouge
         (bandeau de danger de la charte) sinon. Le texte des étiquettes suit
         le cadre ; les montants gardent leur noir."""
-        fond, cadre, texte = (("#EAF6EC", "#229954", "#1A5E32") if ok
-                              else ("#FDEDEB", "#E74C3C", "#7B241C"))
+        cle = "favorable" if ok else "erreur"
+        fond, cadre, texte = (T[f"{cle}_fond"], T[f"{cle}_cadre"],
+                              T[f"{cle}_texte"])
         self.mois_banner.setStyleSheet(f"""
             QFrame#bandeauMois {{
                      background: {fond};
@@ -1074,7 +1107,7 @@ class BilanView(QWidget):
             debits = [regle_debit_differe(cartes)(f"{mois}-01")]
 
         self.cb_total.setStyleSheet(
-            "color:#000000; font-size:12pt; font-weight:bold")
+            f"color:{T['texte']}; font-size:12pt; font-weight:bold")
 
         # ── Ce que le mois laisse, une fois tout payé ─────────────────
         # Le solde de fin de mois moins les achats carte déjà engagés. Il n'a
@@ -1109,7 +1142,7 @@ class BilanView(QWidget):
             self.cb_total_lbl.setText("Achats de la carte sur ce mois")
             self.cb_total.setText(fmt_euro(encours_mois))
             self.cb_total.setStyleSheet(
-                "color:#000000; font-size:12pt; font-weight:bold")
+                f"color:{T['texte']}; font-size:12pt; font-weight:bold")
             self.cb_title.setText(
                 f"💳 ENCOURS CARTE — {period_label(mois).upper()} "
                 "(prélevé le "
@@ -1441,11 +1474,13 @@ class BilanView(QWidget):
         parts.append('<a href="#budget">Voir l’onglet Budget</a>')
 
         if depasses:   # rouge si au moins un dépassement, sinon orange
-            style = ("background:#FDEDEB; border:1px solid #E74C3C; "
-                     "color:#7B241C;")
+            style = (f"background:{T['erreur_fond']}; "
+                     f"border:1px solid {T['erreur_cadre']}; "
+                     f"color:{T['erreur_texte']};")
         else:
-            style = ("background:#FEF5E7; border:1px solid #E67E22; "
-                     "color:#7E5109;")
+            style = (f"background:{T['alerte_fond']}; "
+                     f"border:1px solid {T['alerte_cadre']}; "
+                     f"color:{T['alerte_texte']};")
         self.budget_alert.setStyleSheet(
             f"QLabel {{ {style} border-radius:4px; padding:8px 14px; }}")
         self.budget_alert.setText("&nbsp;&nbsp;".join(parts))
@@ -1625,7 +1660,7 @@ class BilanView(QWidget):
         # taux d'épargne était le seul chiffre à s'écrire « -10.6 % ».
         self.kpis["epargne"]._value.setText(
             f"{tx_epargne:.1f}".replace(".", ",") + "\xa0%")
-        # Vert d'encre commun (#18733A) : le vert-bleu #16A085 d'avant ne
+        # Vert d'encre commun (T["credit"]) : le vert-bleu d'avant ne
         # faisait que 3,09 pour 1 sur l'ivoire de la tuile.
         self._colorer_kpi("epargne", self._couleur_du_signe(tx_epargne))
         self.kpis["epargne"]._sub.setText(
@@ -1786,7 +1821,7 @@ class BilanView(QWidget):
         if not points or not valeurs:
             return
 
-        bleu = QColor("#1F3A6B")
+        bleu = QColor(T["bleu_nuit"])
         constate = QLineSeries()
         constate.setName("Constaté")
         constate.setPen(QPen(bleu, 2))
@@ -1812,6 +1847,7 @@ class BilanView(QWidget):
 
         ax_x = QBarCategoryAxis()
         ax_x.append([_mois_court(m) for m, _s, _p in points])
+        habiller_axe(ax_x)
         self.solde_chart.addAxis(ax_x, Qt.AlignBottom)
         bas, haut = min(valeurs), max(valeurs)
         marge = max((haut - bas) * 0.1, 50)
@@ -1827,7 +1863,7 @@ class BilanView(QWidget):
             # Découvert au moins un mois : la ligne du zéro, en rouge, montre
             # quand la courbe passe dessous.
             zero = QLineSeries()
-            zero.setPen(QPen(QColor("#BC3729"), 1))
+            zero.setPen(QPen(QColor(T["debit"]), 1))
             zero.append(0, 0)
             zero.append(len(points) - 1, 0)
             series.append(zero)
@@ -1893,10 +1929,10 @@ class BilanView(QWidget):
         bar_dep = QBarSet("Dépenses")
         # Dépenses au rouge des dépenses de toute l'appli (choix de l'auteur
         # du 08/10/2026 ; c'était un brun-orange hors palette).
-        bar_rev.setColor(QColor("#229954"))
-        bar_dep.setColor(QColor("#BC3729"))
-        bar_rev.setBorderColor(QColor("#229954"))
-        bar_dep.setBorderColor(QColor("#BC3729"))
+        bar_rev.setColor(QColor(T["barre_revenus"]))
+        bar_dep.setColor(QColor(T["barre_depenses"]))
+        bar_rev.setBorderColor(QColor(T["barre_revenus"]))
+        bar_dep.setBorderColor(QColor(T["barre_depenses"]))
         for m in months:
             # Montants arrondis à l'euro : c'est ce que porteront les
             # étiquettes, et à cette échelle les centimes n'apportent rien.
@@ -1924,8 +1960,10 @@ class BilanView(QWidget):
             # le vert (5,75 pour 1), blanc sur le rouge (5,65). Le blanc sur le
             # vert ne faisait que 3,65 (audit du 08/10/2026).
             series.setLabelsPosition(QAbstractBarSeries.LabelsInsideEnd)
-        bar_rev.setLabelColor(QColor("black"))
-        bar_dep.setLabelColor(QColor("white"))
+        # En sombre, la barre des dépenses est un rouge clair : son chiffre
+        # s'y écrit en noir (voir theme.py).
+        bar_rev.setLabelColor(QColor(T["barre_revenus_encre"]))
+        bar_dep.setLabelColor(QColor(T["barre_depenses_encre"]))
         self.bar_chart.addSeries(series)
 
         # Axe X : le mois seul. Sur douze colonnes, « Oct 25 » ne tient pas —
@@ -1949,6 +1987,7 @@ class BilanView(QWidget):
         self.bar_panel._header.setText(
             f"ÉVOLUTION SUR 12 MOIS — {de_mois_a_mois(months[0], months[-1]).upper()}")
         ax_x = QBarCategoryAxis(); ax_x.append(labels)
+        habiller_axe(ax_x)
         # 8 pt, le minimum de la charte : à 9, « Nov », « Mar » et « Aoû »
         # se coupaient en « N… » à 1280 px de large.
         police = ax_x.labelsFont()

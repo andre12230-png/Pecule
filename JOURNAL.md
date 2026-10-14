@@ -22,6 +22,26 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (4) — Mode sombre, étape 2 : le Bilan et ses graphiques
+
+**Fait.** Le Bilan prend toutes ses couleurs dans le thème : tuiles,
+cartes et leur en-tête, bandeau du mois (vert ou rouge), Encours carte,
+bandeaux orange, alerte budget, listes du bas, infobulles. Les trois
+graphiques aussi : étiquettes des axes, traits, grille et légendes
+suivent le thème (laissés à QtCharts, ils restaient gris moyen, prévus
+pour un fond clair). Le chiffre écrit sur une barre « Dépenses » passe au
+noir en sombre, où cette barre est un rouge clair. Tests : le Bilan
+rejoint la liste des écrans sans couleur en dur ; chiffres des barres
+lisibles dans les deux thèmes ; Bilan construit en sombre (cartes, axes,
+légendes). 748 tests sur 748. Bilan regardé en entier en image, en sombre
+et en clair (animations coupées pour la capture), sur une base inventée.
+**Pourquoi.** Suite du mode sombre promis pour le 01/11/2026 ; le Bilan
+est l'onglet qui s'ouvre au démarrage.
+**Reste.** Fenêtres de saisie (`dialogs.py`), assistants, Notice,
+« Votre avis », « Mise à jour », rapport mensuel (qui restera clair).
+Pastilles et camembert gardent les couleurs des catégories dans les deux
+thèmes : à juger à la relecture. Puis l'étape 3.
+
 ## 2026-10-14 (3) — Mode sombre, étape 2 : le menu et les tableaux
 
 **Fait.** Le menu de gauche et tous les tableaux (Opérations, Budget,

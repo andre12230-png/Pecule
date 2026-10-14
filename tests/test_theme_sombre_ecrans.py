@@ -26,6 +26,8 @@ ECRANS_CONVERTIS = [
     "models.py",
     "recapitulatif.py",
     "search.py",
+    # Étape 2, deuxième lot (14/10/2026) : le Bilan et ses graphiques.
+    "views/bilan.py",
     "views/budget.py",
     "views/categories.py",
     "views/operations.py",
@@ -122,3 +124,40 @@ def test_menu_de_gauche_en_sombre(qapp, sombre, tmp_path):
         style = b.styleSheet().upper()
         assert SOMBRE["bouton_fond"] in style, b.text()
         assert CLAIR["bouton_fond"] not in style, b.text()
+
+
+@pytest.mark.parametrize("palette", [CLAIR, SOMBRE], ids=["clair", "sombre"])
+def test_chiffres_des_barres_du_bilan_lisibles(palette):
+    """Le montant de chaque barre s'écrit dedans, près du sommet."""
+    p = palette
+    assert contraste(p["barre_revenus_encre"], p["barre_revenus"]) >= 4.5
+    assert contraste(p["barre_depenses_encre"], p["barre_depenses"]) >= 4.5
+
+
+def test_bilan_en_sombre(qapp, sombre, tmp_path):
+    """Cartes, tuiles et graphiques du Bilan construits en sombre : fond de
+    carte sombre, axes et légendes dans les couleurs du texte du thème."""
+    from datetime import date
+    from PySide6.QtGui import QColor
+    from comptesbudget.database import Database
+    from comptesbudget.ui.views.bilan import BilanView
+    db = Database(str(tmp_path / "comptes.db"))
+    db.set_setting("initial_date", "2026-01-01")
+    db.set_setting("initial_balance", "100.0")
+    jour = date.today().replace(day=1).isoformat()
+    db.insert_tx(_tx(id="a", date=jour, date_valeur=jour, montant=500.0,
+                     categorie="Revenus"))
+    db.insert_tx(_tx(id="b", date=jour, date_valeur=jour, montant=-50.0,
+                     categorie="Alimentation"))
+    vue = BilanView(db)
+    vue.refresh()
+    style = vue.kpis["solde"].styleSheet().upper()
+    assert SOMBRE["carte"] in style and CLAIR["carte"] not in style
+    for graphique in (vue.bar_chart, vue.pie_chart, vue.solde_chart):
+        assert (graphique.legend().labelColor().name().upper()
+                == SOMBRE["texte"])
+    for graphique in (vue.bar_chart, vue.solde_chart):
+        assert graphique.axes()
+        for axe in graphique.axes():
+            assert axe.labelsColor() == QColor(SOMBRE["texte_secondaire"])
+            assert axe.gridLineColor() == QColor(SOMBRE["grille"])

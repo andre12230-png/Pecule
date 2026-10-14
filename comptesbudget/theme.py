@@ -80,6 +80,8 @@ CLAIR = {
     "pointe_fond": "#D6F0DC",      # case P d'une opération pointée
     "barre_revenus": "#229954",    # barres « Revenus » du Bilan (pas du texte)
     "barre_depenses": "#BC3729",   # barres « Dépenses » du Bilan
+    "barre_revenus_encre": "#000000",   # chiffre écrit sur une barre « Revenus »
+    "barre_depenses_encre": "#FFFFFF",  # chiffre écrit sur une barre « Dépenses »
     "budget_ok": "#27AE60",        # barre d'un budget sous 80 %
     "budget_proche": "#E67E22",    # barre d'un budget entre 80 et 100 %
     "budget_depasse": "#BC3729",   # barre d'un budget dépassé
@@ -143,6 +145,8 @@ SOMBRE = {
     "pointe_fond": "#1B3324",
     "barre_revenus": "#229954",
     "barre_depenses": "#F2806F",
+    "barre_revenus_encre": "#000000",
+    "barre_depenses_encre": "#000000",  # le rouge clair du sombre porte du noir
     # Barres du Budget : le chiffre clair s'écrit sur la barre ET sur sa
     # piste. Des barres foncées (4,5 pour 1 sous le chiffre) sur une piste
     # plus foncée encore, où elles se détachent (3 pour 1 ; la rouge,
