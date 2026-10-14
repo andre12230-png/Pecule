@@ -26,27 +26,56 @@ class TexteALire(QTextBrowser):
         self.setLineWrapColumnOrWidth(min(self.LARGEUR_MAX, dispo))
 
 from ...constants import _data_dir
+from ...theme import T
+
+
+def style_notice() -> str:
+    """Feuille de style de la Notice, aux couleurs du thème (clair ou
+    sombre). Construite à l'affichage : écrite dans NOTICE_HTML, elle
+    resterait claire en sombre."""
+    return f"""
+<style>
+  body {{ font-family: 'Segoe UI', sans-serif; font-size: 11pt;
+         color: {T['texte_libelle']}; }}
+  h1 {{ color: {T['bleu_nuit']}; border-bottom: 2px solid {T['bleu_nuit']};
+       padding-bottom: 4px; }}
+  h2 {{ color: {T['bleu_nuit']}; margin-top: 22px; }}
+  h3 {{ color: {T['bleu_nuit']}; margin-top: 16px; }}
+  .tip {{ background: {T['info_fond']}; border-left: 4px solid {T['info_cadre']};
+         padding: 8px 12px; margin: 8px 0; }}
+  .warn {{ background: {T['erreur_fond']}; border-left: 4px solid {T['erreur_cadre']};
+          padding: 8px 12px; margin: 8px 0; }}
+  code {{ background: {T['ligne_paire']}; padding: 1px 5px; border-radius: 3px;
+         font-family: 'Consolas', monospace; }}
+  ul li {{ margin-bottom: 4px; }}
+  table {{ border-collapse: collapse; margin: 8px 0; }}
+  th, td {{ border: 1px solid {T['filet']}; padding: 4px 8px; }}
+  th {{ background: {T['entete_haut']}; }}
+  kbd {{ background: {T['ligne_paire']}; border: 1px solid {T['filet']};
+        border-radius: 3px; padding: 1px 6px;
+        font-family: 'Consolas', monospace; font-size: 10pt; }}
+</style>
+"""
+
+
+def style_glossaire() -> str:
+    """Feuille de style du Glossaire, aux couleurs du thème."""
+    return f"""
+<style>
+  body {{ font-family: 'Segoe UI', sans-serif; font-size: 11pt;
+         color: {T['texte_libelle']}; }}
+  h1 {{ color: {T['bleu_nuit']}; border-bottom: 2px solid {T['bleu_nuit']};
+       padding-bottom: 4px; }}
+  dt {{ font-weight: bold; color: {T['bleu_nuit']}; margin-top: 12px;
+       font-size: 12pt; }}
+  dd {{ margin-left: 16px; margin-bottom: 6px; color: {T['texte_libelle']}; }}
+  code {{ background: {T['ligne_paire']}; padding: 1px 5px; border-radius: 3px;
+         font-family: 'Consolas', monospace; }}
+</style>
+"""
 
 
 NOTICE_HTML = """
-<style>
-  body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; }
-  h1 { color: #1F3A6B; border-bottom: 2px solid #1F3A6B; padding-bottom: 4px; }
-  h2 { color: #1F3A6B; margin-top: 22px; }
-  h3 { color: #1F3A6B; margin-top: 16px; }
-  .tip { background: #FFFBE6; border-left: 4px solid #E8D77B;
-         padding: 8px 12px; margin: 8px 0; }
-  .warn { background: #FDEDEB; border-left: 4px solid #E74C3C;
-          padding: 8px 12px; margin: 8px 0; }
-  code { background: #F5F5F0; padding: 1px 5px; border-radius: 3px;
-         font-family: 'Consolas', monospace; }
-  ul li { margin-bottom: 4px; }
-  table { border-collapse: collapse; margin: 8px 0; }
-  th, td { border: 1px solid #A9A9A9; padding: 4px 8px; }
-  th { background: #E8EEF7; }
-  kbd { background: #F5F5F0; border: 1px solid #A9A9A9; border-radius: 3px;
-        padding: 1px 6px; font-family: 'Consolas', monospace; font-size: 10pt; }
-</style>
 
 <h1>📖 Notice d'utilisation</h1>
 
@@ -860,14 +889,6 @@ retrouve en rouvrant le fichier.</p>
 """
 
 GLOSSAIRE_HTML = """
-<style>
-  body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; }
-  h1 { color: #1F3A6B; border-bottom: 2px solid #1F3A6B; padding-bottom: 4px; }
-  dt { font-weight: bold; color: #1F3A6B; margin-top: 12px; font-size: 12pt; }
-  dd { margin-left: 16px; margin-bottom: 6px; color: #222; }
-  code { background: #F5F5F0; padding: 1px 5px; border-radius: 3px;
-         font-family: 'Consolas', monospace; }
-</style>
 
 <h1>📚 Glossaire</h1>
 
@@ -1056,18 +1077,21 @@ class NoticeView(QWidget):
         # Notice
         notice = TexteALire()
         notice.setOpenExternalLinks(True)
-        notice.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
+        notice.setStyleSheet(
+            f"QTextBrowser {{ background:{T['carte']}; padding:14px }}")
         # Le dossier des données varie selon le type d'installation : on affiche
         # le vrai chemin plutôt qu'une explication vague, pour que l'utilisateur
         # sache exactement quoi copier lors d'une sauvegarde manuelle.
-        notice.setHtml(NOTICE_HTML.replace("DOSSIER_DONNEES", _data_dir()))
+        notice.setHtml(style_notice()
+                       + NOTICE_HTML.replace("DOSSIER_DONNEES", _data_dir()))
         sub_tabs.addTab(notice, "📖 Notice d'utilisation")
 
         # Glossaire
         gloss = TexteALire()
         gloss.setOpenExternalLinks(True)
-        gloss.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:14px }")
-        gloss.setHtml(GLOSSAIRE_HTML)
+        gloss.setStyleSheet(
+            f"QTextBrowser {{ background:{T['carte']}; padding:14px }}")
+        gloss.setHtml(style_glossaire() + GLOSSAIRE_HTML)
         sub_tabs.addTab(gloss, "📚 Glossaire")
 
         v.addWidget(sub_tabs)

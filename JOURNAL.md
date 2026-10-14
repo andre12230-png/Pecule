@@ -22,6 +22,23 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (7) — Mode sombre, étape 2 : la Notice et le Glossaire
+
+**Fait.** La feuille de style de la Notice et du Glossaire n'est plus
+écrite en dur dans leur texte : `style_notice()` et `style_glossaire()`
+la construisent à partir du thème au moment de l'affichage (texte,
+titres, encadrés « astuce » et « attention », tableaux, touches et code).
+Le texte de la Notice ne change pas. Tests : la Notice rejoint la liste
+des écrans sans couleur en dur ; son texte se lit sur chacun de ses fonds
+dans les deux thèmes ; Notice et Glossaire construits en sombre. 756
+tests sur 756. Début de la Notice, Glossaire, un tableau et les deux
+sortes d'encadrés regardés en image, en sombre et en clair.
+**Pourquoi.** Suite du mode sombre promis pour le 01/11/2026.
+**Reste.** « Votre avis » et « Mise à jour ». À la relecture : en
+sombre, l'encadré « astuce » se détache moins de la page qu'en clair
+(Qt ne dessine pas le trait de gauche, seul le fond le distingue) ; les
+pastilles foncées des catégories.
+
 ## 2026-10-14 (6) — Mode sombre, étape 2 : les assistants
 
 **Fait.** Les cinq assistants d'`assistants.py` (harmoniser les

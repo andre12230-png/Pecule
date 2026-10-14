@@ -38,6 +38,8 @@ ECRANS_CONVERTIS = [
     "dialogs.py",
     # Quatrième lot : les assistants (doublons, harmonisation, prévisionnel).
     "assistants.py",
+    # Cinquième lot : la Notice et le Glossaire.
+    "views/notice.py",
 ]
 
 HEXA = re.compile(r"(?<![&\w])#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])")
@@ -194,3 +196,27 @@ def test_week_ends_du_calendrier_lisibles(qapp, nom):
                 assert contraste(couleur.name(), palette["saisie"]) >= 4.5
     finally:
         theme.choisir_theme("clair")
+
+
+@pytest.mark.parametrize("palette", [CLAIR, SOMBRE], ids=["clair", "sombre"])
+def test_texte_de_la_notice_lisible_sur_ses_fonds(palette):
+    """Le corps de la Notice s'écrit sur la carte, dans les encadrés
+    « astuce » (jaune) et « attention » (rouge), dans l'en-tête des tableaux
+    et sur le fond des touches et du code."""
+    p = palette
+    for fond in ("carte", "info_fond", "erreur_fond", "entete_haut",
+                 "ligne_paire"):
+        assert contraste(p["texte_libelle"], p[fond]) >= 4.5, fond
+    assert contraste(p["bleu_nuit"], p["carte"]) >= 4.5
+
+
+def test_notice_en_sombre(qapp, sombre):
+    from comptesbudget.ui.views import notice
+    for style in (notice.style_notice(), notice.style_glossaire()):
+        assert SOMBRE["texte_libelle"] in style.upper()
+        assert SOMBRE["bleu_nuit"] in style.upper()
+        assert CLAIR["bleu_nuit"] not in style.upper()
+    vue = notice.NoticeView()
+    from PySide6.QtWidgets import QTextBrowser
+    for texte in vue.findChildren(QTextBrowser):
+        assert SOMBRE["carte"] in texte.styleSheet().upper()
