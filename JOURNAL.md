@@ -36,7 +36,11 @@ gardés) :
 - A06 : une année sur deux chiffres recevait toujours « 2000 + » (05/09/99 →
   2099). Même convention que le QIF désormais : 00 à 69 → 2000 et plus, 70 à
   99 → 1900 et plus ; un test garde l'accord des deux.
-Numéro 1.41.17. 801 tests sur 801, ruff propre.
+Numéro 1.41.17. 801 tests sur 801, ruff propre. Installée chez l'auteur :
+contrôle passé, correction prouvée dans l'exe, base identique (SHA-256), titre
+« v1.41.17 » lu depuis le dossier d'usage ; réserve Pecule.exe.avant-1.41.17
+(et avant-1.41.16, à la Corbeille si l'auteur le veut). La réserve
+avant-1.41.15 à la Corbeille, avec son accord.
 **Pourquoi.** Audit du 14/10/2026, deuxième lot choisi par l'auteur.
 **Reste.** Lots 3 (calculs : A04, A05) et 4 (affichage : A09, A10).
 
