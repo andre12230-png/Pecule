@@ -159,6 +159,35 @@ def depense_nette_par_categorie(txs: list[dict]) -> dict[str, float]:
     return {c: round(-v, 2) for c, v in net.items() if v < -0.005}
 
 
+def nets_par_categorie(txs: list[dict]) -> dict[str, float]:
+    """Le total de chaque catégorie sur les opérations données, signé
+    (« Transaction exclue » mise à part)."""
+    net: dict[str, float] = {}
+    for t in txs:
+        c = t.get("categorie") or "Non classé"
+        if c == "Transaction exclue":
+            continue
+        net[c] = net.get(c, 0.0) + (t.get("montant") or 0.0)
+    return {c: round(v, 2) for c, v in net.items()}
+
+
+def revenus_et_depenses_nets(txs: list[dict]) -> tuple[float, float]:
+    """(revenus, dépenses) au sens du Bilan, du rapport et des graphiques :
+    chaque catégorie fait son total sur les opérations données ; négatif,
+    c'est une dépense nette (achats moins remboursements, comme le Budget) ;
+    positif, un revenu net. Les dépenses sont rendues en négatif.
+
+    Un remboursement classé dans la catégorie de l'achat comptait comme un
+    revenu : salaire 1 000 €, achat 200 €, remboursement 100 € donnaient
+    81,8 % d'épargne au lieu de 90 % (audit du 14/10/2026, A04). Des apports
+    plus forts que les dépenses de leur catégorie restent, pour l'excédent,
+    des revenus : la somme des deux est toujours le mouvement total."""
+    nets = nets_par_categorie(txs).values()
+    revenus = round(sum(v for v in nets if v > 0), 2)
+    depenses = round(sum(v for v in nets if v < 0), 2)
+    return revenus, depenses
+
+
 def plus_grosses_depenses(txs: list[dict], limite: int = 8) -> list[dict]:
     """Les plus grosses dépenses des opérations données, un libellé par ligne.
 

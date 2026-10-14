@@ -960,7 +960,11 @@ SYNC_VERSION = 3
 # 1.41.17 : Audit, lot 2 : reimporter un releve dont une ligne est
 #           archivee ne bloque plus tout le releve ; une annee sur deux
 #           chiffres suit la convention du QIF (99 = 1999, 26 = 2026).
-APP_VERSION = "1.41.17"
+# 1.41.18 : Audit, lot 3 : le Bilan, ses graphiques et le rapport
+#           comptent revenus et depenses nets, remboursements deduits
+#           comme dans le Budget ; l'alerte de decouvert compte ce qui
+#           doit encore passer aujourd'hui.
+APP_VERSION = "1.41.18"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

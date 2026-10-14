@@ -345,7 +345,10 @@ Le bandeau d'alerte du Bilan suit la même règle.</p>
 dans la catégorie de l'achat : un achat de 60 € remboursé 30 € compte pour
 30 € dans le budget. Un mois où la catégorie a plus reçu que dépensé compte
 pour 0, jamais moins. Le rapport mensuel et le bandeau « Budget dépassé »
-suivent la même règle. Attention : un <b>virement</b> reçu d'un autre de vos
+suivent la même règle, comme le Bilan pour son taux d'épargne, ses graphiques
+et ses listes : un remboursement n'y est pas un revenu. Si une catégorie a
+reçu plus qu'elle n'a dépensé sur la période, l'excédent y compte comme un
+revenu. Attention : un <b>virement</b> reçu d'un autre de vos
 comptes n'est pas un remboursement — classez-le en
 <code>Virements internes</code>, sinon il effacerait les dépenses de la
 catégorie.</p>
@@ -1072,7 +1075,8 @@ rapprochée avec le relevé.</dd>
 <dt>Taux d'épargne</dt>
 <dd>Part des revenus non dépensée : <code>(revenus − dépenses) / revenus ×
 100</code>, sans la catégorie <code>Épargne</code> — l'argent mis de côté
-n'est pas une dépense. Indicateur de santé financière sur la période.</dd>
+n'est pas une dépense. Revenus et dépenses y sont nets : un remboursement se
+déduit des dépenses de sa catégorie. Indicateur de santé financière sur la période.</dd>
 
 <dt>Virements internes</dt>
 <dd>Catégorie des virements entre vos propres comptes (du compte courant vers

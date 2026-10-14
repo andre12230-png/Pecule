@@ -15,7 +15,7 @@ from ..destinations import avec_extension, destination_refusee
 from ..theme import CLAIR
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
-    plus_grosses_depenses,
+    plus_grosses_depenses, revenus_et_depenses_nets,
 )
 from ..database import Database
 from .widgets import PeriodBar
@@ -38,8 +38,9 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     analyse = [t for t in act if t.get("categorie") != "Épargne"]
     mis_de_cote = sum(t["montant"] for t in act
                       if t.get("categorie") == "Épargne")
-    revenus = sum(t["montant"] for t in analyse if t["montant"] > 0)
-    depenses = sum(t["montant"] for t in analyse if t["montant"] < 0)
+    # Revenus et dépenses NETS, comme le Budget et le Bilan : un
+    # remboursement se déduit de sa catégorie (audit du 14/10/2026, A04).
+    revenus, depenses = revenus_et_depenses_nets(analyse)
     net = revenus + depenses + mis_de_cote     # tout ce qui a bougé
     taux = ((revenus + depenses) / revenus * 100) if revenus > 0 else 0.0
 
@@ -65,12 +66,8 @@ def build_monthly_report_html(db: "Database", month: str) -> str:
     budgets = db.list_budgets()
     # Budgets : achats moins remboursements, comme l'onglet Budget.
     spent_budget = depense_nette_par_categorie(act)
-    # Dépenses par catégorie : les achats du mois, hors épargne.
-    spent: dict[str, float] = {}
-    for t in analyse:
-        if t["montant"] < 0:
-            c = t.get("categorie", "Non classé")
-            spent[c] = spent.get(c, 0) + abs(t["montant"])
+    # Dépenses par catégorie : nettes des remboursements, hors épargne (A04).
+    spent = depense_nette_par_categorie(analyse)
     total_dep = sum(spent.values()) or 1.0
 
     def euro(v):  # € insécable pour QTextDocument

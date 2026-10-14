@@ -24,6 +24,8 @@ from ...utils import (
     depense_nette_par_categorie, est_paiement_carte,
     fmt_euro, fmt_euro_signe, fmt_date_fr, in_period, period_label,
     plus_grosses_depenses, regle_debit_differe,
+    nets_par_categorie,
+    revenus_et_depenses_nets,
 )
 from ...csv_import import TYPE_CARTE, encours_carte_annonce
 from ...database import Database
@@ -851,7 +853,11 @@ class BilanView(QWidget):
         l'arrivée des revenus."""
         today = date.today()
         fin = today + timedelta(days=jours)
-        lignes, _ = self._lignes_a_venir(txs, today + timedelta(days=1), fin)
+        # Depuis AUJOURD'HUI : une échéance due ce jour, ou une opération du
+        # jour pas encore passée en banque, échappait sinon au calcul (audit du
+        # 14/10/2026, A05). Ce qui est déjà pointé à ce jour est dans le solde
+        # et n'est pas recompté (voir _operations_a_venir).
+        lignes, _ = self._lignes_a_venir(txs, today, fin)
 
         solde = solde_compte
         bascule = None
@@ -1589,8 +1595,11 @@ class BilanView(QWidget):
         # d'André après l'audit du 23/09/2026). La tuile « Mouvement », qui
         # dit ce qui a bougé sur le compte, garde tout.
         analyse = [t for t in active if t.get("categorie") != "Épargne"]
-        rev_a = sum(t["montant"] for t in analyse if t["montant"] > 0)
-        dep_a = sum(t["montant"] for t in analyse if t["montant"] < 0)
+        # Revenus et dépenses NETS, comme le Budget : un remboursement se
+        # déduit des dépenses de sa catégorie au lieu de compter comme un
+        # revenu (audit du 14/10/2026, A04). La tuile « Mouvement » garde
+        # les entrées et sorties brutes, celles du relevé.
+        rev_a, dep_a = revenus_et_depenses_nets(analyse)
         tx_epargne = ((rev_a + dep_a) / rev_a * 100) if rev_a > 0 else 0
         solde_p_periode = sum(t["montant"] for t in active if t.get("pointee"))
 
@@ -1692,12 +1701,8 @@ class BilanView(QWidget):
         self._refresh_courbe_solde(txs_prevus, all_active, solde_compte)
 
         # ── Camembert dépenses ────────────────────────────────────────
-        by_cat: dict[str, float] = {}
-        for t in analyse:
-            if t["montant"] >= 0:
-                continue
-            c = t.get("categorie", "Non classé")
-            by_cat[c] = by_cat.get(c, 0) + abs(t["montant"])
+        # Dépenses nettes de chaque catégorie, remboursements déduits (A04).
+        by_cat = depense_nette_par_categorie(analyse)
 
         self.pie_chart.removeAllSeries()
         series = QPieSeries()
@@ -1733,12 +1738,10 @@ class BilanView(QWidget):
         self.list_dep.set_items(dep_items)
 
         # ── Liste : sources de revenus ────────────────────────────────
-        by_rev: dict[str, float] = {}
-        for t in analyse:
-            if t["montant"] <= 0:
-                continue
-            c = t.get("categorie", "Non classé")
-            by_rev[c] = by_rev.get(c, 0) + t["montant"]
+        # Les catégories dont le total est positif : un remboursement n'est
+        # plus une « source de revenus » (A04).
+        by_rev = {c: v for c, v in nets_par_categorie(analyse).items()
+                  if v > 0.005}
         rev_items = [(c, amt, couleur_categorie(c))
                      for c, amt in sorted(by_rev.items(), key=lambda x: x[1], reverse=True)[:8]]
         self.list_rev.set_items(rev_items)
@@ -1909,16 +1912,17 @@ class BilanView(QWidget):
             return
         active = actives
 
-        rev_by_month = {m: 0.0 for m in months}
-        dep_by_month = {m: 0.0 for m in months}
+        # Mois par mois, la même règle que le taux d'épargne : revenus et
+        # dépenses nets de chaque catégorie (audit du 14/10/2026, A04).
+        par_mois: dict[str, list[dict]] = {m: [] for m in months}
         for t in active:
             m = self._eff_date(t)[:7]
-            if m not in rev_by_month:
-                continue
-            if t["montant"] >= 0:
-                rev_by_month[m] += t["montant"]
-            else:
-                dep_by_month[m] += abs(t["montant"])
+            if m in par_mois:
+                par_mois[m].append(t)
+        rev_by_month, dep_by_month = {}, {}
+        for m, ops in par_mois.items():
+            rev, dep = revenus_et_depenses_nets(ops)
+            rev_by_month[m], dep_by_month[m] = rev, abs(dep)
 
         self.bar_chart.removeAllSeries()
         # Supprime les anciens axes

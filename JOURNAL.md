@@ -22,6 +22,30 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (13) — Audit, lot 3 : les calculs (v1.41.18)
+
+**Fait.** Deux constats de l'audit (10), vérifiés sur le code et reproduits
+par des tests qui échouaient (`tests/test_audit_lot3_calculs.py`, 9 cas,
+gardés ; les trois tests d'écran échouent bien sur l'ancien Bilan) :
+- A04 : le Budget déduisait un remboursement de la catégorie de l'achat, le
+  Bilan et le rapport le comptaient comme un revenu (exemple inventé :
+  81,8 % d'épargne affichés au lieu de 90 %). Règle unique désormais
+  (`utils.revenus_et_depenses_nets`) : sur la période, chaque catégorie fait
+  son total ; négatif, dépense nette ; positif, revenu net. Le mouvement total
+  ne change jamais, et des apports plus forts que les dépenses de leur
+  catégorie restent des revenus pour l'excédent. Appliquée au taux d'épargne,
+  au camembert, aux listes « Dépenses par catégorie » et « Sources de
+  revenus », au graphique des douze mois et au rapport mensuel. La tuile
+  « Mouvement » garde les entrées et sorties brutes du relevé.
+- A05 : l'alerte de découvert partait de demain ; une échéance due ce jour ou
+  une opération du jour pas encore passée en banque y échappait. Elle part
+  d'aujourd'hui ; ce qui est déjà pointé à ce jour n'est pas recompté.
+Notice et Glossaire complétés. Effet mesuré, en lecture seule, sur les
+données de l'auteur : un seul mois change, de quelques points.
+Numéro 1.41.18. 810 tests sur 810, ruff propre.
+**Pourquoi.** Audit du 14/10/2026, troisième lot choisi par l'auteur.
+**Reste.** Lot 4 (affichage : A09 axes du Bilan, A10 texte de recherche coupé).
+
 ## 2026-10-14 (12) — Audit, lot 2 : les imports (v1.41.17)
 
 **Fait.** Deux constats de l'audit (10), vérifiés sur le code et reproduits
