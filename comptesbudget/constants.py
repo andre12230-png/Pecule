@@ -964,7 +964,10 @@ SYNC_VERSION = 3
 #           comptent revenus et depenses nets, remboursements deduits
 #           comme dans le Budget ; l'alerte de decouvert compte ce qui
 #           doit encore passer aujourd'hui.
-APP_VERSION = "1.41.18"
+# 1.41.19 : Audit, lot 4 : le texte d'exemple de la recherche des
+#           Operations tient dans son champ, le detail passe dans une
+#           infobulle.
+APP_VERSION = "1.41.19"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

@@ -22,6 +22,32 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (14) — Audit, lot 4 : l'affichage (v1.41.19) ; audit terminé
+
+**Fait.**
+- A10 : le texte d'exemple de la recherche (onglet Opérations) mesurait
+  275 px avec la vraie police pour un champ de 260 : il était coupé. Il
+  devient « Libellé, montant (45,30), date… » (189 px), et le détail, avec
+  le renvoi à « Rechercher » (Ctrl+F), passe dans une infobulle. Tests écrits
+  d'abord (`tests/test_audit_lot4_affichage.py`) ; comme les tests tournent
+  sans les polices de Windows, ils bornent le nombre de caractères, la
+  largeur en pixels ayant été mesurée et regardée à part.
+- A09 (axes du Bilan superposés après plusieurs changements de période) :
+  **non reproduit dans l'appli réelle, donc pas de correction.** Reproduit
+  d'abord avec un script qui fait tourner Qt par à-coups (processEvents),
+  comme l'audit : axes ET listes du bas superposés. Mais avec la vraie
+  boucle d'événements de Qt (app.exec), celle de l'appli, le Bilan reste
+  propre après 5 changements espacés de 300 ms, et après 13 changements
+  espacés de 60 ms (animations en cours). Les éléments remplacés ne sont
+  détruits que par la boucle d'événements : un script qui ne la fait pas
+  tourner les garde à l'écran. À revoir seulement si l'auteur ou un
+  utilisateur le voit dans l'appli.
+Numéro 1.41.19. 812 tests sur 812, ruff propre.
+**Pourquoi.** Dernier lot de l'audit du 14/10/2026.
+**Reste.** Audit terminé : les dix constats sont traités (neuf corrigés, A09
+non reproduit), ainsi que R01 et R02 ; R03 (README à 1.41.2) se règle à la
+sortie du 01/11/2026.
+
 ## 2026-10-14 (13) — Audit, lot 3 : les calculs (v1.41.18)
 
 **Fait.** Deux constats de l'audit (10), vérifiés sur le code et reproduits

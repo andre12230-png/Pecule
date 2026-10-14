@@ -72,7 +72,15 @@ class OperationsView(QWidget):
         toolbar.addWidget(self.btn_export)
 
         self.search = QLineEdit()
-        self.search.setPlaceholderText("Libellé, montant (45,30), date (12/05/2026)…")
+        # Texte court, qui tient dans le champ ; le détail est dans
+        # l'infobulle. L'ancien (« … date (12/05/2026)… ») était coupé à
+        # 1280 px de large (audit du 14/10/2026, A10).
+        self.search.setPlaceholderText("Libellé, montant (45,30), date…")
+        self.search.setToolTip(
+            "Cherche dans le libellé, le montant (45,30) ou la date "
+            "(12/05/2026) des opérations affichées.\n"
+            "Pour tout l'historique : Rechercher, dans le menu de gauche "
+            "(Ctrl+F).")
         # Largeur constante : dans la disposition en flux, les éléments
         # gardent leur taille souhaitée, il faut donc la fixer ici (sinon le
         # champ se réduit et il ne reste que « Li… »).
