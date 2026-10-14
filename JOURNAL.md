@@ -42,7 +42,11 @@ La date la plus récente est en haut.
   détruits que par la boucle d'événements : un script qui ne la fait pas
   tourner les garde à l'écran. À revoir seulement si l'auteur ou un
   utilisateur le voit dans l'appli.
-Numéro 1.41.19. 812 tests sur 812, ruff propre.
+Numéro 1.41.19. 812 tests sur 812, ruff propre. Installée chez l'auteur :
+contrôle passé, correction prouvée dans l'exe, base identique (SHA-256),
+titre « v1.41.19 » lu depuis le dossier d'usage ; réserve
+Pecule.exe.avant-1.41.19 (et avant-1.41.18, à la Corbeille si l'auteur le
+veut). La réserve avant-1.41.17 à la Corbeille, avec son accord.
 **Pourquoi.** Dernier lot de l'audit du 14/10/2026.
 **Reste.** Audit terminé : les dix constats sont traités (neuf corrigés, A09
 non reproduit), ainsi que R01 et R02 ; R03 (README à 1.41.2) se règle à la
