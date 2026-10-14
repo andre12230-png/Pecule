@@ -22,6 +22,24 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (9) — Mode sombre, relecture et version 1.41.15
+
+**Fait.** Les deux points de la relecture. Pastilles des catégories : en
+sombre, quatre passaient sous 3 pour 1 sur le fond des tableaux
+(« Impôts et taxes » 1,2, « Banque et assurances » 1,4, « Logement -
+maison » 1,9, « Loisirs » 2,9) ; `couleur_categorie()` les éclaircit en
+gardant leur teinte, jusqu'à 3 pour 1, pour les écrans seulement (le
+rapport mensuel garde `cat_color()`). Encadrés de la Notice : Qt ne
+dessinait pas leur trait de gauche ; ils deviennent des tableaux d'une
+case avec un vrai cadre, dans les deux thèmes. Tests écrits d'abord.
+Notice mise à jour : elle disait « Pécule s'affiche toujours en clair »,
+elle explique désormais Paramètres › Apparence. Numéro monté à 1.41.15
+pour l'installer chez l'auteur et juger le mode sombre sur ses données.
+766 tests sur 766.
+**Pourquoi.** Mode sombre promis pour la sortie du 01/11/2026 ; l'auteur
+veut l'essayer avant.
+**Reste.** Son avis sur le mode sombre, à l'usage.
+
 ## 2026-10-14 (8) — Mode sombre, fin de l'étape 2 : Votre avis, Mise à jour, rapport mensuel
 
 **Fait.** « Votre avis » et « Mise à jour » prennent leurs couleurs dans

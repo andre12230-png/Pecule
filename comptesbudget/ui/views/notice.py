@@ -210,10 +210,11 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
   </li>
 </ol>
 
-<p><b>Pécule s'affiche toujours en clair</b>, même si Windows est réglé en mode sombre :
-c'est voulu, et il n'y a pas de réglage à chercher. Sur les versions antérieures à
-celle-ci, un poste en mode sombre rendait certains textes blancs sur fond clair, donc
-illisibles — notamment la fenêtre d'accueil ci-dessus.</p>
+<p><b>Clair ou sombre ?</b> Pécule s'affiche en clair par défaut, que Windows
+soit réglé en mode clair ou sombre. Pour l'afficher en sombre : <code>⚙️ Paramètres</code>,
+partie « Apparence », choisissez <b>Sombre</b> puis <b>Enregistrer</b>. Le changement
+s'applique au <b>prochain démarrage</b> de Pécule, pour tous vos comptes. Le rapport
+mensuel, lui, reste toujours clair, comme le papier où il s'imprime.</p>
 
 <h2>2. Plusieurs comptes</h2>
 <p>Pécule peut suivre <b>plusieurs comptes bancaires</b> : un compte courant et
@@ -754,7 +755,7 @@ choisit au début de la rangée d'onglets, dès qu'il y a deux comptes.</p>
   <tr><td>📂 Reprendre un fichier</td><td>Copie ici le <code>comptes.db</code> d'une ancienne installation (§&nbsp;9). N'apparaît que tant que cette installation est vide</td></tr>
   <tr><td>🧠 Règles auto</td><td>Les règles qui classent toutes seules les opérations importées, d'après leur libellé</td></tr>
   <tr><td>🏦 Mes comptes</td><td>Ajouter, renommer, supprimer un compte bancaire, et <b>ranger la liste</b> — le compte du haut est celui qui s'ouvre au lancement</td></tr>
-  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b>. Dans la partie « Avancé » : <b>Exporter vers une autre installation</b> et <b>Fusionner un export</b>, pour transférer ou fusionner deux installations</td></tr>
+  <tr><td>⚙️ Paramètres</td><td>Solde de départ et date initiale <b>du compte affiché</b> ; apparence claire ou sombre, pour tous les comptes. Dans la partie « Avancé » : <b>Exporter vers une autre installation</b> et <b>Fusionner un export</b>, pour transférer ou fusionner deux installations</td></tr>
   <tr><td>📖 Notice</td><td>Ce mode d'emploi et le glossaire</td></tr>
   <tr><td>💬 Votre avis</td><td>Signaler un problème ou proposer une idée : ouvre un court questionnaire dans votre navigateur. Pécule, lui, n'envoie rien</td></tr>
   <tr><td>🔄 Mise à jour</td><td>Affiche votre version et ouvre, dans votre navigateur, la page de la dernière version ou son installeur (§&nbsp;9). Pécule ne se connecte à rien : c'est vous qui comparez les numéros</td></tr>

@@ -949,7 +949,11 @@ SYNC_VERSION = 3
 # 1.41.13 : Une phrase par onglet, au survol : ce que chacun contient.
 # 1.41.14 : Une categorie tapee garde ses majuscules et minuscules : taper
 #           << Alimentation >> ne redonne plus << ALIMENTATION >> deja connue.
-APP_VERSION = "1.41.14"
+# 1.41.15 : Mode sombre : Parametres > Apparence, Clair ou Sombre, au
+#           prochain demarrage. Tous les ecrans suivent le theme ; le
+#           rapport mensuel reste clair. Week-ends du calendrier lisibles,
+#           encadres de la Notice cadres.
+APP_VERSION = "1.41.15"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
