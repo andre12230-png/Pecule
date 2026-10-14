@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...accords import accorde, nombre, pluriel
+from ...theme import T
 from ...utils import (
     deaccent, fmt_euro_signe,
 )
@@ -43,7 +44,7 @@ class SubcategoriesView(QWidget):
         )
         help_lbl.setWordWrap(True)
         help_lbl.setStyleSheet(
-            "background:#FFFBE6; border:1px solid #E8D77B; "
+            f"background:{T['info_fond']}; border:1px solid {T['info_cadre']}; "
             "border-radius:4px; padding:6px 8px;"
         )
         v.addWidget(help_lbl)
@@ -129,7 +130,7 @@ class SubcategoriesView(QWidget):
         # Sous le tableau, seulement le compte : une information, pas une action.
         bas = QHBoxLayout()
         self.lbl_count = QLabel("")
-        self.lbl_count.setStyleSheet("color:#666")
+        self.lbl_count.setStyleSheet(f"color:{T['texte_discret']}")
         bas.addWidget(self.lbl_count)
         bas.addStretch()
         v.addLayout(bas)
@@ -204,7 +205,7 @@ class SubcategoriesView(QWidget):
 
             it_t = QStandardItem(fmt_euro_signe(total))
             it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            it_t.setForeground(QBrush(QColor("#BC3729" if total < 0 else "#18733A")))
+            it_t.setForeground(QBrush(QColor(T["debit"] if total < 0 else T["credit"])))
             it_t.setData(total, Qt.UserRole + 1)
 
             self.model.appendRow([it_sub, it_cat, it_n, it_t])

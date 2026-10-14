@@ -10,6 +10,7 @@ from PySide6.QtGui import (
 from PySide6.QtWidgets import QHeaderView, QLabel
 
 from ..constants import type_affiche
+from ..theme import T
 from ..utils import (
     cat_color, deaccent, fmt_euro, fmt_date_fr, numero_cheque,
 )
@@ -108,7 +109,7 @@ class EtatVide(QObject):
         self.etiquette.setAlignment(Qt.AlignCenter)
         self.etiquette.setWordWrap(True)
         self.etiquette.setStyleSheet(
-            "color:#666666; background:transparent; font-size:10pt")
+            f"color:{T['texte_discret']}; background:transparent; font-size:10pt")
         # Les clics passent au tableau en dessous.
         self.etiquette.setAttribute(Qt.WA_TransparentForMouseEvents)
         vue.viewport().installEventFilter(self)
@@ -257,36 +258,36 @@ class TxTableModel(QStandardItemModel):
             it.setData(tx["id"], Qt.UserRole)
             it.setData(tri, SORT_ROLE)
             if pointee:
-                # Gris foncé (#5A5A5A, contraste 7:1) et non gris pâle : une
+                # Gris foncé (texte_grise, 7 pour 1 en clair) et non gris pâle : une
                 # opération pointée doit se distinguer des autres sans
                 # devenir pénible à lire — et sur une base tenue à jour,
                 # elles sont l'immense majorité des lignes.
-                it.setForeground(QBrush(QColor("#5A5A5A")))
+                it.setForeground(QBrush(QColor(T["texte_grise"])))
 
         # Couleur P
         if pointee:
-            items[0].setForeground(QBrush(QColor("#18733A")))
-            items[0].setBackground(QBrush(QColor("#D6F0DC")))
+            items[0].setForeground(QBrush(QColor(T["credit"])))
+            items[0].setBackground(QBrush(QColor(T["pointe_fond"])))
         elif prevue:
-            items[0].setForeground(QBrush(QColor("#7E5109")))
+            items[0].setForeground(QBrush(QColor(T["avertissement"])))
             items[0].setToolTip(
                 "Échéance prévue : pas encore passée en banque.\n"
                 "Elle sera complétée automatiquement à l'import du relevé.\n\n"
                 + AIDE_POINTAGE)
         else:
-            items[0].setForeground(QBrush(QColor("#666666")))
+            items[0].setForeground(QBrush(QColor(T["texte_discret"])))
         if not prevue:
             items[0].setToolTip(AIDE_POINTAGE)
         items[0].setTextAlignment(Qt.AlignCenter)
 
         # Date valeur en orange si différée (débit différé)
         if is_deferred:
-            items[2].setForeground(QBrush(QColor("#7E5109")))
+            items[2].setForeground(QBrush(QColor(T["avertissement"])))
             items[2].setToolTip("Débit différé : la banque débitera à cette date")
         else:
             # Même remarque : #999 sur blanc rendait la date de valeur
             # presque illisible, alors qu'elle sert au rapprochement.
-            items[2].setForeground(QBrush(QColor("#5A5A5A")))
+            items[2].setForeground(QBrush(QColor(T["texte_grise"])))
 
         # Numéro de chèque en bulle d'aide : la colonne Type est étroite et
         # peut couper un long numéro.
@@ -301,7 +302,7 @@ class TxTableModel(QStandardItemModel):
         # Alignement des montants à droite
         items[7].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         items[8].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        items[7].setForeground(QBrush(QColor("#BC3729")))
-        items[8].setForeground(QBrush(QColor("#18733A")))
+        items[7].setForeground(QBrush(QColor(T["debit"])))
+        items[8].setForeground(QBrush(QColor(T["credit"])))
 
         self.appendRow(items)

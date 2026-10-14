@@ -113,8 +113,10 @@ def test_tout_texte_colore_est_lisible():
 
 
 def test_les_exceptions_sont_utilisees():
-    """Une exception qui ne sert plus sort de la liste."""
-    tout = "".join(t for f in UI.rglob("*.py") for _l, t in _textes_du_code(f)).upper()
+    """Une exception qui ne sert plus sort de la liste. Depuis le mode
+    sombre (14/10/2026), les couleurs vivent aussi dans theme.py."""
+    fichiers = list(UI.rglob("*.py")) + [UI.parent / "theme.py"]
+    tout = "".join(t for f in fichiers for _l, t in _textes_du_code(f)).upper()
     for c in EXCEPTIONS:
         assert c in tout, f"{c} n'est plus employée : la retirer des exceptions"
 

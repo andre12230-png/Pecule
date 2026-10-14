@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...accords import accorde, pluriel
+from ...theme import T
 from ...utils import (
     fmt_date_fr, fmt_euro,
 )
@@ -102,9 +103,9 @@ class RulesView(QWidget):
             sens = r.get("sens") or ""
             it_sens = QStandardItem(self.SENS_LBL.get(sens, "Les deux"))
             if sens == "debit":
-                it_sens.setForeground(QBrush(QColor("#BC3729")))
+                it_sens.setForeground(QBrush(QColor(T["debit"])))
             elif sens == "credit":
-                it_sens.setForeground(QBrush(QColor("#18733A")))
+                it_sens.setForeground(QBrush(QColor(T["credit"])))
             items = [
                 QStandardItem(r["pattern"]),
                 QStandardItem(fmt_euro(r["amount"]) if r["amount"] is not None else "—"),

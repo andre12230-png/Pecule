@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QProgressBar, QInputDialog,
 )
 
+from ...theme import T
 from ...utils import (
     deaccent, depense_nette_par_categorie, fmt_euro, fmt_euro_signe, in_period,
 )
@@ -36,7 +37,7 @@ class BudgetView(QWidget):
             "Les dépenses sont comptées à leur date d'achat : un achat par carte reste dans le mois "
             "où vous l'avez fait, même si la banque le débite le mois suivant."
         )
-        info.setWordWrap(True); info.setStyleSheet("color:#555; padding:6px")
+        info.setWordWrap(True); info.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px")
         v.addWidget(info)
 
         # Bouton au-dessus du tableau, comme dans les autres onglets
@@ -165,9 +166,9 @@ class BudgetView(QWidget):
             it_reste.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             if budget:
                 if reste < 0:
-                    it_reste.setForeground(QBrush(QColor("#BC3729")))
+                    it_reste.setForeground(QBrush(QColor(T["debit"])))
                 else:
-                    it_reste.setForeground(QBrush(QColor("#18733A")))
+                    it_reste.setForeground(QBrush(QColor(T["credit"])))
 
             self.model.appendRow([it_cat, it_bud, it_dep, it_prog, it_reste])
 
@@ -177,12 +178,16 @@ class BudgetView(QWidget):
             bar.setValue(min(int(ratio), 100) if budget > 0 else 0)
             # « 89 % » avec son espace (insécable), comme partout ailleurs.
             bar.setFormat(f"{ratio:.0f}\xa0%" if budget else "—")
-            color = "#27AE60" if ratio < 80 else ("#E67E22" if ratio < 100 else "#BC3729")
+            color = (T["budget_ok"] if ratio < 80 else
+                     (T["budget_proche"] if ratio < 100 else T["budget_depasse"]))
             # Budget dépassé : la barre est pleine et rouge, le chiffre s'y
-            # écrit en blanc (5,44 pour 1 ; en noir, 3,86 seulement).
-            encre = "#FFFFFF" if ratio >= 100 and budget else "#000000"
+            # écrit en blanc en clair (5,44 pour 1 ; en noir, 3,86
+            # seulement). En sombre, des barres plus foncées portent un
+            # chiffre clair (voir theme.py).
+            encre = (T["budget_encre_depasse"] if ratio >= 100 and budget
+                     else T["budget_encre"])
             bar.setStyleSheet(f"""
-                QProgressBar {{ border:1px solid #A9A9A9; border-radius:3px; text-align:center; background:#F5F5F0; color:{encre}; }}
+                QProgressBar {{ border:1px solid {T["filet"]}; border-radius:3px; text-align:center; background:{T["budget_piste"]}; color:{encre}; }}
                 QProgressBar::chunk {{ background:{color}; }}
             """)
             self.table.setIndexWidget(self.model.index(i, 3), bar)

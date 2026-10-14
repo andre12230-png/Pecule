@@ -19,6 +19,7 @@ from ...constants import (
     FREQUENCIES, type_affiche,
 )
 from ...accords import accorde, pluriel
+from ...theme import T
 from ...utils import (
     carte_a_debit_differe, est_paiement_carte, fmt_euro, fmt_euro_signe,
     fmt_date_fr, period_label, regle_debit_differe,
@@ -130,7 +131,9 @@ class PrevisionnelView(QWidget):
             "récurrentes, ci-dessus.")
 
         self.summary = QLabel("")
-        self.summary.setStyleSheet("padding:6px; background:#FFFBE6; border:1px solid #E8D77B")
+        self.summary.setStyleSheet(
+            f"padding:6px; background:{T['info_fond']}; "
+            f"border:1px solid {T['info_cadre']}")
         blay.addWidget(self.summary)
 
         splitter.addWidget(bot)
@@ -157,7 +160,7 @@ class PrevisionnelView(QWidget):
                 QStandardItem("✔" if r["actif"] else ""),
             ]
             row[1].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[1].setForeground(QBrush(QColor("#BC3729" if r["montant"] < 0 else "#18733A")))
+            row[1].setForeground(QBrush(QColor(T["debit"] if r["montant"] < 0 else T["credit"])))
             row[6].setTextAlignment(Qt.AlignCenter)
             tris = [r["libelle"].lower(), r["montant"], r["categorie"].lower(),
                     (r["type"] or "").lower(), r["frequency"], r["start_date"],
@@ -197,7 +200,7 @@ class PrevisionnelView(QWidget):
                 cellule_categorie(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            row[2].setForeground(QBrush(QColor("#BC3729" if r["montant"] < 0 else "#18733A")))
+            row[2].setForeground(QBrush(QColor(T["debit"] if r["montant"] < 0 else T["credit"])))
             for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
                                      r["montant"], r["categorie"].lower()]):
                 it.setData(tri, SORT_ROLE)

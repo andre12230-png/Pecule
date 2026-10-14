@@ -21,10 +21,9 @@ from PySide6.QtWidgets import (
 )
 
 from ..accords import pluriel
+from ..theme import T
 from ..utils import fmt_date_fr, fmt_euro
 
-ROUGE = "#BC3729"
-VERT = "#18733A"
 
 # Titres courts : « Dernière opération pointée » coupait la colonne.
 COLONNES = ["Compte", "En banque", "Non pointé", "Solde comptable",
@@ -79,8 +78,9 @@ class RecapComptesDialog(QDialog):
             "Les virements entre vos comptes s'annulent dans le total quand "
             "ils sont saisis des deux côtés.")
         note.setWordWrap(True)
-        note.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
-                           "border:1px solid #E8D77B")
+        note.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px; "
+                           f"background:{T['info_fond']}; "
+                           f"border:1px solid {T['info_cadre']}")
         lay.addWidget(note)
         # L'espace en trop va en bas, pas entre le texte et le tableau.
         lay.addStretch(1)
@@ -131,7 +131,7 @@ class RecapComptesDialog(QDialog):
         ligne = len(comptes)
         gras = QFont()
         gras.setBold(True)
-        fond = QBrush(QColor("#ECE9D8"))
+        fond = QBrush(QColor(T["fond_page"]))
         cellules = [
             QTableWidgetItem("Total"),
             self._montant(round(total_banque, 2)),
@@ -173,7 +173,7 @@ class RecapComptesDialog(QDialog):
         cellule = QTableWidgetItem(fmt_euro(valeur))
         cellule.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         if colorer:
-            cellule.setForeground(QBrush(QColor(ROUGE if valeur < 0 else VERT)))
+            cellule.setForeground(QBrush(QColor(T["debit"] if valeur < 0 else T["credit"])))
         return cellule
 
     # ── Actions ──────────────────────────────────────────────────────

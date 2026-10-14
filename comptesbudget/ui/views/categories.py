@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from ...accords import pluriel
+from ...theme import T
 from ...utils import (
     carte_a_debit_differe, deaccent, fmt_euro, fmt_euro_signe, in_period,
     period_label,
@@ -129,7 +130,8 @@ class CategoriesView(QWidget):
         # sélecteur « Date », le Budget compte toujours à la date d'achat.
         self.info_date = QLabel("")
         self.info_date.setWordWrap(True)
-        self.info_date.setStyleSheet("color:#555; font-size:9pt; padding:4px 2px")
+        self.info_date.setStyleSheet(
+            f"color:{T['texte_secondaire']}; font-size:9pt; padding:4px 2px")
         v.addWidget(self.info_date)
 
     def _eff_date(self, t: dict) -> str:
@@ -182,7 +184,7 @@ class CategoriesView(QWidget):
             it_n = QStandardItem(str(n)); it_n.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             it_n.setData(n, SORT_ROLE)          # trier sur le nombre, pas « 10 » < « 9 »
             it_t = QStandardItem(fmt_euro_signe(tot)); it_t.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            it_t.setForeground(QBrush(QColor("#BC3729" if tot < 0 else "#18733A")))
+            it_t.setForeground(QBrush(QColor(T["debit"] if tot < 0 else T["credit"])))
             it_t.setData(tot, SORT_ROLE)
             self.cats_model.appendRow([it_c, it_n, it_t])
         self.cats_table.setSortingEnabled(True)

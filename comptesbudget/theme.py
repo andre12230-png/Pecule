@@ -83,6 +83,9 @@ CLAIR = {
     "budget_ok": "#27AE60",        # barre d'un budget sous 80 %
     "budget_proche": "#E67E22",    # barre d'un budget entre 80 et 100 %
     "budget_depasse": "#BC3729",   # barre d'un budget dépassé
+    "budget_piste": "#F5F5F0",     # fond d'une barre de budget
+    "budget_encre": "#000000",     # chiffre d'une barre de budget
+    "budget_encre_depasse": "#FFFFFF",  # chiffre d'une barre pleine et rouge
 }
 
 # ─────────────────────────── Thème sombre ──────────────────────────────────
@@ -140,9 +143,16 @@ SOMBRE = {
     "pointe_fond": "#1B3324",
     "barre_revenus": "#229954",
     "barre_depenses": "#F2806F",
-    "budget_ok": "#27AE60",
-    "budget_proche": "#E67E22",
-    "budget_depasse": "#F2806F",
+    # Barres du Budget : le chiffre clair s'écrit sur la barre ET sur sa
+    # piste. Des barres foncées (4,5 pour 1 sous le chiffre) sur une piste
+    # plus foncée encore, où elles se détachent (3 pour 1 ; la rouge,
+    # toujours pleine, n'a pas de piste visible).
+    "budget_ok": "#1C7642",
+    "budget_proche": "#A0560F",
+    "budget_depasse": "#A93226",
+    "budget_piste": "#1C1B18",
+    "budget_encre": "#EDEAE2",
+    "budget_encre_depasse": "#EDEAE2",
 }
 
 THEMES = {"clair": CLAIR, "sombre": SOMBRE}

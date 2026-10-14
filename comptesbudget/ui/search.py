@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..accords import accorde, pluriel
+from ..theme import T
 from ..utils import (
     deaccent, fmt_euro, fmt_date_fr,
 )
@@ -61,7 +62,7 @@ class GlobalSearchDialog(QDialog):
 
         foot = QHBoxLayout()
         self.lbl = QLabel("")
-        self.lbl.setStyleSheet("color:#666")
+        self.lbl.setStyleSheet(f"color:{T['texte_discret']}")
         foot.addWidget(self.lbl)
         foot.addStretch()
         b_close = QPushButton("Fermer")

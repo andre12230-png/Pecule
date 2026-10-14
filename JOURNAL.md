@@ -22,6 +22,26 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (3) — Mode sombre, étape 2 : le menu et les tableaux
+
+**Fait.** Le menu de gauche et tous les tableaux (Opérations, Budget,
+Catégories, Prévisionnel, Règles auto, Sous-catégories, Tous les comptes,
+Rechercher) prennent leurs couleurs dans le thème : plus aucune couleur
+écrite en dur dans ces dix fichiers. Les barres du Budget ont leurs
+couleurs propres en sombre : barres plus foncées (vert, orange, rouge)
+sous un chiffre clair, sur une piste plus sombre que la ligne ; en clair,
+rien ne change. Nouveau test `tests/test_theme_sombre_ecrans.py` : aucune
+couleur en dur dans les écrans convertis (liste qui s'allongera), barres
+du Budget lisibles dans les deux thèmes, tableau des opérations et menu
+construits en sombre. 744 tests sur 744. Quatre onglets regardés en image,
+en sombre et en clair, sur une base inventée.
+**Pourquoi.** Suite du mode sombre promis pour la sortie du 01/11/2026 ;
+on commence par ce qu'on voit le plus.
+**Reste.** Bilan et ses graphiques, fenêtres de saisie (`dialogs.py`),
+assistants, Notice, « Votre avis », « Mise à jour ». Les couleurs des
+catégories (pastilles) restent les mêmes dans les deux thèmes : à
+regarder à la relecture. Puis l'étape 3 (relecture de chaque écran).
+
 ## 2026-10-14 (2) — Mode sombre, étape 1 : les deux palettes et le réglage
 
 **Fait.** Inventaire des couleurs de l'interface : environ 110 couleurs

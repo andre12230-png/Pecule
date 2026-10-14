@@ -19,6 +19,7 @@ from ...constants import (
     FREQUENCIES, type_affiche,
 )
 from ...accords import accorde, pluriel
+from ...theme import T
 from ...utils import (
     deaccent, fmt_date_fr, fmt_euro, in_period,
 )
@@ -113,7 +114,7 @@ class OperationsView(QWidget):
         # Compteur à droite, hors du flux des filtres : il reste collé au
         # bord droit, les filtres se replient sous lui si la place manque.
         self.lbl_count = QLabel("0 opération")
-        self.lbl_count.setStyleSheet("color: #666")
+        self.lbl_count.setStyleSheet(f"color:{T['texte_discret']}")
         barre.addWidget(self.lbl_count, 0, Qt.AlignVCenter)
 
         v.addLayout(barre)
@@ -127,9 +128,9 @@ class OperationsView(QWidget):
         self.bandeau_annuler = QFrame()
         self.bandeau_annuler.setObjectName("bandeauAnnuler")
         self.bandeau_annuler.setStyleSheet(
-            "QFrame#bandeauAnnuler { background:#FEF5E7; "
-            "border:1px solid #E67E22; border-radius:4px; }"
-            "QLabel { color:#7E5109; }")
+            f"QFrame#bandeauAnnuler {{ background:{T['alerte_fond']}; "
+            f"border:1px solid {T['alerte_cadre']}; border-radius:4px; }}"
+            f"QLabel {{ color:{T['alerte_texte']}; }}")
         ligne_annuler = QHBoxLayout(self.bandeau_annuler)
         ligne_annuler.setContentsMargins(10, 4, 6, 4)
         self.lbl_annuler = QLabel()

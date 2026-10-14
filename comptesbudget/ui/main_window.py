@@ -25,7 +25,7 @@ from ..utils import (
 )
 from ..database import Database
 from ..erreurs import erreur_en_clair
-from ..theme import enregistrer_theme, lire_theme
+from ..theme import T, enregistrer_theme, lire_theme
 from ..labels import charger_alias, clean_libelle
 from ..csv_import import _decode_csv, diagnostiquer_fichier, import_csv
 from ..ofx_import import import_ofx
@@ -82,22 +82,24 @@ class MainWindow(QMainWindow):
         mv.setContentsMargins(8, 6, 8, 4)
         mv.setSpacing(4)
 
+        # Couleurs du thème choisi (clair ou sombre), lues à la construction.
         STYLE_BOUTON = (
             "QPushButton {"
             "  text-align:left; padding-left:8px;"
-            "  border:1px solid #808080; border-radius:4px;"
-            "  background:#FCFCFC; color:#222 }"
+            f"  border:1px solid {T['bouton_contour']}; border-radius:4px;"
+            f"  background:{T['bouton_fond']}; color:{T['bouton_texte']} }}"
             "QPushButton:hover {"
-            "  background:#EAF2FB; border-color:#316AC5 }"
-            "QPushButton:pressed { background:#D8E7F7 }")
+            f"  background:{T['bouton_survol']};"
+            f"  border-color:{T['bouton_survol_contour']} }}"
+            f"QPushButton:pressed {{ background:{T['bouton_actif']} }}")
 
         # Le trait de separation est porte par le titre lui-meme : un
         # QFrame d'un pixel de haut ne se peint pas de facon fiable, alors
         # qu'une bordure de QLabel s'affiche toujours.
         STYLE_TITRE = (
-            "color:#5A5A5A; font-size:8pt; font-weight:700;"
+            f"color:{T['texte_grise']}; font-size:8pt; font-weight:700;"
             "letter-spacing:1px; padding:0 0 3px 3px;"
-            "border-bottom:1px solid #A9A9A9")
+            f"border-bottom:1px solid {T['filet']}")
 
         def add_btn(text, slot, tip=""):
             """Bouton du menu. Sans « slot », il ouvre seulement le menu
@@ -135,13 +137,14 @@ class MainWindow(QMainWindow):
         # section, qui reçoit donc ses 11 px d'air comme les suivants.
         marque = QLabel("Pécule")
         marque.setStyleSheet(
-            "color:#1F3A6B; font-size:13pt; font-weight:700; padding:2px 2px 0")
+            f"color:{T['bleu_nuit']}; font-size:13pt; font-weight:700; padding:2px 2px 0")
         mv.addWidget(marque)
         # Son sous-titre dit ce que l'appli apporte, comme celui de Recharges
         # VE (« Coût réel de vos recharges ») et dans les mots du site
         # (choix de l'auteur du 11/10/2026). Gris des titres de section.
         sous_titre = QLabel("Vos comptes et votre budget")
-        sous_titre.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:0 2px")
+        sous_titre.setStyleSheet(
+            f"color:{T['texte_grise']}; font-size:8pt; padding:0 2px")
         mv.addWidget(sous_titre)
 
         # ── Compte affiché ──
@@ -270,7 +273,8 @@ class MainWindow(QMainWindow):
         # (11/10/2026) : utile pour une capture d'écran ou un signalement,
         # sans qu'on la lise tous les jours. Gris des titres de section.
         version = QLabel(f"v{APP_VERSION}")
-        version.setStyleSheet("color:#5A5A5A; font-size:8pt; padding:0 3px")
+        version.setStyleSheet(
+            f"color:{T['texte_grise']}; font-size:8pt; padding:0 3px")
         mv.addWidget(version)
 
         # Raccourci Ctrl+F (auparavant porté par l'action de la barre d'outils).
