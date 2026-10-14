@@ -22,6 +22,30 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (10) — Audit de la protection des données et des calculs
+
+**Fait.** Audit du code, de la suite de tests, de l’interface et des outils de
+fabrication de la version locale 1.41.15. Les 766 tests recensés réussissent
+après reprise d’un test gêné par les droits du dossier temporaire. Des essais
+sur données fictives ont reproduit des défauts d’export CSV, de fusion JSON,
+de réimport après archivage, de remboursements, d’échéance du jour et de dates
+anciennes, ainsi que des risques dans la fabrication des livrables.
+La relecture de 71 captures couvre les cinq onglets, deux tailles, deux
+périodes et deux thèmes ; elle reproduit une superposition des axes du Bilan
+après plusieurs rafraîchissements et un texte d’exemple de recherche coupé.
+Le rapport complet a été converti en PDF : huit pages relues, dix constats
+présents et deux preuves visuelles. La copie déposée sur le Bureau a été
+contrôlée comme identique au PDF vérifié.
+
+**Pourquoi.** Les tests existants ne couvraient pas ces scénarios. Protéger les
+fichiers de comptes et rendre les fusions entièrement annulables en cas
+d’erreur sont les priorités avant les corrections de calcul.
+
+**Reste.** Aucune correction applicative, aucune publication ni modification
+des données d’usage. Rapport et reproductions conservés dans le dossier
+d’audit local. L’exécutable installé et les livrables réels n’ont pas été
+reconstruits ni contrôlés dans cette séance.
+
 ## 2026-10-14 (9) — Mode sombre, relecture et version 1.41.15
 
 **Fait.** Les deux points de la relecture. Pastilles des catégories : en
