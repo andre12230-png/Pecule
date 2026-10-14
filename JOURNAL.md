@@ -22,6 +22,37 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (2) — Mode sombre, étape 1 : les deux palettes et le réglage
+
+**Fait.** Inventaire des couleurs de l'interface : environ 110 couleurs
+écrites en dur dans 19 fichiers, sans endroit central. Nouveau module
+`comptesbudget/theme.py` : toutes les couleurs rangées par rôle
+(« fond_page », « debit », « alerte_fond »…), en clair et en sombre, avec
+les valeurs de la charte commune aux trois applis ; `T` est rempli sur
+place par `choisir_theme()`, si bien qu'un module qui l'a importé voit
+toujours le thème de la session. `app.py` : palette Qt construite depuis le
+thème (`palette_pour`), reliefs de Fusion posés en sombre (Light, Mid,
+Dark…, sinon traits clairs), contour des cases lu au moment de dessiner,
+thème lu en tout premier dans `main()`. ⚙️ Paramètres : partie
+« Apparence », Clair / Sombre, pour tous les comptes, au prochain
+démarrage ; un changement de thème compte comme une saisie à protéger ;
+changer le seul thème ne redemande pas le solde de départ. Le choix est
+gardé dans les préférences de Windows (`QSettings`, clé
+`apparence/theme`), jamais dans `comptes.db`. Tests :
+`tests/test_theme_sombre.py` (contrastes des deux palettes, réglage,
+palette Qt, fenêtre Paramètres) ; `conftest.py` redirige les préférences
+vers un fichier temporaire et remet le clair après chaque test. 730 tests
+sur 730. Fenêtre Paramètres regardée en image dans les deux thèmes.
+**Pourquoi.** Mode sombre promis à un utilisateur pour la sortie du
+01/11/2026. Le thème doit être connu avant d'ouvrir la base (les premières
+boîtes de message s'affichent avant), d'où les préférences de Windows ; ce
+n'est pas une donnée des comptes, et la base ne change pas de structure.
+**Reste.** Étape 2 : remplacer les couleurs écrites en dur par `T[...]`,
+écran par écran (menu, tableaux, fenêtres, assistants, Bilan et ses
+graphiques, Notice), puis faire lire au test de relecture des couleurs les
+deux palettes. Le rapport mensuel (PDF, impression) doit rester clair.
+Étape 3 : relecture en image de chaque écran en sombre. Rien à livrer avant.
+
 ## 2026-10-14 — Textes Winget publiés, tout ce qui est en ligne vérifié
 
 **Fait.** `winget show` trouve le paquet et `winget download` vérifie l'empreinte de l'archive 1.23.0 ; `winget install` n'a pas pu être essayé sur un poste où Pécule est déjà inscrit dans une version plus récente (non forcé). Les deux commits Winget ont été publiés seuls, depuis une branche partie d'`origin/main`, sans les commits des versions 1.41.3 et suivantes. Relus ensuite en ligne : page d'accueil du site, README, `winget/README.md`, ce journal, page de confidentialité (identique au dépôt), fiche du catalogue Winget, release v1.23.0 (archive et empreinte intactes), manifeste Scoop (1.41.2, empreinte conforme à la release), questionnaire « Votre avis » (ouvert, 11 questions, « winget » parmi les modes d'installation, aucune nouvelle réponse).
