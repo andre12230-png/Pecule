@@ -4,7 +4,9 @@ Non câblé à l'interface (l'app HTML et sa synchronisation ont été retirées
 conservé pour pouvoir fusionner/restaurer un fichier d'échange JSON si besoin.
 """
 import json
+import math
 import os
+from datetime import date
 from typing import TYPE_CHECKING, Optional
 
 from .constants import SYNC_PATH, SYNC_VERSION
@@ -92,6 +94,104 @@ def verifier_export(data) -> Optional[str]:
         valeur = data.get(cle)
         if valeur is not None and not isinstance(valeur, dict):
             return f"Le fichier est abîmé (partie « {cle} »)."
+    # La forme est bonne : reste à vérifier les VALEURS. Un montant
+    # « invalide » passait, s'enregistrait comme texte et faisait ensuite
+    # échouer les calculs (vérification de l'audit du 14/10/2026, A02).
+    return _verifier_valeurs(data)
+
+
+# Pour chaque partie : les champs qui doivent être un montant (obligatoire
+# ou facultatif) et ceux qui doivent être une date AAAA-MM-JJ.
+_CHAMPS = {
+    "transactions": {"montants": ["montant"], "montants_facultatifs": [],
+                     "dates": ["date"], "dates_facultatives": ["date_valeur"]},
+    "recurring":    {"montants": ["montant"], "montants_facultatifs": [],
+                     "dates": ["start_date"],
+                     "dates_facultatives": ["end_date"]},
+    "rules":        {"montants": [], "montants_facultatifs": ["amount"],
+                     "dates": [], "dates_facultatives": []},
+    "comptes":      {"montants": [], "montants_facultatifs": ["solde_initial"],
+                     "dates": [], "dates_facultatives": ["date_initiale"]},
+}
+_NOMS = {"transactions": "une opération", "recurring": "une opération "
+         "récurrente", "rules": "une règle", "comptes": "un compte"}
+
+
+def _est_montant(v) -> bool:
+    """Un nombre fini. Un nombre écrit en texte (« -12.5 ») est admis : de
+    vieux exports l'écrivaient ainsi, et la base le range comme un nombre."""
+    if isinstance(v, bool):
+        return False                  # True / False ne sont pas des montants
+    if isinstance(v, (int, float)):
+        return math.isfinite(v)
+    if isinstance(v, str):
+        # Pas de virgule ni d'espaces autour : la base ne rangerait pas
+        # « 12,5 » comme un nombre.
+        if v != v.strip() or "," in v:
+            return False
+        try:
+            return math.isfinite(float(v))
+        except ValueError:
+            return False
+    return False
+
+
+def _est_date(v) -> bool:
+    """Une vraie date écrite AAAA-MM-JJ (le format de toute la base)."""
+    if not isinstance(v, str) or len(v) != 10:
+        return False
+    try:
+        date.fromisoformat(v)
+    except ValueError:
+        return False
+    return True
+
+
+def _vide(v) -> bool:
+    return v is None or v == ""
+
+
+def _verifier_valeurs(data: dict) -> Optional[str]:
+    for partie, champs in _CHAMPS.items():
+        for rec in data.get(partie) or []:
+            quoi = _NOMS[partie]
+            libelle = rec.get("libelle_op") or rec.get("libelle") \
+                or rec.get("nom") or rec.get("pattern") or rec.get("id")
+            for c in champs["montants"]:
+                if not _est_montant(rec.get(c)):
+                    return (f"Le fichier est abîmé : {quoi} (« {libelle} ») "
+                            f"a un montant illisible : {rec.get(c)!r}.")
+            for c in champs["montants_facultatifs"]:
+                if not _vide(rec.get(c)) and not _est_montant(rec.get(c)):
+                    return (f"Le fichier est abîmé : {quoi} (« {libelle} ») "
+                            f"a un montant illisible : {rec.get(c)!r}.")
+            for c in champs["dates"]:
+                if not _est_date(rec.get(c)):
+                    return (f"Le fichier est abîmé : {quoi} (« {libelle} ») "
+                            f"a une date illisible : {rec.get(c)!r}.")
+            for c in champs["dates_facultatives"]:
+                if not _vide(rec.get(c)) and not _est_date(rec.get(c)):
+                    return (f"Le fichier est abîmé : {quoi} (« {libelle} ») "
+                            f"a une date illisible : {rec.get(c)!r}.")
+    # Budgets : catégorie → montant ; budgets_par_compte : compte → budgets.
+    paquets = [data.get("budgets") or {}]
+    for buds in (data.get("budgets_par_compte") or {}).values():
+        if not isinstance(buds, dict):
+            return "Le fichier est abîmé (partie « budgets_par_compte »)."
+        paquets.append(buds)
+    for buds in paquets:
+        for cat, montant in buds.items():
+            if not _est_montant(montant):
+                return (f"Le fichier est abîmé : le budget « {cat} » a un "
+                        f"montant illisible : {montant!r}.")
+    # Réglages d'avant le multicomptes : solde et date de départ.
+    reglages = data.get("settings") or {}
+    if not _vide(reglages.get("initial_balance")) \
+            and not _est_montant(reglages.get("initial_balance")):
+        return "Le fichier est abîmé : le solde de départ est illisible."
+    if not _vide(reglages.get("initial_date")) \
+            and not _est_date(reglages.get("initial_date")):
+        return "Le fichier est abîmé : la date de départ est illisible."
     return None
 
 

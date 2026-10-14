@@ -22,6 +22,48 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (16) — A02 fermé : les valeurs d'un export sont vérifiées
+
+**Fait.** La fusion d'un export JSON vérifie maintenant, avant toute
+écriture, les montants et les dates de chaque enregistrement : opérations,
+récurrences, règles, comptes, budgets et réglages de départ. Un montant
+« invalide », vide, vrai/faux, infini, écrit avec une virgule, ou une date
+impossible, fait refuser le fichier avec un message qui nomme l'opération
+et la valeur fautive ; la base n'est pas touchée. Un nombre écrit en texte
+(« -12.5 », anciens exports) reste accepté et rangé comme nombre. 28 tests
+ajoutés (`tests/test_audit_suivi_a02.py`) ; 840 tests sur 840 réussissent.
+Un export tiré d'une copie de la base réelle passe le nouveau contrôle.
+
+**Pourquoi.** Dernier point ouvert de la vérification de l'audit : la
+structure était contrôlée, pas les valeurs, et un montant texte cassait
+ensuite le calcul des revenus et des dépenses.
+
+**Reste.** Pas de nouvelle version construite ni déployée. Les champs de
+texte et les cases (pointée, active…) ne sont pas contrôlés : SQLite les
+range sans casser les calculs. README à actualiser à la publication.
+
+## 2026-10-14 (15) — Vérification indépendante des corrections d’audit
+
+**Fait.** Comparaison du code de la version 1.41.19 avec celui de l’audit
+initial. 812 tests sur 812 réussissent en 67,35 secondes. Huit points sont
+entièrement corrigés. La fusion JSON est atomique, mais un montant de type
+texte reste accepté puis fait échouer le calcul des revenus et dépenses,
+comme le montre une reproduction sur base fictive.
+
+A09 est retiré : la superposition des graphiques venait de la méthode de
+capture de l’audit. Les essais avec la boucle normale de Qt, sur le code
+initial comme sur le code actuel, restent propres après cinq et treize
+changements de période. Rapport, note d’interface et PDF rectifiés ; les
+versions initiales sont conservées dans le dossier de suivi local.
+
+**Pourquoi.** Distinguer les corrections vérifiées d’un artefact de contrôle
+et compléter la validation des données de fusion au-delà de leur structure.
+
+**Reste.** Tester puis refuser les montants invalides avant fusion. Le README
+reste à actualiser lors de la publication. Aucun code applicatif ni donnée
+d’usage modifié pendant cette vérification ; l’exécutable installé n’a pas
+été contrôlé de nouveau.
+
 ## 2026-10-14 (14) — Audit, lot 4 : l'affichage (v1.41.19) ; audit terminé
 
 **Fait.**
