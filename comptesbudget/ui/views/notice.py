@@ -858,7 +858,8 @@ installation</code> écrit un export complet (un fichier <code>.json</code>),
 Pécule. Pour une simple sauvegarde, préférez la sauvegarde externe ci-dessus.</p>
 <div class="warn">⚠️ Réimporter un export <b>fusionne</b> : pour chaque opération,
 la version la plus récente gagne. Pour revenir exactement à un état antérieur,
-préférez la copie du fichier <code>comptes.db</code>.</div>
+préférez la copie du fichier <code>comptes.db</code>. Un fichier abîmé, ou qui
+n'est pas un export de Pécule, est refusé sans rien modifier.</div>
 
 <h2>9. Mettre à jour Pécule</h2>
 <p><b>Avec l'installeur</b> (<code>Pecule-Setup.exe</code>) : fermez Pécule,
