@@ -38,6 +38,10 @@ pour l'installer chez l'auteur et juger le mode sombre sur ses données.
 766 tests sur 766.
 **Pourquoi.** Mode sombre promis pour la sortie du 01/11/2026 ; l'auteur
 veut l'essayer avant.
+Installée chez l'auteur : contrôle passé, nouveautés prouvées dans
+l'exe, base identique (SHA-256), titre « v1.41.15 » lu depuis le
+dossier d'usage ; réserve Pecule.exe.avant-1.41.15 ; la réserve
+avant-1.41.14 à la Corbeille, avec son accord.
 **Reste.** Son avis sur le mode sombre, à l'usage.
 
 ## 2026-10-14 (8) — Mode sombre, fin de l'étape 2 : Votre avis, Mise à jour, rapport mensuel
