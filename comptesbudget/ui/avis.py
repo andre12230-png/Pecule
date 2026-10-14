@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox,
 )
 
+from ..theme import T
 from ..constants import (
     APP_VERSION, FORMULAIRE_AVIS_URL, TICKETS_GITHUB_URL,
     DELAI_INVITATION_AVIS,
@@ -95,7 +96,7 @@ class AvisDialog(QDialog):
 
         version = QLabel(
             f"Votre version : <b>{description_systeme()}</b><br>"
-            "<span style='color:#666'>Elle sera copiée pour vous : collez-la "
+            f"<span style='color:{T['texte_discret']}'>Elle sera copiée pour vous : collez-la "
             "(Ctrl+V) dans la question « Votre version de Pécule ».</span>")
         version.setTextFormat(Qt.RichText)
         version.setWordWrap(True)
@@ -103,7 +104,7 @@ class AvisDialog(QDialog):
 
         # Confirmation affichée une fois le questionnaire ouvert.
         self.confirmation = QLabel("")
-        self.confirmation.setStyleSheet("color:#18733A")  # vert de texte commun aux trois applis
+        self.confirmation.setStyleSheet(f"color:{T['credit']}")  # vert de texte commun aux trois applis
         self.confirmation.setWordWrap(True)
         self.confirmation.hide()
         v.addWidget(self.confirmation)
@@ -113,7 +114,7 @@ class AvisDialog(QDialog):
             f"<a href='{TICKETS_GITHUB_URL}'>ouvrir un ticket</a>.")
         github.setTextFormat(Qt.RichText)
         github.setOpenExternalLinks(True)
-        github.setStyleSheet("color:#666")
+        github.setStyleSheet(f"color:{T['texte_discret']}")
         v.addWidget(github)
 
         boutons = QHBoxLayout()
@@ -147,7 +148,7 @@ def inviter(parent, db, aujourdhui: date):
         "Vous utilisez Pécule depuis deux semaines.<br><br>"
         "Qu'est-ce qui marche, qu'est-ce qui coince ? Deux minutes de "
         "questionnaire aident à l'améliorer.<br><br>"
-        "<span style='color:#666'>Cette question ne vous sera plus posée. "
+        f"<span style='color:{T['texte_discret']}'>Cette question ne vous sera plus posée. "
         "Le bouton « 💬 Votre avis » du menu de gauche reste à votre "
         "disposition.</span>")
     oui = boite.addButton("Donner mon avis…", QMessageBox.AcceptRole)

@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
 )
 
+from ..theme import T
 from ..constants import APP_VERSION, PAGE_VERSIONS_URL, INSTALLEUR_URL
 
 
@@ -48,7 +49,7 @@ class MiseAJourDialog(QDialog):
 
         # Confirmation affichée une fois le navigateur sollicité.
         self.confirmation = QLabel("")
-        self.confirmation.setStyleSheet("color:#18733A")  # vert de texte commun aux trois applis
+        self.confirmation.setStyleSheet(f"color:{T['credit']}")  # vert de texte commun aux trois applis
         self.confirmation.setWordWrap(True)
         self.confirmation.hide()
         v.addWidget(self.confirmation)

@@ -22,6 +22,23 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (8) — Mode sombre, fin de l'étape 2 : Votre avis, Mise à jour, rapport mensuel
+
+**Fait.** « Votre avis » et « Mise à jour » prennent leurs couleurs dans
+le thème. Défaut trouvé en image : en sombre, l'aperçu du rapport mensuel
+écrivait son texte en blanc cassé sur son fond ivoire, illisible (son
+HTML ne fixe pas la couleur du texte, qui venait du thème). Test écrit
+d'abord (il échouait), gardé ; l'aperçu reçoit désormais les couleurs du
+clair, quel que soit le thème. Le PDF produit en sombre a été rendu en
+image : noir sur blanc, conforme. Nouveau test : aucun fichier d'écran,
+hors rapport mensuel, n'écrit de couleur en dur. 761 tests sur 761.
+Étape 2 terminée : tous les écrans suivent le thème.
+**Pourquoi.** Mode sombre promis pour le 01/11/2026.
+**Reste.** Étape 3 : relecture de chaque écran en sombre, avec deux
+points déjà notés (pastilles de catégories foncées peu visibles ;
+encadré « astuce » de la Notice peu détaché), puis une version installée
+chez l'auteur pour juger. Contrôle de livraison à lancer avant l'exe.
+
 ## 2026-10-14 (7) — Mode sombre, étape 2 : la Notice et le Glossaire
 
 **Fait.** La feuille de style de la Notice et du Glossaire n'est plus

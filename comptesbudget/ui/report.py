@@ -4,12 +4,14 @@ from calendar import monthrange
 from datetime import date
 from html import escape as _esc   # « B&C » → « B&amp;C » : sinon le & casse le HTML
 
+from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout,
     QPushButton, QDialog, QMessageBox, QFileDialog, QTextBrowser,
 )
 
 from ..accords import pluriel
+from ..theme import CLAIR
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
     plus_grosses_depenses,
@@ -227,6 +229,15 @@ class MonthlyReportDialog(QDialog):
 
         self.browser = QTextBrowser()
         self.browser.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:10px }")
+        # Le rapport reste clair, comme le papier où il s'imprime : son HTML
+        # ne fixe pas la couleur du texte, qui viendrait sinon du thème (blanc
+        # cassé en sombre, illisible sur l'ivoire ; vu le 14/10/2026).
+        clair = self.browser.palette()
+        for role, cle in ((QPalette.Text, "texte"), (QPalette.Base, "carte"),
+                          (QPalette.Link, "lien"),
+                          (QPalette.LinkVisited, "lien_vu")):
+            clair.setColor(role, QColor(CLAIR[cle]))
+        self.browser.setPalette(clair)
         v.addWidget(self.browser, 1)
 
         btns = QHBoxLayout()

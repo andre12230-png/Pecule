@@ -40,6 +40,9 @@ ECRANS_CONVERTIS = [
     "assistants.py",
     # Cinquième lot : la Notice et le Glossaire.
     "views/notice.py",
+    # Sixième lot : « Votre avis » et « Mise à jour ».
+    "avis.py",
+    "mise_a_jour.py",
 ]
 
 HEXA = re.compile(r"(?<![&\w])#(?:[0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})(?![0-9A-Fa-f])")
@@ -220,3 +223,46 @@ def test_notice_en_sombre(qapp, sombre):
     from PySide6.QtWidgets import QTextBrowser
     for texte in vue.findChildren(QTextBrowser):
         assert SOMBRE["carte"] in texte.styleSheet().upper()
+
+
+def test_votre_avis_et_mise_a_jour_en_sombre(qapp, sombre):
+    from comptesbudget.ui.avis import AvisDialog
+    from comptesbudget.ui.mise_a_jour import MiseAJourDialog
+    for fenetre in (AvisDialog(), MiseAJourDialog()):
+        style = fenetre.confirmation.styleSheet().upper()
+        assert SOMBRE["credit"] in style, type(fenetre).__name__
+
+
+def test_rapport_mensuel_reste_clair_en_sombre(qapp, sombre, tmp_path):
+    """Le rapport mensuel reste clair, comme le papier où il s'imprime. Son
+    HTML ne fixe pas la couleur du texte : en sombre, l'aperçu prenait le
+    blanc cassé du thème sur son fond ivoire (vu en image le 14/10/2026)."""
+    from PySide6.QtGui import QPalette
+    from comptesbudget.database import Database
+    from comptesbudget.ui.report import MonthlyReportDialog
+    db = Database(str(tmp_path / "comptes.db"))
+    db.set_setting("initial_date", "2026-01-01")
+    db.set_setting("initial_balance", "100.0")
+    from comptesbudget.app import appliquer_theme, appliquer_theme_clair
+    appliquer_theme(qapp)          # comme au démarrage en sombre
+    try:
+        apercu = MonthlyReportDialog(None, db).browser
+        texte = apercu.palette().color(QPalette.Text).name().upper()
+    finally:
+        appliquer_theme_clair(qapp)
+    assert texte == CLAIR["texte"]
+    assert contraste(texte, CLAIR["carte"]) >= 4.5
+
+
+def test_aucun_ecran_oublie():
+    """Fin de l'étape 2 (14/10/2026) : tout fichier d'écran prend ses
+    couleurs dans le thème. Seul le rapport mensuel garde les siennes : il
+    reste clair, comme le papier où il s'imprime."""
+    en_dur = []
+    for fichier in sorted(UI.rglob("*.py")):
+        if fichier.name == "report.py":
+            continue
+        en_dur += [f"{fichier.relative_to(UI)}:{ligne} {m}"
+                   for ligne, texte in _chaines(fichier)
+                   for m in HEXA.findall(texte)]
+    assert not en_dur, "Couleurs à prendre dans le thème :\n" + "\n".join(en_dur)
