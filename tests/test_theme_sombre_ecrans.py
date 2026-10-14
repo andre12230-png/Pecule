@@ -22,6 +22,8 @@ UI = Path(comptesbudget.__file__).parent / "ui"
 
 # Étape 2, premier lot (14/10/2026) : le menu de gauche et les tableaux.
 ECRANS_CONVERTIS = [
+    # Étape 2, troisième lot (14/10/2026) : les fenêtres de saisie.
+    "dialogs.py",
     "main_window.py",
     "models.py",
     "recapitulatif.py",
@@ -161,3 +163,32 @@ def test_bilan_en_sombre(qapp, sombre, tmp_path):
         for axe in graphique.axes():
             assert axe.labelsColor() == QColor(SOMBRE["texte_secondaire"])
             assert axe.gridLineColor() == QColor(SOMBRE["grille"])
+
+
+@pytest.mark.parametrize("nom", ["clair", "sombre"])
+def test_week_ends_du_calendrier_lisibles(qapp, nom):
+    """Qt écrit samedis et dimanches en rouge vif, pur : 4,0 pour 1 sur
+    le blanc, 3,7 sur le fond sombre, sous les 4,5 de la charte. Toutes les
+    cases de date les écrivent dans le rouge des dépenses du thème."""
+    from PySide6.QtCore import Qt
+    from comptesbudget.ui import dialogs
+    theme.choisir_theme(nom)
+    try:
+        palette = theme.THEMES[nom]
+        cats = ["Alimentation"]
+        fenetres = [
+            dialogs.TxDialog(None, None, cats, []),
+            dialogs.SettingsDialog(None, "2026-01-01", 100.0, "Compte"),
+            dialogs.RecurringDialog(None, None, cats, []),
+        ]
+        cases = [c for f in fenetres
+                 for c in f.findChildren(dialogs.QDateEdit)]
+        assert len(cases) >= 5
+        for case in cases:
+            calendrier = case.calendarWidget()
+            for jour in (Qt.Saturday, Qt.Sunday):
+                couleur = calendrier.weekdayTextFormat(jour).foreground().color()
+                assert couleur.name().upper() == palette["debit"]
+                assert contraste(couleur.name(), palette["saisie"]) >= 4.5
+    finally:
+        theme.choisir_theme("clair")

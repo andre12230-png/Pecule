@@ -3,7 +3,7 @@
 from typing import Optional
 
 from PySide6.QtCore import Qt, QDate
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QColor, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout,
     QLabel, QLineEdit, QComboBox, QDialog, QFormLayout, QDateEdit, QCheckBox,
@@ -41,6 +41,18 @@ MOTIF_TROP_COURT = ("Le motif doit faire au moins 2 caractères : c'est le mot "
                     "que le libellé doit contenir (par exemple « carrefour »).")
 CATEGORIE_MANQUANTE = ("Choisissez la catégorie que la règle donnera aux "
                        "opérations reconnues (par exemple « Alimentation »).")
+
+
+def calendrier_lisible(case: QDateEdit) -> None:
+    """Samedis et dimanches du calendrier d'une case de date dans le rouge
+    des dépenses du thème. Qt les écrit en rouge vif, pur : 4,0 pour 1
+    sur le blanc, 3,7 sur le fond sombre, sous les 4,5 de la charte
+    (relecture du mode sombre, 14/10/2026)."""
+    calendrier = case.calendarWidget()
+    for jour in (Qt.Saturday, Qt.Sunday):
+        forme = calendrier.weekdayTextFormat(jour)
+        forme.setForeground(QColor(T["debit"]))
+        calendrier.setWeekdayTextFormat(jour, forme)
 
 
 def garder_la_frappe(combo: QComboBox):
@@ -133,11 +145,13 @@ class TxDialog(SaisieProtegee, QDialog):
 
         self.date_edit = QDateEdit()
         self.date_edit.setCalendarPopup(True)
+        calendrier_lisible(self.date_edit)
         self.date_edit.setDisplayFormat("dd/MM/yyyy")
         layout.addRow("Date :", self.date_edit)
 
         self.date_val = QDateEdit()
         self.date_val.setCalendarPopup(True)
+        calendrier_lisible(self.date_val)
         self.date_val.setDisplayFormat("dd/MM/yyyy")
         layout.addRow("Date valeur :", self.date_val)
 
@@ -148,7 +162,7 @@ class TxDialog(SaisieProtegee, QDialog):
             "corrigez-la si besoin. L'opération ne comptera dans le solde "
             "qu'à cette date.")
         self.dv_hint.setWordWrap(True)
-        self.dv_hint.setStyleSheet("color:#7E5109; font-size:9pt")
+        self.dv_hint.setStyleSheet(f"color:{T['avertissement']}; font-size:9pt")
         self.dv_hint.setVisible(False)
         layout.addRow("", self.dv_hint)
 
@@ -266,7 +280,7 @@ class TxDialog(SaisieProtegee, QDialog):
                            self.prevue.setEnabled(not coche)))
 
         # ── Section « Mémoriser » (création de règle inline) ──────────
-        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setStyleSheet("color:#A9A9A9")
+        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setStyleSheet(f"color:{T['filet']}")
         layout.addRow(sep)
 
         self.create_rule = QCheckBox("🧠 Mémoriser : créer une règle de catégorisation à partir de cette opération")
@@ -277,7 +291,7 @@ class TxDialog(SaisieProtegee, QDialog):
         self.rule_pattern = QLineEdit()
         self.rule_pattern.setPlaceholderText("Texte qui doit figurer dans le libellé (auto : le libellé entier)")
         self.rule_match_info = QLabel("")
-        self.rule_match_info.setStyleSheet("color:#666; font-size:10pt")
+        self.rule_match_info.setStyleSheet(f"color:{T['texte_discret']}; font-size:10pt")
 
         self.rule_use_amount = QCheckBox("🎯 Affiner par montant — ne s'applique qu'à ce montant exact")
         self.rule_no_overwrite = QCheckBox("🔒 Ne pas écraser les catégories déjà saisies")
@@ -305,7 +319,7 @@ class TxDialog(SaisieProtegee, QDialog):
         self.rule_pattern.textEdited.connect(lambda _: setattr(self, "_pattern_user_edited", True))
 
         # ── Section « Opération récurrente » ─────────────────────────
-        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setStyleSheet("color:#A9A9A9")
+        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setStyleSheet(f"color:{T['filet']}")
         layout.addRow(sep2)
 
         self.create_recurring = QCheckBox(
@@ -327,6 +341,7 @@ class TxDialog(SaisieProtegee, QDialog):
 
         self.rec_end_lbl = QLabel("Date de fin :")
         self.rec_end = QDateEdit(); self.rec_end.setCalendarPopup(True)
+        calendrier_lisible(self.rec_end)
         self.rec_end.setDisplayFormat("dd/MM/yyyy")
         self.rec_end.setSpecialValueText("(aucune)")
         self.rec_end.setMinimumDate(QDate(1900, 1, 1))
@@ -638,7 +653,7 @@ class TxDialog(SaisieProtegee, QDialog):
 
         if not matches:
             self.rule_match_info.setText("Aucune autre opération ne correspond pour l'instant.")
-            self.rule_match_info.setStyleSheet("color:#666; font-size:10pt")
+            self.rule_match_info.setStyleSheet(f"color:{T['texte_discret']}; font-size:10pt")
             return
 
         suffix = f" au montant exact de {fmt_euro(amt)}" if amt is not None else ""
@@ -648,9 +663,9 @@ class TxDialog(SaisieProtegee, QDialog):
         msg = f"{pluriel(n, 'opération', 'opérations')} {accorde(n, 'correspondante', 'correspondantes')}{suffix}."
         if len(cats) > 1 and already_classed:
             msg += f" ⚠️ Catégories existantes : {', '.join(f'« {c} »' for c in already_classed)}."
-            self.rule_match_info.setStyleSheet("color:#BC3729; font-size:10pt; font-weight:600")
+            self.rule_match_info.setStyleSheet(f"color:{T['debit']}; font-size:10pt; font-weight:600")
         else:
-            self.rule_match_info.setStyleSheet("color:#18733A; font-size:10pt")
+            self.rule_match_info.setStyleSheet(f"color:{T['credit']}; font-size:10pt")
         self.rule_match_info.setText(msg)
 
     def values(self) -> dict:
@@ -746,7 +761,7 @@ class CategorieEnMasseDialog(QDialog):
         self.sous_cat.setInsertPolicy(QComboBox.NoInsert)
         layout.addRow("Sous-catégorie :", self.sous_cat)
         aide = QLabel("Laissée vide, la sous-catégorie actuelle est effacée.")
-        aide.setStyleSheet("color: #666")
+        aide.setStyleSheet(f"color: {T['texte_discret']}")
         layout.addRow(aide)
 
         self.btns = boutons_enregistrer_annuler()
@@ -802,11 +817,12 @@ class SettingsDialog(SaisieProtegee, QDialog):
                if nom_compte else "")
         )
         info.setWordWrap(True)
-        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; border:1px solid #E8D77B")
+        info.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px; background:{T['info_fond']}; border:1px solid {T['info_cadre']}")
         layout.addRow(info)
 
         self.initial_date = QDateEdit()
         self.initial_date.setCalendarPopup(True)
+        calendrier_lisible(self.initial_date)
         self.initial_date.setDisplayFormat("dd/MM/yyyy")
         try:
             self.initial_date.setDate(QDate.fromString(initial_date, "yyyy-MM-dd"))
@@ -854,7 +870,7 @@ class SettingsDialog(SaisieProtegee, QDialog):
             # installations de Pécule, pas à l'usage de tous les jours.
             filet = QFrame()
             filet.setFrameShape(QFrame.HLine)
-            filet.setStyleSheet("color:#A9A9A9")
+            filet.setStyleSheet(f"color:{T['filet']}")
             layout.addRow(filet)
             titre = QLabel("<b>Avancé</b>")
             layout.addRow(titre)
@@ -864,7 +880,7 @@ class SettingsDialog(SaisieProtegee, QDialog):
                 "Pour une simple sauvegarde, préférez « 💾 Sauvegarde "
                 "externe » dans le menu de gauche.")
             explication.setWordWrap(True)
-            explication.setStyleSheet("color:#555")
+            explication.setStyleSheet(f"color:{T['texte_secondaire']}")
             layout.addRow(explication)
             ligne = QHBoxLayout()
             # Les boutons disent à quoi ils servent, pas le format du fichier
@@ -943,8 +959,8 @@ class ComptesDialog(QDialog):
             "Les règles automatiques et les catégories sont communes à tous "
             "les comptes.")
         info.setWordWrap(True)
-        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
-                           "border:1px solid #E8D77B")
+        info.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px; background:{T['info_fond']}; "
+                           f"border:1px solid {T['info_cadre']}")
         lay.addWidget(info)
 
         self.liste = QListWidget()
@@ -1098,13 +1114,14 @@ class ArchivesDialog(QDialog):
             "case « Voir les archives » en haut de la fenêtre les remontre "
             "quand vous le souhaitez, et vous pouvez tout rétablir.")
         info.setWordWrap(True)
-        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
-                           "border:1px solid #E8D77B")
+        info.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px; background:{T['info_fond']}; "
+                           f"border:1px solid {T['info_cadre']}")
         lay.addWidget(info)
 
         form = QFormLayout()
         self.date_edit = QDateEdit()
         self.date_edit.setCalendarPopup(True)
+        calendrier_lisible(self.date_edit)
         self.date_edit.setDisplayFormat("dd/MM/yyyy")
         # Par défaut : la fin de la dernière année entièrement plus vieille
         # que trois ans. Les années restent entières, donc comparables.
@@ -1120,7 +1137,7 @@ class ArchivesDialog(QDialog):
 
         self.resume = QLabel()
         self.resume.setWordWrap(True)
-        self.resume.setStyleSheet("color:#000000; padding:4px")
+        self.resume.setStyleSheet(f"color:{T['texte']}; padding:4px")
         lay.addWidget(self.resume)
 
         barre = QHBoxLayout()
@@ -1309,7 +1326,7 @@ class RuleDialog(SaisieProtegee, QDialog):
         layout.addRow("", self.no_overwrite)
 
         self.lbl_info = QLabel("")
-        self.lbl_info.setStyleSheet("color:#666; font-size:10pt")
+        self.lbl_info.setStyleSheet(f"color:{T['texte_discret']}; font-size:10pt")
         layout.addRow("", self.lbl_info)
 
         self.btns = boutons_enregistrer_annuler()
@@ -1443,6 +1460,7 @@ class RecurringDialog(SaisieProtegee, QDialog):
         layout.addRow("Jour du mois :", self.day_of_month)
 
         self.start_date = QDateEdit(); self.start_date.setCalendarPopup(True)
+        calendrier_lisible(self.start_date)
         self.start_date.setDisplayFormat("dd/MM/yyyy")
         self.start_date.setDate(QDate.currentDate())
         layout.addRow("Date de début :", self.start_date)
@@ -1458,6 +1476,7 @@ class RecurringDialog(SaisieProtegee, QDialog):
                 lambda d: self.day_of_month.setValue(d.day()))
 
         self.end_date = QDateEdit(); self.end_date.setCalendarPopup(True)
+        calendrier_lisible(self.end_date)
         self.end_date.setDisplayFormat("dd/MM/yyyy")
         self.end_date.setSpecialValueText("(aucune)")
         self.end_date.setMinimumDate(QDate(1900, 1, 1))
@@ -1568,8 +1587,8 @@ class CategoriesMasqueesDialog(QDialog):
             "Rien n'est supprimé — vous pouvez les rétablir à tout moment."
         )
         info.setWordWrap(True)
-        info.setStyleSheet("color:#555; padding:6px; background:#FFFBE6; "
-                           "border:1px solid #E8D77B")
+        info.setStyleSheet(f"color:{T['texte_secondaire']}; padding:6px; background:{T['info_fond']}; "
+                           f"border:1px solid {T['info_cadre']}")
         layout.addWidget(info)
 
         utilisees = db.categories_utilisees_partout()
@@ -1597,7 +1616,7 @@ class CategoriesMasqueesDialog(QDialog):
             ligne.addWidget(case)
             if motif:
                 etiquette = QLabel(motif)
-                etiquette.setStyleSheet("color:#555; font-style:italic")
+                etiquette.setStyleSheet(f"color:{T['texte_secondaire']}; font-style:italic")
                 ligne.addWidget(etiquette)
             ligne.addStretch()
             liste.addLayout(ligne)

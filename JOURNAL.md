@@ -22,6 +22,24 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-14 (5) — Mode sombre, étape 2 : les fenêtres de saisie
+
+**Fait.** Les fenêtres de `dialogs.py` (saisie d'une opération,
+reclassement, Paramètres, Mes comptes, archives, règle, opération
+récurrente, catégories proposées) prennent leurs couleurs dans le thème.
+Défaut trouvé en image : le calendrier des cases de date écrivait
+samedis et dimanches dans le rouge vif de Qt, 3,7 pour 1 sur le fond
+sombre et 4,0 sur le blanc, sous les 4,5 de la charte. Test écrit
+d'abord (il échouait), gardé ; les sept cases de date passent par
+`calendrier_lisible`, qui met les week-ends au rouge des dépenses du
+thème (en clair aussi, un rouge un peu plus foncé qu'avant). 750 tests
+sur 750. Six fenêtres et le calendrier regardés en image, en sombre et
+en clair, sur des données inventées.
+**Pourquoi.** Suite du mode sombre promis pour le 01/11/2026.
+**Reste.** Assistants, Notice, « Votre avis », « Mise à jour », rapport
+mensuel (qui restera clair). Puis l'étape 3 : relecture et version
+installée chez l'auteur.
+
 ## 2026-10-14 (4) — Mode sombre, étape 2 : le Bilan et ses graphiques
 
 **Fait.** Le Bilan prend toutes ses couleurs dans le thème : tuiles,
