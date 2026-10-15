@@ -306,3 +306,48 @@ def test_l_archive_refuse_un_fichier_inattendu(tmp_path, intrus):
     with pytest.raises(SystemExit) as erreur:
         outil.verifier_contenu(str(tmp_path))
     assert Path(intrus).name in str(erreur.value)
+
+
+# ──────────── Installeur : même contrôle complet que l'archive (15/10) ──────
+# Jusqu'au 15/10/2026, l'installeur ne cherchait qu'une base au premier niveau
+# de dist/Pecule : un relevé ou un export oublié dans un sous-dossier serait
+# parti dans Pecule-Setup.exe, alors que l'archive l'aurait refusé.
+
+class _CompilationAtteinte(Exception):
+    """Levée à la place d'Inno Setup : les contrôles sont tous passés."""
+
+
+def _faire_installeur(monkeypatch, dossier: Path):
+    monkeypatch.syspath_prepend(str(RACINE / "outils"))
+    spec = importlib.util.spec_from_file_location(
+        "faire_installeur", RACINE / "outils" / "faire_installeur.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "DOSSIER_BUILD", str(dossier))
+
+    def _pas_de_compilation():
+        raise _CompilationAtteinte()
+    monkeypatch.setattr(module, "trouver_iscc", _pas_de_compilation)
+    return module
+
+
+def test_l_installeur_accepte_les_fichiers_du_programme(tmp_path, monkeypatch):
+    _faux_dossier(tmp_path)
+    outil = _faire_installeur(monkeypatch, tmp_path)
+    with pytest.raises(_CompilationAtteinte):
+        outil.main()
+
+
+@pytest.mark.parametrize("intrus", ["releve-fictif.csv",
+                                    "_internal/export.json",
+                                    "_internal/PySide6/vieux.qif",
+                                    "_internal/sauvegardes/copie.db"])
+def test_l_installeur_refuse_un_fichier_inattendu(tmp_path, monkeypatch,
+                                                  intrus):
+    _faux_dossier(tmp_path)
+    (tmp_path / intrus).parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / intrus).write_bytes(b"x")
+    outil = _faire_installeur(monkeypatch, tmp_path)
+    with pytest.raises(SystemExit) as erreur:
+        outil.main()
+    assert Path(intrus).name in str(erreur.value)

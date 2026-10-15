@@ -11,7 +11,7 @@ Ce script :
 
   * refait les contrôles de faire_archive.py sur le dossier construit — pas
     de base de données ni de verrou d'essai, Lisez-moi.txt et Budget.ico
-    ajoutés ;
+    ajoutés, puis rien d'autre que le programme à toutes les profondeurs ;
   * lance le compilateur d'Inno Setup sur outils/pecule.iss en lui passant
     le numéro de version (APP_VERSION) ;
   * affiche l'empreinte SHA-256 de l'installeur produit.
@@ -34,7 +34,8 @@ sys.path.insert(0, RACINE)
 
 from comptesbudget.constants import APP_VERSION      # noqa: E402
 from faire_archive import (DOSSIER_BUILD, preparer,   # noqa: E402
-                           retirer_le_verrou, verifier_absence_de_donnees)
+                           retirer_le_verrou, verifier_absence_de_donnees,
+                           verifier_contenu)
 
 RECETTE = os.path.join(OUTILS, "pecule.iss")
 
@@ -66,6 +67,10 @@ def main():
     verifier_absence_de_donnees(DOSSIER_BUILD)
     retirer_le_verrou(DOSSIER_BUILD)
     preparer(DOSSIER_BUILD)
+    # Même contrôle complet que l'archive (15/10/2026) : tout le dossier, à
+    # toutes les profondeurs, ne doit contenir que le programme. Avant, seul
+    # un fichier de comptes au premier niveau était cherché.
+    verifier_contenu(DOSSIER_BUILD)
 
     iscc = trouver_iscc()
     print(f"Inno Setup : {iscc}")
