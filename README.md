@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.41.2** — saisie plus sûre, sauvegarde externe sur clé USB avec rappel, catégorie de plusieurs opérations changée d'un coup, suppression annulable, export vers Excel, courbe du solde, et tous les écrans relus. Un **installeur Windows** (`Pecule-Setup.exe`) accompagne l'archive `.zip`.
+> Version **1.41.22**. Depuis la version publiée 1.41.2, choisissez le thème clair ou sombre dans Paramètres, gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
 
 ---
 
@@ -181,6 +181,11 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
   s'ouvre d'un double-clic dans Excel ou LibreOffice.
 - **Courbe du solde** : sur le Bilan, le solde en fin de mois sur douze mois,
   en trait plein pour ce qui est constaté, en pointillés pour ce qui est prévu.
+- Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
+- Choisissez le thème clair ou sombre dans Paramètres.
+- Sauvegarde externe : un rappel apparaît si la dernière copie date de plus de 30 jours.
+- Les catégories conservent les majuscules et minuscules tapées.
+- Les imports, fusions et reprises de base sont vérifiés avant validation ou remplacement.
 - **Vos propres catégories** : le champ Catégorie s'écrit librement — tapez
   « Animaux », elle est créée, colorée et budgétable comme les autres.
 - **Une seule fenêtre à la fois** sur un même fichier de données : deux

@@ -75,8 +75,13 @@ Pour tester un manifeste local, il faut d'abord l'autoriser en administrateur
 la commande qui fonctionne est
 `winget uninstall --product-code andre12230-png.Pecule__DefaultSource`.
 
-**Ces manifestes sont encore en 1.23.0**, la version acceptée, alors que des
-versions plus récentes sont publiées. Ils seront remontés et soumis à Winget
-avec la prochaine version publiée. D'ici là, le fichier `.zip` de la version
-1.23.0 ne doit pas être modifié : son empreinte est inscrite dans le manifeste
-publié, et c'est lui que Winget télécharge.
+## Version 1.41.22 préparée localement
+
+Les quatre manifestes de la version 1.41.22 sont préparés dans un nouveau
+dossier. Leur URL vise l'archive de la future release GitHub et leur SHA-256
+correspond à l'archive construite localement. Ils ne sont pas soumis à Winget
+et la release n'est pas publiée. Avant de les soumettre, publier l'archive à
+l'URL indiquée et vérifier que son empreinte est identique.
+
+Les manifestes 1.23.0 restent l'historique de la version déjà acceptée ; leur
+archive et leurs empreintes ne doivent pas être modifiées.

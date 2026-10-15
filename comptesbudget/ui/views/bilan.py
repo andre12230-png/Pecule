@@ -1992,6 +1992,9 @@ class BilanView(QWidget):
             f"ÉVOLUTION SUR 12 MOIS — {de_mois_a_mois(months[0], months[-1]).upper()}")
         ax_x = QBarCategoryAxis(); ax_x.append(labels)
         habiller_axe(ax_x)
+        # Le nom du mois et son astérisque doivent rester entiers : Qt
+        # remplaçait « Oct* » par « O… » dans une fenêtre de 1280 px.
+        ax_x.setTruncateLabels(False)
         # 8 pt, le minimum de la charte : à 9, « Nov », « Mar » et « Aoû »
         # se coupaient en « N… » à 1280 px de large.
         police = ax_x.labelsFont()

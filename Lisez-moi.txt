@@ -1,4 +1,12 @@
-PECULE - version 1.41.21
+PECULE - version 1.41.22
+
+NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
+- Choix du theme clair ou sombre dans Parametres.
+- Les categories conservent les majuscules et minuscules saisies.
+- Rappel de sauvegarde externe lorsque la derniere copie date de plus de 30 jours.
+- Verifications renforcees avant import, fusion ou reprise d une base.
+- La copie de reprise est controlee avant de remplacer la base vide ; le fichier source reste intact.
+- Dans le graphique « Evolution sur 12 mois », le mois en cours garde son nom complet et son asterisque.
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
@@ -71,8 +79,8 @@ dossier (Telechargements, par exemple). Vos donnees ne sont pas
 perdues : elles sont restees dans le comptes.db de votre ancien
 dossier. Pecule vous le dit au lancement et propose de reprendre ce
 fichier - bouton << Reprendre mes donnees >>, ou << Reprendre un
-fichier >> dans le menu de gauche. Il est copie, l'original n'est pas
-touche.
+fichier >> dans le menu de gauche. La copie est verifiee avant de
+remplacer la base vide ; le fichier source n'est pas touche.
 
 Avec Scoop, rien a faire : << scoop update pecule >> conserve vos
 donnees d'une version a l'autre.

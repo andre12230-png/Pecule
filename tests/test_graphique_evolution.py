@@ -47,3 +47,12 @@ def test_le_mois_en_cours_est_signale(qapp, tmp_path):
     assert axe.categories()[-1].endswith("*")
     assert vue.bar_note.isVisibleTo(vue)
     assert "n'est pas terminé" in vue.bar_note.text()
+
+
+def test_le_nom_du_mois_et_son_asterisque_ne_sont_pas_tronques(qapp, tmp_path):
+    """Qt doit conserver le nom entier, même avec le repère du mois incomplet."""
+    vue = _vue(tmp_path)
+    axe = next(a for a in vue.bar_chart.axes()
+               if isinstance(a, QBarCategoryAxis))
+    assert axe.categories()[-1].endswith("*")
+    assert not axe.truncateLabels()

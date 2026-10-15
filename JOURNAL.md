@@ -21,6 +21,66 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-15 (6) — Impression : demande des utilisateurs, prévue après la sortie
+
+**Fait.** Rien dans le code. Constat : seul le rapport mensuel s'imprime, et
+il faut ouvrir « 🖨 Rapport mensuel » puis « Imprimer… » pour le trouver.
+Plan retenu : une entrée « 🖨 Imprimer… » au menu de gauche, qui demande quoi
+imprimer — le rapport du mois, les opérations affichées, le Bilan avec ses
+graphiques — puis montre un aperçu. En couleur sur fond blanc, même en mode
+sombre ; rien qui repose sur la couleur seule (signe « - », noms et
+pourcentages écrits) pour les imprimantes noir et blanc.
+**Pourquoi.** Plusieurs utilisateurs ont demandé comment imprimer ; ils
+veulent pouvoir imprimer les trois. Décision d'André : après la sortie du
+01/11, pour ne pas refaire une version déjà construite et vérifiée.
+**Reste.** Tout est à faire, après le 01/11, pour une publication début
+décembre. Les opérations et le Bilan n'ont aucune impression aujourd'hui.
+
+## 2026-10-15 (5) — Version 1.41.22 préparée pour la sortie
+
+**Fait.** Correction du libellé du graphique « Évolution sur 12 mois » : le
+nom du mois et l’astérisque restent visibles. Le contrôle de livraison a
+réussi sur **853 tests sur 853**. Les captures fictives du Bilan ont été
+vérifiées en clair et sombre en janvier et juillet ; quatre captures
+promotionnelles ont été refaites avec le jeu de démonstration. Le ZIP et
+l’installeur 1.41.22 ont été construits ; le dossier autonome contient 180
+fichiers. Les manifestes Scoop et Winget 1.41.22 sont préparés localement.
+Un test supplémentaire de cohérence des manifestes a d'abord échoué sur
+l'empreinte Winget, puis réussi après correction : l'empreinte est bien celle
+du ZIP, comme dans Scoop. La version 1.41.22 est installée localement ; le
+programme précédent et ses bibliothèques sont conservés. Le fichier de
+comptes a exactement la même empreinte avant et après la mise à jour.
+La première fabrication a échoué au démarrage : des bibliothèques Windows
+provenant d'un autre outil avaient été collectées depuis PATH. La version
+précédente a été rétablie, puis le programme reconstruit avec un PATH limité
+à Python et Windows. Le nouvel exécutable a été ouvert avec succès sur une
+base fictive avant son installation. Le contrôle de livraison partagé
+détecte désormais ces DLL ; ses 37 tests passent.
+**Pourquoi.** Préparer la sortie prévue sans publier les artefacts ni soumettre
+les manifestes avant la date choisie.
+**Reste.** Publier le 1er novembre, puis soumettre les manifestes Winget et
+mettre à jour Scoop. Les liens des nouveaux manifestes ne seront disponibles
+qu'une fois l'archive publiée.
+
+## 2026-10-15 (4) — Mode sombre et complétion relus dans l’interface
+
+**Fait.** La copie de la version 1.41.21 a été ouverte sur une base d’essai
+contenant trois opérations fictives. Le Bilan et le formulaire de saisie ont
+été regardés en mode sombre. Dans la catégorie, « alim » propose
+« alimENTATION » ; la touche Tab complète le champ en « ALIMENTATION ».
+Le formulaire a été annulé et la fenêtre fermée sans enregistrer : la base
+contient toujours ses trois opérations. À 1282 × 832, le nom du dernier mois
+de l’axe du graphique « Évolution sur 12 mois » est tronqué (« O… »), alors
+que le graphique du solde affiche « Oct ».
+**Pourquoi.** Vérifier dans l’application empaquetée le cas de complétion qui
+n’était pas couvert par les essais clavier automatisés, et relire le mode
+sombre sur des données fictives.
+**Reste.** Défaut de libellé tronqué du graphique à examiner. `py -m pytest`
+n’a pas pu démarrer : aucun Python installé n’est enregistré auprès du
+lanceur. Les 852 tests réussis sont le dernier chiffre du contrôle précédent,
+pas une vérification de cette séance. Pour la sortie du 01/11, mettre à jour
+le README et le site (encore en 1.41.2), Scoop (1.41.2) et préparer la mise à
+jour Winget (1.23.0).
 
 ## 2026-10-15 (3) — Version 1.41.21 installée : reprise par copie vérifiée
 

@@ -972,7 +972,9 @@ SYNC_VERSION = 3
 # 1.41.21 : Reprendre un ancien fichier de donnees passe par une copie
 #           verifiee avant de remplacer la base vide : une copie
 #           interrompue ou abimee la laisse intacte.
-APP_VERSION = "1.41.21"
+# 1.41.22 : Le graphique du Bilan garde le nom entier du mois et son
+#           astérisque quand le mois n'est pas terminé.
+APP_VERSION = "1.41.22"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
