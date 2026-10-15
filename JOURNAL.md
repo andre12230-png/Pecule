@@ -33,8 +33,9 @@ sans le .bat ; la correction est dans l'exe (`_verifier_copie`,
 identique avant et après la copie (SHA-256). Réserve `Pecule.exe.avant-1.41.21`.
 **Pourquoi.** Demande de l'auteur : installer la correction sans attendre la
 sortie du 01/11.
-**Reste.** Deux anciens exe en réserve (avant-1.41.20 et avant-1.41.21) : le
-premier à la Corbeille si l'auteur le veut.
+`Pecule.exe.avant-1.41.20` (l'exe 1.41.19) à la Corbeille avec l'accord de
+l'auteur ; `Pecule.exe.avant-1.41.21` seule réserve.
+**Reste.** Sortie du 01/11.
 
 ## 2026-10-15 (2) — Reprise d'un fichier : copie vérifiée avant de remplacer la base
 
