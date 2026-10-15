@@ -1102,11 +1102,31 @@ class MainWindow(QMainWindow):
                 "puis « Fusionner un export » ici : tous deux sont dans « ⚙️ "
                 "Paramètres », partie « Avancé ».")
             return False
+        # La copie se fait d'abord dans un fichier temporaire, à côté de la
+        # base, qui n'est mis à sa place qu'une fois vérifié. Copiée
+        # directement, une copie interrompue (disque plein, clé retirée)
+        # laissait une base à moitié écrite, alors que le message disait
+        # « Rien n'a été modifié » (audit du 13/10/2026).
+        temporaire = self.db.path + ".reprise.tmp"
+        try:
+            shutil.copy2(chemin, temporaire)
+            defaut = self._verifier_copie(chemin, temporaire)
+        except (OSError, sqlite3.Error) as e:
+            defaut = f"La copie a échoué :\n{erreur_en_clair(e)}"
+        if defaut:
+            self._effacer_sans_erreur(temporaire)
+            QMessageBox.critical(
+                self, "Reprendre mes données",
+                f"{defaut}\n\nRien n'a été modifié.")
+            return False
         try:
             self.db.conn.close()          # Windows refuse d'écraser un fichier ouvert
-            shutil.copy2(chemin, self.db.path)
+            # Remplacement d'un seul coup : la base est soit l'ancienne
+            # (vide), soit la copie vérifiée, jamais un mélange des deux.
+            os.replace(temporaire, self.db.path)
             self.db.rouvrir()
         except (OSError, sqlite3.Error) as e:
+            self._effacer_sans_erreur(temporaire)
             self.db.rouvrir()             # on retombe sur la base d'origine
             QMessageBox.critical(
                 self, "Reprendre mes données",
@@ -1126,13 +1146,56 @@ class MainWindow(QMainWindow):
             "la nouvelle base.")
         return True
 
+    @classmethod
+    def _verifier_copie(cls, original: str, copie: str) -> str:
+        """Message d'erreur si la copie n'est pas une base saine et complète,
+        sinon ''. Trois contrôles : l'intégrité vue par SQLite, les tables de
+        Pécule, et autant d'opérations que dans l'original."""
+        incomplete = ("La copie de ce fichier est incomplète ou abîmée "
+                      "(disque plein, clé retirée pendant la copie ?).")
+        defaut = cls._verifier_base_pecule(copie)
+        if defaut:
+            return defaut
+
+        def lire(chemin: str, requete: str):
+            # Lecture seule : on ne touche à aucun des deux fichiers.
+            conn = sqlite3.connect(f"file:{chemin}?mode=ro", uri=True)
+            try:
+                return conn.execute(requete).fetchone()[0]
+            finally:
+                conn.close()
+
+        try:
+            if lire(copie, "PRAGMA integrity_check") != "ok":
+                return incomplete
+            compte = "SELECT COUNT(*) FROM transactions"
+            if lire(copie, compte) != lire(original, compte):
+                return incomplete
+        except sqlite3.DatabaseError:
+            return incomplete
+        return ""
+
+    @staticmethod
+    def _effacer_sans_erreur(chemin: str) -> None:
+        """Retire un fichier temporaire, sans se plaindre s'il n'existe pas."""
+        try:
+            os.remove(chemin)
+        except OSError:
+            pass
+
     @staticmethod
     def _verifier_base_pecule(chemin: str) -> str:
         """Message d'erreur si ce fichier n'est pas une base Pécule, sinon ''."""
         try:
-            with sqlite3.connect(f"file:{chemin}?mode=ro", uri=True) as conn:
+            # Fermée explicitement : « with » ne ferme pas une connexion
+            # sqlite3, et un fichier resté ouvert ne peut plus être déplacé
+            # sous Windows (reprise par fichier temporaire, 15/10/2026).
+            conn = sqlite3.connect(f"file:{chemin}?mode=ro", uri=True)
+            try:
                 tables = {r[0] for r in conn.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'")}
+            finally:
+                conn.close()
         except sqlite3.Error:
             return ("Ce fichier n'est pas une base de données Pécule "
                     "(il n'a pas pu être ouvert).")

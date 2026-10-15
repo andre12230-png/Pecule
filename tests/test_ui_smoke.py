@@ -2124,6 +2124,88 @@ def test_reprendre_un_ancien_fichier_de_donnees(qapp, tmp_path, monkeypatch):
     assert len(temoin.list_tx()) == 3
 
 
+def _reprise_avec_copie_abimee(tmp_path, monkeypatch, copie):
+    """Prépare une reprise dont la copie est remplacée par `copie`, et la
+    lance. Rend la base courante, le dossier où elle vit, et le message
+    d'erreur affiché."""
+    import shutil as vrai_shutil
+    from PySide6.QtWidgets import QFileDialog, QMessageBox
+    from comptesbudget.ui import main_window as mw
+
+    ancienne = str(tmp_path / "ancienne" / "comptes.db")
+    os.makedirs(os.path.dirname(ancienne))
+    source = Database(ancienne)
+    source.set_setting("initial_balance", "1200")
+    for i in range(200):          # assez de pages pour qu'une moitié manque
+        source.insert_tx(_tx(id=f"a{i}", libelle=f"ANCIENNE {i} " + "x" * 80))
+    source.conn.close()
+
+    dossier = tmp_path / "neuve"
+    dossier.mkdir()
+    neuve = Database(str(dossier / "comptes.db"))
+    fenetre = mw.MainWindow(neuve)
+    messages = []
+    monkeypatch.setattr(QFileDialog, "getOpenFileName",
+                        staticmethod(lambda *a, **k: (ancienne, "")))
+    monkeypatch.setattr(QMessageBox, "critical",
+                        staticmethod(lambda _p, _t, texte: messages.append(texte)))
+    monkeypatch.setattr(QMessageBox, "information",
+                        staticmethod(lambda *a, **k: None))
+    monkeypatch.setattr(mw.shutil, "copy2",
+                        lambda src, dst: copie(vrai_shutil, src, dst))
+    assert fenetre.action_reprendre_donnees() is False
+    return neuve, dossier, messages
+
+
+def _base_saine(chemin) -> bool:
+    import sqlite3
+    with sqlite3.connect(str(chemin)) as conn:
+        try:
+            return conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+        except sqlite3.DatabaseError:
+            return False
+
+
+def test_reprise_interrompue_laisse_la_base_intacte(qapp, tmp_path, monkeypatch):
+    """La copie s'arrête à mi-chemin (disque plein, clé retirée) : la base
+    vide d'origine doit rester utilisable, comme le dit le message. Avant,
+    le fichier était copié directement à sa place et restait à moitié
+    écrit (audit Codex du 13/10/2026)."""
+    def copie_interrompue(sh, src, dst):
+        with open(src, "rb") as f:
+            debut = f.read()[: os.path.getsize(src) // 2]
+        with open(dst, "wb") as f:
+            f.write(debut)
+        raise OSError(28, "No space left on device")
+
+    neuve, dossier, messages = _reprise_avec_copie_abimee(
+        tmp_path, monkeypatch, copie_interrompue)
+    assert messages and "Rien n'a été modifié" in messages[0]
+    assert _base_saine(dossier / "comptes.db")
+    assert neuve.est_vide()
+    # Aucun fichier temporaire oublié à côté de la base.
+    assert sorted(p.name for p in dossier.iterdir()
+                  if not p.name.startswith("comptes.db.bak")) == ["comptes.db"]
+
+
+def test_reprise_d_une_copie_tronquee_refusee(qapp, tmp_path, monkeypatch):
+    """La copie se termine sans erreur mais le fichier obtenu est incomplet :
+    il est vérifié avant de remplacer la base, et refusé."""
+    def copie_tronquee(sh, src, dst):
+        with open(src, "rb") as f:
+            debut = f.read()[: os.path.getsize(src) // 2]
+        with open(dst, "wb") as f:
+            f.write(debut)
+
+    neuve, dossier, messages = _reprise_avec_copie_abimee(
+        tmp_path, monkeypatch, copie_tronquee)
+    assert messages and "Rien n'a été modifié" in messages[0]
+    assert _base_saine(dossier / "comptes.db")
+    assert neuve.est_vide()
+    assert sorted(p.name for p in dossier.iterdir()
+                  if not p.name.startswith("comptes.db.bak")) == ["comptes.db"]
+
+
 def test_reprendre_refuse_un_fichier_etranger(qapp, tmp_path):
     """Un fichier qui n'est pas une base Pécule est écarté avec un motif."""
     from comptesbudget.ui.main_window import MainWindow
