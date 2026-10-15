@@ -969,7 +969,10 @@ SYNC_VERSION = 3
 #           infobulle.
 # 1.41.20 : Verification de l'audit : la fusion d'un export JSON refuse
 #           un montant ou une date illisible avant toute ecriture.
-APP_VERSION = "1.41.20"
+# 1.41.21 : Reprendre un ancien fichier de donnees passe par une copie
+#           verifiee avant de remplacer la base vide : une copie
+#           interrompue ou abimee la laisse intacte.
+APP_VERSION = "1.41.21"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement
