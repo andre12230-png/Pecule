@@ -22,6 +22,24 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-15 (2) — Reprise d'un fichier : copie vérifiée avant de remplacer la base
+
+**Fait.** « Reprendre mes données » copie l'ancien `comptes.db` dans
+`comptes.db.reprise.tmp`, à côté de la base, le vérifie (intégrité SQLite,
+tables de Pécule, même nombre d'opérations que l'original), puis le met en
+place d'un seul coup (`os.replace`). En cas d'échec, le temporaire est effacé et
+la base vide reste intacte. `_verifier_base_pecule` ferme maintenant sa
+connexion : `with sqlite3.connect(...)` ne la fermait pas, et le temporaire
+resté ouvert ne pouvait plus être déplacé sous Windows (vu pendant la
+correction : le test de la reprise normale restait bloqué). Deux tests écrits
+d'abord (copie interrompue, copie tronquée sans erreur), en échec avant :
+l'appli plantait même sur « database disk image is malformed ». 852 tests sur
+852, aucune remarque ruff ajoutée. Commit local `5744198`.
+**Pourquoi.** Point ouvert de l'audit du 13/10 : une copie interrompue laissait
+une base à moitié écrite alors que le message disait « Rien n'a été modifié ».
+**Reste.** Pas d'exe construit (1.41.21 sur demande) ; partira avec la sortie
+du 01/11.
+
 ## 2026-10-15 — Installeur : même contrôle complet que l'archive
 
 **Fait.** `outils/faire_installeur.py` ne cherchait qu'un fichier de comptes au premier niveau de `dist/Pecule` ; il appelle désormais `verifier_contenu`, comme `faire_archive.py` : rien d'autre que le programme, à toutes les profondeurs. Tests d'abord (4 cas d'intrus faisaient aller l'installeur jusqu'à la compilation), 850 tests sur 850. Le vrai `dist/Pecule` passe le contrôle. Pas de nouvel exe : l'application ne change pas.
