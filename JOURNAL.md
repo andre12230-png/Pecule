@@ -22,6 +22,12 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-15 — Installeur : même contrôle complet que l'archive
+
+**Fait.** `outils/faire_installeur.py` ne cherchait qu'un fichier de comptes au premier niveau de `dist/Pecule` ; il appelle désormais `verifier_contenu`, comme `faire_archive.py` : rien d'autre que le programme, à toutes les profondeurs. Tests d'abord (4 cas d'intrus faisaient aller l'installeur jusqu'à la compilation), 850 tests sur 850. Le vrai `dist/Pecule` passe le contrôle. Pas de nouvel exe : l'application ne change pas.
+**Pourquoi.** Même angle mort trouvé ce jour dans les deux autres applis ; un relevé oublié dans un sous-dossier serait parti dans l'installeur, alors que l'archive l'aurait refusé.
+**Reste.** Rien pour ce point.
+
 ## 2026-10-14 (18) — Version 1.41.20 : contre-vérification d'A02 corrigée
 
 **Fait.** « 1_000 » est refusé, et surtout la fusion convertit elle-même
