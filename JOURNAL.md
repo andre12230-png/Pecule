@@ -22,6 +22,20 @@ La date la plus récente est en haut.
 ---
 
 
+## 2026-10-15 (3) — Version 1.41.21 installée : reprise par copie vérifiée
+
+**Fait.** Numéro 1.41.21 à ses trois endroits (commit `5d12602`). Contrôle de
+livraison vert (852 tests sur 852 ; notice, Lisez-moi et README relus : ils
+disent « copié, l'original n'est pas touché », toujours vrai). Exe construit
+sans le .bat ; la correction est dans l'exe (`_verifier_copie`,
+`_effacer_sans_erreur` et `.reprise.tmp` trouvés dans le module compilé). Titre
+« v1.41.21 » lu sur une base d'essai, puis dans l'installation ; `comptes.db`
+identique avant et après la copie (SHA-256). Réserve `Pecule.exe.avant-1.41.21`.
+**Pourquoi.** Demande de l'auteur : installer la correction sans attendre la
+sortie du 01/11.
+**Reste.** Deux anciens exe en réserve (avant-1.41.20 et avant-1.41.21) : le
+premier à la Corbeille si l'auteur le veut.
+
 ## 2026-10-15 (2) — Reprise d'un fichier : copie vérifiée avant de remplacer la base
 
 **Fait.** « Reprendre mes données » copie l'ancien `comptes.db` dans
