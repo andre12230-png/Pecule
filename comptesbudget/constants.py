@@ -974,7 +974,9 @@ SYNC_VERSION = 3
 #           interrompue ou abimee la laisse intacte.
 # 1.41.22 : Le graphique du Bilan garde le nom entier du mois et son
 #           astérisque quand le mois n'est pas terminé.
-APP_VERSION = "1.41.22"
+# 1.41.23 : Au tout premier lancement, Pecule demande Clair ou Sombre.
+#           Les releves CSV de LCL sans ligne de titres s'importent.
+APP_VERSION = "1.41.23"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

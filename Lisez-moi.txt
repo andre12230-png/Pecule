@@ -1,7 +1,8 @@
-PECULE - version 1.41.22
+PECULE - version 1.41.23
 
 NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
-- Choix du theme clair ou sombre dans Parametres.
+- Choix du theme clair ou sombre au tout premier lancement, puis dans Parametres.
+- Les releves CSV de LCL sans ligne de titres s'importent.
 - Les categories conservent les majuscules et minuscules saisies.
 - Rappel de sauvegarde externe lorsque la derniere copie date de plus de 30 jours.
 - Verifications renforcees avant import, fusion ou reprise d une base.

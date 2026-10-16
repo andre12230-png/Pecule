@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version **1.41.22**. Depuis la version publiée 1.41.2, choisissez le thème clair ou sombre dans Paramètres, gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
+> Version **1.41.23**. Depuis la version publiée 1.41.2, choisissez le thème clair ou sombre dès le premier lancement (puis dans Paramètres), importez les relevés CSV de LCL sans ligne de titres, gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
 
 ---
 
@@ -182,7 +182,8 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 - **Courbe du solde** : sur le Bilan, le solde en fin de mois sur douze mois,
   en trait plein pour ce qui est constaté, en pointillés pour ce qui est prévu.
 - Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
-- Choisissez le thème clair ou sombre dans Paramètres.
+- Choisissez le thème clair ou sombre au tout premier lancement, puis à tout moment dans Paramètres.
+- Les relevés CSV de LCL sans ligne de titres s'importent ; leurs deux lignes de solde sont écartées.
 - Sauvegarde externe : un rappel apparaît si la dernière copie date de plus de 30 jours.
 - Les catégories conservent les majuscules et minuscules tapées.
 - Les imports, fusions et reprises de base sont vérifiés avant validation ou remplacement.
