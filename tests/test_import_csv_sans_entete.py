@@ -1,7 +1,7 @@
 """Import d'un relevé CSV SANS ligne de titres (signalé par un utilisateur
-le 16/10/2026).
+de LCL le 16/10/2026, avec la version 1.41.2).
 
-Certaines banques exportent un fichier « T_cpte_<guichet>_<compte>_du_…_au_….csv »
+LCL exporte un fichier « T_cpte_<guichet>_<compte>_du_…_au_….csv »
 dont aucune ligne ne nomme les colonnes. Leur ordre est fixe :
 
     date ; montant ; type ; compte ; libellé débit ; libellé crédit ; code ; catégorie

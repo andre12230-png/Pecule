@@ -473,8 +473,8 @@ def diagnostiquer_fichier(path: str) -> Optional[str]:
 
 
 # ──────────── Relevé sans ligne de titres ────────────
-# Certaines banques exportent un fichier « T_cpte_<guichet>_<compte>_du_…_au_….csv »
-# qu'aucune ligne ne vient titrer (signalé par un utilisateur le 16/10/2026).
+# LCL exporte un fichier « T_cpte_<guichet>_<compte>_du_…_au_….csv » qu'aucune
+# ligne ne vient titrer (signalé par un utilisateur de LCL le 16/10/2026).
 # L'ordre de ses colonnes est fixe :
 #
 #   date ; montant ; type ; compte ; libellé débit ; libellé crédit ; code ; catégorie
