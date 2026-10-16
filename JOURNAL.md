@@ -21,6 +21,12 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-16 (5) — Version 1.41.23 installée
+
+**Fait.** Pécule était fermé. Ancien programme (1.41.22) mis en réserve : `Pecule.exe.avant-1.41.23`, `_internal.avant-1.41.23`, `Lisez-moi.txt.avant-1.41.23`. Exe, `_internal` (robocopy /MIR) et Lisez-moi de la 1.41.23 copiés. Base : même empreinte SHA-256 avant et après. Fichiers installés identiques un à un à ceux essayés sur dossier jetable (exe et 177 fichiers de `_internal`) ; numéro 1.41.23 lu dans l'exe. Contrôle en mode publication : tout est vert, sauf les captures, qui restent à regarder.
+**Pourquoi.** Demande de l'auteur : la version publiée doit être la dernière essayée chez lui.
+**Reste.** Pécule n'a pas été ouvert sur la vraie base : à l'auteur de le lancer. Deux réserves présentes (avant-1.41.22 et avant-1.41.23) : la plus ancienne est à mettre à la Corbeille si l'auteur le veut. Captures, puis `--captures-verifiees`.
+
 ## 2026-10-16 (4) — Sortie 1.41.23 préparée
 
 **Fait.** Numéro porté à 1.41.23 (constants, Lisez-moi, README, site) ; notes de version et manifestes Winget renommés de 1.41.22 en 1.41.23 et complétés des deux nouveautés (question Clair / Sombre au premier lancement, relevés CSV LCL sans titres). Exe construit sans le .bat ; les deux nouveautés vérifiées dans le programme compilé. Archive `Pecule-1.41.23-win64.zip` (180 fichiers, conforme) et installeur `Pecule-Setup.exe` (copie `Pecule-Setup-1.41.23.exe`) dans `dist/`. Empreinte reportée dans Scoop et Winget ; validation Winget locale réussie. Contrôle de livraison : 870 tests sur 870, aucune DLL parasite, confidentialité sans alerte. L'exe démarre sur un dossier jetable, titre v1.41.23 ; il ne repose pas la question à un utilisateur qui a déjà choisi son thème. Ligne « Version publiée » du README remise au format attendu par le contrôle. Commits locaux `ca479d3`, `bd53a2b`, `b46b5a3`, `0703bc1`.
