@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version **1.41.23**. Depuis la version publiée 1.41.2, choisissez le thème clair ou sombre dès le premier lancement (puis dans Paramètres), importez les relevés CSV de LCL sans ligne de titres, gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
+> Version publiée : **1.41.23**. Depuis la version 1.41.2, choisissez le thème clair ou sombre dès le premier lancement (puis dans Paramètres), importez les relevés CSV de LCL sans ligne de titres, gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
 
 ---
 
