@@ -25,7 +25,7 @@ La date la plus récente est en haut.
 
 **Fait.** Pécule était fermé. Ancien programme (1.41.22) mis en réserve : `Pecule.exe.avant-1.41.23`, `_internal.avant-1.41.23`, `Lisez-moi.txt.avant-1.41.23`. Exe, `_internal` (robocopy /MIR) et Lisez-moi de la 1.41.23 copiés. Base : même empreinte SHA-256 avant et après. Fichiers installés identiques un à un à ceux essayés sur dossier jetable (exe et 177 fichiers de `_internal`) ; numéro 1.41.23 lu dans l'exe. Contrôle en mode publication : tout est vert, sauf les captures, qui restent à regarder.
 **Pourquoi.** Demande de l'auteur : la version publiée doit être la dernière essayée chez lui.
-**Reste.** Pécule n'a pas été ouvert sur la vraie base : à l'auteur de le lancer. Deux réserves présentes (avant-1.41.22 et avant-1.41.23) : la plus ancienne est à mettre à la Corbeille si l'auteur le veut. Captures, puis `--captures-verifiees`.
+**Reste.** Pécule n'a pas été ouvert sur la vraie base : à l'auteur de le lancer. Réserve avant-1.41.22 (exe, `_internal`, Lisez-moi) mise à la Corbeille le même jour avec l'accord de l'auteur ; avant-1.41.23 reste seule ; base vérifiée identique après. Captures, puis `--captures-verifiees`.
 
 ## 2026-10-16 (4) — Sortie 1.41.23 préparée
 
