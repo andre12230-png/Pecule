@@ -472,6 +472,63 @@ def diagnostiquer_fichier(path: str) -> Optional[str]:
         return None
 
 
+# ──────────── Relevé sans ligne de titres ────────────
+# Certaines banques exportent un fichier « T_cpte_<guichet>_<compte>_du_…_au_….csv »
+# qu'aucune ligne ne vient titrer (signalé par un utilisateur le 16/10/2026).
+# L'ordre de ses colonnes est fixe :
+#
+#   date ; montant ; type ; compte ; libellé débit ; libellé crédit ; code ; catégorie
+#
+# Le libellé est dans la 5e colonne pour une dépense, dans la 6e pour une
+# rentrée. La première et la dernière ligne donnent le solde du compte au début
+# et à la fin de la période : seule la case « compte » y est remplie, ce ne
+# sont pas des opérations.
+
+# Nombre minimal de colonnes : jusqu'au libellé de crédit compris.
+COLONNES_SANS_ENTETE = 6
+
+
+def _forme_sans_entete(cellules: list[str]) -> bool:
+    """Vrai si cette ligne a la forme du relevé sans titres : une date
+    française, puis un montant lisible, et au moins six colonnes."""
+    return (len(cellules) >= COLONNES_SANS_ENTETE
+            and parse_french_date(cellules[0]) is not None
+            and lire_montant(cellules[1]) is not None)
+
+
+def releve_sans_entete_vers_csv(texte: str) -> Optional[str]:
+    """Réécrit un relevé sans titres (cf. ci-dessus) sous la forme d'un CSV
+    titré, pour qu'il passe par la mécanique d'import habituelle — comme le
+    QIF (qif_import.qif_vers_csv). Retourne None si le fichier n'a pas
+    EXACTEMENT cette forme à chaque ligne : mieux vaut refuser avec le message
+    d'aide que deviner les colonnes d'un autre fichier."""
+    lignes = [ln for ln in texte.splitlines() if ln.strip()]
+    if not lignes:
+        return None
+    rangees = list(csv.reader(io.StringIO("\n".join(lignes)), delimiter=";"))
+    if not all(_forme_sans_entete(r) for r in rangees):
+        return None
+
+    tampon = io.StringIO()
+    ecrivain = csv.writer(tampon, delimiter=";", lineterminator="\n")
+    ecrivain.writerow(["Date", "Montant", "Type operation", "Libelle",
+                       "Categorie", "Sous categorie"])
+    operations = 0
+    for r in rangees:
+        type_op, compte = r[2].strip(), r[3].strip()
+        libelle = r[4].strip() or r[5].strip()
+        if not libelle and not type_op and compte:
+            continue                      # ligne de solde, pas une opération
+        # « Alimentation:Epicerie » : catégorie et sous-catégorie, comme
+        # dans le QIF.
+        brute = r[7].strip() if len(r) > 7 else ""
+        cat, _, sous = brute.partition(":")
+        ecrivain.writerow([r[0].strip(), r[1].strip(), type_op,
+                           libelle or type_op, cat.strip(), sous.strip()])
+        operations += 1
+    return tampon.getvalue() if operations else None
+
+
 def import_csv(path: str, db: Database) -> ResultatImport:
     """Lit un CSV bancaire français et insère les transactions.
     Retourne un ResultatImport (cf. la description de ses six compteurs)."""
@@ -495,6 +552,11 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             header_idx = i
             break
     if header_idx is None:
+        # Relevé sans ligne de titres, d'une forme connue : on le réécrit
+        # avec ses titres et on recommence (cf. releve_sans_entete_vers_csv).
+        titre = releve_sans_entete_vers_csv(text)
+        if titre is not None:
+            return import_csv_text(titre, db)
         # Le diagnostic dit la cause probable ; à défaut, l'aide générale.
         raise ValueError(diagnostiquer_releve(text)
                          or ("En-tête introuvable." + "\n\n" + AIDE_ENTETE))
