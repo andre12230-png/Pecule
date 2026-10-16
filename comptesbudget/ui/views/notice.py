@@ -210,8 +210,9 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
   </li>
 </ol>
 
-<p><b>Clair ou sombre ?</b> Pécule s'affiche en clair par défaut, que Windows
-soit réglé en mode clair ou sombre. Pour l'afficher en sombre : <code>⚙️ Paramètres</code>,
+<p><b>Clair ou sombre ?</b> La question vous est posée au tout premier lancement.
+Sans réponse, Pécule s'affiche en clair, que Windows
+soit réglé en mode clair ou sombre. Pour changer d'avis ensuite : <code>⚙️ Paramètres</code>,
 partie « Apparence », choisissez <b>Sombre</b> puis <b>Enregistrer</b>. Le changement
 s'applique au <b>prochain démarrage</b> de Pécule, pour tous vos comptes. Le rapport
 mensuel, lui, reste toujours clair, comme le papier où il s'imprime.</p>

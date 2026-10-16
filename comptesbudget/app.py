@@ -14,6 +14,8 @@ from .utils import (_app_dir, _data_dir, backup_db, BaseAbimee,
                     SauvegardeImpossible)
 from .database import Database
 from .labels import charger_alias
+from . import premier_theme
+from .constants import DB_PATH
 from .theme import CLAIR, SOMBRE, T, choisir_theme, lire_theme
 from .ui.main_window import MainWindow
 
@@ -302,6 +304,14 @@ def main():
             "déjà ouverte dans la barre des tâches.")
         return
     app._verrou_instance = verrou    # à garder vivant tant que l'appli tourne
+
+    # Tout premier lancement : demander Clair ou Sombre (16/10/2026, voir
+    # premier_theme.py). Après le verrou (pas de question si Pécule est déjà
+    # ouvert), avant la sauvegarde du jour et la fenêtre.
+    nom = premier_theme.demander_au_premier_lancement(None, DB_PATH)
+    if nom:
+        choisir_theme(nom)
+        appliquer_theme(app)
 
     # Sauvegarde quotidienne AVANT d'ouvrir la base. Un échec ne bloque pas
     # l'ouverture, mais il se dit : il passait inaperçu, et l'on croyait
