@@ -21,6 +21,51 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-16 (4) — Sortie 1.41.23 préparée
+
+**Fait.** Numéro porté à 1.41.23 (constants, Lisez-moi, README, site) ; notes de version et manifestes Winget renommés de 1.41.22 en 1.41.23 et complétés des deux nouveautés (question Clair / Sombre au premier lancement, relevés CSV LCL sans titres). Exe construit sans le .bat ; les deux nouveautés vérifiées dans le programme compilé. Archive `Pecule-1.41.23-win64.zip` (180 fichiers, conforme) et installeur `Pecule-Setup.exe` (copie `Pecule-Setup-1.41.23.exe`) dans `dist/`. Empreinte reportée dans Scoop et Winget ; validation Winget locale réussie. Contrôle de livraison : 870 tests sur 870, aucune DLL parasite, confidentialité sans alerte. L'exe démarre sur un dossier jetable, titre v1.41.23 ; il ne repose pas la question à un utilisateur qui a déjà choisi son thème. Ligne « Version publiée » du README remise au format attendu par le contrôle. Commits locaux `ca479d3`, `bd53a2b`, `b46b5a3`, `0703bc1`.
+**Pourquoi.** Décision de l'auteur : la sortie du 01/11 portera la question Clair / Sombre ; la 1.41.22 préparée n'est jamais sortie.
+**Reste.** Installer la 1.41.23 chez l'auteur avant la sortie (le contrôle en mode publication l'exige). Captures du site : l'écran principal n'a pas changé, les regarder puis relancer le contrôle avec `--captures-verifiees`. Page « Mon relevé ne s'importe pas » du site à compléter pour LCL. Installeur réel non essayé. Rien publié ni poussé.
+
+## 2026-10-16 (3) — Relevé CSV sans ligne de titres
+
+**Fait.** Un utilisateur de LCL (version 1.41.2) a envoyé un relevé « T_cpte_<guichet>_<compte>_du_…_au_….csv » refusé avec « Aucune ligne de ce fichier ne nomme les colonnes ». Ce fichier n'a pas de titres et suit un ordre fixe : date, montant, type, compte, libellé de débit, libellé de crédit, code, catégorie ; la première et la dernière ligne donnent le solde du compte. Nouvelle fonction `releve_sans_entete_vers_csv` (`csv_import.py`) : quand aucune ligne de titres n'est trouvée et que CHAQUE ligne a cette forme, le fichier est réécrit en mémoire avec ses titres (comme le QIF) ; lignes de solde écartées, libellé pris dans l'une ou l'autre colonne, « Alimentation:Epicerie » découpé en catégorie et sous-catégorie. Test d'abord (7 tests, données inventées), suite complète : 870 tests réussis. Essai sur une copie du vrai fichier dans une base jetable : toutes les opérations lues, les deux soldes écartés, réimport sans doublon. Commit local `508332f`.
+**Pourquoi.** Ce format ne pouvait pas être corrigé simplement par l'utilisateur : ajouter une ligne de titres aurait importé les deux soldes comme des opérations et perdu les libellés des rentrées.
+**Reste.** Pas dans la 1.41.22 préparée : il entrera dans la 1.41.23 avec la question Clair / Sombre. Les deux soldes du fichier ne concordent pas avec la somme de ses opérations (achats carte à débit différé ?) : Pécule ne s'en sert pas. Mettre à jour la page « Mon relevé ne s'importe pas » du site à la prochaine sortie.
+
+## 2026-10-16 (2) — Clair ou Sombre demandé au tout premier lancement
+
+**Fait.** Nouveau module `comptesbudget/premier_theme.py` : au premier lancement, après le verrou et avant la sauvegarde du jour et la fenêtre, une petite boîte demande « Clair » ou « Sombre » (Clair par défaut) et rappelle Paramètres › Apparence. Le choix est enregistré avec la vérification habituelle et s'applique tout de suite. Posée seulement à un nouvel utilisateur : aucun thème choisi et pas encore de `comptes.db`. Notice complétée. 9 tests ajoutés ; suite complète : 863 tests réussis. Essai à l'écran sur une base vide et des préférences jetables : question, Sombre, accueil et fenêtre en sombre, Paramètres coché sur Sombre, question non reposée. Commit local `5245858`.
+**Pourquoi.** Demande de l'auteur, la même dans les trois applications : le mode sombre était caché dans Paramètres, où un nouvel utilisateur ne le cherche pas.
+**Reste.** La 1.41.22 préparée pour la sortie du 01/11 ne contient pas ce changement : pour l'inclure, passer en 1.41.23 (journal de version de `constants.py` compris) et refaire ZIP, installeur et fiches Scoop/Winget, dont l'empreinte change. Installeur réel non essayé.
+
+## 2026-10-16 — Analyse critique de Pécule
+
+**Suivi Notion.** Les pages des idées et des priorités ont été actualisées : deux défauts confirmés, cinq améliorations proposées, résultats des 854 tests et des 21 captures, référence au PDF du Bureau. Cinq modifications ciblées relues dans les deux pages ; historique et autres projets conservés, corrections non engagées, impression maintenue après la sortie de novembre.
+
+**Complément.** Analyse complète mise en PDF de trois pages, contrôlée en texte et en image, puis déposée sur le Bureau.
+
+**Fait.** Analyse de la version locale 1.41.22, sans correction du programme
+ni lecture des données d'usage. Les 854 tests recensés ont réussi (72,75 s).
+Vingt et une captures natives sur données fictives : cinq onglets en janvier
+et juillet en clair, cinq en juillet en sombre, saisie dans les deux thèmes
+et quatre vues sans données, à 1280 × 689 pour la fenêtre principale.
+Deux défauts constatés : le menu est rogné de 14 px à droite quand sa barre
+verticale apparaît ; le graphique des dépenses conseille de changer de
+période même si toute la base est vide. Le Bilan mélange un solde du jour
+et des indicateurs de la période, et reste dense sur petite fenêtre.
+Un exemple fictif confirme que « Virements internes » affecte le taux
+d'épargne, contrairement à « Épargne » ; ce choix doit être clarifié.
+**Pourquoi.** Distinguer les défauts reproduits des préférences visuelles et
+des évolutions possibles, avant de décider d'une nouvelle série de travaux.
+Les protections des imports, suppressions et sauvegardes, les états vides
+et les deux thèmes constituent des points forts à conserver.
+**Reste.** Choisir les corrections et améliorations : menu, guidage vide,
+hiérarchie du Bilan, sens des analyses et des dates, aide à la saisie.
+L'impression élargie reste déjà prévue après la sortie de novembre.
+Pas d'essai avec lecteur d'écran, grossissement Windows, gros historique,
+incident disque réel ni installeur ; aucun essai sur les données d'usage.
+
 ## 2026-10-15 (6) — Impression : demande des utilisateurs, prévue après la sortie
 
 **Fait.** Rien dans le code. Constat : seul le rapport mensuel s'imprime, et
