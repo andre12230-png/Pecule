@@ -1,4 +1,4 @@
-PECULE - version 1.41.23
+PECULE - version 1.41.24
 
 NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
 - Choix du theme clair ou sombre au tout premier lancement, puis dans Parametres.

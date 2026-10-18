@@ -976,7 +976,9 @@ SYNC_VERSION = 3
 #           astérisque quand le mois n'est pas terminé.
 # 1.41.23 : Au tout premier lancement, Pecule demande Clair ou Sombre.
 #           Les releves CSV de LCL sans ligne de titres s'importent.
-APP_VERSION = "1.41.23"
+# 1.41.24 : Notice : la phrase de la recherche globale est accordee
+#           (« quelle que soit la periode choisie »).
+APP_VERSION = "1.41.24"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

@@ -100,3 +100,15 @@ def test_toute_la_periode_porte_le_meme_nom_partout():
               for ligne, texte in _textes_affiches(chemin)
               if re.search(r"[Tt]outes périodes", texte)]
     assert not fautes, ", ".join(fautes)
+
+
+def test_toute_la_periode_sans_faute_d_accord():
+    """Le remplacement de « toutes périodes » par « Toute la période » (08/10)
+    avait laissé « toute la période confondues » dans la Notice : un pluriel
+    accroché à un singulier. Trouvé à l'audit du 18/10/2026."""
+    fautes = [f"{chemin.name}:{ligne}"
+              for chemin in sorted(RACINE.rglob("*.py"))
+              for ligne, texte in _textes_affiches(chemin)
+              if re.search(r"[Tt]oute la période,?\s+(confondu|compris)es",
+                           texte)]
+    assert not fautes, ", ".join(fautes)

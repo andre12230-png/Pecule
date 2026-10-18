@@ -790,7 +790,7 @@ la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
 ou bouton ✏️.</p>
 
 <h3>🔎 Recherche globale (<kbd>Ctrl+F</kbd>)</h3>
-<p>Recherche dans <b>tout l'historique</b>, toute la période confondues : libellé,
+<p>Recherche dans <b>tout l'historique</b>, quelle que soit la période choisie : libellé,
 note, catégorie, montant ou date. Les montants peuvent être tapés comme à l'écran :
 <code>-45,30 €</code> fonctionne (le signe et le € sont ignorés). Plusieurs mots =
 tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
