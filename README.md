@@ -133,7 +133,7 @@ automatique, motif → catégorie), dans la section Réglages ; la **📖 Notice
 sous-catégories** (tri, fusion, renommage), dans le menu **🧹 Mettre au
 propre…**.
 
-Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
+Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA / LCL,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
 **export CSV** des opérations affichées (pour Excel),
@@ -379,7 +379,7 @@ flowchart TD
     end
     subgraph F_G ["Fondation"]
         F
-        FF["constants · utils · database · accords · erreurs · sauvegarde_externe"]
+        FF["constants · utils · database · accords · erreurs · sauvegarde_externe · destinations"]
     end
 ```
 
@@ -391,12 +391,15 @@ comptesbudget/
 ├── __init__.py
 ├── __main__.py              Permet « py -m comptesbudget »
 ├── app.py                   main() : QApplication, palette, lancement
+├── theme.py                 Palettes clair et sombre (couleurs de l'interface)
+├── premier_theme.py         Choix Clair / Sombre au tout premier lancement (Qt)
 │
 │   ── Fondation (Python pur, sans Qt) ──
 ├── constants.py             Catégories, couleurs, règles d'harmonisation,
 │                            fréquences, chemins, numéro de version
 ├── utils.py                 Dates, formatage €, normalisation, sauvegarde
 ├── database.py              class Database (schéma + accès SQLite)
+├── destinations.py          Où un export peut écrire : refuse les fichiers de comptes
 │
 │   ── Logique métier (Python pur, sans Qt) ──
 ├── rules.py                 Auto-catégorisation (matches_rule, apply_rules_to_tx)
@@ -510,7 +513,7 @@ demande de le fermer au lieu de le fermer de force. L'installeur s'ajoute au
 ### Couches
 
 1. **Fondation** (`constants`, `utils`, `database`, `accords`, `erreurs`,
-   `sauvegarde_externe`) — données de configuration,
+   `sauvegarde_externe`, `destinations`) — données de configuration,
    utilitaires et accès SQLite. Aucune dépendance vers le reste.
 2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `ofx_import`,
    `qif_import`, `sync`) —
