@@ -21,6 +21,49 @@ La date la plus récente est en haut.
 
 ---
 
+## 2026-10-18 — 1.41.24 : phrase de la recherche globale accordée
+
+**Fait.** La Notice disait « Recherche dans tout l'historique, toute la période
+confondues » : un pluriel accroché à un singulier, laissé par le remplacement de
+« toutes périodes » du 08/10. Test d'abord (`test_toute_la_periode_sans_faute_d_accord`,
+en échec sur la phrase), puis « quelle que soit la période choisie ». Suite
+complète : 871 tests sur 871. Contrôle de livraison vert (deux « À VOIR »
+acceptés : ce journal non commité, l'entrée de la 1.41.24 pas encore écrite).
+Exe construit avec un PATH limité à Python et Windows, aucune DLL système
+embarquée ; phrase corrigée retrouvée dans le module extrait de l'exe ; essai
+sur une base fictive : titre « Pécule — v1.41.24 », fermeture propre.
+Installée chez l'auteur : base identique avant et après (empreinte), réserve
+« avant-1.41.24 » (exe, `_internal`, Lisez-moi).
+**Pourquoi.** Trouvé par l'audit des fichiers du 18/10 ; la faute était dans la
+1.41.23 prévue pour la sortie du 01/11.
+**Reste.** La sortie du 01/11 portera la 1.41.24 : ZIP, installeur, fiches Scoop
+et Winget, notes, README et site, préparés en 1.41.23, sont à refaire. Pécule
+n'a pas été ouvert sur la vraie base : à l'auteur de lire « v1.41.24 » dans le
+titre. Deux réserves présentes (avant-1.41.23, avant-1.41.24) : une de trop.
+
+## 2026-10-17 — Actualité de l’audit vérifiée
+
+**Complément.** À la demande de l’auteur, PDF actualisé et daté du 17 octobre :
+version 1.41.23, 870 tests, nouveautés depuis l’analyse et distinction entre
+la vérification du jour et les captures du 16 octobre. Trois pages contrôlées
+en texte et en image ; original du 16 octobre conservé sur le Bureau.
+
+**Fait.** Comparaison du PDF d’analyse du 16 octobre avec les sources locales
+1.41.23 et l’historique : les deux défauts restent présents (menu rogné quand
+la barre de défilement apparaît, conseil inadapté dans une base entièrement
+vide). Les cinq recommandations restent pertinentes ; les écrans concernés
+n’ont pas changé depuis la 1.41.22 examinée. Suite complète relancée :
+870 tests sur 870 réussis en 73,79 s. Les trois pages du PDF ont été relues.
+**Pourquoi.** Le rapport reste valable sur le fond, mais il mentionne encore
+la 1.41.22 et 854 tests. La 1.41.23 ajoute le choix du thème au premier
+lancement et la lecture des relevés LCL sans titres ; elle ne corrige pas
+les constats de cet audit.
+**Reste.** Aucune correction du programme engagée et
+aucun nouvel essai visuel de l’application : les 21 captures de l’audit
+n’ont pas été refaites. Exécutable installé, grossissement Windows,
+lecteur d’écran, gros historique et incidents disque non revérifiés.
+L’impression élargie reste prévue après la sortie de novembre.
+
 ## 2026-10-16 (5) — Version 1.41.23 installée
 
 **Fait.** Pécule était fermé. Ancien programme (1.41.22) mis en réserve : `Pecule.exe.avant-1.41.23`, `_internal.avant-1.41.23`, `Lisez-moi.txt.avant-1.41.23`. Exe, `_internal` (robocopy /MIR) et Lisez-moi de la 1.41.23 copiés. Base : même empreinte SHA-256 avant et après. Fichiers installés identiques un à un à ceux essayés sur dossier jetable (exe et 177 fichiers de `_internal`) ; numéro 1.41.23 lu dans l'exe. Contrôle en mode publication : tout est vert, sauf les captures, qui restent à regarder.
