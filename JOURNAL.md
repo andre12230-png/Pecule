@@ -25,7 +25,7 @@ La date la plus récente est en haut.
 
 **Fait.** Numéro 1.41.25 (les trois impressions de « 🖨 Imprimer… »). Contrôle de livraison : 882 tests sur 882, confidentialité et ruff sans remarque. Exe construit (version lue dans le fichier : 1.41.25) ; présence du module d'impression vérifiée dans l'archive de l'exe. Essayé sur une base inventée en mode sombre : titre « v1.41.25 », les trois aperçus s'ouvrent et restent clairs. Installé : base de l'auteur identique avant et après (empreinte SHA-256), 177 fichiers sur 177 dans `_internal`. Ancienne version gardée en réserve sous le suffixe `.avant-1.41.25` (exe, `_internal`, Lisez-moi), à côté de la réserve `.avant-1.41.24`.
 **Pourquoi.** L'auteur essaie les impressions chez lui avant la sortie du 01-11.
-**Reste.** Essai par l'auteur, sur ses comptes et sur une vraie imprimante. Ranger la réserve `.avant-1.41.24` (deux réserves au lieu d'une). Livrables de la sortie à refaire en 1.41.25.
+**Reste.** Essai par l'auteur, sur ses comptes et sur une vraie imprimante. La réserve `.avant-1.41.24` (la 1.41.23) a été rangée le même jour, avec l'accord de l'auteur, dans le dossier de quarantaine du ménage ; il ne reste que `.avant-1.41.25`. Livrables de la sortie à refaire en 1.41.25.
 
 ## 19-10-2026 (3) — Imprimer : le Bilan avec ses graphiques
 
