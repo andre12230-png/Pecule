@@ -21,6 +21,12 @@ La date la plus récente est en haut.
 
 ---
 
+## 19-10-2026 (4) — Version 1.41.25 installée chez l'auteur
+
+**Fait.** Numéro 1.41.25 (les trois impressions de « 🖨 Imprimer… »). Contrôle de livraison : 882 tests sur 882, confidentialité et ruff sans remarque. Exe construit (version lue dans le fichier : 1.41.25) ; présence du module d'impression vérifiée dans l'archive de l'exe. Essayé sur une base inventée en mode sombre : titre « v1.41.25 », les trois aperçus s'ouvrent et restent clairs. Installé : base de l'auteur identique avant et après (empreinte SHA-256), 177 fichiers sur 177 dans `_internal`. Ancienne version gardée en réserve sous le suffixe `.avant-1.41.25` (exe, `_internal`, Lisez-moi), à côté de la réserve `.avant-1.41.24`.
+**Pourquoi.** L'auteur essaie les impressions chez lui avant la sortie du 01-11.
+**Reste.** Essai par l'auteur, sur ses comptes et sur une vraie imprimante. Ranger la réserve `.avant-1.41.24` (deux réserves au lieu d'une). Livrables de la sortie à refaire en 1.41.25.
+
 ## 19-10-2026 (3) — Imprimer : le Bilan avec ses graphiques
 
 **Fait.** Troisième choix de « 🖨 Imprimer… » : « 🏠 Bilan avec graphiques ». Une copie du Bilan, pour la période choisie en haut, est construite hors écran en couleurs claires (le thème de l'écran est remis aussitôt, même en cas d'erreur), puis photographiée bloc par bloc : tuiles, bandeaux du mois et de la carte, alerte budget, les deux graphiques, la courbe du solde, les trois listes. Un bloc par image : une page ne coupe jamais un graphique. Le tour des blocs est blanc (pas le crème de la fenêtre) et le détail des bandeaux, lu au survol à l'écran, est écrit en entier. Les rappels propres à l'écran (sauvegarde, solde de départ, opérations antérieures) sont laissés de côté. 3 tests ajoutés (`test_impression_bilan.py`), dont un en mode sombre ; suite complète : 882 tests sur 882. PDF regardés sur une base inventée : un mois passé en sombre et le mois en cours en clair, une page chacun.
