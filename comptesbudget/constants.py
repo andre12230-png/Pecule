@@ -978,7 +978,11 @@ SYNC_VERSION = 3
 #           Les releves CSV de LCL sans ligne de titres s'importent.
 # 1.41.24 : Notice : la phrase de la recherche globale est accordee
 #           (« quelle que soit la periode choisie »).
-APP_VERSION = "1.41.24"
+# 1.41.25 : « Imprimer… » remplace « Rapport mensuel » dans le menu de
+#           gauche : rapport du mois, operations affichees (periode et
+#           filtres de l'ecran, non pointees comprises) et Bilan avec ses
+#           graphiques, toujours en clair, avec apercu et PDF.
+APP_VERSION = "1.41.25"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

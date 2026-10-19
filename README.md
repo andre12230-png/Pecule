@@ -422,7 +422,8 @@ comptesbudget/
     ├── flow_layout.py       FlowLayout : barre d'outils qui passe à la ligne
     ├── dialogs.py           Édition : transaction, réglages, règle, récurrence
     ├── assistants.py        Harmonisation, pré-remplissage du prévisionnel
-    ├── report.py            Rapport mensuel (HTML, aperçu, PDF, impression)
+    ├── report.py            Rapport du mois (HTML)
+    ├── impression.py        « Imprimer… » : aperçu commun, opérations, Bilan
     ├── search.py            Recherche globale (Ctrl+F)
     ├── recapitulatif.py     « Tous les comptes » : soldes côte à côte et total
     ├── avis.py              « Votre avis » : le questionnaire, dans le navigateur

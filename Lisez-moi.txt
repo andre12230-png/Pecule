@@ -1,4 +1,4 @@
-PECULE - version 1.41.24
+PECULE - version 1.41.25
 
 NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
 - Choix du theme clair ou sombre au tout premier lancement, puis dans Parametres.
@@ -8,6 +8,7 @@ NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
 - Verifications renforcees avant import, fusion ou reprise d une base.
 - La copie de reprise est controlee avant de remplacer la base vide ; le fichier source reste intact.
 - Dans le graphique « Evolution sur 12 mois », le mois en cours garde son nom complet et son asterisque.
+- Bouton « Imprimer... » : rapport du mois, liste des operations affichees (par mois, par annee, non pointees...) et Bilan avec ses graphiques, avec apercu et enregistrement en PDF.
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
