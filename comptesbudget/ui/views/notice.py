@@ -747,9 +747,10 @@ choisit au début de la rangée d'onglets, dès qu'il y a deux comptes.</p>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
-  <tr><td>🖨 Imprimer…</td><td>Ouvre les deux impressions ci-dessous, chacune avec un aperçu, l'impression et l'enregistrement en PDF</td></tr>
+  <tr><td>🖨 Imprimer…</td><td>Ouvre les trois impressions ci-dessous, chacune avec un aperçu, l'impression et l'enregistrement en PDF</td></tr>
   <tr><td>&nbsp;&nbsp;📄 Rapport du mois</td><td>Synthèse imprimable du mois : revenus, dépenses, budgets, plus grosses dépenses</td></tr>
   <tr><td>&nbsp;&nbsp;📋 Opérations affichées</td><td>La liste de l'onglet Opérations, avec la période et les filtres choisis</td></tr>
+  <tr><td>&nbsp;&nbsp;🏠 Bilan avec graphiques</td><td>Le Bilan de la période choisie : tuiles, bandeaux, graphiques et listes</td></tr>
   <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>🧹 Mettre au propre…</td><td>Ouvre les cinq outils ci-dessous</td></tr>
   <tr><td>&nbsp;&nbsp;🧽 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
@@ -798,7 +799,7 @@ note, catégorie, montant ou date. Les montants peuvent être tapés comme à l'
 tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 
 <h3>🖨 Imprimer</h3>
-<p>Le bouton <code>🖨 Imprimer…</code> du menu de gauche propose deux
+<p>Le bouton <code>🖨 Imprimer…</code> du menu de gauche propose trois
 impressions. Chacune s'ouvre sur un <b>aperçu</b>, d'où vous pouvez
 <b>imprimer</b> ou enregistrer en <b>PDF</b>. La feuille reste sur fond blanc,
 même en mode sombre, et se lit aussi en noir et blanc : les débits gardent leur
@@ -815,6 +816,13 @@ imprimer, réglez d'abord l'écran :</p>
 </ul>
 <p>Le haut de la feuille rappelle la période et les filtres utilisés ; le bas
 donne le total des débits, des crédits et le mouvement.</p>
+<p><b>🏠 Bilan avec graphiques</b> imprime le Bilan de la période choisie en
+haut de la fenêtre (un mois, une année ou toute la période) : les quatre
+tuiles, les bandeaux du mois, les graphiques et les trois listes. Il est
+toujours imprimé en couleurs claires, même si l'écran est en mode sombre, et
+le détail des bandeaux, qu'à l'écran on lit au survol, y est écrit en entier.
+Les rappels propres à l'écran (sauvegarde, solde de départ) n'y figurent
+pas.</p>
 <p><b>📄 Rapport du mois</b> génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
 top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.
 Il s'ouvre sur la période choisie en haut de la fenêtre : le mois affiché, ou,

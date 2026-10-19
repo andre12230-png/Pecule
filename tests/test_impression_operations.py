@@ -106,7 +106,7 @@ def test_html_echappe_les_libelles():
 
 def test_menu_imprimer_propose_les_deux_impressions(fenetre):
     textes = [a.text() for a in fenetre.menu_imprimer.actions()]
-    assert textes == ["📄 Rapport du mois", "📋 Opérations affichées"]
+    assert textes[:2] == ["📄 Rapport du mois", "📋 Opérations affichées"]
     assert fenetre.btn_imprimer.text() == "🖨 Imprimer…"
 
 

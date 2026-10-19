@@ -1,5 +1,5 @@
 """Impression : la fenêtre d'aperçu commune (PDF, imprimante) et la liste
-des opérations.
+des opérations, puis le Bilan avec ses graphiques.
 
 Plan retenu le 15/10/2026 et avancé à la sortie du 01/11/2026 : une entrée
 « 🖨 Imprimer… » au menu de gauche, qui demande quoi imprimer puis montre un
@@ -8,13 +8,16 @@ ne repose sur la couleur seule (signe « - », coche ✔ écrite), pour les
 imprimantes noir et blanc.
 """
 
+from datetime import date
 from html import escape as _esc   # « B&C » → « B&amp;C » : sinon le & casse le HTML
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QPalette
+from PySide6.QtCore import QPoint, Qt, QUrl
+from PySide6.QtGui import (
+    QColor, QImage, QPalette, QPixmap, QRegion, QTextDocument,
+)
 from PySide6.QtWidgets import (
     QDialog, QFileDialog, QHBoxLayout, QMessageBox, QPushButton, QTextBrowser,
-    QVBoxLayout,
+    QVBoxLayout, QWidget,
 )
 
 from ..accords import pluriel
@@ -213,3 +216,143 @@ class ApercuOperations(FenetreApercu):
         if self.vue.pt_filter.currentText() == "Non pointées":
             periode = "non-pointees"
         return f"operations-{periode}.pdf"
+
+
+# ── Bilan avec ses graphiques ───────────────────────────────────────────────
+
+# Largeur de la copie du Bilan photographiée (en pixels d'écran), puis de
+# chaque bloc sur la feuille. Plus étroite que l'écran, la copie garde des
+# textes lisibles une fois réduite à la largeur d'une page A4.
+LARGEUR_BILAN = 960
+LARGEUR_IMAGE = 640
+# Netteté : chaque bloc est photographié à deux fois la résolution de l'écran.
+FINESSE = 2
+
+
+def _photo(widget, rect, fond: str) -> QImage:
+    """Image d'une zone `rect` de `widget`, sur le fond `fond`."""
+    pix = QPixmap(rect.size() * FINESSE)
+    pix.setDevicePixelRatio(FINESSE)
+    pix.fill(QColor(fond))
+    # DrawChildren seul : sans DrawWindowBackground, Qt ne repeint pas le
+    # fond de la fenêtre par-dessus `fond`.
+    widget.render(pix, QPoint(0, 0), QRegion(rect),
+                  QWidget.RenderFlag.DrawChildren)
+    return pix.toImage()
+
+
+def photos_du_bilan(db, periode: str, date_mode: str) -> list:
+    """Photographie, bloc par bloc, une copie du Bilan construite hors écran
+    pour la période `periode`, TOUJOURS en couleurs claires : le papier est
+    blanc, même quand l'écran est en mode sombre. Un bloc par image : une
+    page de la feuille ne coupe jamais un graphique en deux.
+
+    Le Bilan prend ses couleurs dans le thème au moment où il se dessine : le
+    thème clair est donc posé le temps de la copie, puis celui de l'écran est
+    remis, quoi qu'il arrive."""
+    from PySide6.QtCharts import QChart
+    from PySide6.QtWidgets import QApplication
+    from .. import theme
+    from ..app import appliquer_theme, appliquer_theme_clair
+    from .views.bilan import BilanView
+
+    app = QApplication.instance()
+    ancien = theme.theme_actif()
+    changer = ancien != "clair"
+    if changer:
+        theme.choisir_theme("clair")
+        appliquer_theme_clair(app)
+    try:
+        vue = BilanView(db)
+        # Sans animation : la photo montrerait des barres à mi-hauteur.
+        for graphique in (vue.bar_chart, vue.pie_chart, vue.solde_chart):
+            graphique.setAnimationOptions(QChart.NoAnimation)
+        vue.period = periode
+        vue.date_mode = date_mode
+        # Jamais à l'écran : la copie n'existe que pour être photographiée.
+        vue.setAttribute(Qt.WA_DontShowOnScreen, True)
+        vue.resize(LARGEUR_BILAN, 900)
+        vue.show()
+        vue.refresh()
+        # À l'écran, les bandeaux renvoient le détail « au survol » : sur
+        # le papier, rien ne se survole, il est écrit en entier.
+        for etiquette, complet in ((vue.mois_detail, vue.mois_detail_complet),
+                                   (vue.cb_detail, vue.cb_detail_complet)):
+            if complet.strip():
+                etiquette.setText(complet)
+        app.processEvents()
+        contenu = vue.scroll.widget()
+        # Le crème de la fenêtre vient d'une règle de style posée sur la zone
+        # qui défile, héritée par tout le Bilan : la copie la rend
+        # transparente, le blanc du papier passe dessous.
+        vue.scroll.viewport().setStyleSheet("background: transparent;")
+        contenu.setAutoFillBackground(False)
+        # Hauteur naturelle du contenu : plus grande, les graphiques
+        # s'étireraient pour remplir la place.
+        vue.resize(LARGEUR_BILAN, contenu.sizeHint().height() + 4)
+        for _ in range(3):
+            app.processEvents()
+
+        def zone(*widgets):
+            visibles = [w for w in widgets if w.isVisible()]
+            if not visibles:
+                return None
+            r = visibles[0].geometry()
+            for w in visibles[1:]:
+                r = r.united(w.geometry())
+            # Un peu d'air autour du bloc, au fond de la page.
+            return r.adjusted(-6, -6, 6, 6)
+
+        # Les rappels propres à l'écran (sauvegarde, solde de départ,
+        # opérations antérieures) n'ont rien à faire sur le papier.
+        blocs = [
+            zone(*vue.kpis.values()),
+            zone(vue.mois_banner),
+            zone(vue.cb_banner),
+            zone(vue.budget_alert),
+            zone(vue.bar_panel, vue.pie_view.parentWidget()),
+            zone(vue.solde_panel),
+            zone(vue.list_dep.parentWidget(), vue.list_rev.parentWidget(),
+                 vue.list_top.parentWidget()),
+        ]
+        # Autour des blocs, le blanc du papier plutôt que le crème de la
+        # fenêtre : pas d'encre dépensée pour rien.
+        images = [_photo(contenu, r, "#FFFFFF") for r in blocs if r is not None]
+        vue.close()
+        vue.deleteLater()
+    finally:
+        if changer:
+            theme.choisir_theme(ancien)
+            appliquer_theme(app)
+    return images
+
+
+class ApercuBilan(FenetreApercu):
+    """Aperçu du Bilan de la période choisie, avec ses graphiques."""
+
+    def __init__(self, parent, db, vue_bilan):
+        super().__init__(parent, db, "Imprimer le Bilan")
+        self.periode = vue_bilan.period
+        self.images = photos_du_bilan(db, vue_bilan.period, vue_bilan.date_mode)
+
+        compte = db.nom_compte() if len(db.list_comptes()) > 1 else ""
+        suffixe = f" — {_esc(compte)}" if compte else ""
+        quelle_date = ("date de valeur" if vue_bilan.date_mode == "valeur"
+                       else "date d'opération")
+        H = [f"<h1>📒 Pécule — Bilan{suffixe}</h1>",
+             f"<p>Période : {_esc(period_label(self.periode))}<br>"
+             f"<i>Opérations datées à la {quelle_date}. Généré le "
+             f"{fmt_date_fr(date.today().isoformat())}.</i></p>"]
+        doc = self.browser.document()
+        for i, image in enumerate(self.images):
+            nom = f"bilan-{i}.png"
+            doc.addResource(QTextDocument.ImageResource, QUrl(nom), image)
+            # Taille en points de la page : la largeur fixe, la hauteur suit.
+            larg = image.width() / FINESSE
+            haut = round(image.height() / FINESSE * LARGEUR_IMAGE / larg)
+            H.append(f'<p><img src="{nom}" width="{LARGEUR_IMAGE}" '
+                     f'height="{haut}"></p>')
+        self.browser.setHtml("\n".join(H))
+
+    def nom_pdf(self) -> str:
+        return f"bilan-{'tout' if self.periode == 'all' else self.periode}.pdf"

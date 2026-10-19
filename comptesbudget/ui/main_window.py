@@ -38,7 +38,7 @@ from ..sync import (
 from .widgets import PeriodBar, confirmer, demander_montant
 from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
-from .impression import ApercuOperations
+from .impression import ApercuBilan, ApercuOperations
 from .report import MonthlyReportDialog
 from .search import GlobalSearchDialog
 from .views.operations import OperationsView
@@ -205,14 +205,17 @@ class MainWindow(QMainWindow):
                 ("📋 Opérations affichées", self.action_imprimer_operations,
                  "La liste de l'onglet Opérations, telle qu'elle est "
                  "affichée : période choisie en haut (mois, année ou "
-                 "toute la période), filtres (non pointées…) et tri")):
+                 "toute la période), filtres (non pointées…) et tri"),
+                ("🏠 Bilan avec graphiques", self.action_imprimer_bilan,
+                 "Le Bilan de la période choisie en haut : tuiles, "
+                 "bandeaux, graphiques et listes, sur fond clair")):
             act = self.menu_imprimer.addAction(texte)
             act.setToolTip(aide)
             act.triggered.connect(action)
         self.btn_imprimer = add_btn(
             "🖨 Imprimer…", None,
-            "Imprimer ou enregistrer en PDF le rapport du mois ou la liste "
-            "des opérations, après un aperçu")
+            "Imprimer ou enregistrer en PDF le rapport du mois, la liste "
+            "des opérations ou le Bilan, après un aperçu")
         self.btn_imprimer.setMenu(self.menu_imprimer)
 
         add_section("Mes données")
@@ -1462,6 +1465,10 @@ class MainWindow(QMainWindow):
                 "haut, ou remettez « Toutes » ou « Tous » dans ses filtres.")
             return
         ApercuOperations(self, self.db, self.ops_view).exec()
+
+    def action_imprimer_bilan(self):
+        """Aperçu du Bilan de la période choisie, avec ses graphiques."""
+        ApercuBilan(self, self.db, self.bilan_view).exec()
 
     def action_search(self):
         dlg = GlobalSearchDialog(self, self.db)
