@@ -38,6 +38,7 @@ from ..sync import (
 from .widgets import PeriodBar, confirmer, demander_montant
 from .dialogs import SettingsDialog, ComptesDialog, ArchivesDialog
 from .assistants import HarmonizeDialog, HarmonizeLabelsDialog, DuplicatesDialog
+from .impression import ApercuOperations
 from .report import MonthlyReportDialog
 from .search import GlobalSearchDialog
 from .views.operations import OperationsView
@@ -191,8 +192,28 @@ class MainWindow(QMainWindow):
         add_btn("🔎 Rechercher", self.action_search,
                 "Recherche dans tout l'historique (Ctrl+F) : "
                 "libellé, note, catégorie, montant, date")
-        add_btn("🖨 Rapport mensuel", self.action_monthly_report,
-                "Bilan du mois : synthèse, budgets, dépenses — aperçu, PDF ou impression")
+        # « Imprimer… » remplace « Rapport mensuel » (19/10/2026) : un seul
+        # bouton, qui demande quoi imprimer, puis montre un aperçu. Le menu
+        # garde ainsi sa hauteur (il doit tenir sur un portable 1366 × 768).
+        # Pas d'emoji 🖨 dans le sous-menu : il reprendrait celui du bouton.
+        self.menu_imprimer = QMenu(self)
+        self.menu_imprimer.setToolTipsVisible(True)
+        for texte, action, aide in (
+                ("📄 Rapport du mois", self.action_monthly_report,
+                 "Synthèse du mois : revenus, dépenses, budgets, "
+                 "plus grosses dépenses"),
+                ("📋 Opérations affichées", self.action_imprimer_operations,
+                 "La liste de l'onglet Opérations, telle qu'elle est "
+                 "affichée : période choisie en haut (mois, année ou "
+                 "toute la période), filtres (non pointées…) et tri")):
+            act = self.menu_imprimer.addAction(texte)
+            act.setToolTip(aide)
+            act.triggered.connect(action)
+        self.btn_imprimer = add_btn(
+            "🖨 Imprimer…", None,
+            "Imprimer ou enregistrer en PDF le rapport du mois ou la liste "
+            "des opérations, après un aperçu")
+        self.btn_imprimer.setMenu(self.menu_imprimer)
 
         add_section("Mes données")
         # Les sauvegardes automatiques restent sur le même disque que la
@@ -1430,6 +1451,17 @@ class MainWindow(QMainWindow):
         # Le rapport s'ouvre sur la période choisie dans la barre du haut
         MonthlyReportDialog(self, self.db,
                             self.period_bar.current_period()).exec()
+
+    def action_imprimer_operations(self):
+        """Aperçu de la liste de l'onglet Opérations, avec ses filtres."""
+        if not self.ops_view.filtered:
+            QMessageBox.information(
+                self, "Imprimer les opérations",
+                "Aucune opération n'est affichée dans l'onglet Opérations : "
+                "il n'y a rien à imprimer.\nChoisissez une autre période en "
+                "haut, ou remettez « Toutes » ou « Tous » dans ses filtres.")
+            return
+        ApercuOperations(self, self.db, self.ops_view).exec()
 
     def action_search(self):
         dlg = GlobalSearchDialog(self, self.db)

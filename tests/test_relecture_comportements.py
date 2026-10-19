@@ -236,7 +236,7 @@ def test_ordre_du_menu_de_gauche(qapp, db):
         # Le nom en tête, comme les deux autres applis (11/10/2026).
         "# Pécule", "# Vos comptes et votre budget",
         "# SAISIE", "➕ Nouvelle opération", "📥 Importer un relevé",
-        "# CONSULTER", "🔎 Rechercher", "🖨 Rapport mensuel",
+        "# CONSULTER", "🔎 Rechercher", "🖨 Imprimer…",
         "# MES DONNÉES", "💾 Sauvegarde externe", "🧹 Mettre au propre…",
         "📦 Archiver", "📂 Reprendre un fichier",
         "# RÉGLAGES", "🧠 Règles auto", "🏦 Mes comptes", "⚙️ Paramètres",

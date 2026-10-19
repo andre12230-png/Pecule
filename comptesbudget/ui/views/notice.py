@@ -487,7 +487,7 @@ existe là-bas — pratique pour comparer un même mois d'une année sur l'autre
 quand vous y êtes déjà. Au clavier : <code>Ctrl+←</code> mois précédent,
 <code>Ctrl+→</code> mois suivant, <code>Ctrl+Origine</code> mois en cours (dans
 une zone de saisie, <code>Ctrl+←</code> et <code>Ctrl+→</code> gardent leur rôle
-habituel : sauter d'un mot). Le <b>Rapport mensuel</b> a le même sélecteur, sans
+habituel : sauter d'un mot). Le <b>Rapport du mois</b> (bouton <b>🖨 Imprimer…</b>) a le même sélecteur, sans
 « Toute la période » ni « Toute l'année » puisqu'il porte sur un seul mois.</p>
 <p>L'application <b>s'ouvre toujours sur le mois en cours</b> : elle ne se
 souvient pas de la période que vous consultiez la fois précédente, pour ne pas
@@ -747,7 +747,9 @@ choisit au début de la rangée d'onglets, dès qu'il y a deux comptes.</p>
   <tr><td>➕ Nouvelle opération</td><td>Saisie manuelle d'une opération</td></tr>
   <tr><td>📥 Importer un relevé</td><td>Import d'un relevé bancaire CSV ou OFX, ou d'un fichier QIF venu d'un autre logiciel (ou glisser-déposer)</td></tr>
   <tr><td>🔎 Rechercher</td><td>Recherche globale dans tout l'historique (<kbd>Ctrl+F</kbd>)</td></tr>
-  <tr><td>🖨 Rapport mensuel</td><td>Synthèse imprimable du mois (aperçu, PDF, impression)</td></tr>
+  <tr><td>🖨 Imprimer…</td><td>Ouvre les deux impressions ci-dessous, chacune avec un aperçu, l'impression et l'enregistrement en PDF</td></tr>
+  <tr><td>&nbsp;&nbsp;📄 Rapport du mois</td><td>Synthèse imprimable du mois : revenus, dépenses, budgets, plus grosses dépenses</td></tr>
+  <tr><td>&nbsp;&nbsp;📋 Opérations affichées</td><td>La liste de l'onglet Opérations, avec la période et les filtres choisis</td></tr>
   <tr><td>💾 Sauvegarde externe</td><td>Copie vos données sur une clé USB ou un disque externe, dans un dossier daté, et vérifie la copie (§&nbsp;8)</td></tr>
   <tr><td>🧹 Mettre au propre…</td><td>Ouvre les cinq outils ci-dessous</td></tr>
   <tr><td>&nbsp;&nbsp;🧽 Nettoyer catégories</td><td>Normalise les noms (accents, variantes)</td></tr>
@@ -795,8 +797,25 @@ note, catégorie, montant ou date. Les montants peuvent être tapés comme à l'
 <code>-45,30 €</code> fonctionne (le signe et le € sont ignorés). Plusieurs mots =
 tous requis. Double-cliquez sur un résultat pour modifier l'opération.</p>
 
-<h3>🖨 Rapport mensuel</h3>
-<p>Génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
+<h3>🖨 Imprimer</h3>
+<p>Le bouton <code>🖨 Imprimer…</code> du menu de gauche propose deux
+impressions. Chacune s'ouvre sur un <b>aperçu</b>, d'où vous pouvez
+<b>imprimer</b> ou enregistrer en <b>PDF</b>. La feuille reste sur fond blanc,
+même en mode sombre, et se lit aussi en noir et blanc : les débits gardent leur
+signe « - », les opérations pointées leur coche ✔.</p>
+<p><b>📋 Opérations affichées</b> imprime la liste de l'onglet Opérations
+<b>telle qu'elle est affichée</b>, dans le même ordre. Pour choisir quoi
+imprimer, réglez d'abord l'écran :</p>
+<ul>
+  <li><b>un mois</b> ou <b>une année</b> : choisissez-les dans la période en
+      haut de la fenêtre (« Toute l'année » pour l'année entière) ;</li>
+  <li><b>les opérations non pointées</b> : filtre <b>Pointage</b> sur « Non
+      pointées ». Comme à l'écran, elles sont prises sur toute la période ;</li>
+  <li>les autres filtres (catégorie, type, sens, recherche) s'appliquent aussi.</li>
+</ul>
+<p>Le haut de la feuille rappelle la période et les filtres utilisés ; le bas
+donne le total des débits, des crédits et le mouvement.</p>
+<p><b>📄 Rapport du mois</b> génère une synthèse du mois choisi (soldes, budgets, dépenses par catégorie,
 top dépenses) que vous pouvez <b>imprimer</b> ou enregistrer en <b>PDF</b>.
 Il s'ouvre sur la période choisie en haut de la fenêtre : le mois affiché, ou,
 pour « Toute l'année », le dernier mois de cette année (le mois en cours pour
@@ -1014,7 +1033,7 @@ que ce magasin précis.</dd>
 <dd>Somme algébrique des opérations sur la période : revenus moins dépenses.
 S'il est positif vous avez épargné, s'il est négatif vous avez puisé dans
 le solde. Le Bilan et les Opérations le comptent à la date choisie dans le
-menu « Date » (date de valeur par défaut) ; le Rapport mensuel et le Budget,
+menu « Date » (date de valeur par défaut) ; le Rapport du mois et le Budget,
 toujours à la date d'achat : pour un même mois, les chiffres peuvent donc
 différer des achats par carte à débit différé.</dd>
 
@@ -1035,9 +1054,10 @@ ou un mois précis (« Mai 2026 »).</dd>
 <dd>Projection des opérations à venir basée sur les opérations récurrentes
 déclarées. Permet d'anticiper le solde futur.</dd>
 
-<dt>Rapport mensuel</dt>
+<dt>Rapport du mois</dt>
 <dd>Synthèse imprimable d'un mois (soldes, budgets, dépenses par catégorie,
-top dépenses), exportable en PDF. Accessible par le bouton 🖨 du menu de gauche.</dd>
+top dépenses), exportable en PDF. Accessible par le bouton 🖨 Imprimer… du menu
+de gauche.</dd>
 
 <dt>Rapprochement bancaire</dt>
 <dd>Procédure consistant à comparer ligne à ligne ses opérations enregistrées

@@ -256,11 +256,12 @@ def test_rapport_mensuel_reste_clair_en_sombre(qapp, sombre, tmp_path):
 
 def test_aucun_ecran_oublie():
     """Fin de l'étape 2 (14/10/2026) : tout fichier d'écran prend ses
-    couleurs dans le thème. Seul le rapport mensuel garde les siennes : il
-    reste clair, comme le papier où il s'imprime."""
+    couleurs dans le thème. Seules les impressions gardent les leurs
+    (rapport mensuel, puis liste des opérations le 19/10/2026) : elles
+    restent claires, comme le papier où elles s'impriment."""
     en_dur = []
     for fichier in sorted(UI.rglob("*.py")):
-        if fichier.name == "report.py":
+        if fichier.name in ("report.py", "impression.py"):
             continue
         en_dur += [f"{fichier.relative_to(UI)}:{ligne} {m}"
                    for ligne, texte in _chaines(fichier)

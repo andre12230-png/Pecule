@@ -4,20 +4,13 @@ from calendar import monthrange
 from datetime import date
 from html import escape as _esc   # « B&C » → « B&amp;C » : sinon le & casse le HTML
 
-from PySide6.QtGui import QColor, QPalette
-from PySide6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout,
-    QPushButton, QDialog, QMessageBox, QFileDialog, QTextBrowser,
-)
-
 from ..accords import pluriel
-from ..destinations import avec_extension, destination_refusee
-from ..theme import CLAIR
 from ..utils import (
     cat_color, depense_nette_par_categorie, fmt_euro, fmt_date_fr,
     plus_grosses_depenses, revenus_et_depenses_nets,
 )
 from ..database import Database
+from .impression import FenetreApercu
 from .widgets import PeriodBar
 
 MOIS_FR = ["", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet",
@@ -192,19 +185,16 @@ def _mois_de_depart(periode: str, mois_dispo: set, aujourdhui: date) -> str:
     return ""
 
 
-class MonthlyReportDialog(QDialog):
-    """Aperçu du rapport mensuel, avec export PDF et impression."""
+class MonthlyReportDialog(FenetreApercu):
+    """Aperçu du rapport mensuel, avec export PDF et impression (boutons
+    communs : voir impression.FenetreApercu)."""
 
     def __init__(self, parent, db: Database, periode: str = None):
         """`periode` : la période choisie dans la barre du haut — « AAAA-MM »,
         « AAAA » ou « all ». Le rapport s'ouvre sur ce mois-là (cf.
         _mois_de_depart) ; sans elle, sur le mois en cours."""
-        super().__init__(parent)
-        self.db = db
-        self.setWindowTitle("Rapport mensuel")
-        self.resize(760, 640)
+        super().__init__(parent, db, "Rapport du mois")
 
-        v = QVBoxLayout(self)
         # Le même sélecteur que la barre du haut (‹ année mois › Ce mois-ci,
         # Ctrl+← / Ctrl+→ / Ctrl+Origine), réduit aux mois : un rapport porte
         # toujours sur un mois. Il filtre, comme le rapport, sur la date
@@ -223,36 +213,7 @@ class MonthlyReportDialog(QDialog):
         if cur:
             self.periode.choisir_periode(cur)
         self.periode.period_changed.connect(lambda _p: self._rebuild())
-        v.addWidget(self.periode)
-
-        self.browser = QTextBrowser()
-        self.browser.setStyleSheet("QTextBrowser { background:#FAF8F1; padding:10px }")
-        # Le rapport reste clair, comme le papier où il s'imprime : son HTML
-        # ne fixe pas la couleur du texte, qui viendrait sinon du thème (blanc
-        # cassé en sombre, illisible sur l'ivoire ; vu le 14/10/2026).
-        clair = self.browser.palette()
-        for role, cle in ((QPalette.Text, "texte"), (QPalette.Base, "carte"),
-                          (QPalette.Link, "lien"),
-                          (QPalette.LinkVisited, "lien_vu")):
-            clair.setColor(role, QColor(CLAIR[cle]))
-        self.browser.setPalette(clair)
-        v.addWidget(self.browser, 1)
-
-        btns = QHBoxLayout()
-        btns.addStretch()
-        b_pdf = QPushButton("💾 Enregistrer en PDF…")
-        b_pdf.clicked.connect(self._save_pdf)
-        btns.addWidget(b_pdf)
-        b_print = QPushButton("🖨 Imprimer…")
-        b_print.clicked.connect(self._print)
-        btns.addWidget(b_print)
-        b_close = QPushButton("Fermer")
-        b_close.clicked.connect(self.reject)
-        btns.addWidget(b_close)
-        # Entrée ne doit déclencher aucun bouton par accident
-        for b in (b_pdf, b_print, b_close):
-            b.setAutoDefault(False); b.setDefault(False)
-        v.addLayout(btns)
+        self.disposition.insertWidget(0, self.periode)
 
         self._rebuild()
 
@@ -260,32 +221,8 @@ class MonthlyReportDialog(QDialog):
         p = self.periode.current_period()
         return p if len(p) == 7 else date.today().strftime("%Y-%m")
 
+    def nom_pdf(self) -> str:
+        return f"rapport-{self.current_month()}.pdf"
+
     def _rebuild(self):
         self.browser.setHtml(build_monthly_report_html(self.db, self.current_month()))
-
-    def _save_pdf(self):
-        from PySide6.QtPrintSupport import QPrinter
-        mo = self.current_month()
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Enregistrer le rapport", f"rapport-{mo}.pdf", "PDF (*.pdf)")
-        if not path:
-            return
-        # Jamais par-dessus le fichier de comptes (audit du 14/10/2026, A01).
-        raison = destination_refusee(path, self.db.path)
-        path = avec_extension(path, ".pdf")
-        raison = raison or destination_refusee(path, self.db.path)
-        if raison:
-            QMessageBox.warning(self, "Rapport", raison)
-            return
-        printer = QPrinter(QPrinter.HighResolution)
-        printer.setOutputFormat(QPrinter.PdfFormat)
-        printer.setOutputFileName(path)
-        self.browser.document().print_(printer)
-        QMessageBox.information(self, "Rapport", f"PDF enregistré :\n{path}")
-
-    def _print(self):
-        from PySide6.QtPrintSupport import QPrinter, QPrintDialog
-        printer = QPrinter(QPrinter.HighResolution)
-        dlg = QPrintDialog(printer, self)
-        if dlg.exec() == QDialog.Accepted:
-            self.browser.document().print_(printer)
