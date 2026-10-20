@@ -406,6 +406,17 @@ AIDE_ENTETE = (
     "Les accents et les majuscules n'ont pas d'importance, et vous pouvez "
     "garder vos autres colonnes.")
 
+# Ajoutée sous le message quand un CSV ne donne rien (20/10/2026). Pécule a
+# été écrit avec les relevés de quelques banques seulement ; un utilisateur
+# dont l'import échoue écrit rarement. On lui demande la FORME du fichier
+# (la ligne des titres), jamais son contenu.
+INVITATION_FORMAT = (
+    "Votre banque n'est peut-être pas encore connue de Pécule. Vous pouvez "
+    "aider à l'ajouter : par le bouton « 💬 Votre avis », indiquez le nom "
+    "de votre banque et recopiez seulement la ligne des titres des colonnes "
+    "de votre fichier (par exemple Date;Libellé;Débit;Crédit). N'envoyez "
+    "ni montant, ni libellé d'opération, ni numéro de compte.")
+
 
 def diagnostiquer_releve(texte: str) -> Optional[str]:
     """Explication en clair quand un relevé ne donne rien, sinon None.

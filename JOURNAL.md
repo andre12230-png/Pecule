@@ -21,6 +21,31 @@ La date la plus récente est en haut.
 
 ---
 
+## 20-10-2026 (4) — Relevé non reconnu : invitation à envoyer la forme du fichier
+
+**Fait.** Quand un CSV ne donne aucune opération, la boîte « Import incomplet » se termine par une invitation : indiquer sa banque et recopier seulement la ligne des titres des colonnes, par « 💬 Votre avis », sans montant, libellé ni numéro de compte. Texte unique `INVITATION_FORMAT` (`csv_import.py`), ajouté dans `_import_files` (`ui/main_window.py`). Test d'abord (`tests/test_invitation_format_inconnu.py`, 3 cas : séparateur virgule, dates année d'abord, import réussi sans invitation), il échouait avant. Suite complète : 889 tests passés. Texte vérifié sur un fichier inventé.
+**Pourquoi.** Décision de la séance (3) : attendre les retours des utilisateurs. Or un utilisateur dont l'import échoue écrit rarement ; l'invitation au bon moment augmente les chances d'un retour exploitable.
+**Reste.** Pas d'exe construit : partira avec la prochaine version (nouveau numéro au prochain exe). La page d'aide « Mon relevé ne s'importe pas » pourrait porter la même invitation.
+
+## 20-10-2026 (3) — Tester les CSV d'autres banques
+
+**Fait.** Import CSV examiné en lecture seule et sources publiques consultées. Recommandations conservées dans `F:\Projets\livrables\pecule-csv-autres-banques-2026-10-20.md` : structures neutralisées, fichiers fictifs avec résultats attendus et essais chez des utilisateurs ; réglage des colonnes avec aperçu proposé. Quatre fichiers de tests ciblés lancés : 88 tests sur 88 réussis.
+**Pourquoi.** Vérifier les différences de formats sans confondre un exemple inventé avec une preuve de compatibilité bancaire. Le séparateur point-virgule imposé et les dates ISO refusées restent les premières limites à traiter.
+**Décision.** André choisit d'attendre les retours des utilisateurs volontaires (structure de leur CSV) plutôt que de développer le réglage des colonnes maintenant.
+**Reste.** Rien d'engagé au-delà du chantier d'import déjà prévu après le 01-11 ; aucun code modifié, aucun relevé réel importé et aucune compatibilité bancaire nouvelle confirmée. Suite complète, interface et exécutable hors périmètre ; rien publié.
+
+## 20-10-2026 (2) — OFX : « &amp; » traduit dans les libellés
+
+**Fait.** Les codes de caractères de l'OFX (« &amp; », « &lt; », « &gt; », « &quot; », « &#201; »…) sont traduits dans tous les champs lus (`champ()`, `ofx_import.py`). Un libellé « GAMMA &amp; CO » arrive maintenant en « GAMMA & CO ». Quatre tests ajoutés dans `tests/test_ofx_import.py` ; ils échouaient avant la correction. Suite complète : 886 tests passés.
+**Pourquoi.** Trou trouvé en confrontant le guide de validation au code : aucun test ne contenait de caractère spécial OFX. Seuls les codes complets, terminés par « ; », sont traduits, pour qu'un « & » laissé nu par la banque reste intact. Réimporter un ancien relevé ne crée pas de doublon : l'opération est reconnue par son FITID, pas par son libellé (un test le prouve). Les libellés déjà importés avec « &amp; » restent tels quels dans la base.
+**Reste.** Dates AAAA-MM-JJ et séparateurs virgule ou tabulation en CSV, à traiter après le 01-11. Pas d'exe construit : la correction partira avec la prochaine version.
+
+## 20-10-2026 — Plan de validation des imports
+
+**Fait.** Guide de validation lu et comparé aux imports, tests et documentation locaux. Proposition conservée dans `F:\Projets\livrables\pecule-plan-validation-imports-2026-10-20.md` : réutiliser les moteurs et le bilan existants, compléter les fichiers fictifs et les tests, puis préparer le suivi des compatibilités et les vérifications sur GitHub.
+**Pourquoi.** Adapter le guide à ce qui existe déjà ; distinguer la preuve par test fictif d'un essai bancaire réel documenté.
+**Reste.** Proposition à décider, aucun développement engagé. Aucun test exécuté, aucun import réel ni compatibilité nouvelle confirmée. Rien publié.
+
 ## 19-10-2026 (4) — Version 1.41.25 installée chez l'auteur
 
 **Fait.** Numéro 1.41.25 (les trois impressions de « 🖨 Imprimer… »). Contrôle de livraison : 882 tests sur 882, confidentialité et ruff sans remarque. Exe construit (version lue dans le fichier : 1.41.25) ; présence du module d'impression vérifiée dans l'archive de l'exe. Essayé sur une base inventée en mode sombre : titre « v1.41.25 », les trois aperçus s'ouvrent et restent clairs. Installé : base de l'auteur identique avant et après (empreinte SHA-256), 177 fichiers sur 177 dans `_internal`. Ancienne version gardée en réserve sous le suffixe `.avant-1.41.25` (exe, `_internal`, Lisez-moi), à côté de la réserve `.avant-1.41.24`.

@@ -28,7 +28,8 @@ from ..erreurs import erreur_en_clair
 from ..destinations import avec_extension, destination_refusee
 from ..theme import T, enregistrer_theme, lire_theme
 from ..labels import charger_alias, clean_libelle
-from ..csv_import import _decode_csv, diagnostiquer_fichier, import_csv
+from ..csv_import import (
+    INVITATION_FORMAT, _decode_csv, diagnostiquer_fichier, import_csv)
 from ..ofx_import import import_ofx
 from ..qif_import import import_qif, ordre_jour_mois_devine
 from ..sync import (
@@ -666,6 +667,11 @@ class MainWindow(QMainWindow):
                         "logiciel américain, vérifiez les dates importées.")
         if errors:
             msg += "\n\nErreurs :\n  • " + "\n  • ".join(errors)
+        # Un CSV n'a rien donné : sa banque est peut-être inconnue. On invite
+        # l'utilisateur à envoyer la ligne des titres (20/10/2026).
+        if rien_retenu and any(p.lower().endswith((".csv", ".txt"))
+                               for p in paths):
+            msg += "\n\n" + INVITATION_FORMAT
         if errors or total_bad or rien_lu:
             QMessageBox.warning(self, "Import incomplet", msg)
         else:
