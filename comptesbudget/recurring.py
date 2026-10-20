@@ -51,8 +51,16 @@ def _date_ou_none(s) -> date:
         return None
 
 
+def dates_sautees(rec: dict) -> set[str]:
+    """Les dates (AAAA-MM-JJ) que cette récurrence doit sauter : « pas ce
+    mois-ci ». Rangées dans la colonne `sautees`, séparées par des virgules.
+    Un morceau illisible ne correspond à aucune date et ne saute donc rien."""
+    return {s.strip() for s in (rec.get("sautees") or "").split(",") if s.strip()}
+
+
 def generate_occurrences(rec: dict, until: date) -> list[date]:
-    """Toutes les occurrences depuis start_date jusqu'à `until` (incluse)."""
+    """Toutes les occurrences depuis start_date jusqu'à `until` (incluse),
+    sauf celles que l'utilisateur a choisi de sauter (20-10-2026)."""
     if not rec.get("actif"):
         return []
     cur = _date_ou_none(rec.get("start_date"))
@@ -60,11 +68,15 @@ def generate_occurrences(rec: dict, until: date) -> list[date]:
         return []
     end = _date_ou_none(rec.get("end_date")) if rec.get("end_date") else None
     ref_day = cur.day          # jour de la première occurrence (cf. next_occurrence)
+    sautees = dates_sautees(rec)
     out = []
     while cur <= until:
         if end and cur > end:
             break
-        out.append(cur)
+        # Une date sautée n'interrompt pas le rythme : la suivante se calcule
+        # toujours depuis elle.
+        if cur.isoformat() not in sautees:
+            out.append(cur)
         nxt = next_occurrence(rec, cur, ref_day)
         if nxt <= cur:  # sécurité anti-boucle infinie
             break
@@ -256,6 +268,32 @@ def echeances_du_mois(recs: list[dict], txs: list[dict], annee: int, mois: int,
         })
 
     out.sort(key=lambda e: (e["date"], e["libelle"].lower()))
+    return out
+
+
+def echeances_decouvertes(recs: list[dict], avant: list[dict],
+                          apres: list[dict], dates: list[str]) -> list[dict]:
+    """Les échéances qu'une suppression vient de découvrir.
+
+    Avant la suppression, une opération couvrait l'échéance ; après, plus
+    rien : sans réponse, le Prévisionnel l'attendrait de nouveau. On compare
+    simplement le rapprochement des deux états, mois par mois, avec la règle
+    habituelle (echeances_du_mois) — aucune autre façon de deviner quelle
+    échéance une ligne couvrait. `dates` : celles des opérations supprimées,
+    pour savoir quels mois regarder."""
+    mois = sorted({d[:7] for d in dates if d and len(d) >= 7})
+    out = []
+    for m in mois:
+        try:
+            an, mo = int(m[:4]), int(m[5:7])
+        except ValueError:
+            continue
+        couvertes = {(e["rec_id"], e["date"])
+                     for e in echeances_du_mois(recs, avant, an, mo) if e["_deja"]}
+        for e in echeances_du_mois(recs, apres, an, mo):
+            if not e["_deja"] and (e["rec_id"], e["date"]) in couvertes:
+                out.append({"rec_id": e["rec_id"], "libelle": e["libelle"],
+                            "date": e["date"], "montant": e["montant"]})
     return out
 
 

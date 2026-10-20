@@ -26,7 +26,8 @@ from ...utils import (
 )
 from ...database import Database
 from ...recurring import (
-    generate_occurrences, detect_recurring_candidates, echeances_du_mois,
+    dates_sautees, generate_occurrences, detect_recurring_candidates,
+    echeances_du_mois,
     candidats_non_couverts, _recurring_aligned_start,
 )
 
@@ -106,12 +107,29 @@ class PrevisionnelView(QWidget):
 
         # Prévisions sur les 12 prochains mois
         bot = QWidget(); blay = QVBoxLayout(bot); blay.setContentsMargins(0, 0, 0, 0)
-        blay.addWidget(QLabel("Prévisions des 12 prochains mois :"))
+        entete = QHBoxLayout()
+        entete.addWidget(QLabel("Prévisions des 12 prochains mois :"))
+        entete.addStretch()
+        # « Pas cette fois-ci » : un péage sans passage, une facture
+        # suspendue. Sans ce bouton, l'échéance restait attendue et comptée
+        # dans les sorties à venir (20-10-2026).
+        self.btn_sauter = QPushButton("⏭ Sauter cette échéance")
+        self.btn_sauter.setToolTip(
+            "Cette échéance ne passera pas cette fois-ci : elle sort des "
+            "sorties à venir et du solde prévu. Les suivantes restent "
+            "attendues. Une échéance sautée se rétablit du même bouton.")
+        self.btn_sauter.clicked.connect(self._sauter_ou_retablir)
+        entete.addWidget(self.btn_sauter)
+        blay.addLayout(entete)
         self.forecast_model = QStandardItemModel(0, 4, self)
         self.forecast_model.setHorizontalHeaderLabels(
             ["Date prévue", "Libellé", "Montant", "Catégorie"])
         self.forecast_table = QTableView()
         self.forecast_table.setModel(self.forecast_model)
+        self.forecast_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.forecast_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.forecast_table.selectionModel().selectionChanged.connect(
+            self._maj_bouton_sauter)
         self.forecast_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.forecast_table.verticalHeader().setVisible(False)
         self.forecast_table.setAlternatingRowColors(True)
@@ -178,43 +196,101 @@ class PrevisionnelView(QWidget):
         auj = date.today()
         until = date(auj.year + 1, auj.month,
                      monthrange(auj.year + 1, auj.month)[1])
-        events: list[tuple[date, dict]] = []
+        # Chaque prévision porte un état : "" (à venir), "retard" (du mois en
+        # cours, datée d'avant aujourd'hui et toujours sans opération) ou
+        # "sautee" (« pas cette fois-ci », 20-10-2026). Les deux derniers
+        # apparaissent ici pour pouvoir être sautés ou rétablis d'un clic.
+        events: list[tuple[date, dict, str]] = []
         for r in recs:
             if not r["actif"]:
                 continue
             for d in generate_occurrences(r, until):
-                if d >= date.today():
-                    events.append((d, r))
+                if d >= auj:
+                    events.append((d, r, ""))
+            debut_mois = auj.replace(day=1).isoformat()
+            for s in dates_sautees(r):
+                if debut_mois <= s <= until.isoformat():
+                    try:
+                        events.append((date.fromisoformat(s), r, "sautee"))
+                    except ValueError:
+                        pass          # date abîmée : ignorée, comme au calcul
+        par_id = {r["id"]: r for r in recs}
+        txs = [dict(t) for t in self.db.list_tx()]
+        for e in echeances_du_mois(recs, txs, auj.year, auj.month):
+            if not e["_deja"] and e["_passee"] and e["rec_id"] in par_id:
+                events.append((date.fromisoformat(e["date"]),
+                               par_id[e["rec_id"]], "retard"))
         events.sort(key=lambda x: x[0])
 
         self.forecast_table.setSortingEnabled(False)
         self.forecast_model.setRowCount(0)
         total_pos = total_neg = 0.0
-        for d, r in events:
-            total_pos += r["montant"] if r["montant"] > 0 else 0
-            total_neg += r["montant"] if r["montant"] < 0 else 0
+        suffixes = {"": "", "retard": "  — en retard",
+                    "sautee": "  — sautée cette fois-ci"}
+        for d, r, etat in events:
+            if etat != "sautee":
+                total_pos += r["montant"] if r["montant"] > 0 else 0
+                total_neg += r["montant"] if r["montant"] < 0 else 0
             row = [
                 QStandardItem(fmt_date_fr(d.isoformat())),
-                QStandardItem(r["libelle"]),
+                QStandardItem(r["libelle"] + suffixes[etat]),
                 QStandardItem(fmt_euro_signe(r["montant"])),
                 cellule_categorie(r["categorie"]),
             ]
             row[2].setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             row[2].setForeground(QBrush(QColor(T["debit"] if r["montant"] < 0 else T["credit"])))
+            if etat == "sautee":
+                # En italique : elle ne compte plus, mais reste visible pour
+                # être rétablie. Pas de gris : sélectionnée, la ligne devenait
+                # illisible (gris sur la couleur de sélection).
+                for it in row[:3]:
+                    police = it.font()
+                    police.setItalic(True)
+                    it.setFont(police)
             for it, tri in zip(row, [d.isoformat(), r["libelle"].lower(),
                                      r["montant"], r["categorie"].lower()]):
                 it.setData(tri, SORT_ROLE)
+                it.setData((r["id"], d.isoformat(), etat), Qt.UserRole)
             self.forecast_model.appendRow(row)
 
         self.forecast_table.setSortingEnabled(True)
+        self._maj_bouton_sauter()
 
-        n = len(events)
+        n = sum(1 for _d, _r, etat in events if etat != "sautee")
         self.summary.setText(
             f"📊 {pluriel(n, 'occurrence', 'occurrences')} "
             f"{accorde(n, 'prévue', 'prévues')} jusqu'au {fmt_date_fr(until.isoformat())}  —  "
             f"Entrées : {fmt_euro(total_pos)}  ·  Sorties : {fmt_euro(total_neg)}  ·  "
             f"Net : {fmt_euro(total_pos + total_neg)}"
         )
+
+    def _prevision_choisie(self) -> Optional[tuple]:
+        """(id de la récurrence, date, état) de la prévision sélectionnée."""
+        idx = self.forecast_table.currentIndex()
+        if not idx.isValid() or not self.forecast_table.selectionModel().hasSelection():
+            return None
+        return self.forecast_model.item(idx.row(), 0).data(Qt.UserRole)
+
+    def _maj_bouton_sauter(self, *_):
+        """Le bouton dit ce qu'il fera : sauter, ou rétablir une échéance
+        déjà sautée. Grisé tant qu'aucune prévision n'est choisie."""
+        choix = self._prevision_choisie()
+        self.btn_sauter.setEnabled(choix is not None)
+        self.btn_sauter.setText(
+            "↩ Rétablir cette échéance" if choix and choix[2] == "sautee"
+            else "⏭ Sauter cette échéance")
+
+    def _sauter_ou_retablir(self):
+        choix = self._prevision_choisie()
+        if not choix:
+            return
+        rec_id, d, etat = choix
+        if etat == "sautee":
+            self.db.retablir_echeance(rec_id, d)
+        else:
+            self.db.sauter_echeance(rec_id, d)
+        self.refresh()
+        self.changed.emit()
 
     def _selected_id(self) -> Optional[str]:
         idx = self.table.currentIndex()

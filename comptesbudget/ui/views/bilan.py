@@ -241,6 +241,20 @@ def _make_panel(title: str, body: QWidget) -> QFrame:
     return f
 
 
+def prochaines_echeances(lignes: list[tuple], today_iso: str,
+                         n: int = 3) -> list[tuple]:
+    """Les échéances à nommer dans le bandeau du mois : (date, libellé,
+    montant, en_retard), par date, `n` au plus.
+
+    Les sorties à venir se comptent depuis le 1er du mois : une échéance
+    datée d'avant aujourd'hui et pas encore passée y reste. Elle doit aussi
+    être NOMMÉE, en retard, sinon le total et la liste se contredisent
+    (20-10-2026 : -80 € annoncés, une seule ligne de -30 € montrée).
+    Les opérations carte à débit différé partent avec le lot : pas ici."""
+    hors_carte = sorted((l for l in lignes if not l[3]), key=lambda x: x[0])
+    return [(d, lbl, m_, d < today_iso) for d, lbl, m_, _c in hors_carte][:n]
+
+
 class BilanView(QWidget):
     goto_budget = Signal()   # clic sur l'alerte budget → ouvrir l'onglet Budget
     goto_parametres = Signal()   # clic sur le bandeau du solde de départ
@@ -1399,16 +1413,15 @@ class BilanView(QWidget):
             # Les trois prochaines échéances, pour situer. Elles venaient du
             # bandeau des 15 jours : ne comptant que ce qui est ENCORE à venir,
             # elles gardent tout leur sens dans une fenêtre qui part du 1er.
-            today_iso = today.isoformat()
-            suivantes = sorted((l for l in lignes if not l[3] and l[0] >= today_iso),
-                               key=lambda x: x[0])[:3]
+            suivantes = prochaines_echeances(lignes, today.isoformat())
             prochaines = ""
             if suivantes:
                 # Une par ligne (audit du 04/10/2026) : à la suite, elles se
                 # coupaient au milieu en bout de ligne.
                 prochaines = "Prochaines échéances :\n" + "\n".join(
                     f"{fmt_date_fr(d)[:5]}  {lbl[:22]}  {fmt_euro(m_)}"
-                    for d, lbl, m_, _c in suivantes)
+                    + ("  (en retard)" if retard else "")
+                    for d, lbl, m_, retard in suivantes)
                 detail += "\n" + prochaines
             detail += f"\nSolde en banque aujourd'hui : {fmt_euro(solde_compte)}"
             # À l'écran, ce qui arrive : les prochaines échéances. Le compte

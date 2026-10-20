@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 
 from .constants import CATEGORIES_DEFAUT, CATEGORIES_NON_MASQUABLES, DB_PATH
+from .recurring import dates_sautees
 from .utils import _now_iso
 
 def _lendemain(date_iso: str) -> str:
@@ -183,7 +184,10 @@ class Database:
             day_of_month INTEGER,
             start_date  TEXT NOT NULL,
             end_date    TEXT,
-            actif       INTEGER NOT NULL DEFAULT 1
+            actif       INTEGER NOT NULL DEFAULT 1,
+            -- Dates sautées (« pas ce mois-ci »), AAAA-MM-JJ séparées par des
+            -- virgules (1.41.26).
+            sautees     TEXT NOT NULL DEFAULT ''
         );
 
         CREATE TABLE IF NOT EXISTS settings (
@@ -204,6 +208,7 @@ class Database:
         self._migrate_prevue()
         self._migrate_comptes()
         self._migrate_archives()
+        self._migrate_sautees()
 
     def _migrate_prevue(self):
         """Ajoute la colonne « prevue » aux bases antérieures à la v1.21.
@@ -599,6 +604,15 @@ class Database:
             self.conn.execute("ALTER TABLE comptes ADD COLUMN archive_jusqua TEXT")
         self.conn.commit()
 
+    def _migrate_sautees(self):
+        """Ajoute la colonne des échéances sautées (1.41.26). Les récurrences
+        existantes la reçoivent vide : rien n'est sauté, rien ne change."""
+        cols = [r[1] for r in self.conn.execute("PRAGMA table_info(recurring)")]
+        if "sautees" not in cols:
+            self.conn.execute("ALTER TABLE recurring "
+                              "ADD COLUMN sautees TEXT NOT NULL DEFAULT ''")
+        self.conn.commit()
+
     def archive_jusqua(self, compte_id: str = None) -> str:
         """Date de coupure du compte ('' si rien n'est archivé)."""
         r = self.get_compte(compte_id)
@@ -888,6 +902,27 @@ class Database:
         self.conn.execute(f"UPDATE recurring SET {sets} WHERE id = :id", fields)
         self._commit()
 
+    def _poser_sautees(self, rec_id: str, dates: set):
+        """Réécrit la liste des dates sautées, triée. La date de mise à jour
+        avance : une fusion JSON transporte ce choix comme le reste."""
+        self.conn.execute(
+            "UPDATE recurring SET sautees = ?, updated_at = ? WHERE id = ?",
+            (",".join(sorted(dates)), _now_iso(), rec_id))
+        self._commit()
+
+    def _sautees_de(self, rec_id: str) -> set:
+        row = self.conn.execute(
+            "SELECT sautees FROM recurring WHERE id = ?", (rec_id,)).fetchone()
+        return dates_sautees({"sautees": row[0]}) if row else set()
+
+    def sauter_echeance(self, rec_id: str, date_iso: str):
+        """« Pas ce mois-ci » : cette échéance ne sera plus attendue."""
+        self._poser_sautees(rec_id, self._sautees_de(rec_id) | {date_iso})
+
+    def retablir_echeance(self, rec_id: str, date_iso: str):
+        """Annule un saut : l'échéance est de nouveau attendue."""
+        self._poser_sautees(rec_id, self._sautees_de(rec_id) - {date_iso})
+
     def delete_recurring(self, rec_id: str):
         self._record_deletion("recurring", rec_id)
         self.conn.execute("DELETE FROM recurring WHERE id = ?", (rec_id,))
@@ -1062,7 +1097,8 @@ class Database:
                       "no_overwrite", "created_at", "updated_at", "sens"],
             "recurring": ["id", "compte_id", "libelle", "montant", "categorie",
                           "sous_cat", "type", "frequency", "day_of_month",
-                          "start_date", "end_date", "actif", "updated_at"],
+                          "start_date", "end_date", "actif", "updated_at",
+                          "sautees"],
         }[entity]
         vals = {c: rec.get(c) for c in cols}
         if "compte_id" in cols and not vals.get("compte_id"):
@@ -1075,6 +1111,9 @@ class Database:
             # dans une colonne déclarée NOT NULL.
             vals["prevue"] = 1 if vals.get("prevue") else 0
             vals["archivee"] = 1 if vals.get("archivee") else 0
+        if entity == "recurring":
+            # Même précaution : un export d'avant la 1.41.26 n'a pas « sautees ».
+            vals["sautees"] = vals.get("sautees") or ""
         placeholders = ", ".join(f":{c}" for c in cols)
         collist = ", ".join(cols)
         self.conn.execute(

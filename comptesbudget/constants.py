@@ -982,7 +982,11 @@ SYNC_VERSION = 3
 #           gauche : rapport du mois, operations affichees (periode et
 #           filtres de l'ecran, non pointees comprises) et Bilan avec ses
 #           graphiques, toujours en clair, avec apercu et PDF.
-APP_VERSION = "1.41.25"
+# 1.41.26 : Une echeance du Previsionnel peut etre sautee « cette fois-ci »
+#           (bouton du Previsionnel, ou question a la suppression de sa
+#           ligne prevue) : elle n'est plus attendue ni comptee. Le bandeau
+#           du mois nomme aussi les echeances en retard.
+APP_VERSION = "1.41.26"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

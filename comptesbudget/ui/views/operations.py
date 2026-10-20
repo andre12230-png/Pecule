@@ -27,6 +27,7 @@ from ...utils import (
 from ...database import Database
 from ...erreurs import erreur_en_clair
 from ...export_csv import ecrire_csv_operations
+from ...recurring import echeances_decouvertes
 from ...rules import apply_rules_to_tx
 
 from ..flow_layout import FlowLayout
@@ -725,11 +726,14 @@ class OperationsView(QWidget):
         # bouton « Annuler » remettra en place.
         par_id = {t["id"]: dict(t) for t in self.transactions}
         copies = [par_id[i] for i in ids if i in par_id]
+        avant = [dict(t) for t in self.db.list_tx()]
         with self.db.batch():
             for tx_id in ids:
                 self.db.delete_tx(tx_id)
+        sautees = self._proposer_de_sauter(avant, copies)
         self.reload_from_db()
         self._supprimees = copies
+        self._sautees_par_suppression = sautees
         self._compte_suppression = self.db.compte_id
         n = len(copies)
         self.lbl_annuler.setText(
@@ -744,6 +748,9 @@ class OperationsView(QWidget):
             return
         with self.db.batch():
             self.db.restaurer_tx(self._supprimees)
+            # L'opération revient : l'échéance qu'elle couvre n'est plus sautée.
+            for rec_id, d in getattr(self, "_sautees_par_suppression", []):
+                self.db.retablir_echeance(rec_id, d)
         self._oublier_suppression()
         self.reload_from_db()
         self.tx_changed.emit()
@@ -751,5 +758,49 @@ class OperationsView(QWidget):
     def _oublier_suppression(self):
         """Ferme le bandeau ; la suppression devient définitive."""
         self._supprimees = []
+        self._sautees_par_suppression = []
         self._compte_suppression = None
         self.bandeau_annuler.setVisible(False)
+
+    def _proposer_de_sauter(self, avant: list[dict],
+                            supprimees: list[dict]) -> list[tuple]:
+        """Après la suppression d'une échéance prévue, demande si elle est
+        sautée ce mois-ci (20-10-2026).
+
+        Sans cette question, le Prévisionnel ne voyait plus d'opération qui
+        couvre l'échéance et l'attendait de nouveau : un péage sans passage ce
+        mois-là, supprimé à la main, restait compté dans les sorties à venir.
+        Retourne les (récurrence, date) sautées, pour « Annuler »."""
+        if not any(t.get("prevue") for t in supprimees):
+            return []          # une opération ordinaire : rien à demander
+        recs = [dict(r) for r in self.db.list_recurring()]
+        apres = [dict(t) for t in self.db.list_tx()]
+        decouvertes = echeances_decouvertes(
+            recs, avant, apres, [t.get("date", "") for t in supprimees])
+        if not decouvertes:
+            return []
+        noms = "\n".join(f"• {e['libelle']} du {fmt_date_fr(e['date'])} "
+                         f"({fmt_euro(e['montant'])})" for e in decouvertes)
+        une = len(decouvertes) == 1
+        question = (
+            ("Cette échéance du Prévisionnel n'a plus d'opération :\n"
+             if une else
+             "Ces échéances du Prévisionnel n'ont plus d'opération :\n")
+            + noms + "\n\n"
+            + ("Ne passera-t-elle pas cette fois-ci ? Sautée, elle sort des "
+               "sorties à venir et du solde prévu. Sinon, Pécule continue "
+               "de l'attendre." if une else
+               "Ne passeront-elles pas cette fois-ci ? Sautées, elles sortent "
+               "des sorties à venir et du solde prévu. Sinon, Pécule continue "
+               "de les attendre."))
+        if not confirmer(self, "Échéance prévue supprimée", question,
+                         action=("Sauter cette fois-ci" if une
+                                 else "Les sauter cette fois-ci"),
+                         garder="Continuer de l'attendre" if une
+                         else "Continuer de les attendre",
+                         action_par_defaut=True):
+            return []
+        with self.db.batch():
+            for e in decouvertes:
+                self.db.sauter_echeance(e["rec_id"], e["date"])
+        return [(e["rec_id"], e["date"]) for e in decouvertes]

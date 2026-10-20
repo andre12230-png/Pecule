@@ -165,6 +165,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       alors aussi. Ce sont bien ces achats-là que Pécule garde, à leur date d'achat — votre solde peut donc différer
       quelques jours de celui de la banque, qui ne les débite qu'en bloc le mois suivant.
       La <b>cotisation</b> de la carte, elle, reste une dépense comme une autre.
+      Si un CSV ne donne <b>aucune opération</b>, votre banque n'est peut-être pas
+      encore connue : la boîte « Import incomplet » vous invite alors à envoyer, par
+      <b>💬 Votre avis</b>, le nom de la banque et la seule ligne des titres des
+      colonnes — jamais un montant, un libellé ni un numéro de compte.
   </li>
   <li><b>Télécharger le relevé au format OFX</b> quand votre banque ne propose plus le
       CSV — ou que vous le préférez. Même bouton, même glisser-déposer : Pécule reconnaît le
@@ -398,6 +402,14 @@ menus, reçoit sa couleur et peut recevoir un budget mensuel comme les autres.</
 précisant la fréquence (hebdo, mensuelle, trimestrielle, annuelle) et la date
 de début. L'app calcule automatiquement les <b>12 prochains mois</b> de
 prévisions avec totaux recettes / dépenses / net.</p>
+<p>Une échéance qui <b>ne passera pas cette fois-ci</b> (un péage sans
+passage ce mois-là, un abonnement suspendu) se saute : choisissez-la dans la
+liste des prévisions, puis <b>⏭ Sauter cette échéance</b>. Elle sort des
+sorties à venir et du solde prévu ; les suivantes restent attendues. Elle reste
+visible, en italique, et le même bouton la <b>rétablit</b>. Les échéances du mois
+en cours déjà en retard figurent aussi dans cette liste, pour pouvoir être
+sautées. Supprimer une échéance prévue ⏳ dans les Opérations pose la même
+question.</p>
 
 <h3>📅 Générer les échéances du mois</h3>
 <p>Le bouton <b>📅 Générer les échéances du mois</b> (onglet Prévisionnel)
@@ -657,7 +669,9 @@ mois à venir, il montre ce qui est déjà prévu pour ce mois-là. Une année o
 « Toute la période » le ramènent au mois en cours.</p>
 <p>La liste <b>« Prochaines échéances : »</b> nomme, une par ligne, les trois échéances qui arrivent, avec
 leur date et leur montant — de quoi situer ce qui vient sans ouvrir le
-Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
+Prévisionnel. Une échéance <b>en retard</b>, comptée dans les sorties à venir,
+y figure aussi, marquée « (en retard) » ; si elle ne passera pas ce mois-ci,
+sautez-la depuis le Prévisionnel. C'est elle qui reste à l'écran ; <b>le reste du détail apparaît
 au survol du bandeau</b> : nombre de sorties et d'entrées, débit carte,
 solde en banque du jour.</p>
 <p>Le <b>débit carte</b> annoncé au survol est celui de votre relevé : il ne compte que les
