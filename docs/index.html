@@ -109,6 +109,9 @@
   header .sub{font-size:1.15rem;opacity:.95;margin:10px auto 0;max-width:620px}
   .badges{margin:18px 0 26px}
   .badges img{height:20px;margin:0 3px;vertical-align:middle}
+  /* Un badge plus large que l'écran (titre de version long, sur téléphone)
+     rapetisse en gardant ses proportions au lieu de faire glisser la page. */
+  .badges img{max-width:calc(100% - 6px);height:auto;max-height:20px}
 
   .btn{display:inline-block;background:#fff;color:var(--bleu);font-weight:700;
        font-size:1.15rem;padding:14px 28px;border-radius:10px;text-decoration:none;
