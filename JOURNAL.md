@@ -25,7 +25,7 @@ La date la plus récente est en haut.
 
 **Fait.** Quand un CSV ne donne aucune opération, la boîte « Import incomplet » se termine par une invitation : indiquer sa banque et recopier seulement la ligne des titres des colonnes, par « 💬 Votre avis », sans montant, libellé ni numéro de compte. Texte unique `INVITATION_FORMAT` (`csv_import.py`), ajouté dans `_import_files` (`ui/main_window.py`). Test d'abord (`tests/test_invitation_format_inconnu.py`, 3 cas : séparateur virgule, dates année d'abord, import réussi sans invitation), il échouait avant. Suite complète : 889 tests passés. Texte vérifié sur un fichier inventé.
 **Pourquoi.** Décision de la séance (3) : attendre les retours des utilisateurs. Or un utilisateur dont l'import échoue écrit rarement ; l'invitation au bon moment augmente les chances d'un retour exploitable.
-**Reste.** Pas d'exe construit : partira avec la prochaine version (nouveau numéro au prochain exe). La page d'aide « Mon relevé ne s'importe pas » pourrait porter la même invitation.
+**Reste.** Pas d'exe construit : partira avec la prochaine version (nouveau numéro au prochain exe). Fait dans la même séance : la page d'aide « Mon relevé ne s'importe pas » (`docs/import-csv-problemes.html`, rubrique « Toujours bloqué ? ») demande aussi la ligne des titres et cite le bouton « Votre avis » ; vérifiée dans le navigateur. Elle sera en ligne à la publication du 01-11.
 
 ## 20-10-2026 (3) — Tester les CSV d'autres banques
 
