@@ -134,6 +134,21 @@ def test_champ_absent():
     assert champ("<TRNAMT>-30.00\n", "MEMO") == ""
 
 
+def test_champ_caracteres_speciaux_traduits():
+    """L'OFX écrit « & » sous la forme « &amp; » (et de même pour < > " ') :
+    le libellé doit retrouver le vrai caractère, pas le code."""
+    assert champ("<NAME>M&amp;S BOUTIQUE\n", "NAME") == "M&S BOUTIQUE"
+    assert champ("<MEMO>A &lt; B &gt; C</MEMO>", "MEMO") == "A < B > C"
+    assert champ("<NAME>L&apos;EPI &quot;BIO&quot;\n", "NAME") == "L'EPI \"BIO\""
+    assert champ("<NAME>CAF&#201; &#x26; CO\n", "NAME") == "CAFÉ & CO"
+
+
+def test_champ_esperluette_seule_inchangee():
+    """Une banque qui écrit un « & » nu (sans le coder) ne doit pas voir son
+    libellé abîmé."""
+    assert champ("<NAME>M&S BOUTIQUE\n", "NAME") == "M&S BOUTIQUE"
+
+
 def test_lecture_ofx_version_2_en_xml():
     """La 2.x est du XML : tout est refermé, sur une seule ligne ou non."""
     xml = ('<?xml version="1.0"?><OFX><BANKMSGSRSV1><STMTRS>'
@@ -273,6 +288,28 @@ def test_import_ofx_insere(tmp_path):
     assert abonnement["type"] == "Prelevement"
     # Un relevé ne porte que des opérations déjà passées en banque.
     assert abonnement["pointee"] == 1
+
+
+def test_import_ofx_libelle_avec_esperluette(tmp_path):
+    """Bout en bout : « &amp; » dans le fichier donne « & » dans Pécule."""
+    db = Database(str(tmp_path / "t.db"))
+    ofx = _OFX_COMPTE.replace("<NAME>GAMMA TELECOM", "<NAME>GAMMA &amp; CO")
+    import_ofx_text(ofx, db)
+    abonnement = next(r for r in db.list_tx() if r["montant"] == -30.00)
+    assert abonnement["libelle"] == "GAMMA & CO"
+
+
+def test_import_ofx_esperluette_pas_de_doublon_avec_un_ancien_import(tmp_path):
+    """Avant la correction, le libellé était enregistré avec « &amp; ».
+    Réimporter le même relevé ensuite ne doit pas créer de doublon : c'est
+    le numéro d'opération (FITID) qui reconnaît l'opération, pas le libellé."""
+    db = Database(str(tmp_path / "t.db"))
+    # « &amp;amp; » une fois traduit redonne « &amp; » : l'ancien libellé.
+    ancien = _OFX_COMPTE.replace("<NAME>GAMMA TELECOM", "<NAME>GAMMA &amp;amp; CO")
+    import_ofx_text(ancien, db)
+    assert any(r["libelle"] == "GAMMA &amp; CO" for r in db.list_tx())
+    nouveau = _OFX_COMPTE.replace("<NAME>GAMMA TELECOM", "<NAME>GAMMA &amp; CO")
+    assert import_ofx_text(nouveau, db) == (0, 2, 0, 0, 1, 0)
 
 
 def test_import_ofx_recapitulatif_debit_differe_ecarte(tmp_path):

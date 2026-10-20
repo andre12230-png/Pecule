@@ -35,6 +35,7 @@ Deux relevés différents peuvent arriver au format OFX :
     leur date de valeur, sans quoi ils pèseraient trop tôt sur le solde.
 """
 import csv
+import html
 import io
 import re
 from typing import NamedTuple, Optional
@@ -100,7 +101,19 @@ def champ(bloc: str, nom: str) -> str:
     prochain « < » ou à la fin de la ligne. La balise fermante du XML (2.x)
     s'arrête donc au bon endroit, et son absence en SGML (1.x) aussi."""
     m = re.search("<" + nom + r">([^<\r\n]*)", bloc, re.I)
-    return m.group(1).strip() if m else ""
+    return _traduire_codes(m.group(1).strip()) if m else ""
+
+
+# Un code complet : « &amp; », « &lt; », « &#201; », « &#x26; »…
+_CODE_CARACTERE = re.compile(r"&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);")
+
+
+def _traduire_codes(texte: str) -> str:
+    """L'OFX ne peut pas écrire « & », « < » ou « > » tels quels : il les
+    remplace par des codes (« &amp; », « &lt; »…). On remet le vrai
+    caractère. Seuls les codes complets, terminés par « ; », sont traduits :
+    un « & » laissé nu par la banque (« M&S ») reste tel quel."""
+    return _CODE_CARACTERE.sub(lambda m: html.unescape(m.group(0)), texte)
 
 
 # ── Type d'opération ────────────────────────────────────────────────────────
