@@ -986,7 +986,10 @@ SYNC_VERSION = 3
 #           (bouton du Previsionnel, ou question a la suppression de sa
 #           ligne prevue) : elle n'est plus attendue ni comptee. Le bandeau
 #           du mois nomme aussi les echeances en retard.
-APP_VERSION = "1.41.26"
+# 1.41.27 : L'export CSV de Qonto s'importe : libelle = nom de la
+#           contrepartie, date de l'operation ; les operations « En cours »
+#           entrent non pointees.
+APP_VERSION = "1.41.27"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

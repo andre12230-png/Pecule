@@ -540,6 +540,133 @@ def releve_sans_entete_vers_csv(texte: str) -> Optional[str]:
     return tampon.getvalue() if operations else None
 
 
+# ──────────── Export des opérations de Qonto ────────────
+# Qonto (banque en ligne) exporte un fichier dont aucune colonne ne contient
+# « libellé » : le nom du marchand ou de l'émetteur est dans « Nom de la
+# contrepartie ». Pécule le refusait (constat du 20/10/2026). Ses pièges :
+#   - deux dates : celle de l'OPÉRATION, toujours remplie, et celle de la
+#     VALEUR, vide tant que l'opération est « En cours » ;
+#   - les dates portent une heure (« 2026-09-05 14:32:10 ») ;
+#   - « Statut » : « Exécuté » (passée en banque) ou « En cours » ;
+#   - le montant est « Montant total (TTC) », signé ; les colonnes de TVA,
+#     « Débit », « Crédit » et « Solde » ne servent pas.
+# Le fichier existe avec des titres français (export de l'appli) ou anglais
+# (page d'aide de Qonto) : les deux sont reconnus. Le séparateur et le format
+# des dates du CSV produit par Qonto ne sont pas documentés : point-virgule,
+# virgule ou tabulation, dates « année d'abord » ou à la française, tout est
+# accepté. Comme pour LCL, on réécrit le fichier en relevé ordinaire avant
+# l'import habituel.
+
+# Titres possibles de chaque colonne utile, sans accents ni majuscules.
+# L'heure LOCALE passe avant l'UTC : c'est le jour vécu par l'utilisateur.
+_QONTO_COLONNES = {
+    "libelle": ["nom de la contrepartie", "counterparty name"],
+    "montant": ["montant total (ttc)", "total amount (incl. vat)"],
+    "date": ["date de l'operation (local)", "operation date (local)",
+             "date de l'operation (utc)", "operation date (utc)"],
+    "valeur": ["date de la valeur (local)", "settlement date (local)",
+               "date de la valeur (utc)", "settlement date (utc)"],
+    "statut": ["statut", "status"],
+    "methode": ["methode de paiement", "payment method"],
+    "reference": ["reference"],
+    "note": ["note"],
+}
+
+# Statut d'une opération passée en banque : elle entre pointée. « En cours »
+# (et tout statut inconnu) entre NON pointée — choix d'André du 20/10/2026 :
+# elle se voit tout de suite, et le prochain import la pointera une fois
+# exécutée (même date d'opération, même montant, même libellé : c'est un
+# doublon, que l'import pointe au lieu de le réimporter).
+_QONTO_EXECUTEE = {"execute", "executee", "executed", "settled"}
+# Opération refusée ou annulée : aucun argent n'a bougé, on ne l'importe pas.
+_QONTO_ANNULEE = {"refuse", "refusee", "annule", "annulee", "declined",
+                  "canceled", "cancelled", "reversed", "rejete", "rejetee"}
+
+# Moyens de paiement de l'export anglais, traduits comme les écrit l'export
+# français. Les autres valeurs passent telles quelles.
+_QONTO_METHODES = {"card": "Carte", "transfer": "Virement",
+                   "direct_debit": "Prélèvement", "check": "Chèque",
+                   "subscription_fees": "Frais d'abonnement"}
+
+_RE_DATE_ISO = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})")
+_RE_DATE_FR = re.compile(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})\b")
+
+
+def _date_qonto(cellule: str) -> str:
+    """« 2026-09-05 14:32:10 » ou « 05/09/2026 14:32 » → « 05/09/2026 »,
+    l'écriture que lit parse_french_date. Une case vide ou illisible est
+    rendue telle quelle : l'import la comptera comme illisible."""
+    s = (cellule or "").strip()
+    m = _RE_DATE_ISO.match(s)
+    if m:
+        return f"{int(m.group(3)):02d}/{int(m.group(2)):02d}/{m.group(1)}"
+    m = _RE_DATE_FR.match(s)
+    if m:
+        return f"{m.group(1)}/{m.group(2)}/{m.group(3)}"
+    return s
+
+
+def _colonnes_qonto(titres: list[str]) -> Optional[dict]:
+    """Position de chaque colonne utile, ou None si ce n'est pas un export
+    Qonto (il faut au moins le libellé, le montant et la date d'opération)."""
+    noms = [deaccent(t).replace("’", "'").replace("\xa0", " ")
+            for t in titres]
+    positions = {}
+    for cle, candidats in _QONTO_COLONNES.items():
+        # Le premier candidat présent l'emporte (heure locale avant UTC).
+        positions[cle] = next((noms.index(c) for c in candidats if c in noms),
+                              -1)
+    if min(positions["libelle"], positions["montant"], positions["date"]) < 0:
+        return None
+    return positions
+
+
+def releve_qonto_vers_csv(texte: str) -> Optional[str]:
+    """Réécrit un export Qonto (cf. ci-dessus) sous la forme d'un relevé
+    titré que lit import_csv_text. Retourne None si ce n'est pas un export
+    Qonto."""
+    lignes = [ln for ln in texte.splitlines() if ln.strip()]
+    if not lignes:
+        return None
+    # Le séparateur est celui qui fait apparaître les colonnes de Qonto dans
+    # la première ligne.
+    for sep in (";", ",", "\t"):
+        rangees = list(csv.reader(io.StringIO("\n".join(lignes)),
+                                  delimiter=sep))
+        pos = _colonnes_qonto(rangees[0])
+        if pos is not None:
+            break
+    else:
+        return None
+
+    def case(r: list[str], cle: str) -> str:
+        i = pos[cle]
+        return r[i].strip() if 0 <= i < len(r) else ""
+
+    tampon = io.StringIO()
+    ecrivain = csv.writer(tampon, delimiter=";", lineterminator="\n")
+    # « Pointage operation » : « x » = passée en banque (cf. import_csv_text).
+    ecrivain.writerow(["Date", "Date de valeur", "Libelle", "Montant",
+                       "Type operation", "Informations",
+                       "Pointage operation"])
+    for r in rangees[1:]:
+        statut = deaccent(case(r, "statut"))
+        if statut in _QONTO_ANNULEE:
+            continue
+        # Sans colonne de statut, toutes les lignes sont réputées passées,
+        # comme dans tout relevé sans colonne de pointage.
+        passee = pos["statut"] < 0 or statut in _QONTO_EXECUTEE
+        methode = case(r, "methode")
+        methode = _QONTO_METHODES.get(methode.lower(), methode)
+        info = " ".join(x for x in (case(r, "reference"), case(r, "note"))
+                        if x)
+        ecrivain.writerow([_date_qonto(case(r, "date")),
+                           _date_qonto(case(r, "valeur")),
+                           case(r, "libelle"), case(r, "montant"),
+                           methode, info, "x" if passee else ""])
+    return tampon.getvalue()
+
+
 def import_csv(path: str, db: Database) -> ResultatImport:
     """Lit un CSV bancaire français et insère les transactions.
     Retourne un ResultatImport (cf. la description de ses six compteurs)."""
@@ -563,6 +690,11 @@ def import_csv_text(text: str, db: Database) -> ResultatImport:
             header_idx = i
             break
     if header_idx is None:
+        # Export Qonto : le libellé s'appelle « Nom de la contrepartie ». On
+        # le traduit en relevé ordinaire et on recommence.
+        qonto = releve_qonto_vers_csv(text)
+        if qonto is not None:
+            return import_csv_text(qonto, db)
         # Relevé sans ligne de titres, d'une forme connue : on le réécrit
         # avec ses titres et on recommence (cf. releve_sans_entete_vers_csv).
         titre = releve_sans_entete_vers_csv(text)

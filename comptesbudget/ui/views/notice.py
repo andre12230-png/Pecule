@@ -165,6 +165,10 @@ Cette notice vous guide à travers les principales fonctionnalités.</p>
       alors aussi. Ce sont bien ces achats-là que Pécule garde, à leur date d'achat — votre solde peut donc différer
       quelques jours de celui de la banque, qui ne les débite qu'en bloc le mois suivant.
       La <b>cotisation</b> de la carte, elle, reste une dépense comme une autre.
+      L'export CSV de <b>Qonto</b> est reconnu tel quel : le libellé est le nom de la
+      contrepartie, la date celle de l'opération ; les opérations « En cours » entrent
+      <b>non pointées</b> et se pointent d'elles-mêmes au relevé suivant, une fois passées.
+      Son export Excel (.xlsx) doit d'abord être enregistré en CSV.
       Si un CSV ne donne <b>aucune opération</b>, votre banque n'est peut-être pas
       encore connue : la boîte « Import incomplet » vous invite alors à envoyer, par
       <b>💬 Votre avis</b>, le nom de la banque et la seule ligne des titres des
