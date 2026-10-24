@@ -12,9 +12,10 @@ La date la plus récente est en haut.
 > se lit dans `constants.py` et dans les messages de commit.
 >
 > **Ce journal est public** (il est dans le dépôt GitHub). Règle posée par
-> l'auteur le 07/09/2026 et rappelée le 25/09/2026 : **aucun nom de personne,
-> aucune adresse e-mail, aucun numéro de compte ou de carte, aucun montant
-> réel** de l'auteur, de ses proches ou des utilisateurs. Écrire « son épouse »,
+> André le 07/09/2026 et rappelée le 25/09/2026 : **aucun nom de personne**
+> (hormis le prénom d'André, qu'il autorise depuis le 24/10/2026), **aucune
+> adresse e-mail, aucun numéro de compte ou de carte, aucun montant
+> réel** d'André, de ses proches ou des utilisateurs. Écrire « son épouse »,
 > « le second compte », « un utilisateur du Crédit Agricole », et des montants
 > inventés et ronds. Le détail réel va dans le journal du Bureau et la mémoire.
 > Relire ce fichier avant chaque `git push`.
@@ -41,7 +42,7 @@ restaient en coin de liste, sur les photos seulement). Contrôle de livraison ve
 fichiers retéléchargés : empreintes identiques ; installation Scoop essayée puis
 retirée. Branche de sauvegarde de l'ancien historique supprimée avant l'envoi
 (copie de sécurité gardée hors du dépôt).
-**Pourquoi.** L'auteur a choisi de publier Pécule seul, avant la sortie groupée de
+**Pourquoi.** André a choisi de publier Pécule seul, avant la sortie groupée de
 mi-octobre prévue pour les trois applis.
 **Reste.** Les deux images de partage (`promo_cover`, `promo_share`) ne sont pas
 refaites par le script. Pas d'annonce faite. La mise à jour d'une ancienne
@@ -59,7 +60,7 @@ Fermer), construite une fois par la fenêtre principale. Il reste cinq onglets.
 La barre de période ne se grise plus que sur le Prévisionnel. Notice (parties
 2, 3, 4, 6 et glossaire) et README (architecture) mis à jour. Trois tests
 nouveaux ou réécrits vus en échec avant le changement ; 631 tests passés.
-**Pourquoi.** L'auteur : le compte commande tout l'écran, il doit se lire en
+**Pourquoi.** André : le compte commande tout l'écran, il doit se lire en
 premier, et les onglets qui servent rarement encombrent la rangée. Mesures
 (vraies polices, 1280 px) : sur la ligne « Période » (962 px) le compte
 (289 px) ne tenait pas ; dans le menu, il le faisait déborder. Menu de gauche
@@ -70,7 +71,7 @@ regrouper. Catégories reste un onglet (il suit la période).
 
 ## 2026-10-01 (10) — Infobulles lisibles ; version 1.41.1
 
-**Fait.** (commit 1219448) En essayant la 1.41.0, l'auteur a montré
+**Fait.** (commit 1219448) En essayant la 1.41.0, André a montré
 l'infobulle de l'Encours carte : texte gris clair sur le beige de la page.
 Deux causes, mesurées : la palette des infobulles venait du système (fond
 #3C3C3C, texte #D4D4D4 sur ce poste ; `QToolTip.setPalette` manquait dans
@@ -93,11 +94,11 @@ la 1.41.0 devient `Pecule.exe.avant-1.41.1`, empreinte de `comptes.db`
 identique avant et après.
 
 **Reste.** Le Photovoltaïque et Recharges VE ne règlent pas non plus leurs
-infobulles : probablement sombres chez l'auteur, à mesurer. Ménage fait à
-la demande de l'auteur : les exe 1.40.4 et 1.40.3 sont à la Corbeille (vérifié) ;
+infobulles : probablement sombres chez André, à mesurer. Ménage fait à
+la demande d'André : les exe 1.40.4 et 1.40.3 sont à la Corbeille (vérifié) ;
 seul filet, `Pecule.exe.avant-1.41.1` (l'exe 1.41.0).
 
-## 2026-10-01 (9) — Version 1.41.0 installée chez l'auteur pour essai
+## 2026-10-01 (9) — Version 1.41.0 installée chez André pour essai
 
 **Fait.** Numéro 1.41.0 (constants.py et son historique, Lisez-moi.txt) :
 bandeau du mois réuni, tris de A à Z, case Catégorie vide à la saisie,
@@ -106,7 +107,7 @@ Période se grise dans Sous-catégories, Règles auto et Prévisionnel (elle
 disait « sauf Règles »). Lisez-moi : les deux phrases qui parlaient de
 « débité ou encaissé » et du bandeau « Ce mois-ci ».
 
-**Pourquoi.** L'auteur veut essayer chez lui les changements de la relecture
+**Pourquoi.** André veut essayer chez lui les changements de la relecture
 de design avant de continuer.
 
 Contrôle de livraison vert (625/625, ruff, confidentialité). Exe construit
@@ -116,7 +117,7 @@ règle sans catégorie, largeurs, numéro) ; lancé sur une base inventée :
 devient `Pecule.exe.avant-1.41.0`, `_internal` remis à jour (robocopy code 1),
 empreinte de `comptes.db` identique avant et après.
 
-**Reste.** Retour de l'auteur après essai. Deux anciens exe gardés
+**Reste.** Retour d'André après essai. Deux anciens exe gardés
 (`avant-1.41.0`, `avant-1.40.4`) : proposer le second à la Corbeille.
 
 ## 2026-10-01 (8) — Onglets harmonisés : largeur, boutons, vocabulaire
@@ -130,7 +131,7 @@ empreinte de `comptes.db` identique avant et après.
 - b39951d — tous les boutons au-dessus du tableau (ils étaient en bas dans
   Budget et Sous-catégories, des deux côtés dans Règles auto) : actions sur
   la sélection à gauche, outil d'ensemble à droite, comme le Prévisionnel ;
-- 8719526 — vocabulaire choisi par l'auteur : « Entrées / Sorties » pour
+- 8719526 — vocabulaire choisi par André : « Entrées / Sorties » pour
   l'argent qui bouge (bandeau du mois, Prévisionnel, Générer les échéances),
   « Revenus / Dépenses » pour les analyses ; « à débiter » reste à l'Encours
   carte. Nouveau `tests/test_vocabulaire.py`, qui relit tous les textes de
@@ -172,7 +173,7 @@ motif trop court dans « Nouvelle règle » ferme la fenêtre et perd la saisie.
 
 **Fait.** Relecture de tous les onglets avec le plugin Design (captures sur
 données inventées, 1280 × 720 et 1668 × 1000, octobre et septembre) : liste
-d'écarts remise à l'auteur. Premier point corrigé (commit bfe826c) : le verdict
+d'écarts remise à André. Premier point corrigé (commit bfe826c) : le verdict
 devient la première ligne du bandeau « Ce mois-ci », qui prend sa couleur
 (vert ou rouge) ; le bloc « Solde au … », qui répétait le chiffre du verdict,
 est retiré ; le détail du bandeau du mois passe au survol (seule la ligne
@@ -191,7 +192,7 @@ au démarrage (Catégories, Sous-catégories, récurrences), catégorie
 l'affichage, vocabulaire des entrées d'argent, tableaux pleine largeur, place
 des boutons, axe du solde (pas de 4 000), Règles auto sans pastille.
 
-## 2026-10-01 (5) — Version 1.40.4 installée chez l'auteur
+## 2026-10-01 (5) — Version 1.40.4 installée chez André
 
 **Fait.** Numéro 1.40.4 (constants.py et son historique, Lisez-moi.txt) :
 l'import qui reconnaît une opération renommée, et les corrections des tests
@@ -203,7 +204,7 @@ devient `Pecule.exe.avant-1.40.4` (seul filet), `_internal` remis à jour
 (robocopy code 1), empreinte de `comptes.db` identique avant et après. L'exe
 1.40.2 (`Pecule.exe.avant-1.40.3`) est à la Corbeille, vérifié.
 
-**Pourquoi.** Demande de l'auteur : « construis la 1.40.4, installe-la chez
+**Pourquoi.** Demande d'André : « construis la 1.40.4, installe-la chez
 moi, mets l'ancien à la corbeille ».
 
 **Reste.** Sortie de mi-octobre.
@@ -219,7 +220,7 @@ l'import qui s'arrêtait sur « UNIQUE constraint failed » et le doublon
 silencieux d'une opération importée avant le 16/09). 611/611 ; tests de
 `outils-import` : 20/20.
 
-**Pourquoi.** L'auteur a accepté la correction proposée. Le diagnostic,
+**Pourquoi.** André a accepté la correction proposée. Le diagnostic,
 parti des 23 opérations qui ne différaient que par la casse, a montré la
 vraie racine : sur une copie de la base réelle (lecture seule), 673
 opérations renommées n'auraient pas été reconnues en réimportant leur
@@ -248,9 +249,9 @@ opérations ont une clé anti-doublon d'import qui diffère, entre le libellé
 de la banque et le libellé enregistré, seulement par les majuscules (règle
 des sigles courts, antérieure au 01/10) ; 16 sans référence bancaire. Une
 réimportation de leur relevé pourrait les doubler. Correction proposée à
-l'auteur (clé de détection insensible à la casse), pas faite.
+André (clé de détection insensible à la casse), pas faite.
 
-## 2026-10-01 (2) — Version 1.40.3 installée chez l'auteur
+## 2026-10-01 (2) — Version 1.40.3 installée chez André
 
 **Fait.** Numéro 1.40.3 (constants.py et son historique, Lisez-moi.txt, dont
 le passage multicomptes aligné sur le nouveau menu) : la relecture de design
@@ -263,7 +264,7 @@ copié, `_internal` remis à jour (robocopy code 3) ; empreinte SHA-256 de
 `comptes.db` identique avant et après. L'exe 1.40.1
 (`Pecule.exe.avant-1.40.2`) est à la Corbeille, vérifié.
 
-**Pourquoi.** Demande de l'auteur : « construis la 1.40.3 et installe-la
+**Pourquoi.** Demande d'André : « construis la 1.40.3 et installe-la
 chez moi, supprime l'ancien exe ».
 
 **Reste.** README et site à aligner à la sortie de mi-octobre.
@@ -292,7 +293,7 @@ chez moi, supprime l'ancien exe ».
 **Pourquoi.** Fin des 23 points de la relecture de design ; les règles
 retenues sont passées dans la charte des applis.
 
-Puis, sur maquettes, l'auteur a choisi (commit c07d856) : un seul bouton
+Puis, sur maquettes, André a choisi (commit c07d856) : un seul bouton
 « 🧹 Mettre au propre… » qui ouvre les quatre outils, et le choix du compte
 au bout de la rangée d'onglets — le menu passe de 856 à 649 px avec deux
 comptes, la fenêtre descend toujours à 1 082 px ; le bandeau Encours carte
@@ -300,7 +301,7 @@ garde sa phrase « il reste… », le reste au survol. 603/603, vérifié en ima
 à 1280 × 800.
 
 **Reste.** Aucun exe construit : nouvelle version (1.40.3) à faire pour
-l'installer chez l'auteur. README, Lisez-moi et une page du site décrivent
+l'installer chez André. README, Lisez-moi et une page du site décrivent
 encore l'ancien menu et « Exporter (JSON) » : à aligner à la sortie de
 mi-octobre (noté dans la liste de contrôle de la publication).
 
@@ -313,7 +314,7 @@ l'ordre, « Enregistrer » au lieu de « OK », titres de boîtes précis,
 « Suggérer catégories », « Chercher doublons », plus de « JSON » à l'écran.
 Lot 2, couleurs (commit c9b38ac) : textes pâles passés à l'encre, bandeaux
 ramenés à la palette, barres « Dépenses » en orange foncé. 573/573.
-**Pourquoi.** Suite des 20 points de la relecture, demandée par l'auteur.
+**Pourquoi.** Suite des 20 points de la relecture, demandée par André.
 L'alerte « Budget dépassé » garde son rouge : c'est la couleur du danger,
 comme le verdict de découvert.
 **Reste.** Lot 3 (période grisée sur Sous-catégories, Règles et
@@ -321,13 +322,13 @@ Prévisionnel ; Rapport qui dit sa date ; « mouvement » dans Opérations ;
 états vides ; vraies cases à cocher ; largeur de la notice ; majuscules de
 l'harmonisation) et lot 4 (axes des graphiques en euros, mois abrégés,
 légende rognée). Menu trop haut et bandeau Encours carte : à choisir par
-l'auteur sur captures. Charte à compléter (bandeau vert, rouge du danger).
+André sur captures. Charte à compléter (bandeau vert, rouge du danger).
 
 ## 2026-09-30 — Relecture de design : catégories lisibles, chiffres entiers, confirmations
 
 **Fait.** Relecture de toutes les pages et fenêtres avec les grilles du
 plugin Design (critique, accessibilité, textes), confrontée à la charte des
-applis ; trois points corrigés, choisis par l'auteur sur une liste de 23.
+applis ; trois points corrigés, choisis par André sur une liste de 23.
 - **Catégories lisibles** : le nom s'écrit dans la couleur du texte, la
   couleur de la catégorie passe sur une pastille ronde devant lui
   (`models.pastille_categorie`, `cellule_categorie`), dans Opérations,
@@ -370,7 +371,7 @@ légende du camembert rognée en hauteur à 800 px. Un test qui appelle
 d'autres tests et bloque la suite : c'est ce qui a failli arriver ici.
 Aucun exe construit : pas de nouveau numéro de version.
 
-## 2026-09-29 (4) — Version 1.40.2 installée chez l'auteur
+## 2026-09-29 (4) — Version 1.40.2 installée chez André
 
 **Fait.** Numéro 1.40.2 (constants.py et son historique, Lisez-moi.txt) :
 les pluriels accordés de l'entrée ci-dessous. Contrôle de livraison vert
@@ -381,7 +382,7 @@ l'archive. Installé : ancien exe renommé `Pecule.exe.avant-1.40.2`,
 avant/après.
 **Pourquoi.** « installe les exe chez moi ».
 **Reste.** Rien : `Pecule.exe.avant-1.40.1` (l'exe 1.40.0) est parti à la
-Corbeille à la demande de l'auteur ; filet unique `avant-1.40.2`.
+Corbeille à la demande d'André ; filet unique `avant-1.40.2`.
 
 ## 2026-09-29 (3) — Pluriels accordés au lieu de « (s) »
 
@@ -403,14 +404,14 @@ ses opérations », « son montant n'entre pas », sens d'origine gardé pour le
 doublons et les sous-catégories).
 **Reste.** Rien sur ce sujet.
 
-## 2026-09-29 (2) — Version 1.40.1 installée chez l'auteur
+## 2026-09-29 (2) — Version 1.40.1 installée chez André
 
 **Fait.** Numéro 1.40.1 (vert des confirmations commun aux trois applis,
 `cb0eafd`). Contrôle de livraison vert (545/545). Exe essayé sur une base de
 démonstration (titre « v1.40.1 »), installé ; `comptes.db` identique avant et
 après. L'exe 1.40.0 devient le filet unique (`Pecule.exe.avant-1.40.1`),
 l'exe 1.39.2 part à la Corbeille.
-**Pourquoi.** L'auteur : « deploie chez moi et supprime les ancien exe ».
+**Pourquoi.** André : « deploie chez moi et supprime les ancien exe ».
 **Reste.** Rien.
 
 ## 2026-09-29 — Vert des confirmations aligné sur les deux autres applis
@@ -425,9 +426,9 @@ onglet Prévisionnel), elle tient en moitié d'écran de 1280 px.
 d'interface commune (règle : exactement les mêmes couleurs partout).
 **Reste.** Pas de nouveau numéro tant qu'aucun exe n'est construit. Écarts
 de forme entre les trois applis (cartes, sélecteur de période, fin du menu)
-présentés à l'auteur, en attente de sa décision.
+présentés à André, en attente de sa décision.
 
-## 2026-09-28 (6) — Version 1.40.0 installée chez l'auteur
+## 2026-09-28 (6) — Version 1.40.0 installée chez André
 
 **Fait.** Numéro 1.40.0 (constants.py avec son historique, Lisez-moi.txt) :
 reclassement en masse, export CSV, suppression annulable, courbe du solde.
@@ -436,7 +437,7 @@ fichier 1.40.0), essayé sur une base inventée : titre « Pécule — v1.40.0 �
 fermeture propre. Installé : ancien exe renommé `Pecule.exe.avant-1.40.0`
 (1.39.2), exe copié (identique à celui construit), `_internal` synchronisé
 (robocopy code 1) ; `comptes.db` identique avant et après.
-**Pourquoi.** Demande de l'auteur : « déploie chez moi et supprime l'ancien
+**Pourquoi.** Demande d'André : « déploie chez moi et supprime l'ancien
 exe ». Deuxième chiffre monté : nouvelles fonctions.
 **Reste.** `Pecule.exe.avant-rappel-sauvegarde` (1.39.1) mis à la Corbeille à
 sa demande : seul filet, `Pecule.exe.avant-1.40.0`. Rien de poussé ; sortie de
@@ -469,10 +470,10 @@ Notice, README (FR et EN) et Lisez-moi complétés. Tests écrits avant le code 
 `test_ui_smoke.py` (1). 544/544 ; contrôle de livraison vert hors les deux
 points attendus (code non commité, numéro non monté). Aperçus rendus sur la
 base inventée de `captures_promo.py`, sans fenêtre.
-**Pourquoi.** Demande de l'auteur : « fais les autres points à la suite ».
+**Pourquoi.** Demande d'André : « fais les autres points à la suite ».
 **Reste.** Pas de numéro ni d'exe. Seule la dernière suppression de la liste
 s'annule ; l'outil Doublons et la suppression d'un compte n'y passent pas. Deux
-points laissés à l'auteur, tranchés le jour même : **on ne change rien**.
+points laissés à André, tranchés le jour même : **on ne change rien**.
 L'onglet Catégories garde la date choisie (sa phrase d'explication reste), et
 le solde de départ n'est pas lu dans l'OFX (ce solde est daté du
 téléchargement).
@@ -492,7 +493,7 @@ README (FR et EN) et Lisez-moi complétés. Trois tests écrits avant le code
 pouvait déjà pointer ou supprimer toute une sélection, mais reclasser se
 faisait ligne à ligne, ou par catégorie entière depuis l'onglet Catégories.
 **Reste.** Pas de numéro de version ni d'exe : à la prochaine installation
-chez l'auteur, puis sortie de mi-octobre. Les échéances futures d'une
+chez André, puis sortie de mi-octobre. Les échéances futures d'une
 récurrence gardent la catégorie de la récurrence (comme pour une modification
 à l'unité). Autres pistes de la revue, non commencées : export CSV des
 opérations affichées, courbe du solde sur le Bilan, « Annuler » après une
@@ -511,14 +512,14 @@ messages ; mêmes résultats de tests avant et après sur le sommet public. Bran
 publique et 27 étiquettes renvoyées ; les 23 versions publiées gardent leurs
 fichiers, dont l'archive de la 1.23.0 soumise à Winget (même empreinte en ligne
 avant et après).
-**Pourquoi.** Décision de l'auteur, après la même opération sur son application
+**Pourquoi.** Décision d'André, après la même opération sur son application
 photovoltaïque : une valeur retirée du dernier état restait lisible dans les
 versions précédentes.
 **Reste.** L'ancien sommet reste joignable chez GitHub par son numéro exact : seul
 le support de GitHub peut le purger. Une sauvegarde de l'ancien historique est
 gardée hors du dépôt jusqu'à la sortie de mi-octobre.
 
-## 2026-09-28 (2) — Installée chez l'auteur (1.39.2)
+## 2026-09-28 (2) — Installée chez André (1.39.2)
 
 **Fait.** Numéro monté à 1.39.2 (rappel de sauvegarde externe). Le contrôle
 de livraison bloquait sur le test antérieur qui dépendait du jour
@@ -531,9 +532,9 @@ Contrôle de livraison vert. Exe construit (version du fichier 1.39.2), essayé
 sur une copie de la base : titre « Pécule — v1.39.2 », fermeture propre.
 Installé : ancien exe renommé `Pecule.exe.avant-rappel-sauvegarde`, robocopy
 code 1, `comptes.db` identique avant et après.
-**Pourquoi.** Demande de l'auteur : déploiement des trois applications.
+**Pourquoi.** Demande d'André : déploiement des trois applications.
 **Reste.** Rien de poussé ; sortie de mi-octobre. `Pecule.exe.avant-1.39.1`
-(l'exe 1.39.0) mis à la Corbeille avec l'accord de l'auteur : seul filet,
+(l'exe 1.39.0) mis à la Corbeille avec l'accord d'André : seul filet,
 `Pecule.exe.avant-rappel-sauvegarde` (1.39.1).
 
 ## 2026-09-28 — Rappel de sauvegarde externe sur le Bilan
@@ -551,12 +552,12 @@ Suite : 530 passent ; un échec antérieur et sans lien,
 `test_bilan_ne_compte_pas_deux_fois_une_echeance_generee`, qui place une
 échéance à aujourd'hui + 3 jours : les trois derniers jours du mois, elle
 tombe le mois suivant (il échoue de même sur la version commitée).
-**Pourquoi.** Demande de l'auteur, pour les trois applications.
+**Pourquoi.** Demande d'André, pour les trois applications.
 **Reste.** Entré dans l'exe avec la 1.39.2. Le test dépendant de la date a
 été corrigé au déploiement (entrée suivante). Tant qu'aucune sauvegarde externe n'a été refaite avec cette version,
 le rappel dit « jamais » : les précédentes n'étaient pas notées.
 
-## 2026-09-26 (9) — Version 1.39.1 installée chez l'auteur
+## 2026-09-26 (9) — Version 1.39.1 installée chez André
 
 **Fait.** Numéro 1.39.1 (constants.py avec son historique, Lisez-moi.txt) : les
 erreurs dites en français (entrée précédente). 523/523, contrôle de livraison
@@ -565,17 +566,17 @@ reconstruit sans le .bat : version de fichier 1.39.1, module des erreurs présen
 dans l'archive de l'exe ; lancé sur une copie de la base de démonstration (dossier
 de données redirigé) : titre « v1.39.1 », fermeture propre. Installé : ancien exe
 renommé `Pecule.exe.avant-1.39.1`, exe copié (identique à celui construit),
-`_internal` synchronisé ; base de l'auteur identique avant et après.
-**Pourquoi.** Demande de l'auteur : déployer les trois applications chez lui.
+`_internal` synchronisé ; base d'André identique avant et après.
+**Pourquoi.** Demande d'André : déployer les trois applications chez lui.
 Nouveau numéro à chaque exe déployé ; dernier chiffre seulement, ce sont des
 corrections.
 **Reste.** Sortie de mi-octobre. `Pecule.exe.avant-1.39.0` mis à la Corbeille
-avec l'accord de l'auteur : seul filet, `Pecule.exe.avant-1.39.1`.
+avec l'accord d'André : seul filet, `Pecule.exe.avant-1.39.1`.
 
 ## 2026-09-26 (8) — Erreurs techniques dites en français
 
 **Fait.** Nouveau module `comptesbudget/erreurs.py`, commun aux trois
-applications de l'auteur (même fichier) : `erreur_en_clair(e)` dit en français
+applications d'André (même fichier) : `erreur_en_clair(e)` dit en français
 les erreurs de Python et de SQLite (fichier ouvert dans un autre programme,
 disque plein, base occupée ou abîmée…) ; les messages rédigés par Pécule
 passent inchangés, même quand leur classe dérive d'OSError. Branché aux six
@@ -589,13 +590,13 @@ plein » au lieu du mot du message d'origine : même intention. 523/523.
 **Pourquoi.** Diagnostic de langue du 26/09/2026 : les textes de Pécule et les
 boutons de Qt étaient déjà en français ; seules ces erreurs rares pouvaient
 apparaître en anglais (« Permission denied », « database is locked »).
-**Reste.** Rien de construit ni de poussé : nouveau numéro et exe si l'auteur
+**Reste.** Rien de construit ni de poussé : nouveau numéro et exe si André
 le demande ; sortie de mi-octobre.
 
-## 2026-09-26 (7) — Version 1.39.0 installée chez l'auteur
+## 2026-09-26 (7) — Version 1.39.0 installée chez André
 
 **Fait.** Numéro 1.39.0 (constants.py, Lisez-moi.txt), exe reconstruit et
-installé chez l'auteur, sa base vérifiée identique avant et après.
+installé chez André, sa base vérifiée identique avant et après.
 **Pourquoi.** Règle : un nouveau numéro à chaque exe déployé ; le deuxième
 chiffre monte, la journée ayant changé des comportements (débit différé,
 classement, imports).
@@ -650,16 +651,16 @@ comportement lui-même.
   une carte à débit différé ;
 - Bilan : avec une carte à débit immédiat, un achat carte saisi et pas encore
   pointé compte dans ce qui reste à passer.
-**Pourquoi.** Diagnostic « ce qui ne vaut que pour l'auteur » : ces cas ne se
+**Pourquoi.** Diagnostic « ce qui ne vaut que pour André » : ces cas ne se
 voient pas sur un compte à débit différé importé en CSV, mais faussent le solde
 ailleurs.
 **Reste.** Jour du prélèvement différé figé au 4, détection du débit différé trop
 facile, ligne récapitulative écartée sans vérification, classement automatique
-trop large, textes de la notice qui généralisent le cas de l'auteur.
+trop large, textes de la notice qui généralisent le cas d'André.
 
 ## 2026-09-26 (3) — Montants d'exemple remplacés par des montants ronds
 
-**Fait.** Un diagnostic « ce qui ne vaut que pour l'auteur » a relevé des
+**Fait.** Un diagnostic « ce qui ne vaut que pour André » a relevé des
 montants au centime qui ressemblaient à de vrais chiffres : dans la notice
 intégrée (Catégories, verdict du Bilan, « Reste pour la carte »), l'aide de la
 recherche, le journal de version de `constants.py` et quelques commentaires. Tous
@@ -668,7 +669,7 @@ passe d'une cotisation réelle à 50,00 €. Aucun calcul ne change.
 **Pourquoi.** Règle du dépôt public : exemples inventés et ronds dès la première
 écriture. Le script de contrôle ne sait pas juger si un montant est inventé.
 Deux messages de commit locaux, non publiés, qui citaient deux de ces montants
-ont été réécrits avec l'accord de l'auteur, après une sauvegarde complète : les
+ont été réécrits avec l'accord d'André, après une sauvegarde complète : les
 fichiers de tous les commits sont identiques, seules ces deux lignes de message
 changent ; le contrôle avant livraison est de nouveau au vert.
 **Reste.** Le reste du diagnostic : défauts qui touchent
@@ -681,7 +682,7 @@ figé), notice, classement automatique.
 **Fait.** Le nouveau contrôle avant livraison (hors dépôt) a trouvé le nom réel
 d'une entreprise dans un test de saisie (`tests/test_sens_saisie.py`), venu d'un
 commit local du 17/09 que le nettoyage du matin n'avait pas repéré. Remplacé par
-un nom inventé dans chaque commit non publié, avec l'accord de l'auteur et après
+un nom inventé dans chaque commit non publié, avec l'accord d'André et après
 une sauvegarde complète. Preuves : entre l'ancien et le nouveau sommet, une seule
 ligne diffère ; messages et dates des commits identiques ; la version publiée
 n'est pas touchée ; 461 tests verts.
@@ -697,7 +698,7 @@ journal, des **données réelles dans un test** : les données d'essai du relev�
 Crédit Agricole (`tests/test_csv_import.py`) avaient été recopiées d'un vrai
 relevé d'utilisateur (titulaire, fragment de numéro de carte, références de
 prélèvement, soldes, commerçants). Remplacement par des données inventées
-fait. Les commits locaux ont ensuite été **réécrits** avec l'accord de l'auteur,
+fait. Les commits locaux ont ensuite été **réécrits** avec l'accord d'André,
 après une sauvegarde complète : données inventées dans chaque commit (le même
 encours était aussi repris par un test d'affichage et deux commentaires de
 l'import), ce journal ramené à sa version publiée dans chaque commit sauf le
@@ -715,16 +716,16 @@ septembre** (entrées déjà publiées). Leçon : un relevé réel reçu pour re
 un bug ne sert que de modèle de forme ; son contenu est inventé dès le premier
 commit.
 
-## 2026-09-25 (5) — Numéro 1.38.0, installé chez l'auteur
+## 2026-09-25 (5) — Numéro 1.38.0, installé chez André
 
 **Fait.** `APP_VERSION` passe à 1.38.0, avec son entrée dans l'historique de
 `constants.py` (tout ce qui attend la sortie de mi-octobre) et l'en-tête du
 `Lisez-moi.txt`. Exe reconstruit sans le `.bat` (étapes 2 et 3 rejouées), contrôlé
 (numéro 1.38.0 dans les informations du fichier et le titre de la fenêtre,
 couleurs présentes dans le code embarqué, lancement et fermeture sur une copie de
-la base), puis installé chez l'auteur (étape 4 à la main, ancien exe gardé à côté,
+la base), puis installé chez André (étape 4 à la main, ancien exe gardé à côté,
 base identique avant et après). 461 tests verts.
-**Pourquoi.** L'auteur voulait voir tout de suite les nouveaux fonds, avec un
+**Pourquoi.** André voulait voir tout de suite les nouveaux fonds, avec un
 numéro qui les distingue de la 1.37.0 publiée.
 **Reste.** Rien de poussé. Le README, la page du site et le manifeste Scoop
 gardent 1.37.0 jusqu'à la publication de mi-octobre.
@@ -744,7 +745,7 @@ l'application. Mêmes couleurs dans les deux applications sœurs.
 
 ## 2026-09-25 (3) — Couleurs lisibles, comme dans les deux autres applications
 
-**Fait.** Les trois applications de l'auteur suivent désormais les couleurs de
+**Fait.** Les trois applications d'André suivent désormais les couleurs de
 Pécule ; en les reprenant, le Photovoltaïque et Recharges VE ont dû foncer quatre
 teintes pour rester lisibles. Pécule prend les mêmes, pour que les trois soient
 identiques : vert des montants positifs et des coches `#18733A` (au lieu de
@@ -757,7 +758,7 @@ bandeau gardent `#229954` : ce n'est pas du texte. 461 tests verts.
 bouton 3 pour 1 (règles déjà appliquées au Photovoltaïque depuis le 15/09).
 **Reste.** Sortira avec la 1.38.0 à la mi-octobre.
 
-## 2026-09-25 (2) — Deux prélèvements d'assurance renommés dans la base de l'auteur
+## 2026-09-25 (2) — Deux prélèvements d'assurance renommés dans la base d'André
 
 **Fait.** Dans la vraie base, deux lignes de juillet 2026 saisies à la main sous
 des libellés du classeur (« ASS AUTO », « ASS HABITATION », sans sous-catégorie)
@@ -791,19 +792,19 @@ tête du fichier.
 **Pourquoi.** Ce journal est public depuis le 31/08. La règle du 07/09 existait,
 mais sa note avait disparu de l'en-tête ; rien n'avertissait plus en écrivant.
 **Reste.** Les commits locaux non poussés portent encore l'ancien texte : à
-réécrire avant le push de mi-octobre, avec l'auteur et après une branche de
+réécrire avant le push de mi-octobre, avec André et après une branche de
 sauvegarde. Modification pas encore commitée.
 
-## 2026-09-24 — Libellés fusionnés dans la base de l'auteur
+## 2026-09-24 — Libellés fusionnés dans la base d'André
 
-**Fait.** Revue des 765 libellés de `F:\budget-app\Pecule\comptes.db` sur une
+**Fait.** Revue des 765 libellés de la base de son installation sur une
 copie, puis fusion de **25 groupes** que la fenêtre « Harmoniser » ne sait pas
 rapprocher (deux écritures d'un même nom : un prénom seul / le prénom suivi du nom,
 E-Leclerc / Centre Leclerc, les six façons d'écrire un retrait d'espèces…).
 728 opérations et 3 récurrences renommées, 765 → 720 libellés. Sauvegarde
 datée avant, totaux par catégorie identiques après. Détail et liste des
 libellés à ne jamais réunir : mémoire `libelles-harmonises`.
-**Pourquoi.** L'auteur a repéré ces deux écritures d'un même nom dans l'aperçu
+**Pourquoi.** André a repéré ces deux écritures d'un même nom dans l'aperçu
 d'harmonisation ; la question valait pour toute la base.
 **Reste.** Deux cas à trancher par lui : `ASS AUTO` / `ASS AUTO CLIO`, et la
 ligne `ASS HABITATION` de juillet 2026. Aucune modification de code.
@@ -823,7 +824,7 @@ complétée (bouton + Espace + Échap + Ctrl+Entrée). Deux tests ajoutés,
 **Pourquoi.** Saisir un relevé à la main obligeait à rouvrir la fenêtre à
 chaque ligne. Le bouton n'apparaît pas à la modification : enchaîner n'y a
 pas de sens.
-**Reste.** Envoi du mail laissé à l'auteur. Installé chez lui le même jour
+**Reste.** Envoi du mail laissé à André. Installé chez lui le même jour
 (ancien exe en `Pecule.exe.avant-enregistrer-et-nouvelle`, base intacte) ;
 rien de poussé, installeur du Bureau non refait — sortira en 1.38.0 à la
 mi-octobre. Refusé volontairement : recopier les
@@ -841,10 +842,10 @@ son mois le plus récent. Le rendu en image a révélé une erreur que les tests
 voyaient pas (mode de date choisi avant que la barre soit prête) : corrigée et
 testée. Notice (rubrique 4) complétée. 8 tests
 (`tests/test_selecteur_ce_mois.py`), 460 verts. Commit `1bdde08`. **Déployé chez
-l'auteur** (exe toujours v1.37.0, contenu prouvé par extraction du PYZ, essai sur
+André** (exe toujours v1.37.0, contenu prouvé par extraction du PYZ, essai sur
 base jetable ; ancien exe en `Pecule.exe.avant-ce-mois-ci` ; comptes.db identique
 avant/après). Rien de poussé.
-**Pourquoi.** Demande de l'auteur : revenir au mois en cours sans rouvrir deux menus,
+**Pourquoi.** Demande d'André : revenir au mois en cours sans rouvrir deux menus,
 et le même sélecteur dans le rapport.
 **Reste.** À reporter à la main dans pv-dashboard et Recharges VE (même
 sélecteur, code distinct) avant la sortie de mi-octobre.
@@ -866,9 +867,9 @@ pensions, les deux « JOUR prévu le 7 vs réel le 3 » sortent, et la
 revalorisation d'une assurance aussi ; sur la base actuelle, plus aucune
 fausse alerte de jour ni de tranche future.
 **Pourquoi.** Deux versements passés du 7 au 3 depuis quatre mois n'avaient
-pas été signalés : la médiane de douze mois restait au 7. C'est l'auteur qui l'a vu
+pas été signalés : la médiane de douze mois restait au 7. C'est André qui l'a vu
 sur le bandeau du Bilan.
-**Reste.** Non commité (l'auteur décide). « IRRÉGULIER » reste signalé sur une
+**Reste.** Non commité (André décide). « IRRÉGULIER » reste signalé sur une
 récurrence dont les opérations portent deux sous-catégories différentes selon
 les mois : c'est une incohérence de classement, pas de l'outil. Un outil, pas
 l'appli : rien à livrer dans l'exe.
@@ -880,11 +881,11 @@ le mois choisi (même sans opération), pour « Toute l'année » le dernier moi
 l'année qui a des opérations sans dépasser le mois en cours, pour « Toutes
 périodes » le mois en cours comme avant (`_mois_de_depart` dans `report.py`).
 Notice complétée. 6 tests (`tests/test_rapport_periode.py`), 445 verts. Commit
-`8f0b8de`. **Déployé chez l'auteur** (exe toujours v1.37.0, contenu prouvé par
+`8f0b8de`. **Déployé chez André** (exe toujours v1.37.0, contenu prouvé par
 extraction du PYZ, essai sur base jetable ; ancien exe en
 `Pecule.exe.avant-rapport-periode` ; comptes.db identique avant/après).
 Rien de poussé.
-**Pourquoi.** Demande de l'auteur : la barre affichait Janvier 2026, le rapport
+**Pourquoi.** Demande d'André : la barre affichait Janvier 2026, le rapport
 s'ouvrait sur septembre.
 **Reste.** Part avec la 1.38.0 de mi-octobre.
 
@@ -897,14 +898,14 @@ donne à chaque échéance `_debit` et `_carte`, et la fenêtre part du mois
 d'avant pour voir les achats carte débités dans la période. Carte à débit
 immédiat : rien ne change. 5 tests (`tests/test_recurrence_carte_differee.py`),
 439 verts. Commit `19f03b1`. Rejoué sur une copie de la vraie base : le point
-bas du 05/10 remonte exactement du montant de l'abonnement Anthropique, les
-abonnements carte d'octobre partent au 04/11. **Déployé chez l'auteur** (exe
+bas du 05/10 remonte exactement du montant de l'abonnement en ligne, les
+abonnements carte d'octobre partent au 04/11. **Déployé chez André** (exe
 toujours v1.37.0, contenu prouvé par extraction du PYZ, essai sur base
 jetable ; ancien exe en `Pecule.exe.avant-carte-differee` ; comptes.db
 identique avant/après). Rien de poussé.
-**Pourquoi.** L'auteur contestait le bandeau « Au plus bas ». Sur l'écart, les
+**Pourquoi.** André contestait le bandeau « Au plus bas ». Sur l'écart, les
 quatre prélèvements des 4 et 5 du mois (assurances, eau, téléphone) étaient
-justes — il les avait oubliés — ; seul l'abonnement Anthropique, payé par carte,
+justes — il les avait oubliés — ; seul l'abonnement en ligne, payé par carte,
 était compté à tort le 01/10 alors que celui de septembre était déjà dans le lot
 du 05/10.
 **Reste.** Part avec la 1.38.0 de mi-octobre. `date_debit_differe` prend
@@ -933,9 +934,9 @@ pré-coché sur le compte courant. 434 tests verts.
 repris des prélèvements arrêtés depuis longtemps et d'anciens libellés de
 récurrences déjà déclarées, avec des montants moyennés sur des années, et les
 a pré-cochés. Le prévisionnel sur 12 mois en était lourdement faussé.
-Commit `de55618`. **Déployé chez l'auteur (20 h 40)** : exe reconstruit (toujours
+Commit `de55618`. **Déployé chez André (20 h 40)** : exe reconstruit (toujours
 v1.37.0), correction prouvée dans l'exe par extraction du PYZ, lancé sur une
-copie jetable de la base, puis installé dans `F:\budget-app\Pecule` ; ancien
+copie jetable de la base, puis installé dans son dossier Pécule ; ancien
 exe en `Pecule.exe.avant-prerempli` ; comptes.db identique avant/après.
 Rien de poussé.
 **Reste.** Part avec la 1.38.0 de mi-octobre. `outils/audit_recurrences.py` filtre encore les récurrences
@@ -973,18 +974,18 @@ comptes.db de la racine). 369 tests verts. Constats vérifiés en exécutant :
   « Pécule est déjà ouvert » si le dossier n'est pas inscriptible ;
   prévisionnel « 12 mois » jusqu'au 31/08/2027 ; axe du graphique vide
   « 1, 0, 0, 0, 0 » ; taux d'épargne « 53.9 % » dans le rapport.
-**Pourquoi.** Demande de l'auteur : ce qui bloquerait un nouvel utilisateur.
+**Pourquoi.** Demande d'André : ce qui bloquerait un nouvel utilisateur.
 Pécule a d'autres utilisateurs, dont les comptes ne ressemblent pas au sien.
 **Reste.** Ordre proposé : soldes faux sans alerte, puis import à 0 €,
 saisie « 1.234,56 », bandeau de découvert, doc.
 
-**Déployé chez l'auteur (13 h 30).** Exe reconstruit (toujours v1.37.0),
+**Déployé chez André (13 h 30).** Exe reconstruit (toujours v1.37.0),
 contenu prouvé par extraction du PYZ, lancé sur une base d'essai, puis
-installé dans `F:\budget-app\Pecule` avec le Lisez-moi ; ancien exe en
+installé dans son dossier Pécule avec le Lisez-moi ; ancien exe en
 `Pecule.exe.avant-audit-nouvel-utilisateur` ; comptes.db identique avant/après.
 Rien de poussé.
 
-**Les deux choix de l'auteur (commit 37cfc95).** Calculs faits d'abord sur sa
+**Les deux choix d'André (commit 37cfc95).** Calculs faits d'abord sur sa
 vraie base : exclure « Virements internes » aurait rendu le second compte absurde
 (−12 000 % d'épargne) → seule « Épargne » sort des analyses (taux,
 graphiques, rapport « Mis de côté ») ; la tuile Mouvement garde tout.
@@ -1010,7 +1011,7 @@ compte supprimé VOLONTAIREMENT revient aussi si l'on restaure un export
 d'avant — mieux vaut un compte à resupprimer qu'un compte perdu.
 Sauvegardes : 10 dernières + la première de chacun des 12 derniers mois
 (`sauvegardes_a_garder`) ; échec → `SauvegardeImpossible`, message au
-lancement, l'appli s'ouvre quand même. Chez l'auteur : 10 copies, identiques
+lancement, l'appli s'ouvre quand même. Chez André : 10 copies, identiques
 avant/après (elles ne remontaient qu'au 11/09). Piège revu : le heredoc a
 encore changé « \n » en vrais retours à la ligne dans app.py — éditer avec
 l'outil Edit dès qu'il y a un antislash. 415 tests verts.
@@ -1048,7 +1049,7 @@ tombent dans la marge de tolérance (5 jours), sans les rendre. Limité à
 cette marge exprès : élargi au mois voisin entier, l'échéance du 1er
 juillet « volait » le paiement anticipé du 30/07 qui revient au 1er août
 (test existant). Comparaison sur une copie de la vraie base (sauvegarde
-SQLite de F:\budget-app\Pecule\comptes.db) : 573 échéances 2025-2027,
+SQLite de la base de son installation) : 573 échéances 2025-2027,
 aucun statut changé. Scénario de l'audit rejoué : novembre « à débiter
 −250 €, fin −60 € » au lieu de 0 € et +190 €. 399 tests verts.
 Non fait : choisir le débit le PLUS PROCHE quand plusieurs conviennent (le
@@ -1106,16 +1107,16 @@ de création, « 🏦 Mes comptes » reçoit **⬆ Monter / ⬇ Descendre**, et 
 du haut est marqué « ouvert au lancement ». Notice complétée aux deux endroits.
 Nouvelle méthode `deplacer_compte` (renumérote l'ordre, sans effet aux
 extrémités). 369 tests verts, dont 3 nouveaux.
-**Pourquoi.** Demande de l'auteur : rouvrir sur un compte secondaire fait saisir au
+**Pourquoi.** Demande d'André : rouvrir sur un compte secondaire fait saisir au
 mauvais endroit. Vérifié sur une copie de sa base : elle mémorisait le
 troisième compte comme dernier compte — d'où l'import du 16/09 dans le mauvais compte. Même
 esprit que l'ouverture sur le mois en cours. Le réglage `compte_courant`
 continue d'être écrit (séance en cours, outils).
 **Reste.** Part avec la 1.38.0 à la mi-octobre.
 
-## 2026-09-17 (4) — Garde-fou déployé chez l'auteur
+## 2026-09-17 (4) — Garde-fou déployé chez André
 
-**Fait.** Exe reconstruit et installé dans `F:\budget-app\Pecule` (toujours
+**Fait.** Exe reconstruit et installé dans son dossier Pécule (toujours
 v1.37.0, contenu plus récent). Présence du garde-fou prouvée dans l'exe par
 extraction du PYZ. `comptes.db` identique avant/après, 22 sauvegardes en place.
 Ancien exe gardé en `Pecule.exe.avant-sens-saisie`.
@@ -1135,17 +1136,17 @@ et le focus revient sur le choix du sens. Nouvelle fonction
 d'enregistrer un virement reçu en débit, et le solde était faux de deux fois le
 montant. On n'avertit QUE dans ce sens : un type de dépense au montant positif
 (remboursement, prélèvement rejeté) est courant et légitime.
-**Reste.** Part avec la 1.38.0 à la mi-octobre. Rien n'est déployé chez l'auteur.
+**Reste.** Part avec la 1.38.0 à la mi-octobre. Rien n'est déployé chez André.
 
 ## 2026-09-17 (2) — Troisième compte : solde faux, saisie du mauvais côté
 
 **Fait.** Le troisième compte affichait un solde faux de **deux fois** le
 montant d'un virement reçu : saisi à la main le 17/09, il avait été enregistré
-en dépense. L'auteur a corrigé ; solde revérifié contre le relevé (78 opérations).
+en dépense. André a corrigé ; solde revérifié contre le relevé (78 opérations).
 **Pourquoi.** L'import a d'abord été mis hors de cause : relu dans une base
 d'essai, il rend les 78 lignes au centime près. La comparaison base / relevé
 par (date, montant) a isolé la seule ligne fautive.
-**Reste.** Proposé à l'auteur : un avertissement quand un « Virement reçu » classé
+**Reste.** Proposé à André : un avertissement quand un « Virement reçu » classé
 en Revenus est enregistré avec un montant négatif. En attente de sa réponse.
 
 ## 2026-09-17 — Crédit Agricole : l'utilisateur confirme que tout fonctionne
@@ -1166,7 +1167,7 @@ l'explication existante. Test `test_bulle_aide_pointage`. 363 tests verts.
 version 1.26.0) : l'utilisateur demandait « un raccourci pour pointer une
 opération ». La barre d'espace existe depuis la 1.33.0, mais rien ne la montre
 à l'endroit où l'on pointe.
-**Reste.** Sortira avec la 1.38.0 (mi-octobre). Installé chez l'auteur le même
+**Reste.** Sortira avec la 1.38.0 (mi-octobre). Installé chez André le même
 jour (ancien exe en `Pecule.exe.avant-aide-pointage`, base intacte) ; rien de
 poussé. `Pecule-Setup.exe` de l'utilisateur du Crédit Agricole refait et recopié sur le Bureau (testé :
 pose silencieuse, lancement, désinstallation sans trace). L'auteur de l'avis n'a pas laissé d'adresse : impossible de le
@@ -1193,7 +1194,7 @@ justement à cet écart de dates.
   jamais enregistrée, ni comptée dans les dépenses ou les graphiques. Il
   disparaît une fois prélevé, ou dès que son détail est importé.
 - `bilan.py` : le reste du mois ne retranche plus que les achats prélevés
-  **après** la fin du mois. Pour l'auteur, rien ne change (tout part le 4). Au
+  **après** la fin du mois. Pour André, rien ne change (tout part le 4). Au
   CA, le lot part le dernier jour ouvré du mois et il aurait été compté deux
   fois. En consultation, le titre donne les vraies dates de prélèvement
   (« prélevé le 31/07/2026 et le 31/08/2026 ») au lieu du 4 du mois suivant.
@@ -1202,10 +1203,10 @@ justement à cet écart de dates.
   bandeau affiché, lot du mois prélevé le 30/09/2026, et 0 ajout au réimport.
 
 **Pourquoi.** Le CA ne fournit pas de colonne Type, et son débit différé ne
-suit pas celui de l'auteur (20 → 19, prélevé en fin de mois). Le détail du lot en
+suit pas celui d'André (20 → 19, prélevé en fin de mois). Le détail du lot en
 cours n'est pas dans le fichier : seul son total permet d'en parler.
 
-**Construit et déployé le même jour (11 h)** : exe dans `F:\budget-app\Pecule`
+**Construit et déployé le même jour (11 h)** : exe dans le dossier Pécule d'André
 (ancien en `Pecule.exe.avant-encours-ca`, base identique octet pour octet),
 correction vérifiée dans le PYZ de l'exe. Nouveau `Pecule-Setup.exe` (SHA-256
 `4630fe3b…49ee`) essayé en silence puis désinstallé sans trace, et copié sur le
@@ -1218,7 +1219,7 @@ avec le lot suivant, ne sont pas détaillés. Sortie publique : mi-octobre.
 
 ## 2026-09-16 — Un relevé ne pouvait pas être importé dans deux comptes
 
-**Fait.** L'auteur importe le relevé d'un compte bancaire nouveau
+**Fait.** André importe le relevé d'un compte bancaire nouveau
 dans son **second compte** au lieu d'en créer un pour lui : 75 opérations
 atterrissent au mauvais endroit. Réparé sans rien supprimer — les 75
 ont simplement changé de compte, vers un troisième compte créé entre-temps.
@@ -1227,7 +1228,7 @@ matin (`comptes-2026-09-16.db`, antérieure à l'import), ce qui garantit qu'auc
 ancienne opération du second compte n'a été touchée : le contenu du compte est
 redevenu identique au caractère près à celui d'avant l'import.
 
-En tentant de réimporter le relevé dans le bon compte, l'auteur a mis au jour un
+En tentant de réimporter le relevé dans le bon compte, André a mis au jour un
 **vrai défaut** : `UNIQUE constraint failed: transactions.id`, aucune opération
 importée. L'identifiant d'une opération se fabriquait dans `csv_import.py` à
 partir de sa date, son montant et sa référence bancaire — **sans le compte**.
@@ -1238,7 +1239,7 @@ identifiant, et l'import échouait en bloc.
   imports OFX et QIF passent par le même chemin (`import_csv_text`) et en
   profitent sans modification.
 - `tests/test_csv_import.py` : deux tests écrits **avant** la correction et qui
-  échouaient bien sur le message de l'auteur — le même relevé dans deux comptes, et
+  échouaient bien sur le message d'André — le même relevé dans deux comptes, et
   le cas vécu du relevé importé dans le mauvais compte puis dans le bon.
 - 357 tests passent.
 
@@ -1249,12 +1250,12 @@ changement de formule sans danger. Seul garde-fou à préserver : un identifiant
 d'opération importée doit contenir un `|`, ce par quoi `csv_import` distingue
 les saisies manuelles (UUID) des lignes venues d'un relevé.
 
-L'auteur a ensuite réimporté le relevé dans le troisième compte : **77 opérations**,
+André a ensuite réimporté le relevé dans le troisième compte : **77 opérations**,
 les deux lignes que le premier import avait prises à tort pour des doublons du
 second compte comprises. Pécule a réglé seul la date et le solde de départ du
 compte d'après la première opération du relevé.
 
-**Exe reconstruit et déployé** dans `F:\budget-app\Pecule` à sa demande (ancien
+**Exe reconstruit et déployé** dans son dossier Pécule à sa demande (ancien
 exe gardé en `Pecule.exe.avant-id-par-compte`). Contrôles : l'exe lancé sur une
 base d'essai isolée affiche « Pécule — v1.37.0 » et se ferme proprement ; le
 module `comptesbudget.csv_import` **extrait de l'exe installé** référence bien
@@ -1264,12 +1265,12 @@ identique avant et après la copie.
 
 **Reste.** Le numéro de version n'a pas bougé (1.37.0) : le passage en 1.38.0
 et la ligne du journal de version en tête de `constants.py` se feront à la
-publication de mi-octobre. L'installation de l'auteur contient donc, une fois de
+publication de mi-octobre. L'installation d'André contient donc, une fois de
 plus, davantage que la version publiée.
 
 ## 2026-09-16 — Le mode sombre de Windows rendait Pécule illisible
 
-**Fait.** L'auteur signale que sur un autre poste, la fenêtre d'accueil de Pécule
+**Fait.** André signale que sur un autre poste, la fenêtre d'accueil de Pécule
 est écrite en **blanc sur fond clair** — donc vide à l'écran. Cause trouvée
 dans `comptesbudget/app.py` : la palette partait de celle du **système**
 (`pal = app.palette()`) et l'on n'y remplaçait que les **fonds** (crème
@@ -1290,16 +1291,16 @@ dont les **textes** sont blancs — et personne ne les rectifiait.
 Mesure avant/après sur l'exe, poste sombre simulé par
 `QT_QPA_PLATFORM=windows:darkmode=2` : fond de la fenêtre **RGB(94,95,94)**
 avant, **RGB(236,237,235)** après. 355 tests passent. **Confirmé sur le poste
-réel** le soir même : l'auteur a installé l'exe corrigé sur la machine où le
+réel** le soir même : André a installé l'exe corrigé sur la machine où le
 défaut se voyait — « c'est bon maintenant c'est lisible ». La simulation ne
 reproduisait qu'une partie du défaut (le texte du dialogue restait noir) :
-c'est le poste de l'auteur qui tranche. Exe reconstruit et
+c'est le poste d'André qui tranche. Exe reconstruit et
 déployé (ancien en `Pecule.exe.avant-theme-clair`, base intacte), installeur
 refait et recopié sur le Bureau.
 
 **Pourquoi.** La règle du 14/09/2026 — thème clair seul — n'était tenue qu'à
 moitié : on imposait l'apparence claire des fonds en laissant Windows décider
-de la couleur des lettres. Le défaut ne se voyait pas chez l'auteur, dont le poste
+de la couleur des lettres. Le défaut ne se voyait pas chez André, dont le poste
 est réglé en clair pour les applications.
 
 **Reste.** Le premier installeur envoyé à l'utilisateur du Crédit Agricole (lien WeTransfer du
@@ -1334,7 +1335,7 @@ cotisation conservée, libellés lisibles. 351 tests passent.
 Notice (§ import) et `Lisez-moi.txt` complétés : « DEPENSES CARTE… » cité à
 côté de « DEBIT DIFFERE… », et la conséquence du choix (achats gardés à leur
 date d'achat) dite en clair. Puis exe reconstruit (1.37.0, le numéro ne monte
-qu'à la publication), **déployé dans `F:\budget-app\Pecule`** — ancien exe en
+qu'à la publication), **déployé dans le dossier Pécule d'André** — ancien exe en
 `Pecule.exe.avant-import-credit-agricole`, empreinte de `comptes.db` identique
 avant et après — et **installeur `Pecule-Setup.exe` fabriqué pour cet
 utilisateur**, copié sur le Bureau. Installeur éprouvé comme le 10/09 : pose
@@ -1353,7 +1354,7 @@ valeur dépasse la date d'achat, or le CSV du CA ne porte ni colonne « type »
 ni date de valeur. Page contrôlée : balises appariées, rendu relu, pas de
 débordement horizontal.
 
-**Pourquoi.** L'auteur a tranché le choix qui restait ouvert : garder **le détail
+**Pourquoi.** André a tranché le choix qui restait ouvert : garder **le détail
 des achats** et écarter le prélèvement global — le même parti que le 05/08/2026
 pour son propre relevé, pour que le budget reste détaillé par catégorie.
 
@@ -1367,7 +1368,7 @@ publié : sortie mi-octobre en 1.38.0 (les nouveautés visibles déjà en attent
 justifient le numéro) — la page d'aide complétée ne sera donc en ligne qu'à ce
 moment-là, GitHub Pages servant `docs/` de `main`. Piste écartée faute d'un
 vrai besoin : faire reconnaître au CSV du CA la date du prélèvement groupé
-(dernier jour ouvré du mois, et non le 4 comme chez l'auteur) pour que le bandeau
+(dernier jour ouvré du mois, et non le 4 comme chez André) pour que le bandeau
 « débit différé » fonctionne aussi avec ce format.
 
 ## 2026-09-15 — Sauvegarde externe (pas encore publié)
@@ -1384,13 +1385,13 @@ le bouton remplace le conseil « copiez `comptes.db` ailleurs ». 8 tests
 sur une base jetable : 7 tables, intégrité « ok ». Largeur minimale de la
 fenêtre mesurée à 1094 px : elle tient toujours en moitié d'écran.
 
-**Pourquoi.** L'auteur : aucune de ses trois applis ne sait sauvegarder sur un
+**Pourquoi.** André : aucune de ses trois applis ne sait sauvegarder sur un
 support externe, Pécule compris. Les copies de `sauvegardes/` restent sur le
 même disque que la base. Dossier choisi retenu tant que Pécule reste ouvert seulement :
 Pécule n'a pas de préférences enregistrées, on n'en crée pas pour ça.
 
 **Puis, même jour : Exporter / Restaurer (JSON) quittent le menu de gauche.**
-L'auteur : « ces boutons ne sont pas importants pour un utilisateur lambda ».
+André : « ces boutons ne sont pas importants pour un utilisateur lambda ».
 Ils passent dans **⚙️ Paramètres**, partie « Avancé » (transférer ou fusionner
 deux installations), et « Sauvegarde externe » reprend l'emoji 💾. Les
 boutons ferment la fenêtre Paramètres AVANT d'agir : une restauration change
@@ -1404,8 +1405,8 @@ pytest (tous les tests passaient) — il détruit maintenant ses fenêtres par
 `shiboken6.delete`.
 
 **Reste.** Commits locaux, **non poussés** : rythme d'une version par mois,
-sortira à la mi-octobre avec le numéro de chèque. **Installé chez l'auteur le
-même soir** dans `F:\budget-app\Pecule` : exe essayé d'abord sur une copie de
+sortira à la mi-octobre avec le numéro de chèque. **Installé chez André le
+même soir** dans son dossier Pécule : exe essayé d'abord sur une copie de
 la base (fermeture propre), puis `Pecule.exe` + `_internal` remplacés,
 `comptes.db` identique à l'empreinte près, ancien exe gardé en
 `Pecule.exe.avant-sauvegarde-externe`. L'exe porte toujours v1.37.0. À la
@@ -1433,8 +1434,8 @@ La vraie base a montré que `reference` ne contient jamais de numéro de chèque
 (470 opérations) : d'où la règle — le formulaire ne renvoie `reference` QUE pour
 un chèque, sinon modifier un prélèvement effacerait l'identifiant qui sert à
 reconnaître les doublons à l'import.
-**Installé chez l'auteur** le même jour (commit `3c14240`) : exe reconstruit,
-contrôlé sur une base d'essai, copié dans `F:\budget-app\Pecule` (ancien en
+**Installé chez André** le même jour (commit `3c14240`) : exe reconstruit,
+contrôlé sur une base d'essai, copié dans son dossier Pécule (ancien en
 `Pecule.exe.avant-numero-cheque`) ; `comptes.db` vérifiée intacte (même
 empreinte). Il affiche toujours « v1.37.0 ». Rien de poussé sur GitHub.
 **Reste.** À publier avec la version de mi-octobre (règle
@@ -1459,7 +1460,7 @@ aux réponses déjà reçues.
 **Reste.** Le numéro de chèque : la colonne `reference` le reçoit déjà à
 l'import (CSV BPCE ; en OFX il est aussi recopié dans la note), mais le tableau
 ne l'affiche pas et la saisie manuelle la laisse vide. Candidat pour la
-prochaine version (vers la mi-octobre), pas encore décidé par l'auteur.
+prochaine version (vers la mi-octobre), pas encore décidé par André.
 
 ## 2026-09-13 — Gratilog : fiche et fil passent à la 1.37.0
 
@@ -1497,12 +1498,12 @@ d'essai inchangée. Manifestes Winget non touchés.
 correction de l'archivage, le nouveau premier lancement, la proposition de
 reculer la date de départ et la correction de la barre de période. Nouveautés
 visibles : numéro mineur plutôt que 1.36.1.
-**Publiée le soir même**, sur accord de l'auteur : push, puis release `v1.37.0`
+**Publiée le soir même**, sur accord d'André : push, puis release `v1.37.0`
 avec le `.zip` et `Pecule-Setup.exe`. Contrôles : les deux fichiers
 retéléchargés depuis leurs adresses publiques sont identiques aux originaux,
 l'archive concorde avec le manifeste Scoop ; v1.37.0 est la « latest »,
 `v1.23.0` intacte ; les deux badges à 1.37.0 ; page de présentation servie
-en 1.37.0. Installation de l'auteur dans `F:\budget-app\Pecule` mise à jour
+en 1.37.0. Installation d'André dans son dossier Pécule mise à jour
 (ancien exe en `Pecule.exe.avant-1.37.0`, `comptes.db` inchangée à l'octet).
 **Reste.** Rien.
 
@@ -1519,7 +1520,7 @@ main ensuite). 7 tests
 (`tests/test_premier_releve.py`, avec un vrai CSV au format Crédit Agricole),
 vus en échec avant ; 336 passent. Parcours joué par capture sur une base
 d'essai : le Bilan affiche le solde donné, aucun bandeau.
-**Pourquoi.** Demande de l'auteur, après le cas d'un nouvel utilisateur (entrée
+**Pourquoi.** Demande d'André, après le cas d'un nouvel utilisateur (entrée
 ci-dessous) : c'est demander le solde AVANT l'import qui fabrique le piège. On demande le solde à la date de la
 dernière opération, pas celui du jour : sinon les opérations d'entre-deux
 seraient comptées deux fois au prochain import. Lecture automatique du solde
@@ -1552,7 +1553,7 @@ quel solde mettre en face : un calcul que personne ne fait seul. Le piège
 guette tout nouvel utilisateur, puisque le solde est demandé avant l'import.
 Pas de proposition si le solde de départ n'a jamais été saisi (rien à
 préserver) ni s'il y a des archives (le départ effectif en dépend) : le lien
-retombe alors sur les Paramètres. Les deux comptes de l'auteur n'ont aucune
+retombe alors sur les Paramètres. Les deux comptes d'André n'ont aucune
 opération avant leur départ : la question ne lui sera jamais posée.
 **Reste.** Pas de numéro de version. À la prochaine publication (1.37.0),
 ajouter l'entrée au journal de version de `constants.py`. D'ici là, la
@@ -1570,21 +1571,21 @@ pointage, puis le total ; un double-clic affiche le compte. Calcul dans
 soldes identiques au Bilan de chaque compte.
 **Pourquoi.** Premier vrai retour d'un utilisateur via le questionnaire
 « Votre avis » : « un récapitulatif de l'ensemble des comptes serait très utile ».
-La vue consolidée avait été écartée en 1.24.0 ; l'auteur l'a demandée ce jour.
+La vue consolidée avait été écartée en 1.24.0 ; André l'a demandée ce jour.
 Pour qu'un compte n'affiche jamais deux soldes différents, `soldes_compte`
 passe par le même chemin que le Bilan au lieu d'en recopier les règles.
-Installé le soir même dans `F:\budget-app\Pecule` à la demande de l'auteur
+Installé le soir même dans son dossier Pécule à la demande d'André
 (exe contrôlé d'abord sur une copie de la base ; ancien exe gardé en
 `Pecule.exe.avant-recapitulatif` ; `comptes.db` inchangée).
-**Reste.** Pas de numéro de version ni de publication : l'auteur ne veut pas
+**Reste.** Pas de numéro de version ni de publication : André ne veut pas
 publier tout de suite. À la prochaine publication, ce sera la 1.37.0.
-Anomalie repérée en chemin, **corrigée le soir même** à la demande de l'auteur :
+Anomalie repérée en chemin, **corrigée le soir même** à la demande d'André :
 archiver une opération pointée datée AVANT la date de départ la faisait
 entrer dans le solde (`total_archivees` ignorait la date de départ) ; et une
 coupure antérieure au départ faisait « reprendre » le compte trop tôt. Deux
 tests dans `tests/test_archives.py`, écrits avant la correction et vus en
 échec. Soldes réels inchangés. Correction pas encore
-installée dans `F:\budget-app\Pecule` (sans effet sur ses données).
+installée dans son dossier Pécule (sans effet sur ses données).
 
 ## 2026-09-11 — Fiche Gratilog : demande de passage en 1.36.0
 
@@ -1613,9 +1614,9 @@ version remontés (`APP_VERSION` + historique, Lisez-moi, README, JSON-LD,
 manifeste Scoop). Contrôles avant publication : 311 tests ; exe et installeur
 en 1.36.0 installés, lancés et désinstallés en dossier d'essai sur une copie
 de la base (aucun `comptes.db` livré, icône = ancien logo). Installation
-de l'auteur en 1.36.0, ancien exe gardé en `Pecule.exe.avant-1.36.0`,
+d'André en 1.36.0, ancien exe gardé en `Pecule.exe.avant-1.36.0`,
 `comptes.db` inchangée.
-**Pourquoi.** L'auteur a demandé la publication. Numéro 1.36.0 : nouveauté
+**Pourquoi.** André a demandé la publication. Numéro 1.36.0 : nouveauté
 visible (le bouton), plus le lien direct dans la notice et le Lisez-moi.
 **Reste.** Winget toujours en 1.23.0 (PR #416272).
 
@@ -1628,7 +1629,7 @@ ouverts dans le navigateur. Adresses dans `constants.py` (`PAGE_VERSIONS_URL`,
 `INSTALLEUR_URL`). Notice (tableau des boutons, § 9) et `Lisez-moi.txt`
 complétés. Trois tests, dont un garde-fou : aucun module de `comptesbudget`
 n'importe de bibliothèque réseau.
-**Pourquoi.** L'auteur voulait que Pécule annonce les nouvelles versions au
+**Pourquoi.** André voulait que Pécule annonce les nouvelles versions au
 lancement. Cela exigeait une connexion à GitHub, contraire à la promesse
 « aucun accès réseau » (confidentialité, site, revue Winget). Trois voies
 présentées ; il a choisi « sans Internet » : pas d'annonce automatique, un
@@ -1654,9 +1655,9 @@ la prochaine version, le fichier voyageant dans le `.zip` et l'installeur.
 Notice intégrée, rubrique 9 : lien cliquable « Télécharger la dernière
 version de l'installeur » (le `QTextBrowser` ouvre les liens dans le
 navigateur), adresse écrite en clair à côté. Même réserve : il n'arrive chez
-les utilisateurs qu'à la prochaine version ; l'exe de l'auteur a été reconstruit
+les utilisateurs qu'à la prochaine version ; l'exe d'André a été reconstruit
 pour qu'il le voie dès maintenant (il affiche toujours v1.35.1).
-**Pourquoi.** L'auteur voulait un lien direct vers l'installeur. Le lien
+**Pourquoi.** André voulait un lien direct vers l'installeur. Le lien
 `latest/download` de GitHub exige un nom de fichier identique d'une version à
 l'autre ; un lien vers le nom numéroté aurait fini par servir une vieille
 version.
@@ -1671,11 +1672,11 @@ le bouton du site renverra une erreur 404.
 `.zip`. Contrôles : 308 tests ; icône intégrée à l'exe et à l'installeur
 vérifiée visuellement ; installation, lancement et désinstallation en dossier
 d'essai ; les deux fichiers retéléchargés identiques au bit près, `v1.23.0`
-(Winget) intacte ; release « Latest ». Installation de l'auteur en 1.35.1, ancien
+(Winget) intacte ; release « Latest ». Installation d'André en 1.35.1, ancien
 exe gardé en `Pecule.exe.avant-1.35.1`, `comptes.db` inchangée.
-**Pourquoi.** L'auteur voulait que l'installeur crée la même icône que son
+**Pourquoi.** André voulait que l'installeur crée la même icône que son
 raccourci du Bureau. Celui-ci pointait vers un vieux `Budget.ico` resté dans
-`F:\budget-app\Pecule` (les mises à jour ne remplacent pas ce fichier) : le
+son dossier Pécule (les mises à jour ne remplacent pas ce fichier) : le
 dessin d'avant la refonte du 11/08. Averti que ce dessin vient d'une banque
 d'icônes à la licence inconnue — raison de la refonte —, il a choisi
 « ancien logo partout ».
@@ -1694,9 +1695,9 @@ et notice (§ 9) décrivent maintenant les deux façons d'installer et de mettre
 Contrôles : 308 tests ; exe et installeur en 1.35.0 installés, lancés et
 désinstallés en dossier d'essai ; les deux fichiers retéléchargés depuis
 GitHub identiques au bit près, archive `v1.23.0` (Winget) intacte ; release
-marquée « Latest ». Installation de l'auteur mise à jour en 1.35.0, ancien
+marquée « Latest ». Installation d'André mise à jour en 1.35.0, ancien
 programme gardé en `Pecule.exe.avant-1.35.0`, `comptes.db` inchangée.
-**Pourquoi.** L'auteur a demandé de publier la nouvelle version avec
+**Pourquoi.** André a demandé de publier la nouvelle version avec
 l'installeur. Numéro 1.35.0 : une nouveauté (l'installeur) plus la
 correction du bandeau.
 **Reste.** Manifestes Winget toujours en 1.23.0 (PR #416272 pendante). Le
@@ -1718,7 +1719,7 @@ complété. Essais complets en dossier d'essai, sur une copie de la base :
 installation, lancement, mise à jour (reste d'ancienne version nettoyé),
 refus propre avec Pécule ouvert, désinstallation — empreinte de la base
 identique à chaque étape, aucun `comptes.db` livré ni créé à côté de l'exe.
-**Pourquoi.** L'auteur voulait proposer aux utilisateurs un exécutable
+**Pourquoi.** André voulait proposer aux utilisateurs un exécutable
 d'installation plutôt qu'un `.zip` à décompresser soi-même. `_data_dir()`
 prévoyait déjà ce cas depuis la 1.22.0 : aucune ligne de l'appli n'a changé.
 Inno Setup retenu : gratuit, standard, recette lisible.
@@ -1746,7 +1747,7 @@ reculer la date de départ, les aurait comptés deux fois.
 Notice mise à jour dans la foulée (c'est la date de débit qui compte). Exe
 reconstruit (étapes 2-3 du `.bat` rejouées à la main), contrôlé sur une copie
 de la base (« Pécule — v1.34.0 », fermeture propre), puis installé dans
-`F:\budget-app\Pecule` : `comptes.db` inchangée.
+son dossier Pécule : `comptes.db` inchangée.
 **Reste.** L'exe installé porte toujours « v1.34.0 » mais contient cette
 correction, non versionnée. Rien de poussé ni de publié : elle sortira avec
 la prochaine version.
@@ -1784,7 +1785,7 @@ d'essai (titre « Pécule — v1.34.0 », fermeture propre).
 
 ## 2026-09-09 (notices) — Les trois notices confrontées au code
 
-**Fait.** Nouvelle règle de travail posée par l'auteur : *avant de reconstruire
+**Fait.** Nouvelle règle de travail posée par André : *avant de reconstruire
 l'exe et de déployer, vérifier que la notice est à jour*. Les notices des trois
 applications ont donc été relues à côté du code qu'elles décrivent — menus,
 libellés de boutons, fonctions ajoutées depuis la dernière relecture.
@@ -1915,15 +1916,15 @@ quatre fichiers portent les mêmes noms.
 
 **Reste.** La page ne parle que du **CSV** pour l'import (« relevés bancaires
 au format CSV »), alors que Pécule lit aussi le **QIF** et l'**OFX** depuis la
-1.26.0. Signalé à l'auteur, pas corrigé.
+1.26.0. Signalé à André, pas corrigé.
 
 ## 2026-09-08 — Publication de la 1.33.0, puis 1.33.1 : les sauvegardes qui disparaissaient
 
 **Fait.** La 1.33.0 publiée (exe reconstruit, commit, push, release, Scoop,
-vitrine, installation de l'auteur mise à jour), puis une **1.33.1** dans la foulée
+vitrine, installation d'André mise à jour), puis une **1.33.1** dans la foulée
 pour un défaut découvert par le contrôle final.
 
-**Le défaut.** L'installation de l'auteur n'avait **plus aucune sauvegarde
+**Le défaut.** L'installation d'André n'avait **plus aucune sauvegarde
 automatique depuis le 3 septembre**. La rotation de `backup_db` gardait les
 10 fichiers les plus récents en triant par NOM, sur tout ce qui commence par
 `comptes-`. Or une copie manuelle `comptes-avant-quelque-chose.db` se classe
@@ -2095,7 +2096,7 @@ solde de départ, import du relevé de sa banque, lecture du Bilan.
 
 **Pourquoi.** Le banc d'essai a joué onze formats de relevés français : sept
 passaient, trois échouaient, un s'importait à zéro ligne en silence. Ce qui
-marchait chez l'auteur marchait parce que la Caisse d'Épargne fournit la colonne
+marchait chez André marchait parce que la Caisse d'Épargne fournit la colonne
 « Pointage » — personne d'autre ne l'a. Les trois défauts se cumulaient sur le
 même écran : solde figé, camembert « 100 % Non classé », message d'erreur
 opaque. C'est la première impression du logiciel.
@@ -2154,7 +2155,7 @@ les étiquettes et les mini-blocs peignent le gris de la palette là où ils
 prenaient auparavant le fond du cadre.
 
 **Et.** Le bloc « Reste pour la carte » du bandeau Encours carte est supprimé.
-L'auteur : « c'est faux, puisque si à la fin du mois je suis en négatif il ne reste
+André : « c'est faux, puisque si à la fin du mois je suis en négatif il ne reste
 rien pour n'importe quelle dépense ». Le chiffre était plafonné à 0,00 € et,
 aligné avec trois autres, se lisait comme un budget encore disponible. Le
 calcul (`_reste_du_mois`) reste : il alimente la phrase du détail — « Solde
@@ -2164,7 +2165,7 @@ visaient le bloc portent désormais sur cette phrase.
 
 **Exe.** Reconstruit et installé. Étapes 2 et 3 du `.bat` rejouées à la main
 (`outils/version_exe.py` puis PyInstaller, chemins absolus), puis mise à jour
-de `F:\budget-app\Pecule` : `Pecule.exe` copié et `_internal\` en robocopy
+de son dossier Pécule : `Pecule.exe` copié et `_internal\` en robocopy
 /MIR. `comptes.db` inchangée (2 101 248 octets, même horodatage) et les dix
 sauvegardes en place. Contrôlé en lançant l'application : titre « Pécule —
 v1.30.7 — Compte courant », bandeau carte à trois blocs, cadres du bas alignés
@@ -2187,7 +2188,7 @@ s'en servent maintenant. Test ajouté, notice complétée, 276 tests.
 Catégories affichait une dépense en Shopping quand le Budget n'en comptait aucune.
 Aucun des deux n'a tort — l'un dit ce qui est sorti du compte, l'autre ce qui a
 été dépensé — mais rien ne l'expliquait. Trois sorties étaient possibles ;
-l'auteur a choisi de garder les deux logiques et de les écrire, plutôt que
+André a choisi de garder les deux logiques et de les écrire, plutôt que
 d'aligner Catégories (ce qui l'aurait éloigné du Bilan) ou de changer de mode
 de date (ce qui fausserait la lecture du solde).
 
@@ -2196,7 +2197,7 @@ de date (ce qui fausserait la lecture du solde).
 
 ## 2026-09-07 — Le Bilan tout entier suit le mois choisi (1.30.2 → 1.30.6)
 
-**Fait.** Cinq pas, partis d'un constat de l'auteur sur le bandeau des budgets
+**Fait.** Cinq pas, partis d'un constat d'André sur le bandeau des budgets
 dépassés.
 
 - **1.30.2** — l'onglet **Budget** et son bandeau d'alerte comptent les
@@ -2241,7 +2242,7 @@ cette version-là.
 **Fait.** Le chiffre pouvait afficher un montant **négatif** quand le mois se
 terminait déjà dans le rouge. Il est désormais borné à **0,00 €**, en rouge.
 
-**Pourquoi.** Remarque de l'auteur : « comme à la fin du mois le prévisionnel est
+**Pourquoi.** Remarque d'André : « comme à la fin du mois le prévisionnel est
 négatif, pour les achats carte il reste 0 € ». Il a raison — « ce qui reste »
 répond à « combien puis-je encore dépenser ? », et la réponse est *rien*, pas
 *moins tant*. Le montant qui **manque** est une autre question, et il était
@@ -2463,7 +2464,7 @@ donné, et consigné hors du dépôt :
 
 ## 2026-09-04 — Relevé du 1er au 4 septembre : concordance vérifiée, deux dates recalées
 
-**Fait.** L'auteur avait déjà importé le relevé du compte courant (6 opérations) et
+**Fait.** André avait déjà importé le relevé du compte courant (6 opérations) et
 mis le classeur à jour avant la séance ; le travail a donc été de **vérifier**, puis
 de corriger trois détails.
 
@@ -2478,7 +2479,7 @@ de corriger trois détails.
 * **Échéance d'une autre assurance recalée du 05 au 07.** Le 5 est un
   samedi et la banque l'annonce au lundi 7 dans son onglet « À venir ».
 * **Classeur, feuille Septembre : un montant corrigé de quatre centimes** (par
-  l'auteur). C'était une saisie d'avance recopiée de mars, seul mois où ce
+  André). C'était une saisie d'avance recopiée de mars, seul mois où ce
   montant a existé.
 
 **Pourquoi.** Recaler une échéance décalée par un week-end **avant** l'import est
@@ -2506,7 +2507,7 @@ Un bouton « Catégories proposées… », sous la liste de l'onglet Catégories
 fenêtre à cocher. Masquer n'efface **rien** — ni catégorie, ni opération : c'est un filtre
 d'affichage, réversible en recochant la case.
 
-**Pourquoi.** Question de l'auteur après avoir vérifié ce que reçoit un nouvel utilisateur :
+**Pourquoi.** Question d'André après avoir vérifié ce que reçoit un nouvel utilisateur :
 17 catégories, **aucune sous-catégorie** (elles se créent au fil de l'eau), aucune règle
 personnelle, et 12 règles intégrées qui reconnaissent les enseignes françaises via le
 bouton « Harmoniser » — lequel **propose** sans jamais décider. Tout est modifiable, les
@@ -2560,7 +2561,7 @@ Deux précautions qui comptent :
   l'application démarre quand même — quelques mots en anglais valent mieux qu'un refus de
   démarrer.
 
-**Exe reconstruit et installé** en 1.27.0, pour que l'auteur profite tout de suite des deux
+**Exe reconstruit et installé** en 1.27.0, pour qu'André profite tout de suite des deux
 ajouts sans attendre une publication. Étapes 2 et 3 du `.bat` rejouées à la main, comme la
 veille. Contrôles : empreinte identique entre `dist/` et l'installation, titre de la fenêtre
 « Pécule — v1.27.0 — Compte courant », `comptes.db` inchangée au bit près (2 101 248 octets),
@@ -2661,7 +2662,7 @@ Contrôlé après publication : la page déclare bien la nouvelle image et celle
 description sous la ligne de flottaison alors que trois badges et trois appels à l'action
 occupent déjà le haut.
 
-**Défaut vu par l'auteur, et confirmé par le calcul : le haut du sac disparaissait.** Le lien
+**Défaut vu par André, et confirmé par le calcul : le haut du sac disparaissait.** Le lien
 du sac, dans le logo, est un `#2d4fb3` ; le haut du dégradé était un `#2B4EAE`. Rapport de
 contraste : **1,03** — la même couleur, à un cheveu près. Le nœud se fondait dans le fond
 et le logo paraissait amputé.
@@ -2675,7 +2676,7 @@ Recolorer le logo était l'autre voie ; elle a été écartée parce que **le �
 couleur que le lien** et doit, lui, rester foncé pour se lire sur la panse claire. Un
 remplacement de couleur les aurait touchés tous les deux.
 
-**Défaut vu par l'auteur : le multicompte n'apparaissait toujours pas.** Les captures refaites
+**Défaut vu par André : le multicompte n'apparaissait toujours pas.** Les captures refaites
 portaient bien le bouton « Mes comptes », mais rien n'y **montrait** la fonction. La cause
 est dans `main_window._fill_comptes` : le sélecteur de comptes reste caché tant qu'il n'y
 en a qu'un seul, et le titre de la fenêtre ne porte alors aucun nom de compte. La base de
@@ -2693,7 +2694,7 @@ bouton dans le menu ne suffisait pas : il fallait deux comptes pour que l'interf
 qu'elle en gère plusieurs. À vérifier de la même façon pour toute fonction qui ne s'affiche
 que sous condition.
 
-**Puis l'auteur a demandé de regarder les trois autres captures — à raison.** Le sélecteur y
+**Puis André a demandé de regarder les trois autres captures — à raison.** Le sélecteur y
 était bien, mais le passage à 1080 px, décidé pour la légende du Bilan, avait **agrandi
 d'autant le vide** sous leurs tableaux : la capture du Budget montrait huit lignes dans une
 fenêtre aux deux tiers vide. Corriger un défaut sur une vue en avait créé un sur trois
@@ -2707,7 +2708,7 @@ descend plus bas que le tableau, et c'est exactement ce que voit l'utilisateur.
 **Deuxième leçon, plus large :** après un réglage qui vaut pour tout le lot, revoir **tout
 le lot**, pas seulement la vue qui avait motivé le réglage.
 
-**Contrôle du site, à la demande de l'auteur.** Les six images ont été retéléchargées depuis
+**Contrôle du site, à la demande d'André.** Les six images ont été retéléchargées depuis
 l'adresse publique : empreintes **identiques au bit près** aux fichiers du dépôt. Les six
 images référencées par la page répondent 200. Et les dimensions réellement chargées par le
 navigateur ont été relevées — 1668 × 1080 pour le Bilan, 1668 × 984 pour les trois autres :
@@ -2728,14 +2729,14 @@ sans problème.
 Le lien à partager est celui de la **vitrine**, pas celui de GitHub, qui imposerait son
 propre habillage.
 
-**La publication a été faite dans la foulée**, et son texte remplacé : l'auteur avait d'abord
+**La publication a été faite dans la foulée**, et son texte remplacé : André avait d'abord
 laissé l'adresse nue en guise de message. Une adresse seule n'explique pas pourquoi on
 partage — trois courts paragraphes à la place (la version, les trois nouveautés, les
 garanties : gratuit, français, open source, données locales). L'aperçu reste attaché quand
 on modifie le texte : il n'y a rien à craindre de ce côté.
 
 À savoir pour la prochaine fois : **la page « Statistiques de la publication » ne permet
-pas de modifier quoi que ce soit** — c'est là que l'auteur s'était arrêté. Il faut ouvrir la
+pas de modifier quoi que ce soit** — c'est là qu'André s'était arrêté. Il faut ouvrir la
 publication sur le profil, menu « ⋯ » → « Modifier la publication ».
 
 **Reste.** Rien d'ouvert sur les images. Une idée en réserve : une signature illustrée sur
@@ -2769,7 +2770,7 @@ signatures sur Gratilog, mais **aucun membre n'y met d'image** — pas même la 
 7 806 messages au compteur : ce sont des configurations matérielles ou des citations. Le
 champ est d'ailleurs un simple textarea, sans la barre BBCode qu'ont les messages. Une
 bannière du logiciel sous chaque message y aurait détonné et ressemblé à de l'affichage
-publicitaire de la part de l'auteur. Deux lignes de texte à la place, dans le ton du site,
+publicitaire de la part d'André. Deux lignes de texte à la place, dans le ton du site,
 avec le lien vers la page de présentation.
 
 L'option **« Toujours attacher ma signature » était sur Non** : sans elle, le champ ne sert
@@ -2827,7 +2828,7 @@ piège qui faisait mourir l'application sur « unable to open database file ». 
 en 1.26.0, empreinte identique à celle du poste. Puis
 `scoop uninstall pecule --purge` **aussitôt** : cette copie est vide et son raccourci du
 menu Démarrer masquerait l'installation réelle. Vérifié après coup qu'il ne reste ni
-dossier, ni données persistées, ni raccourci, et que l'installation de `F:\budget-app` est
+dossier, ni données persistées, ni raccourci, et que son installation réelle est
 intacte.
 
 **Reste.** Ne **jamais** supprimer la release `v1.23.0` ni son archive tant que la PR
@@ -2837,7 +2838,7 @@ la demande. À la clôture de la PR seulement, remonter les manifestes Winget.
 ## 2026-09-03 (nettoyage) — Purge des données réelles restées dans le dépôt public
 
 **Fait.** Passe complète sur tous les fichiers versionnés, à la recherche de ce qui
-identifie l'auteur ou son argent. Le journal a d'abord été nettoyé de ses montants (solde,
+identifie André ou son argent. Le journal a d'abord été nettoyé de ses montants (solde,
 encours de carte, prix d'un abonnement) et d'un nom de commerce. Mais la recherche élargie
 a trouvé bien pire, dans les **tests de l'import OFX** écrits le 1er septembre : le
 fixture était un extrait **littéral** d'un relevé, avec le **numéro de compte** (répété
@@ -3014,7 +3015,7 @@ La **notice intégrée** (`comptesbudget/ui/views/notice.py`, bouton 📖 Notice
 dernières versions y figurent — « Plusieurs comptes » (1.24.0) en section 2,
 « Archiver » (1.25.0) en section 7, l'import OFX (1.26.0) avec ses deux versions
 de format. Le `Lisez-moi.txt` du dépôt était déjà juste depuis le matin. Seule la
-copie déployée dans `F:\budget-app\Pecule\` était restée à l'en-tête
+copie déployée dans son dossier Pécule était restée à l'en-tête
 « version 1.26.0 » d'avant le gel : elle a été remplacée par la version du dépôt.
 La sauvegarde prise au passage a été supprimée dans la foulée, une fois vérifié
 que le fichier en place était identique à celui du dépôt : son contenu vit de
@@ -3069,7 +3070,7 @@ de Segoe UI, la police des boîtes de dialogue — mesuré avec
 prétend qu'aucun symbole n'existe). Les trois autres symboles du message,
 eux, sont bien dans la police et restent.
 
-**Pourquoi.** La banque de l'auteur propose le relevé en quatre formats — CSV,
+**Pourquoi.** La banque d'André propose le relevé en quatre formats — CSV,
 PDF, QIF, OFX — et il a téléchargé celui d'août en OFX. Le CSV reste
 disponible, mais autant lire les trois formats de données sur quatre.
 
@@ -3086,7 +3087,7 @@ Trois décisions méritent d'être retenues :
   partir une pension de retraite en retrait d'espèces. Et sur un relevé de
   compte, une somme **reçue** n'est jamais un paiement par carte : c'est ce
   qui range un remboursement de marchand au crédit en remboursement, comme
-  l'auteur le fait.
+  André le fait.
 - **La date de débit d'un achat carte vient de la FIN DU RELEVÉ**, pas de la
   date de l'achat. Un achat du 31/07 que la banque ne comptabilise qu'en août
   est prélevé le 4 septembre avec les autres, et non le 4 août.
@@ -3096,40 +3097,41 @@ n'ajoutent rien (57 doublons reconnus, 1 récapitulatif de débit différé
 écarté, solde inchangé). Puis, août effacé de la copie et reconstruit à partir
 des seuls relevés : 57 opérations restituées, solde **identique au centime**,
 les 25 achats carte tous datés du 04/09. Les deux seules
-différences de type avec la saisie de l'auteur étaient des corrections. L'import a
+différences de type avec la saisie d'André étaient des corrections. L'import a
 enfin été rejoué **par la fenêtre principale** elle-même, hors écran, pour
 contrôler le branchement du bouton et du glisser-déposer. 225 tests au vert.
 
 **Reste.** Rien n'est publié : GitHub, Scoop et le site restent en 1.23.2, et
-c'est voulu. L'exécutable de `F:\budget-app\Pecule` a été reconstruit en
-1.26.0 pour que l'auteur s'en serve tout de suite (l'ancien est conservé sous
+c'est voulu. L'exécutable de son dossier Pécule a été reconstruit en
+1.26.0 pour qu'André s'en serve tout de suite (l'ancien est conservé sous
 `Pecule.exe.avant-1.26.0`) — il devance donc la version publiée, comme
 déjà en août. Le commentaire de `qif_import.py` qui affirme que Pécule « suit
 un seul compte par base de données » date d'avant le multicomptes : à corriger
 un jour.
 
-## 2026-09-01 — L'abonnement Claude AI en récurrence mensuelle
+## 2026-09-01 — Un abonnement en ligne en récurrence mensuelle
 
-**Fait.** Ajout de l'opération récurrente « Anthropique (Claude AI) » sur le
+**Fait.** Ajout de l'opération récurrente « Éditeur (Service IA) » (noms
+neutralisés ici) sur le
 Compte courant, le 1er de chaque mois, catégorie Abonnements,
 type Carte bancaire, à partir du 1er septembre 2026. Insertion faite avec
 `Database.insert_recurring()` plutôt qu'en SQL direct, base sauvegardée avant.
 
 **Pourquoi.** Le libellé est le point délicat. La banque écrit
-« Anthropique », pas « Claude AI » : or le prévisionnel rapproche une échéance
+« Éditeur », pas « Service IA » : or le prévisionnel rapproche une échéance
 de l'opération réelle en comparant les libellés normalisés, mot à mot, le plus
-court devant être le DÉBUT du plus long. Une récurrence nommée « Claude AI »
-donne la clé `claude`, qui ne correspond jamais à `anthropique` — l'échéance
+court devant être le DÉBUT du plus long. Une récurrence nommée « Service IA »
+donne la clé `service`, qui ne correspond jamais à `editeur` — l'échéance
 serait restée éternellement non soldée, en double avec l'opération réelle à
 chaque import. En commençant par le mot de la banque, la clé devient
-`anthropique claude`, dont `anthropique` est bien le préfixe : le
+`editeur service`, dont `editeur` est bien le préfixe : le
 rapprochement fonctionne. Vérifié en simulant l'arrivée du relevé sur une
 copie de la base.
 
-**Puis.** L'auteur a signalé que l'échéance de septembre n'était pas encore
+**Puis.** André a signalé que l'échéance de septembre n'était pas encore
 en banque et devait donc apparaître non pointée. Il avait raison, et le
 motif est plus intéressant qu'il n'y paraît : ses 23 opérations prévues de
-septembre étaient déjà générées (`prevue=1`, `pointee=0`) ; seule Claude AI
+septembre étaient déjà générées (`prevue=1`, `pointee=0`) ; seul cet abonnement
 manquait, la récurrence ayant été créée après cette génération. La ligne a
 été ajoutée à la main, avec les champs exacts de `_creer_operations` —
 date de valeur au 04/10 via `date_debit_differe`, `pointee=0`, `prevue=1`.
@@ -3140,11 +3142,11 @@ date de valeur tombe dans la fenêtre du mois. Pour une carte à débit
 différé, l'opération du mois M porte une date de valeur au 4 du mois M+1 —
 elle solde donc systématiquement l'échéance de M+1. Mesuré : septembre et
 octobre sont `_deja=True`, novembre ne le devient qu'une fois l'opération
-d'octobre créée. Le défaut ne s'était jamais manifesté parce que Claude AI
+d'octobre créée. Le défaut ne s'était jamais manifesté parce que cet abonnement
 est la **seule récurrence de type « Carte bancaire »** sur 24 — les autres
 sont des prélèvements et virements, sans différé.
 
-**Corrigé.** L'auteur a choisi de réparer le moteur plutôt que de compenser à la
+**Corrigé.** André a choisi de réparer le moteur plutôt que de compenser à la
 main. Deux tests écrits d'abord, dont un qui échouait bien sur le symptôme
 exact (`_deja` vrai pour octobre) ; le second garde le cas ordinaire, où la
 date de valeur doit continuer de servir — un prélèvement présenté le 31/07 et
@@ -3166,12 +3168,12 @@ reconnues. 192 tests au vert, aucun écart `ruff` nouveau (les deux points-
 virgules signalés préexistaient).
 
 **Exécutable reconstruit.** `APP_VERSION` reste à **1.25.3** : comme le
-10/08/2026, l'exe installé devance la version publiée pour que l'auteur profite
+10/08/2026, l'exe installé devance la version publiée pour qu'André profite
 tout de suite du correctif. Le numéro sera incrémenté à la prochaine
 publication — vérifier alors ce qui est dans le source sans être sorti.
 Construit en rejouant les étapes 2 et 3 de `Construire-Exe.bat` (jamais le
 `.bat` lui-même, dont la dernière étape écrase l'installation sans contrôle),
-puis `Pecule.exe` et `_internal` seuls recopiés vers `F:\budget-app\Pecule` —
+puis `Pecule.exe` et `_internal` seuls recopiés vers son dossier Pécule —
 `comptes.db` vérifiée par empreinte avant/après, inchangée, et les
 10 sauvegardes intactes. L'ancien exe est conservé sous
 `Pecule.exe.avant-correction`.
@@ -3213,15 +3215,15 @@ toucher à l'original. Noté en mémoire avec les quatre autres pièges Excel.
 - Le correctif est **commité et poussé** sur `main`. Rien n'est **publié**
   pour autant : ni release, ni tag, et `APP_VERSION` reste à 1.25.3 — la page
   de présentation ne bougera qu'à la prochaine version.
-- ~~Aucune règle de catégorisation pour « Anthropique »~~ — **ajoutée** :
-  motif `ANTHROPIQUE`, sens `debit`, vers Abonnements / Abonnements, sans
+- ~~Aucune règle de catégorisation pour « Éditeur »~~ — **ajoutée** :
+  motif `EDITEUR`, sens `debit`, vers Abonnements / Abonnements, sans
   montant figé (le tarif d'un abonnement bouge). Simulée sur toute la base
   avant insertion : elle reconnaît les trois opérations existantes, n'en
   reclasse aucune et n'entre en conflit avec aucune des 73 autres règles.
   Vérifiée ensuite par le vrai moteur `apply_rules_to_tx` sur cinq libellés,
   dont un suffixe bancaire et un tarif différent, tous classés — et un
   remboursement (crédit), qui reste bien non classé. Cette règle vit dans la
-  base de l'auteur, pas dans le dépôt : elle n'est pas concernée par le commit.
+  base d'André, pas dans le dépôt : elle n'est pas concernée par le commit.
 - ~~Les appels dupliqués du critère « carte »~~ — **faits**. Ils étaient
   trois, non deux : `is_cb` et `est_carte`, deux noms pour la même chose dans
   le même fichier (`bilan.py`), plus une expression en clair dans
