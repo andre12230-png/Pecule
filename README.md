@@ -71,10 +71,19 @@ Prefer not to install anything? Take the `.zip` from the
 [latest release](https://github.com/andre12230-png/Pecule/releases/latest),
 unzip it anywhere and run `Pecule.exe`. Either way your data lives in
 `%LOCALAPPDATA%\Pecule`; for a truly portable copy (USB stick), close Pécule
-and copy your `comptes.db` next to `Pecule.exe`. Or install via [Scoop](https://scoop.sh):
+and copy your `comptes.db` next to `Pecule.exe`.
+
+From the command line, with [Scoop](https://scoop.sh):
 
 ```bash
 scoop install https://raw.githubusercontent.com/andre12230-png/Pecule/main/bucket/pecule.json
+```
+
+or with **Winget**, the package manager built into Windows 10/11 (the Winget
+version may lag a few days behind the latest release):
+
+```bash
+winget install --id andre12230-png.Pecule
 ```
 
 From source (any OS):
@@ -82,13 +91,6 @@ From source (any OS):
 ```bash
 pip install PySide6
 python pecule.py
-```
-
-Or with **Winget**, the package manager built into Windows 10/11 (the Winget
-version may lag a few days behind the latest release):
-
-```bash
-winget install --id andre12230-png.Pecule
 ```
 
 Requires Python ≥ 3.9 (developed and tested on 3.13 / 3.14). Licensed under
@@ -118,14 +120,15 @@ L'application s'organise en onglets :
 | 🏷️ **Catégories** | Exploration par catégorie (drill-down), recatégorisation en masse |
 | 🔮 **Prévisionnel** | Opérations récurrentes, projection des prochains mois et **génération des échéances du mois** |
 
-Trois outils ne sont pas des onglets mais des boutons du menu de gauche, qui
-les ouvrent dans une fenêtre à part : la **📖 Notice** (mode d'emploi et
-glossaire), les **🧠 Règles auto** (catégorisation automatique, motif →
-catégorie) et **🔖 Ranger sous-catégories** (tri, fusion, renommage), dans le
-menu **🧹 Mettre au propre…**.
+Trois outils ne sont pas des onglets : ils s'ouvrent dans une fenêtre à part
+depuis le menu de gauche. La **📖 Notice** (mode d'emploi et glossaire) est
+dans la rubrique « Aide », les **🧠 Règles auto** (catégorisation
+automatique, motif → catégorie) dans « Réglages », et **🔖 Ranger
+sous-catégories** (tri, fusion, renommage) dans le menu **🧹 Mettre au
+propre…**.
 
 Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA,
-encodage windows-1252), **harmonisation** des catégories et libellés,
+encodage windows-1252 ou UTF-8), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **rapport mensuel** imprimable / PDF,
 **export CSV** des opérations affichées (pour Excel),
 **export de toutes vos données vers une autre installation**, et **sauvegarde
@@ -365,11 +368,11 @@ flowchart TD
 
     subgraph LOG_G ["Logique métier — testable sans Qt"]
         LOG
-        R["rules · labels · recurring · csv_import · ofx_import · qif_import · sync"]
+        R["rules · labels · recurring · csv_import · ofx_import · qif_import · sync · export_csv · sauvegarde_externe"]
     end
     subgraph F_G ["Fondation"]
         F
-        FF["constants · utils · database"]
+        FF["constants · utils · database · accords · erreurs"]
     end
 ```
 
@@ -387,6 +390,8 @@ comptesbudget/
 │                            fréquences, chemins, numéro de version
 ├── utils.py                 Dates, formatage €, normalisation, sauvegarde
 ├── database.py              class Database (schéma + accès SQLite)
+├── accords.py               Accord des mots avec un nombre (« 2 opérations »)
+├── erreurs.py               Erreurs techniques traduites en phrases simples
 │
 │   ── Logique métier (Python pur, sans Qt) ──
 ├── rules.py                 Auto-catégorisation (matches_rule, apply_rules_to_tx)
@@ -398,6 +403,7 @@ comptesbudget/
 ├── sync.py                  Moteur de fusion (LWW) : export et restauration
 │                            de ⚙️ Paramètres › Avancé
 ├── export_csv.py            Export CSV des opérations affichées (pour Excel)
+├── sauvegarde_externe.py    Copie vérifiée de la base sur clé USB ou disque
 │
 └── ui/                      ── Interface (PySide6/Qt) ──
     ├── models.py            TxTableModel (modèle de table)
@@ -407,20 +413,25 @@ comptesbudget/
     ├── assistants.py        Harmonisation, pré-remplissage du prévisionnel
     ├── report.py            Rapport mensuel (HTML, aperçu, PDF, impression)
     ├── search.py            Recherche globale (Ctrl+F)
+    ├── recapitulatif.py     Fenêtre « Tous les comptes »
+    ├── avis.py              Bouton « Votre avis » (questionnaire en ligne)
+    ├── mise_a_jour.py       Bouton « Mise à jour » (sans accès réseau)
     ├── main_window.py       MainWindow : assemble onglets et menu d'actions
     └── views/
         ├── operations.py    Vue Opérations
         ├── bilan.py         Vue Bilan
         ├── budget.py        Vue Budget
         ├── categories.py    Vue Catégories
-        ├── subcategories.py Vue Sous-catégories
+        ├── subcategories.py Vue Sous-catégories (ouverte en fenêtre)
         ├── previsionnel.py  Vue Prévisionnel
-        ├── rules_view.py    Vue Règles auto
-        └── notice.py        Vue Notice (ouverte en fenêtre, pas en onglet)
+        ├── rules_view.py    Vue Règles auto (ouverte en fenêtre)
+        └── notice.py        Vue Notice (ouverte en fenêtre)
 
 outils/
+├── audit_recurrences.py    Confronte les récurrences aux relevés réels
 ├── captures_promo.py       Refabrique les captures de docs/media/ à partir
 │                           d'une base de démonstration inventée
+├── couverture.py           Refabrique les images de couverture et de partage
 ├── faire_archive.py        Fabrique le .zip de la release et son empreinte
 ├── faire_installeur.py     Fabrique l'installeur Pecule-Setup.exe
 ├── pecule.iss              Recette de l'installeur (Inno Setup 6)
@@ -488,11 +499,10 @@ demande de le fermer au lieu de le fermer de force. L'installeur s'ajoute au
 
 ### Couches
 
-1. **Fondation** (`constants`, `utils`, `database`) — données de configuration,
+1. **Fondation** (`constants`, `utils`, `database`, `accords`, `erreurs`) — données de configuration,
    utilitaires et accès SQLite. Aucune dépendance vers le reste.
 2. **Logique métier** (`rules`, `labels`, `recurring`, `csv_import`, `ofx_import`,
-   `qif_import`, `sync`) —
-   pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
+   `qif_import`, `sync`, `export_csv`, `sauvegarde_externe`) — pur Python, **testable sans interface graphique**. Ne dépend que de la fondation.
 3. **Interface** (`ui/`) — widgets, dialogues et vues PySide6. La fenêtre
    principale assemble cinq onglets ; trois autres vues (la notice, les
    règles automatiques et les sous-catégories) s'ouvrent en fenêtre depuis le

@@ -1,6 +1,6 @@
 # Manifestes Winget
 
-Paquet Winget pour Pecule. **La demande d'intégration à
+Paquet Winget pour Pécule. **La demande d'intégration à
 [`microsoft/winget-pkgs`](https://github.com/microsoft/winget-pkgs),
 [#416272](https://github.com/microsoft/winget-pkgs/pull/416272), a été acceptée
 le 13 octobre 2026**, pour la version 1.23.0. Le paquet s'installe avec :
