@@ -806,6 +806,11 @@ opérations reconnues. Dans les formulaires, la case Catégorie s'ouvre vide
 — rien n'est choisi à votre place. Une opération enregistrée sans catégorie
 est rangée dans « Non classé » ; une règle sans catégorie, elle, n'est pas
 créée.</p>
+<p>Le bouton <b>🔄 Appliquer aux opérations existantes</b> passe vos règles
+sur tout l'historique, mais ne range que les opérations encore
+« Non classé » : une opération qui a déjà une catégorie, par exemple
+corrigée à la main, la garde toujours. Pour changer la catégorie d'une
+opération déjà classée, modifiez-la dans Opérations.</p>
 <p>Pour supprimer une règle : sélectionnez-la et utilisez le bouton 🗑,
 la touche <kbd>Suppr</kbd> ou le clic droit. Pour la modifier : double-clic
 ou bouton ✏️.</p>

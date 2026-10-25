@@ -190,14 +190,27 @@ class RulesView(QWidget):
             return
         txs = [dict(r) for r in self.db.list_tx()]
         modified = 0
+        # Opérations déjà classées que les règles auraient changées : on les
+        # laisse telles quelles (constat du 20/10/2026 : le bouton écrasait
+        # les catégories corrigées à la main). Seules les « Non classé »
+        # reçoivent la catégorie de la règle.
+        gardees = 0
         with self.db.batch():
             for tx in txs:
                 ok, fields = apply_rules_to_tx(tx, rules)
                 if ok and (fields.get("categorie") != tx.get("categorie")
                            or fields.get("sous_cat") != tx.get("sous_cat")):
+                    if tx.get("categorie") not in ("", "Non classé"):
+                        gardees += 1
+                        continue
                     self.db.update_tx(tx["id"], fields)
                     modified += 1
-        QMessageBox.information(self, "Appliquer les règles",
-            f"{pluriel(modified, 'opération', 'opérations')} "
-            f"{accorde(modified, 'mise', 'mises')} à jour.")
+        msg = (f"{pluriel(modified, 'opération', 'opérations')} "
+               f"{accorde(modified, 'classée', 'classées')}.")
+        if gardees:
+            msg += (f"\n\n{pluriel(gardees, 'opération', 'opérations')} "
+                    f"{accorde(gardees, 'déjà classée a gardé', 'déjà classées ont gardé')} "
+                    f"{accorde(gardees, 'sa', 'leur')} catégorie : le bouton ne remplace jamais un classement "
+                    f"existant. Pour en changer une, modifiez-la dans Opérations.")
+        QMessageBox.information(self, "Appliquer les règles", msg)
         self.rules_changed.emit()

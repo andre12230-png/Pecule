@@ -989,7 +989,10 @@ SYNC_VERSION = 3
 # 1.41.27 : L'export CSV de Qonto s'importe : libelle = nom de la
 #           contrepartie, date de l'operation ; les operations « En cours »
 #           entrent non pointees.
-APP_VERSION = "1.41.27"
+# 1.41.28 : « Appliquer aux operations existantes » (Regles auto) ne range
+#           plus que les operations « Non classe » : une categorie deja
+#           choisie, par exemple corrigee a la main, n'est jamais remplacee.
+APP_VERSION = "1.41.28"
 
 # Questionnaire en ligne (Microsoft Forms) où l'on donne son avis ou signale
 # un problème. Pécule se contente de l'ouvrir dans le navigateur, et seulement

@@ -1,4 +1,4 @@
-PECULE - version 1.41.27
+PECULE - version 1.41.28
 
 NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
 - Choix du theme clair ou sombre au tout premier lancement, puis dans Parametres.
@@ -11,6 +11,7 @@ NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
 - Bouton « Imprimer... » : rapport du mois, liste des operations affichees (par mois, par annee, non pointees...) et Bilan avec ses graphiques, avec apercu et enregistrement en PDF.
 - Une echeance du Previsionnel peut etre sautee cette fois-ci (peage sans passage, abonnement suspendu) : elle n'est plus comptee dans les sorties a venir.
 - L'export CSV de la banque Qonto s'importe tel quel (les operations en cours entrent non pointees).
+- « Appliquer aux operations existantes » (Regles auto) ne range que les operations non classees : une categorie corrigee a la main n'est plus jamais remplacee.
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.

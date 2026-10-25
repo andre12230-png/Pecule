@@ -21,6 +21,18 @@ La date la plus récente est en haut.
 
 ---
 
+## 25-10-2026 — 1.41.28 : la correction du bouton des règles entre dans la sortie du 01-11
+
+**Fait.** Le contrôle de publication a bloqué sur la correction de la séance du 20-10 (7), restée non commitée. Le test a été rejoué contre l'ancien code (échec : la catégorie choisie à la main repassait dans celle de la règle), puis avec la correction (réussi). Numéro passé en 1.41.28 (`APP_VERSION`, journal de version de `constants.py`, en-tête et nouveautés de `Lisez-moi.txt`), puis le tout commité.
+**Pourquoi.** Décision d'André : la correction part avec la publication, plutôt que d'attendre la sortie suivante. Elle protège les classements faits à la main, pour tous les utilisateurs.
+**Reste.** Exe 1.41.28 à construire et à déployer chez André (la publication sort la dernière version installée). Fichiers de la sortie à refaire en 1.41.28 : README, site, Scoop, Winget, ZIP, installeur, notes de version. Captures du site à regarder.
+
+## 20-10-2026 (7) — « Appliquer aux opérations existantes » ne remplace plus un classement
+
+**Fait.** Le bouton « 🔄 Appliquer aux opérations existantes » de la fenêtre des règles (`rules_view.py`, `apply_all`) ne range plus que les opérations encore « Non classé » ; une opération déjà classée garde sa catégorie, et le message de fin dit combien ont été laissées telles quelles. Avant, il rejouait toutes les règles sur toute la base, sans question préalable, et remplaçait les catégories corrigées à la main (sauf règle « ne pas écraser »). Test d'abord (`tests/test_appliquer_regles_existantes.py`, en échec avant : la catégorie choisie à la main repassait dans celle de la règle) ; suite complète : 915 tests passés. Notice (section Règles auto) complétée.
+**Pourquoi.** Des achats reclassés à la main dans une autre catégorie, pour que des avances remboursées s'annulent, seraient repartis dans la catégorie du marchand au premier appui. Décision d'André : « il ne faut pas écraser les modifications faites ». Pécule ne retient pas quelles catégories ont été choisies à la main ; marquer ces corrections aurait demandé une colonne de plus et n'aurait pas protégé celles déjà faites : on protège donc tout ce qui est déjà classé.
+**Reste.** Conséquence voulue : changer la catégorie d'une règle ne reclasse plus l'historique déjà classé par ce bouton ; on passe par l'écran Catégories (« 🏷️ Recatégoriser toutes ces opérations… ») ou par Opérations, une à une. Pas encore dans un exe, ni dans le journal de version de `constants.py` (à écrire avec le prochain numéro), ni commité.
+
 ## 20-10-2026 (6) — 1.41.27 : import de l'export Qonto
 
 **Fait.** `csv_import.py` reconnaît l'export des opérations de Qonto et le réécrit en relevé ordinaire avant l'import habituel (`releve_qonto_vers_csv`, comme pour le relevé LCL sans titres) : libellé pris dans « Nom de la contrepartie », date dans « Date de l'opération (local) », date de valeur dans « Date de la valeur (local) », montant dans « Montant total (TTC) » (ni TVA, ni Débit/Crédit, ni Solde), moyen de paiement en type, référence et note en informations. Titres français (export de l'appli) ou anglais (page d'aide de Qonto), séparateur point-virgule, virgule ou tabulation, dates avec heure, « année d'abord » ou à la française. Les catégories de trésorerie de Qonto ne sont pas reprises : les règles de Pécule classent. Test d'abord (`tests/test_import_qonto.py`, 9 cas, tous en échec avant avec le message « Aucune ligne de ce fichier ne nomme les colonnes ») ; suite complète : 914 tests passés. Essai sur un vrai export converti en CSV, dans une base jetable : toutes les lignes importées, somme des montants identique au fichier, aucun libellé vide, réimport sans doublon.
