@@ -21,7 +21,7 @@ des opérations récurrentes, rapports et rapprochement bancaire.
 Interface **PySide6 (Qt)**, données stockées en **SQLite** local. C'est un portage
 Python d'une ancienne application HTML/JS.
 
-> Version publiée : **1.41.28**. Depuis la version 1.41.2, choisissez le thème clair ou sombre dès le premier lancement (puis dans Paramètres), importez les relevés CSV de LCL sans ligne de titres et l'export CSV de Qonto, imprimez le rapport du mois, les opérations affichées ou le Bilan avec ses graphiques (aperçu et PDF), sautez une échéance du Prévisionnel « cette fois-ci », gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. « Appliquer aux opérations existantes » ne remplace plus une catégorie déjà choisie. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
+> Version publiée : **1.41.28**. Depuis la version 1.41.2, choisissez le thème clair ou sombre dès le premier lancement (puis dans Paramètres), importez les relevés CSV de LCL sans ligne de titres, imprimez le rapport du mois, les opérations affichées ou le Bilan avec ses graphiques (aperçu et PDF), sautez une échéance du Prévisionnel « cette fois-ci », gardez la casse saisie pour les catégories et recevez un rappel si la dernière sauvegarde externe date de plus de 30 jours. « Appliquer aux opérations existantes » ne remplace plus une catégorie déjà choisie. Les imports et les copies de reprise bénéficient de contrôles renforcés. Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
 
 ---
 
@@ -133,7 +133,7 @@ automatique, motif → catégorie), dans la section Réglages ; la **📖 Notice
 sous-catégories** (tri, fusion, renommage), dans le menu **🧹 Mettre au
 propre…**.
 
-Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA / LCL / Qonto,
+Autres outils : **import CSV, OFX et QIF** des relevés bancaires (BPCE / CM / CA / LCL,
 encodage windows-1252), **harmonisation** des catégories et libellés,
 **recherche globale** (Ctrl+F), **🖨 Imprimer…** (rapport du mois, opérations
 affichées, Bilan avec ses graphiques ; aperçu et PDF),
@@ -188,7 +188,6 @@ Un nouvel utilisateur n'a ni règle ni historique : l'import s'en charge seul.
 - Sauvegarde externe : un rappel apparaît si la dernière copie date de plus de 30 jours.
 - Les catégories conservent les majuscules et minuscules tapées.
 - Les imports, fusions et reprises de base sont vérifiés avant validation ou remplacement.
-- L'export CSV de la banque Qonto s'importe tel quel ; les opérations « En cours » entrent non pointées.
 - Une échéance du Prévisionnel peut être sautée « cette fois-ci » : elle n'est plus comptée dans les sorties à venir.
 - « 🔄 Appliquer aux opérations existantes » (Règles auto) ne range que les opérations « Non classé » : une catégorie corrigée à la main n'est jamais remplacée.
 - **Vos propres catégories** : le champ Catégorie s'écrit librement — tapez
