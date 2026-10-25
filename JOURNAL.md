@@ -25,7 +25,8 @@ La date la plus récente est en haut.
 
 **Fait.** Le contrôle de publication a bloqué sur la correction de la séance du 20-10 (7), restée non commitée. Le test a été rejoué contre l'ancien code (échec : la catégorie choisie à la main repassait dans celle de la règle), puis avec la correction (réussi). Numéro passé en 1.41.28 (`APP_VERSION`, journal de version de `constants.py`, en-tête et nouveautés de `Lisez-moi.txt`), puis le tout commité.
 **Pourquoi.** Décision d'André : la correction part avec la publication, plutôt que d'attendre la sortie suivante. Elle protège les classements faits à la main, pour tous les utilisateurs.
-**Reste.** Exe 1.41.28 à construire et à déployer chez André (la publication sort la dernière version installée). Fichiers de la sortie à refaire en 1.41.28 : README, site, Scoop, Winget, ZIP, installeur, notes de version. Captures du site à regarder.
+Exe 1.41.28 construit et déployé chez André le même jour : contrôle de livraison passé, correctif retrouvé dans l'exe construit (et absent de l'ancien), base identique au déploiement (même empreinte), titre « Pécule — v1.41.28 ». Réserve `Pecule.exe.avant-1.41.28` à côté.
+**Reste.** Deux réserves à côté de l'exe (avant-1.41.27 et avant-1.41.28) : avant-1.41.27 à mettre à la Corbeille si André est d'accord. Fichiers de la sortie du 01-11 à refaire en 1.41.28 (README, site, Scoop, Winget, ZIP, installeur, notes de version), captures du site à regarder. Fichiers de la sortie à refaire en 1.41.28 : README, site, Scoop, Winget, ZIP, installeur, notes de version. Captures du site à regarder.
 
 ## 20-10-2026 (7) — « Appliquer aux opérations existantes » ne remplace plus un classement
 
