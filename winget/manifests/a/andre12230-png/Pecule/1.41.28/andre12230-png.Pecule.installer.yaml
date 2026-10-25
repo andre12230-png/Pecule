@@ -5,7 +5,7 @@
 # lui-meme contenant l'executable : c'est ce que decrivent les deux
 # lignes « NestedInstaller » ci-dessous.
 PackageIdentifier: andre12230-png.Pecule
-PackageVersion: 1.41.23
+PackageVersion: 1.41.28
 InstallerType: zip
 NestedInstallerType: portable
 # INDISPENSABLE ici. Par defaut Winget cree un raccourci vers l'executable
@@ -19,7 +19,7 @@ Installers:
 - Architecture: x64
   NestedInstallerFiles:
   - RelativeFilePath: Pecule/Pecule.exe
-  InstallerUrl: https://github.com/andre12230-png/Pecule/releases/download/v1.41.23/Pecule-1.41.23-win64.zip
-  InstallerSha256: 487A4EB8CD83717B9B8B38DE3ABC6CEC2FBE0751536E7F32A4DE6585E90B6289
+  InstallerUrl: https://github.com/andre12230-png/Pecule/releases/download/v1.41.28/Pecule-1.41.28-win64.zip
+  InstallerSha256: 9180DE46EC612328480C520092A31CE3D42660F5E75CBC66EBF1A0F30F055064
 ManifestType: installer
 ManifestVersion: 1.12.0

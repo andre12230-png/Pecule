@@ -1,12 +1,12 @@
 {
-    "version": "1.41.23",
+    "version": "1.41.28",
     "description": "Application gratuite et en français pour gérer ses comptes et son budget personnels (Windows 10/11). Données 100% locales, open source.",
     "homepage": "https://andre12230-png.github.io/Pecule/",
     "license": "MIT",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/andre12230-png/Pecule/releases/download/v1.41.23/Pecule-1.41.23-win64.zip",
-            "hash": "487a4eb8cd83717b9b8b38de3abc6cec2fbe0751536e7f32a4de6585e90b6289"
+            "url": "https://github.com/andre12230-png/Pecule/releases/download/v1.41.28/Pecule-1.41.28-win64.zip",
+            "hash": "9180de46ec612328480c520092a31ce3d42660f5e75cbc66ebf1a0f30f055064"
         }
     },
     "extract_dir": "Pecule",
