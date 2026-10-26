@@ -21,6 +21,12 @@ La date la plus récente est en haut.
 
 ---
 
+## 26-10-2026 — Lisez-moi.txt accentué
+
+**Fait.** `Lisez-moi.txt`, livré dans l'archive et l'installeur, était écrit entièrement sans accents, avec « << >> » pour guillemets et « ... ». Il retrouve accents, « » et « … » ; le contenu ne change pas. La première ligne (« PECULE - version 1.41.28 ») garde sa forme : le contrôle de livraison y lit le numéro. Nouveau test `tests/test_lisez_moi.py`. Suite complète : 918 tests passés. Commit `301e34e`, rien poussé.
+**Pourquoi.** Contrôle du français des trois applis du 26-10 : c'était l'écart le plus visible des textes livrés, à corriger avant la sortie du 01-11.
+**Reste.** Le ZIP et l'installeur 1.41.28 du 25-10 contiennent l'ancien Lisez-moi : à refaire, avec la mise à jour de leur empreinte dans Scoop et Winget, sur accord d'André.
+
 ## 25-10-2026 — 1.41.28 : la correction du bouton des règles entre dans la sortie du 01-11
 
 **Fait.** Le contrôle de publication a bloqué sur la correction de la séance du 20-10 (7), restée non commitée. Le test a été rejoué contre l'ancien code (échec : la catégorie choisie à la main repassait dans celle de la règle), puis avec la correction (réussi). Numéro passé en 1.41.28 (`APP_VERSION`, journal de version de `constants.py`, en-tête et nouveautés de `Lisez-moi.txt`), puis le tout commité.
