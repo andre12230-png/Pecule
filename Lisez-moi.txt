@@ -1,17 +1,17 @@
 PECULE - version 1.41.28
 
-NOUVEAUTES DEPUIS LA VERSION PUBLIEE 1.41.2
-- Choix du theme clair ou sombre au tout premier lancement, puis dans Parametres.
-- Les releves CSV de LCL sans ligne de titres s'importent.
-- Les categories conservent les majuscules et minuscules saisies.
-- Rappel de sauvegarde externe lorsque la derniere copie date de plus de 30 jours.
-- Verifications renforcees avant import, fusion ou reprise d une base.
-- La copie de reprise est controlee avant de remplacer la base vide ; le fichier source reste intact.
-- Dans le graphique « Evolution sur 12 mois », le mois en cours garde son nom complet et son asterisque.
-- Bouton « Imprimer... » : rapport du mois, liste des operations affichees (par mois, par annee, non pointees...) et Bilan avec ses graphiques, avec apercu et enregistrement en PDF.
-- Une echeance du Previsionnel peut etre sautee cette fois-ci (peage sans passage, abonnement suspendu) : elle n'est plus comptee dans les sorties a venir.
-- L'export CSV de la banque Qonto s'importe tel quel (les operations en cours entrent non pointees).
-- « Appliquer aux operations existantes » (Regles auto) ne range que les operations non classees : une categorie corrigee a la main n'est plus jamais remplacee.
+NOUVEAUTÉS DEPUIS LA VERSION PUBLIÉE 1.41.2
+- Choix du thème clair ou sombre au tout premier lancement, puis dans Paramètres.
+- Les relevés CSV de LCL sans ligne de titres s'importent.
+- Les catégories conservent les majuscules et minuscules saisies.
+- Rappel de sauvegarde externe lorsque la dernière copie date de plus de 30 jours.
+- Vérifications renforcées avant import, fusion ou reprise d'une base.
+- La copie de reprise est contrôlée avant de remplacer la base vide ; le fichier source reste intact.
+- Dans le graphique « Évolution sur 12 mois », le mois en cours garde son nom complet et son astérisque.
+- Bouton « Imprimer… » : rapport du mois, liste des opérations affichées (par mois, par année, non pointées…) et Bilan avec ses graphiques, avec aperçu et enregistrement en PDF.
+- Une échéance du Prévisionnel peut être sautée cette fois-ci (péage sans passage, abonnement suspendu) : elle n'est plus comptée dans les sorties à venir.
+- L'export CSV de la banque Qonto s'importe tel quel (les opérations en cours entrent non pointées).
+- « Appliquer aux opérations existantes » (Règles auto) ne range que les opérations non classées : une catégorie corrigée à la main n'est plus jamais remplacée.
 
 Application Windows GRATUITE et open source (licence MIT) de gestion de
 comptes et de budget personnel. Aucune installation de Python requise.
@@ -19,179 +19,179 @@ comptes et de budget personnel. Aucune installation de Python requise.
 -------------------------------------------------------------------
 UTILISATION
 -------------------------------------------------------------------
-- Deux facons d'installer Pecule :
-  * L'INSTALLEUR << Pecule-Setup.exe >> : double-cliquez dessus et
-    suivez l'assistant. Aucun mot de passe administrateur n'est demande.
-    Pecule s'installe dans C:\Users\<votre nom>\AppData\Local\Programs\Pecule,
-    avec un raccourci dans le menu Demarrer. Pour le desinstaller :
-    Parametres > Applications. Vos donnees ne sont jamais effacees.
-  * L'ARCHIVE << .zip >> (sans installation) : decompressez ce dossier ou
-    vous voulez, puis double-cliquez sur << Pecule.exe >>. Vos donnees vont
-    au meme endroit qu'avec l'installeur (voir ci-dessous).
-- Au 1er lancement, si Windows affiche un avertissement (appli non signee) :
-  cliquez << Informations complementaires >> puis << Executer quand meme >>.
-- Vos donnees sont enregistrees dans un fichier unique, << comptes.db >>,
-  cree automatiquement au 1er lancement. Une sauvegarde quotidienne est
-  faite dans un sous-dossier << sauvegardes >>, a cote de lui.
-  OU se trouve ce fichier ?
-  * En general, dans votre dossier personnel, que vous ayez pris
+- Deux façons d'installer Pécule :
+  * L'INSTALLEUR « Pecule-Setup.exe » : double-cliquez dessus et
+    suivez l'assistant. Aucun mot de passe administrateur n'est demandé.
+    Pécule s'installe dans C:\Users\<votre nom>\AppData\Local\Programs\Pecule,
+    avec un raccourci dans le menu Démarrer. Pour le désinstaller :
+    Paramètres > Applications. Vos données ne sont jamais effacées.
+  * L'ARCHIVE « .zip » (sans installation) : décompressez ce dossier où
+    vous voulez, puis double-cliquez sur « Pecule.exe ». Vos données vont
+    au même endroit qu'avec l'installeur (voir ci-dessous).
+- Au 1er lancement, si Windows affiche un avertissement (appli non signée) :
+  cliquez « Informations complémentaires » puis « Exécuter quand même ».
+- Vos données sont enregistrées dans un fichier unique, « comptes.db »,
+  créé automatiquement au 1er lancement. Une sauvegarde quotidienne est
+  faite dans un sous-dossier « sauvegardes », à côté de lui.
+  OÙ se trouve ce fichier ?
+  * En général, dans votre dossier personnel, que vous ayez pris
     l'installeur ou l'archive .zip :
     C:\Users\<votre nom>\AppData\Local\Pecule
-    Vos donnees y sont a l'abri : une mise a jour du programme ne peut pas
+    Vos données y sont à l'abri : une mise à jour du programme ne peut pas
     les effacer.
-  * Exception, l'usage PORTABLE : s'il existe un << comptes.db >> A COTE
-    de Pecule.exe, c'est celui-la qui sert, et tout tient dans un seul
-    dossier (pratique sur une cle USB). C'est le cas des installations
-    commencees avant la version 1.22. Pour rendre la votre portable :
-    fermez Pecule, puis copiez votre comptes.db a cote de Pecule.exe. Vos
-    operations vivent alors dans ce dossier : c'est lui qu'il faut
+  * Exception, l'usage PORTABLE : s'il existe un « comptes.db » À CÔTÉ
+    de Pecule.exe, c'est celui-là qui sert, et tout tient dans un seul
+    dossier (pratique sur une clé USB). C'est le cas des installations
+    commencées avant la version 1.22. Pour rendre la vôtre portable :
+    fermez Pécule, puis copiez votre comptes.db à côté de Pecule.exe. Vos
+    opérations vivent alors dans ce dossier : c'est lui qu'il faut
     sauvegarder.
-  Dans tous les cas, la barre en bas de la fenetre (<< Base : ... >>)
-  affiche le chemin exact du fichier utilise.
-  Si vous avez installe l'application avec Scoop, comptes.db et le dossier
-  << sauvegardes >> sont ranges dans << scoop\persist\pecule >> :
-  ils sont conserves d'une mise a jour a l'autre.
+  Dans tous les cas, la barre en bas de la fenêtre (« Base : … »)
+  affiche le chemin exact du fichier utilisé.
+  Si vous avez installé l'application avec Scoop, comptes.db et le dossier
+  « sauvegardes » sont rangés dans « scoop\persist\pecule » :
+  ils sont conservés d'une mise à jour à l'autre.
 
 -------------------------------------------------------------------
-MISE A JOUR depuis une version precedente
+MISE À JOUR depuis une version précédente
 -------------------------------------------------------------------
-Avec l'INSTALLEUR : fermez Pecule, puis lancez le nouveau
-<< Pecule-Setup >>. Il remplace le programme sans toucher a vos donnees.
-S'il trouve Pecule ouvert, il vous demande de le fermer.
-Lien direct, toujours vers la derniere version :
+Avec l'INSTALLEUR : fermez Pécule, puis lancez le nouveau
+« Pecule-Setup ». Il remplace le programme sans toucher à vos données.
+S'il trouve Pécule ouvert, il vous demande de le fermer.
+Lien direct, toujours vers la dernière version :
 https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe
 
-Avec l'ARCHIVE .zip : decompressez la nouvelle version ou vous voulez
+Avec l'ARCHIVE .zip : décompressez la nouvelle version où vous voulez
 (par-dessus l'ancienne, c'est le plus simple), puis lancez son
-Pecule.exe. Vos donnees, rangees a part dans votre dossier personnel,
-sont retrouvees toutes seules. L'installeur et l'archive partagent ce
-meme dossier : vous pouvez passer de l'un a l'autre sans rien faire.
+Pecule.exe. Vos données, rangées à part dans votre dossier personnel,
+sont retrouvées toutes seules. L'installeur et l'archive partagent ce
+même dossier : vous pouvez passer de l'un à l'autre sans rien faire.
 
-En usage PORTABLE (un comptes.db a cote de Pecule.exe, voir plus haut),
-c'est different : decompressez la nouvelle version PAR-DESSUS votre
-dossier Pecule, en acceptant de remplacer les fichiers. L'archive ne
-contient ni << comptes.db >> ni le dossier << sauvegardes >> : vos
-operations ne peuvent donc pas etre ecrasees. Seuls Pecule.exe et le
-dossier _internal sont remplaces.
-A NE PAS FAIRE : supprimer l'ancien dossier avant de coller le
-nouveau, ou renommer le nouveau dossier a la place de l'ancien. La
-c'est bien votre comptes.db qui disparait. En cas de doute, copiez
+En usage PORTABLE (un comptes.db à côté de Pecule.exe, voir plus haut),
+c'est différent : décompressez la nouvelle version PAR-DESSUS votre
+dossier Pécule, en acceptant de remplacer les fichiers. L'archive ne
+contient ni « comptes.db » ni le dossier « sauvegardes » : vos
+opérations ne peuvent donc pas être écrasées. Seuls Pecule.exe et le
+dossier _internal sont remplacés.
+À NE PAS FAIRE : supprimer l'ancien dossier avant de coller le
+nouveau, ou renommer le nouveau dossier à la place de l'ancien. Là,
+c'est bien votre comptes.db qui disparaît. En cas de doute, copiez
 comptes.db ailleurs avant de commencer : c'est un seul fichier.
 
-<< J'ai mis a jour et l'application est VIDE >> : cela n'arrive qu'en
-usage portable, quand le nouveau Pecule.exe est lance depuis un autre
-dossier (Telechargements, par exemple). Vos donnees ne sont pas
-perdues : elles sont restees dans le comptes.db de votre ancien
-dossier. Pecule vous le dit au lancement et propose de reprendre ce
-fichier - bouton << Reprendre mes donnees >>, ou << Reprendre un
-fichier >> dans le menu de gauche. La copie est verifiee avant de
-remplacer la base vide ; le fichier source n'est pas touche.
+« J'ai mis à jour et l'application est VIDE » : cela n'arrive qu'en
+usage portable, quand le nouveau Pecule.exe est lancé depuis un autre
+dossier (Téléchargements, par exemple). Vos données ne sont pas
+perdues : elles sont restées dans le comptes.db de votre ancien
+dossier. Pécule vous le dit au lancement et propose de reprendre ce
+fichier : bouton « Reprendre mes données », ou « Reprendre un
+fichier » dans le menu de gauche. La copie est vérifiée avant de
+remplacer la base vide ; le fichier source n'est pas touché.
 
-Avec Scoop, rien a faire : << scoop update pecule >> conserve vos
-donnees d'une version a l'autre.
+Avec Scoop, rien à faire : « scoop update pecule » conserve vos
+données d'une version à l'autre.
 
 -------------------------------------------------------------------
 FONCTIONS
 -------------------------------------------------------------------
-- Import des releves bancaires au format CSV. Les colonnes sont
-  reconnues par leur nom, quelle que soit la banque francaise.
-  Les operations importees sont pointees : un releve ne porte que des
-  operations deja passees en banque, votre solde est donc juste des le
-  premier import. Seule exception, les releves qui portent eux-memes
-  une colonne "Pointage" (BPCE) : leur indication fait foi.
-  Si rien ne s'importe, le message explique pourquoi : separateur
-  virgule, colonnes mal nommees ou dates hors du format JJ/MM/AAAA.
-- Import au format OFX, propose par la plupart des banques a cote du
-  CSV et parfois a sa place. Les deux versions du format sont lues.
-  Le releve de la carte a debit differe est reconnu : ses achats ne
-  pesent sur le solde qu'au jour du prelevement groupe.
+- Import des relevés bancaires au format CSV. Les colonnes sont
+  reconnues par leur nom, quelle que soit la banque française.
+  Les opérations importées sont pointées : un relevé ne porte que des
+  opérations déjà passées en banque, votre solde est donc juste dès le
+  premier import. Seule exception, les relevés qui portent eux-mêmes
+  une colonne « Pointage » (BPCE) : leur indication fait foi.
+  Si rien ne s'importe, le message explique pourquoi : séparateur
+  virgule, colonnes mal nommées ou dates hors du format JJ/MM/AAAA.
+- Import au format OFX, proposé par la plupart des banques à côté du
+  CSV et parfois à sa place. Les deux versions du format sont lues.
+  Le relevé de la carte à débit différé est reconnu : ses achats ne
+  pèsent sur le solde qu'au jour du prélèvement groupé.
 - Import au format QIF, pour reprendre l'historique d'un autre logiciel
-  (Microsoft Money, Quicken, GnuCash, HomeBank...). Dates et montants
-  europeens ou americains sont reconnus automatiquement. Un fichier
-  contenant plusieurs comptes est refuse : Pecule suit un seul compte
-  par fichier de donnees, exportez un compte a la fois.
-- Categorisation automatique des le premier import : les operations sont
-  classees d'apres leur libelle (CARREFOUR -> Alimentation, EDF ->
-  Logement...). Vos propres regles et la categorie fournie par la banque
+  (Microsoft Money, Quicken, GnuCash, HomeBank…). Dates et montants
+  européens ou américains sont reconnus automatiquement. Un fichier
+  contenant plusieurs comptes est refusé : Pécule suit un seul compte
+  par fichier de données, exportez un compte à la fois.
+- Catégorisation automatique dès le premier import : les opérations sont
+  classées d'après leur libellé (CARREFOUR → Alimentation, EDF →
+  Logement…). Vos propres règles et la catégorie fournie par la banque
   passent avant ; ce classement ne comble que ce qui resterait
-  "Non classe".
-- Budgets mensuels avec barres de progression, previsionnel des
-  operations recurrentes, bilan avec graphiques, rapport mensuel
+  « Non classé ».
+- Budgets mensuels avec barres de progression, prévisionnel des
+  opérations récurrentes, bilan avec graphiques, rapport mensuel
   (impression / PDF), rapprochement (pointage).
-- Pointage EN MASSE : selectionnez plusieurs lignes (Maj+clic, Ctrl+clic,
+- Pointage EN MASSE : sélectionnez plusieurs lignes (Maj+clic, Ctrl+clic,
   Ctrl+A), puis barre d'espace ou clic droit pour toutes les pointer ou
-  depointer d'un coup. La touche Suppr porte aussi sur la selection.
-- Reclassement EN MASSE : meme selection, puis clic droit > "Changer la
-  categorie de ces N operations..." pour leur donner une autre categorie.
-- Suppression annulable : apres une suppression, un bandeau propose
-  "Annuler la suppression" et remet les lignes telles qu'elles etaient.
-- Export vers Excel : bouton "Exporter" de l'onglet Operations. Les lignes
-  affichees (filtres et tri compris) partent dans un fichier CSV qui s'ouvre
+  dépointer d'un coup. La touche Suppr porte aussi sur la sélection.
+- Reclassement EN MASSE : même sélection, puis clic droit > « Changer la
+  catégorie de ces N opérations… » pour leur donner une autre catégorie.
+- Suppression annulable : après une suppression, un bandeau propose
+  « Annuler la suppression » et remet les lignes telles qu'elles étaient.
+- Export vers Excel : bouton « Exporter » de l'onglet Opérations. Les lignes
+  affichées (filtres et tri compris) partent dans un fichier CSV qui s'ouvre
   d'un double-clic dans Excel ou LibreOffice.
 - Courbe du solde en fin de mois sur le Bilan : trait plein pour le solde
-  constate, pointilles pour le solde prevu.
-- Vos propres categories : le champ Categorie s'ecrit librement. Tapez
-  "Animaux" ou "Vacances" et la categorie est creee, avec sa couleur et
+  constaté, pointillés pour le solde prévu.
+- Vos propres catégories : le champ Catégorie s'écrit librement. Tapez
+  « Animaux » ou « Vacances » et la catégorie est créée, avec sa couleur et
   son budget possible.
-- Premier lancement : le bouton << Importer mon premier releve >> lit
-  votre releve, puis demande le solde du compte au jour de sa derniere
-  operation. Pecule regle seul la date et le solde de depart.
-- Le Bilan previent quand le solde de depart n'est pas renseigne, et
-  quand des operations sont anterieures a la date de depart (leur total
-  n'entre pas dans le solde : il est cense etre deja compris dedans).
+- Premier lancement : le bouton « Importer mon premier relevé » lit
+  votre relevé, puis demande le solde du compte au jour de sa dernière
+  opération. Pécule règle seul la date et le solde de départ.
+- Le Bilan prévient quand le solde de départ n'est pas renseigné, et
+  quand des opérations sont antérieures à la date de départ (leur total
+  n'entre pas dans le solde : il est censé être déjà compris dedans).
   Il propose alors de reculer la date sans changer le solde du jour.
-- Plusieurs comptes : le compte affiche se choisit au debut de la rangee
-  d'onglets ; le bouton << Tous les comptes >>, a cote, donne le solde de chacun,
+- Plusieurs comptes : le compte affiché se choisit au début de la rangée
+  d'onglets ; le bouton « Tous les comptes », à côté, donne le solde de chacun,
   puis le total.
-- Une seule fenetre a la fois sur les memes donnees : deux fenetres
-  ouvertes en meme temps se contrediraient.
-- Cartes a DEBIT DIFFERE : les achats n'entrent dans le solde qu'au jour
-  du prelevement groupe. Un bandeau reprend les chiffres de votre espace
-  bancaire (prochain prelevement, operations en cours, achats a debiter).
-  La ligne recapitulative du releve (<< DEBIT DIFFERE... >>, ou
-  << DEPENSES CARTE... >> au Credit Agricole) n'est jamais importee : elle
-  ferait doublon avec les achats deja detailles. Ce sont ces achats-la qui
-  sont gardes, a leur date d'achat ; votre solde peut donc differer de
-  quelques jours de celui de la banque, qui les debite en bloc le mois
-  suivant. La cotisation de la carte reste, elle, une depense comme une
+- Une seule fenêtre à la fois sur les mêmes données : deux fenêtres
+  ouvertes en même temps se contrediraient.
+- Cartes à DÉBIT DIFFÉRÉ : les achats n'entrent dans le solde qu'au jour
+  du prélèvement groupé. Un bandeau reprend les chiffres de votre espace
+  bancaire (prochain prélèvement, opérations en cours, achats à débiter).
+  La ligne récapitulative du relevé (« DEBIT DIFFERE… », ou
+  « DEPENSES CARTE… » au Crédit Agricole) n'est jamais importée : elle
+  ferait doublon avec les achats déjà détaillés. Ce sont ces achats-là qui
+  sont gardés, à leur date d'achat ; votre solde peut donc différer de
+  quelques jours de celui de la banque, qui les débite en bloc le mois
+  suivant. La cotisation de la carte reste, elle, une dépense comme une
   autre.
-- Prochain decouvert : en haut du bilan, un bandeau dit si le compte
+- Prochain découvert : en haut du bilan, un bandeau dit si le compte
   reste positif sur les 45 prochains jours, et sinon quel jour il passe
-  sous zero et apres quelle operation, d'apres vos operations
-  recurrentes.
-- Echeances du mois : le bouton << Generer les echeances du mois >> de
-  l'onglet Previsionnel cree en une fois tout ce qui doit encore entrer
-  sur le compte ou en sortir. Ces operations sont NON pointees (marquees par un
+  sous zéro et après quelle opération, d'après vos opérations
+  récurrentes.
+- Échéances du mois : le bouton « Générer les échéances du mois » de
+  l'onglet Prévisionnel crée en une fois tout ce qui doit encore entrer
+  sur le compte ou en sortir. Ces opérations sont NON pointées (marquées par un
   sablier) : elles n'entrent pas dans le solde en banque tant qu'elles ne
-  sont pas passees. A l'import du releve, chacune est completee avec la
-  date et le montant reels au lieu de faire doublon, meme si la banque la
+  sont pas passées. À l'import du relevé, chacune est complétée avec la
+  date et le montant réels au lieu de faire doublon, même si la banque la
   passe un autre jour.
-- Bandeau du mois, en tete du bilan : solde prevu au dernier jour du
-  mois, puis les sorties et les entrees encore a venir.
-- Montants affiches sur les graphiques du bilan.
+- Bandeau du mois, en tête du bilan : solde prévu au dernier jour du
+  mois, puis les sorties et les entrées encore à venir.
+- Montants affichés sur les graphiques du bilan.
 - Tri des tableaux : cliquez sur le titre d'une colonne (dates, montants,
-  libelles). Un second clic inverse l'ordre.
-- Saisie des montants : la virgule et le point du pave numerique donnent
-  le meme resultat (12,50 = 12.50).
-- Notice complete integree (bouton << Notice >> du menu de gauche).
-- Un probleme, une idee ? Le bouton << Votre avis >> du menu de gauche
+  libellés). Un second clic inverse l'ordre.
+- Saisie des montants : la virgule et le point du pavé numérique donnent
+  le même résultat (12,50 = 12.50).
+- Notice complète intégrée (bouton « Notice » du menu de gauche).
+- Un problème, une idée ? Le bouton « Votre avis » du menu de gauche
   ouvre un court questionnaire dans votre navigateur (deux minutes, sans
-  compte a creer). N'y indiquez ni numero de compte ni montant.
-- Une nouvelle version ? Le bouton << Mise a jour >> du menu de gauche
-  affiche votre version et ouvre la page de la derniere dans votre
-  navigateur. Pecule ne se connecte jamais a Internet lui-meme : c'est
-  vous qui comparez les numeros.
+  compte à créer). N'y indiquez ni numéro de compte ni montant.
+- Une nouvelle version ? Le bouton « Mise à jour » du menu de gauche
+  affiche votre version et ouvre la page de la dernière dans votre
+  navigateur. Pécule ne se connecte jamais à Internet lui-même : c'est
+  vous qui comparez les numéros.
 
 -------------------------------------------------------------------
-INFOS
+À SAVOIR
 -------------------------------------------------------------------
-- Vos donnees restent sur VOTRE ordinateur, rien n'est envoye en ligne.
-- Pour sauvegarder : bouton << Sauvegarde externe >> du menu de gauche,
-  qui copie vos donnees sur une cle USB ou un disque et verifie la copie.
-  Copier le fichier << comptes.db >> ailleurs revient au meme.
-- Presentation : https://andre12230-png.github.io/Pecule/
-- Installeur    : https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe
-- Code source   : https://github.com/andre12230-png/Pecule
-- Votre avis    : https://forms.cloud.microsoft/r/gBQcGGD33d
+- Vos données restent sur VOTRE ordinateur, rien n'est envoyé en ligne.
+- Pour sauvegarder : bouton « Sauvegarde externe » du menu de gauche,
+  qui copie vos données sur une clé USB ou un disque et vérifie la copie.
+  Copier le fichier « comptes.db » ailleurs revient au même.
+- Présentation : https://andre12230-png.github.io/Pecule/
+- Installeur   : https://github.com/andre12230-png/Pecule/releases/latest/download/Pecule-Setup.exe
+- Code source  : https://github.com/andre12230-png/Pecule
+- Votre avis   : https://forms.cloud.microsoft/r/gBQcGGD33d
 
-Windows 10 / 11 - 64 bits.
+Windows 10 / 11 — 64 bits.
