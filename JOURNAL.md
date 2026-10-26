@@ -25,7 +25,8 @@ La date la plus récente est en haut.
 
 **Fait.** `Lisez-moi.txt`, livré dans l'archive et l'installeur, était écrit entièrement sans accents, avec « << >> » pour guillemets et « ... ». Il retrouve accents, « » et « … » ; le contenu ne change pas. La première ligne (« PECULE - version 1.41.28 ») garde sa forme : le contrôle de livraison y lit le numéro. Nouveau test `tests/test_lisez_moi.py`. Suite complète : 918 tests passés. Commit `301e34e`, rien poussé.
 **Pourquoi.** Contrôle du français des trois applis du 26-10 : c'était l'écart le plus visible des textes livrés, à corriger avant la sortie du 01-11.
-**Reste.** Le ZIP et l'installeur 1.41.28 du 25-10 contiennent l'ancien Lisez-moi : à refaire, avec la mise à jour de leur empreinte dans Scoop et Winget, sur accord d'André.
+**Puis, avec l'accord d'André.** ZIP et installeur 1.41.28 refaits depuis le même `dist\Pecule` : le programme est identique au ZIP du 25-10, fichier par fichier (179 sur 179), seul `Lisez-moi.txt` change. Nouvelle empreinte du ZIP reportée dans `bucket/pecule.json` et le manifeste Winget 1.41.28 (commit `cffb5e4`). `Pecule-Setup.exe` et sa copie `Pecule-Setup-1.41.28.exe` remplacés ; les anciens fichiers sont gardés hors du dépôt. Contrôle de publication : **PRÊT, tout vert** (918 tests).
+**Reste.** Le nouvel installeur n'a pas été essayé (installation d'essai) : l'ancien l'avait été le 25-10, et seul le Lisez-moi diffère. Publication le 01-11, après l'accord d'André.
 
 ## 25-10-2026 — 1.41.28 : la correction du bouton des règles entre dans la sortie du 01-11
 
