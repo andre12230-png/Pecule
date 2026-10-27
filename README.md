@@ -27,12 +27,16 @@ Python d'une ancienne application HTML/JS.
 
 ## Aperçu
 
+[![Vidéo de présentation de Pécule (48 s) — cliquez pour la lancer](docs/media/video-apercu.jpg)](https://andre12230-png.github.io/Pecule/#video)
+
+*▶ Vidéo de présentation (48 s), sur la page de présentation.*
+
 | | |
 |:---:|:---:|
 | ![Tableau de bord — soldes, budgets, graphiques](docs/media/promo_1_bilan.png) | ![Budgets mensuels par catégorie](docs/media/promo_3_budget.png) |
 | ![Liste des opérations](docs/media/promo_2_operations.png) | ![Prévisionnel des opérations récurrentes](docs/media/promo_4_previsionnel.png) |
 
-*Captures réalisées avec des données d'exemple.*
+*Vidéo et captures réalisées avec des données d'exemple.*
 
 ---
 
