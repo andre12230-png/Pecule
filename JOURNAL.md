@@ -21,6 +21,14 @@ La date la plus récente est en haut.
 
 ---
 
+## 27-10-2026 — Vidéo de présentation : nouvelle bande son
+
+**Fait.** Bande son de `docs/media/pecule-presentation.mp4` remplacée : commentaire en français par une voix de synthèse (Rémy, edge-tts), une phrase par scène calée sur la légende affichée, et une musique rythmée composée par programme (aucun droit d'auteur), qui baisse quand la voix parle ; volume à −16 LUFS. Les images ne changent pas (identiques à l'ancienne vidéo, vérifié par empreinte), ni la durée (48 s), l'affiche ou le texte du site et du README. Essai sur le site servi en local : la nouvelle vidéo se charge et se lit. Commit local, rien poussé.
+
+**Pourquoi.** Demande d'André, qui a choisi la voix parmi neuf. La première fin (« importer, ranger, prévoir » en mots isolés) était lue dans une autre langue : une voix multilingue devine la langue d'après le texte. Elle est réécrite en vraie phrase ; André a écouté et validé le résultat.
+
+**Reste.** Partira avec la sortie du 01-11.
+
 ## 27-10-2026 — Vidéo de présentation sur le site et dans le README
 
 **Fait.** Vidéo de présentation (48 s, 3,1 Mo, données d'exemple) ajoutée dans `docs/media/pecule-presentation.mp4` ; le site la lit en tête de la rubrique « Aperçu », avec une affiche tirée de son écran titre (`video-affiche.jpg`), sans lecture automatique. Le README affiche à la même place une image avec un bouton ▶ (`video-apercu.jpg`) qui ouvre la vidéo sur le site (`#video`). Essai sur le site servi en local : la vidéo se charge et se lit (1920×1080, 48 s). Contrôle de publication vert, 918 tests sur 918. Commit local, rien poussé.
