@@ -21,6 +21,14 @@ La date la plus récente est en haut.
 
 ---
 
+## 27-10-2026 — Vidéo de présentation sur le site et dans le README
+
+**Fait.** Vidéo de présentation (48 s, 3,1 Mo, données d'exemple) ajoutée dans `docs/media/pecule-presentation.mp4` ; le site la lit en tête de la rubrique « Aperçu », avec une affiche tirée de son écran titre (`video-affiche.jpg`), sans lecture automatique. Le README affiche à la même place une image avec un bouton ▶ (`video-apercu.jpg`) qui ouvre la vidéo sur le site (`#video`). Essai sur le site servi en local : la vidéo se charge et se lit (1920×1080, 48 s). Contrôle de publication vert, 918 tests sur 918. Commit local, rien poussé.
+
+**Pourquoi.** Demande d'André. GitHub ne lit pas dans un README une vidéo rangée dans le dépôt ; son lecteur intégré exige un envoi par le site github.com, qui publierait aussitôt, hors du rythme mensuel. L'image cliquable part avec le reste à la sortie.
+
+**Reste.** Partira avec la sortie du 01-11. Contenu de la vidéo relu sur une image toutes les 3 secondes, pas image par image ; la bande son n'a pas été écoutée.
+
 ## 26-10-2026 — Lisez-moi.txt accentué
 
 **Fait.** `Lisez-moi.txt`, livré dans l'archive et l'installeur, était écrit entièrement sans accents, avec « << >> » pour guillemets et « ... ». Il retrouve accents, « » et « … » ; le contenu ne change pas. La première ligne (« PECULE - version 1.41.28 ») garde sa forme : le contrôle de livraison y lit le numéro. Nouveau test `tests/test_lisez_moi.py`. Suite complète : 918 tests passés. Commit `301e34e`, rien poussé.
