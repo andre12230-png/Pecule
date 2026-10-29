@@ -83,13 +83,15 @@ echo "=== 5/7 : Construction du programme ==="
 cd "$TRAVAIL"
 rm -rf build dist
 # Sous Linux, --add-data sépare la source et la destination par « : »
-# (et non « ; » comme sous Windows).
+# (et non « ; » comme sous Windows). Chemin complet obligatoire : avec
+# --specpath, PyInstaller lit les chemins courts à partir de build/ (erreur
+# « Unable to find …/build/src/Budget.ico », essai du 29/10/2026).
 "$PY" -m PyInstaller \
     --noconfirm \
     --onedir \
     --windowed \
     --name "Pecule" \
-    --add-data "src/Budget.ico:." \
+    --add-data "$TRAVAIL/src/Budget.ico:." \
     --distpath "$TRAVAIL/dist" \
     --workpath "$TRAVAIL/build" \
     --specpath "$TRAVAIL/build" \

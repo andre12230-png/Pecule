@@ -3,7 +3,9 @@ import os
 import sqlite3
 import sys
 
-from PySide6.QtCore import QLibraryInfo, QLockFile, Qt, QTranslator, QUrl
+from PySide6.QtCore import (
+    QLibraryInfo, QLocale, QLockFile, Qt, QTranslator, QUrl,
+)
 from PySide6.QtGui import QColor, QDesktopServices, QIcon, QPalette, QPen
 from PySide6.QtWidgets import (
     QApplication, QMessageBox, QProxyStyle, QStyle, QStyleFactory, QToolTip,
@@ -261,10 +263,20 @@ def _ouvrir_base():
         return None
 
 
+def imposer_format_francais():
+    """Montants et dates « à la française » (1 850,00 ; lundi, janvier),
+    quelle que soit la langue du système. Essai sous Linux du 29/10/2026 : un
+    système réglé en anglais, ou en langue « C » (cas de WSL), faisait écrire
+    « 1,850.00 » dans les cases de montant. Sous un Windows français, rien ne
+    change."""
+    QLocale.setDefault(QLocale(QLocale.French, QLocale.France))
+
+
 def main():
     # Le thème se lit avant tout le reste : la première boîte de message
     # (verrou, sauvegarde) doit déjà avoir les bonnes couleurs.
     choisir_theme(lire_theme())
+    imposer_format_francais()
     app = QApplication(sys.argv)
     appliquer_theme(app)
     installer_traduction_qt(app)

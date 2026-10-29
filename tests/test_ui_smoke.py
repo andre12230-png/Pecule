@@ -2296,7 +2296,10 @@ def test_bouton_votre_avis_dans_le_menu(qapp, tmp_path):
 
 def test_mise_a_jour_ouvre_le_navigateur(qapp, monkeypatch):
     """Pécule ne se connecte à rien : le bouton affiche la version installée
-    et confie au navigateur la page des nouveautés ou l'installeur."""
+    et confie au navigateur la page des nouveautés ou l'installeur.
+    Comportement Windows : sous Linux, c'est l'AppImage (tests/test_linux.py)."""
+    import sys
+    monkeypatch.setattr(sys, "platform", "win32")
     from PySide6.QtGui import QDesktopServices
     from comptesbudget.constants import (
         APP_VERSION, INSTALLEUR_URL, PAGE_VERSIONS_URL)

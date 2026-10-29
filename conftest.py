@@ -14,6 +14,10 @@ import pytest
 def qapp():
     """QApplication unique pour toute la session (une seule par processus)."""
     from PySide6.QtWidgets import QApplication
+    from comptesbudget.app import imposer_format_francais
+    # Comme au démarrage de Pécule (app.main) : montants et dates en français,
+    # quelle que soit la langue du système qui lance les tests.
+    imposer_format_francais()
     app = QApplication.instance() or QApplication([])
     yield app
 

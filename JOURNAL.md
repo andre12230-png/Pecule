@@ -21,6 +21,27 @@ La date la plus récente est en haut.
 
 ---
 
+## 29-10-2026 — Premier essai sous Linux : trois corrections
+
+**Fait.** L'AppImage a été construite et essayée sur une machine Linux de
+test (Ubuntu 24.04), pas encore dans WSL : 925 tests sur 925 sous Linux après
+correction, fichier de 73 Mo, appli ouverte et manipulée (thème clair,
+pictogrammes, compte et opération d'essai, bouton Mise à jour, base dans
+`~/.local/share/Pecule`). Trois corrections reportées ici : montants et dates
+imposés en français au démarrage (`imposer_format_francais`, un Linux en
+anglais écrivait « 1,850.00 »), le test du bouton Mise à jour limité au
+comportement Windows, le chemin complet de l'icône dans
+`outils/construire_linux.sh`. Un test de plus ; 926 tests réussis sous Windows.
+**Pourquoi.** Ce que l'essai a révélé ; la langue des montants était un vrai
+défaut pour un utilisateur Linux, pas seulement un test.
+**Reste.** Avant toute publication : publier le fichier sous le nom
+`Pecule-x86_64.AppImage` (celui du bouton Mise à jour) ; construire sur une
+Ubuntu plus ancienne pour viser Ubuntu 22.04, Debian 12 et Mint 21 (glibc
+2.38 exigée sinon) ; signaler le paquet `libfuse2` pour le double-clic.
+À essayer : WSL sur un vrai PC, un vrai bureau Linux (icône, menu), le
+navigateur, l'import, l'impression, le thème sombre. À comparer sous Windows :
+trait blanc du camembert quand il n'a qu'une catégorie.
+
 ## 29-10-2026 — Préparation de la version Linux
 
 **Fait.** Le code de Pécule est prêt pour Linux, sans changement pour

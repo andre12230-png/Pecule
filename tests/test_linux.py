@@ -94,3 +94,20 @@ def test_mise_a_jour_inchangee_sous_windows(qapp, monkeypatch):
     fenetre = MiseAJourDialog()
     assert fenetre.btn_installeur.text() == "⬇ Télécharger l'installeur"
     assert fenetre.adresse_installeur == constants.INSTALLEUR_URL
+
+
+# --- Montants et dates à la française ---------------------------------------
+
+def test_montants_a_la_francaise_quelle_que_soit_la_langue(qapp):
+    """Essai sous Linux du 29/10/2026 : un système réglé en anglais, ou en
+    langue « C » (cas de WSL), faisait écrire « 1,850.00 » dans les cases de
+    montant. Pécule impose le français au démarrage."""
+    from PySide6.QtCore import QLocale
+    from comptesbudget.app import imposer_format_francais
+    QLocale.setDefault(QLocale(QLocale.English, QLocale.UnitedStates))
+    try:
+        imposer_format_francais()
+        assert QLocale().language() == QLocale.French
+        assert QLocale().decimalPoint() == ","
+    finally:
+        QLocale.setDefault(QLocale(QLocale.French, QLocale.France))
