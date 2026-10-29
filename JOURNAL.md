@@ -21,6 +21,16 @@ La date la plus récente est en haut.
 
 ---
 
+## 29-10-2026 — Site : lien vers la page d'accueil commune
+
+**Fait.** Lien « Mes autres logiciels » ajouté en fin de pied de page des sept pages du
+site (`docs/`), vers `https://andre12230-png.github.io/`, la page qui présente les trois
+logiciels. Balises vérifiées sur les sept pages ; contrôle de publication : 918 tests sur
+918, pilote à l'écran sans erreur, confidentialité sans rien de suspect.
+**Pourquoi.** Relier le site de Pécule aux deux autres logiciels par une adresse unique.
+**Reste.** Part avec la publication du 01-11 (rien poussé d'ici là). Le pied de page n'a pas
+été regardé dans un navigateur.
+
 ## 27-10-2026 — Vidéo de présentation : nouvelle bande son
 
 **Fait.** Bande son de `docs/media/pecule-presentation.mp4` remplacée : commentaire en français par une voix de synthèse (Rémy, edge-tts), une phrase par scène calée sur la légende affichée, et une musique rythmée composée par programme (aucun droit d'auteur), qui baisse quand la voix parle ; volume à −16 LUFS. Les images ne changent pas (identiques à l'ancienne vidéo, vérifié par empreinte), ni la durée (48 s), l'affiche ou le texte du site et du README. Essai sur le site servi en local : la nouvelle vidéo se charge et se lit. Commit local, rien poussé.
