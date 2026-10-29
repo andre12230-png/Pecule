@@ -30,7 +30,13 @@ def _data_dir() -> str:
     """
     if os.path.exists(os.path.join(_app_dir(), "comptes.db")):
         return _app_dir()
-    base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    if sys.platform.startswith("linux"):
+        # Sous Linux, l'endroit habituel des données d'un logiciel est
+        # ~/.local/share (ou le dossier désigné par XDG_DATA_HOME).
+        base = (os.environ.get("XDG_DATA_HOME")
+                or os.path.join(os.path.expanduser("~"), ".local", "share"))
+    else:
+        base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
     dossier = os.path.join(base, "Pecule")
     try:
         os.makedirs(dossier, exist_ok=True)
@@ -1006,6 +1012,10 @@ TICKETS_GITHUB_URL = "https://github.com/andre12230-png/Pecule/issues"
 PAGE_VERSIONS_URL = "https://github.com/andre12230-png/Pecule/releases/latest"
 INSTALLEUR_URL = ("https://github.com/andre12230-png/Pecule/releases/latest/"
                   "download/Pecule-Setup.exe")
+# Équivalent pour la version Linux (fichier AppImage). En préparation depuis
+# le 29/10/2026 : ce fichier n'est pas encore publié.
+APPIMAGE_URL = ("https://github.com/andre12230-png/Pecule/releases/latest/"
+                "download/Pecule-x86_64.AppImage")
 # Jours d'utilisation avant l'unique invitation à donner son avis.
 DELAI_INVITATION_AVIS = 14
 

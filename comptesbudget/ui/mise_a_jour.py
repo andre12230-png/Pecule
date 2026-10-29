@@ -9,6 +9,8 @@ le navigateur : c'est l'utilisateur qui compare les numéros, et rien ne part
 de Pécule.
 """
 
+import sys
+
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
@@ -16,7 +18,9 @@ from PySide6.QtWidgets import (
 )
 
 from ..theme import T
-from ..constants import APP_VERSION, PAGE_VERSIONS_URL, INSTALLEUR_URL
+from ..constants import (
+    APP_VERSION, PAGE_VERSIONS_URL, INSTALLEUR_URL, APPIMAGE_URL,
+)
 
 
 class MiseAJourDialog(QDialog):
@@ -33,16 +37,36 @@ class MiseAJourDialog(QDialog):
         self.version.setTextFormat(Qt.RichText)
         v.addWidget(self.version)
 
+        # Sous Linux, pas d'installeur : la dernière version est un fichier
+        # AppImage qui remplace l'ancien.
+        sous_linux = sys.platform.startswith("linux")
+        if sous_linux:
+            self.adresse_installeur = APPIMAGE_URL
+            texte_bouton = "⬇ Télécharger l'AppImage"
+            mode_emploi = (
+                "<b>Télécharger l'AppImage</b> récupère directement la "
+                "dernière version. Fermez Pécule, remplacez l'ancien fichier "
+                "par le nouveau et rendez-le exécutable : vos données ne sont "
+                "pas touchées.")
+            apres = ("✓ Téléchargement lancé dans votre navigateur. Fermez "
+                     "Pécule avant de remplacer l'ancien fichier.")
+        else:
+            self.adresse_installeur = INSTALLEUR_URL
+            texte_bouton = "⬇ Télécharger l'installeur"
+            mode_emploi = (
+                "<b>Télécharger l'installeur</b> récupère directement la "
+                "dernière version. Fermez Pécule avant de le lancer : vos "
+                "données ne sont pas touchées. Vous utilisez l'archive .zip ? "
+                "Prenez-la sur la page des nouveautés.")
+            apres = ("✓ Téléchargement lancé dans votre navigateur. Fermez "
+                     "Pécule avant de lancer l'installeur.")
+
         explication = QLabel(
             "Pécule ne se connecte jamais à Internet : il ne peut donc pas "
             "savoir tout seul qu'une nouvelle version existe.<br><br>"
             "<b>Voir les nouveautés</b> ouvre dans votre navigateur la page de "
             "la dernière version. Si son numéro est plus grand que le vôtre, "
-            "une mise à jour vous attend.<br><br>"
-            "<b>Télécharger l'installeur</b> récupère directement la dernière "
-            "version. Fermez Pécule avant de le lancer : vos données ne sont "
-            "pas touchées. Vous utilisez l'archive .zip ? Prenez-la sur la "
-            "page des nouveautés.")
+            "une mise à jour vous attend.<br><br>" + mode_emploi)
         explication.setTextFormat(Qt.RichText)
         explication.setWordWrap(True)
         v.addWidget(explication)
@@ -63,12 +87,9 @@ class MiseAJourDialog(QDialog):
                                  "✓ Page des nouveautés ouverte dans votre "
                                  "navigateur."))
         boutons.addWidget(self.btn_nouveautes)
-        self.btn_installeur = QPushButton("⬇ Télécharger l'installeur")
+        self.btn_installeur = QPushButton(texte_bouton)
         self.btn_installeur.clicked.connect(
-            lambda: self._ouvrir(INSTALLEUR_URL,
-                                 "✓ Téléchargement lancé dans votre "
-                                 "navigateur. Fermez Pécule avant de lancer "
-                                 "l'installeur."))
+            lambda: self._ouvrir(self.adresse_installeur, apres))
         boutons.addWidget(self.btn_installeur)
         fermer = QPushButton("Fermer")
         fermer.clicked.connect(self.accept)

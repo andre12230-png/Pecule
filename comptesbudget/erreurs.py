@@ -18,7 +18,7 @@ Sans Qt ni autre dépendance, pour se tester sans fenêtre.
 
 import errno
 import json
-from pathlib import Path
+from pathlib import PureWindowsPath
 
 # Codes d'erreur de Windows qui veulent dire « disque plein ».
 _DISQUE_PLEIN_WINDOWS = (39, 112)
@@ -66,9 +66,16 @@ def erreur_en_clair(e: BaseException) -> str:
     return str(e) or f"Erreur inattendue de l'application ({nom})."
 
 
+def _nom_de_fichier(chemin) -> str:
+    """Le seul nom du fichier, sans son dossier. PureWindowsPath reconnaît
+    les deux séparateurs (antislash et /) : un chemin écrit à la Windows est donc
+    bien coupé, même sous Linux où Path ne coupe qu'aux /."""
+    return PureWindowsPath(str(chemin)).name
+
+
 def _erreur_de_fichier(e: OSError) -> str:
     """Fichier introuvable, verrouillé, disque plein... en clair."""
-    nom = f" « {Path(e.filename).name} »" if e.filename else ""
+    nom = f" « {_nom_de_fichier(e.filename)} »" if e.filename else ""
     if isinstance(e, FileNotFoundError):
         return f"Fichier{nom} introuvable."
     if isinstance(e, PermissionError):

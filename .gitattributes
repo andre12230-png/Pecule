@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Scripts Linux : toujours des fins de ligne LF, sinon ils refusent de se lancer.
+*.sh text eol=lf

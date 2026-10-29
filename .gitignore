@@ -208,3 +208,5 @@ config.local.*
 # Notes de passation : strategie, canaux ecartes, pistes a venir.
 # Utiles a qui developpe, sans interet pour qui visite le depot.
 VISIBILITE.md
+# Version Linux (AppImage) construite dans WSL, non publiée
+dist-linux/
