@@ -21,6 +21,22 @@ La date la plus récente est en haut.
 
 ---
 
+## 29-10-2026 — Préparation de la version Linux
+
+**Fait.** Le code de Pécule est prêt pour Linux, sans changement pour
+Windows : sous Linux, les données vont dans `~/.local/share/Pecule`, les
+messages d'erreur nomment correctement un fichier quelle que soit l'écriture
+de son chemin, et le bouton « Mise à jour » propose l'AppImage au lieu de
+l'installeur. Nouveau script `outils/construire_linux.sh`, qui construit une
+AppImage dans WSL (tests, PyInstaller, appimagetool). 7 tests dans
+`tests/test_linux.py` ; suite complète : 925 tests réussis sous Windows.
+Commit local 5521503.
+**Pourquoi.** André veut avoir la version Linux prête, sans la publier pour
+l'instant. Pécule seul : c'est l'appli qui a d'autres utilisateurs.
+**Reste.** Rien n'a encore tourné sous Linux : installer WSL (avec l'accord
+d'André), lancer le script, essayer l'AppImage à l'écran. Ensuite seulement,
+décider d'une publication (notes de version, page du site, README).
+
 ## 29-10-2026 — Site : lien vers la page d'accueil commune
 
 **Fait.** Lien « Mes autres logiciels » ajouté en fin de pied de page des sept pages du
