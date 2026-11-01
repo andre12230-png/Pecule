@@ -21,6 +21,23 @@ La date la plus récente est en haut.
 
 ---
 
+## 01-11-2026 — Version 1.41.28 publiée
+
+**Fait.** Contrôle de publication vert le jour même (926 tests sur 926, 10 pages
+et 42 fenêtres ouvertes sans erreur), `main` poussé, release `v1.41.28` créée
+avec l'installeur et le ZIP. Fichiers retéléchargés depuis les adresses publiques :
+empreintes conformes ; release 1.23.0 inchangée ; site servi en 1.41.28 avec sa
+vidéo. Installation Scoop essayée depuis le manifeste public, puis retirée.
+Mise à jour Winget soumise (microsoft/winget-pkgs#467758).
+**Pourquoi.** Sortie mensuelle prévue. L'exe publié date du 25-10 et ne contient
+pas la préparation Linux du 29-10, invisible sous un Windows français : le numéro
+reste 1.41.28 et l'étiquette `v1.41.28` est posée sur `39dbb25`, dont le code est
+exactement celui de l'exe. `main` a quelques commits de plus, sans sortie Linux.
+**Reste.** Suivre la demande Winget. Une copie du catalogue Scoop antérieure à la
+réécriture de l'historique du dépôt ne se met plus à jour et reste sur 1.33.1 :
+`scoop bucket rm pecule`, puis l'ajouter de nouveau, la répare. Reporter les
+corrections de l'audit Linux, puis le virement de compte à compte.
+
 ## 29-10-2026 — Premier essai sous Linux : trois corrections
 
 **Fait.** L'AppImage a été construite et essayée sur une machine Linux de
