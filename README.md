@@ -27,9 +27,9 @@ Python d'une ancienne application HTML/JS.
 
 ## Aperçu
 
-[![Vidéo de présentation de Pécule (48 s) — cliquez pour la lancer](docs/media/video-apercu.jpg)](https://andre12230-png.github.io/Pecule/#video)
+[![Vidéo de présentation de Pécule (1 min 09) — cliquez pour la lancer](docs/media/video-apercu.jpg)](https://andre12230-png.github.io/Pecule/#video)
 
-*▶ Vidéo de présentation (48 s), sur la page de présentation.*
+*▶ Vidéo de présentation (1 min 09), sur la page de présentation.*
 
 | | |
 |:---:|:---:|

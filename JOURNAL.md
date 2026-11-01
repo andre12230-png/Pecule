@@ -21,6 +21,17 @@ La date la plus récente est en haut.
 
 ---
 
+## 01-11-2026 — Vidéo de présentation refaite
+
+**Fait.** La vidéo du site et du README est refaite sur les vrais écrans de la
+1.41.28, avec des données inventées : opérations, Bilan, Budget, Prévisionnel,
+aperçu d'impression et mode sombre (1 min 09, même voix et même musique). Durée
+corrigée dans le README et la page d'accueil, images d'aperçu refaites.
+**Pourquoi.** L'ancienne vidéo montrait des écrans fabriqués, sans le bouton
+« Imprimer… » ni le mode sombre. Le programme publié ne change pas : pas de
+nouvelle version.
+**Reste.** Rien pour le site.
+
 ## 01-11-2026 — Version 1.41.28 publiée
 
 **Fait.** Contrôle de publication vert le jour même (926 tests sur 926, 10 pages
